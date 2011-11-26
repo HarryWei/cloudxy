@@ -11,7 +11,7 @@
    我们建议使用cloudera的ch3，安装方式参见  https://ccp.cloudera.com/display/CDHDOC/CDH3+Installation
 ===Xen 安装===   
    我们使用xen中的tapdisk2模式加载hlfs磁盘，因此需要使用xen4.0之上版本（如果低版本xen需要打上tapdisk2的patch)。因此我们建议使用xen4.1.x 。 对于dom0内核版本，我们建议不要用2.6.18的老内核，使用当前2.6.32以上的内核比较可靠。<br>
-   关于xen的安装，网上资料很多。 也可以参见我们download中提供的资料http://code.google.com/p/cloudxy/downloads/detail?name=xen_guide.pd
+   关于xen的安装，网上资料很多。 也可以参见我们download中提供的资料http://code.google.com/p/cloudxy/downloads/detail?name=xen_guide.pdf
    
 
 == HLFS START UP ==
@@ -25,18 +25,16 @@
       * all: 生成所有库和工具
       * libhlfs: 生成hlfs动态库
       * tools: 生成所有工具
-      * test: 生成测试用例
 ----
    ** _src hlfs库源代码目录_
    ** _nbd-2.9.15 修改后的nbd-server/nbd-client源代码目录_
    ** _3part 第三方库，目前包含hadoop相关;log库_
-   ** _test 测试文件目录_
    ** _output 编译后的生成库和工具所在目录_
 ----
  === 测试hlfs ===
  为了方便调试目的，hlfs实现中支持了本地测试（不需要hadoop hdfs),我们称为local模式。我们首先用local模式测试
    * 编译hlfs - cd hlfs/build;cmake ../src/;make all
-   * 格式化hlfs文件系统 
+   * local模式下格式化hlfs文件系统 
        # mkdir /tmp/testenv //需要一个类似workshop的工作环境
        # ./output/bin/mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024 (-b是数据块大小，单位是byte， -s是段文件大小，单位是byte， -m 是虚拟磁盘的最大容量,单位是M) 
    * 编译测试用例 - cd test;camke .;make 
@@ -44,7 +42,19 @@
 -----
     * _格式化目的是写入原数据到superblock中，这些元数据描述了该hlfs的属性信息；当格式化完成后，你会在/tmp/testenv目录下，发现testfs目录，再其下发现superblock文件，查看该文件，会发现块大小、段大小、容量限制等该hlfs的属性信息_
     * _执行完毕后，会在/tmp/testenv/testfs下发现生成的段文件_
---------------- 
+----
+ 如果你已经安装hadoop hdfs，并且已经启动，则可以测试hdfs模式，测试方式
+  * 编译hlfs - cd hlfs/build;cmake ../src/;make all
+  * hdfs 模式下格式化hlfs文件系统 (我们以伪分布模式执行）
+       # hadoop fs -mkdir hdfs:///tmp/testenv
+       # ./output/bin/mkfs.hlfs -u hdfs:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024 　
+  * 编译测试用例 - cd test;camke .;make 
+  * 执行测试用例 - ./test -u hdfs:///tmp/testenv/testfs   
+----
+  _可见local模式和hdfs模式只是uri都head不同而已_
+  _执行hadoop fs -ls /tmp/testenv/testfs命令你可看到类似local模式下的各种文件。hadoop shell 命令请见http://hadoop.apache.org/common/docs/r0.17.2/hdfs_user_guide.html_
+----
+
 
    
 

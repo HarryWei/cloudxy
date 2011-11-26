@@ -15,8 +15,8 @@
    
 
 == HLFS START UP ==
- # 获取hlfs代码和相关依赖库——在终端键入'svn checkout http://cloudxy.googlecode.com/svn/trunk/hlfs/  hlfs'
- # 编译hlfs
+ * 获取hlfs代码和相关依赖库——在终端键入'svn checkout http://cloudxy.googlecode.com/svn/trunk/hlfs/  hlfs'
+ * 编译hlfs
    # 安装cmake;安装glib库;安装java。
    # 修改在hlfs/src/CMakeLists.txt中配置你正确的java目录 'SET(JAVA_HOME   /usr/lib/jvm/java-6-sun)'。
    # 生成makefile:cd hlfs/build；cmake ../src（生成makefile)
@@ -25,13 +25,15 @@
       * libhlfs: 生成hlfs动态库
       * tools: 生成所有工具
       * test: 生成测试用例
- * 注：hlfs目录说明
+----
+   注：hlfs目录说明
    ** _src hlfs库源代码目录_
    ** _nbd-2.9.15 修改后的nbd-server/nbd-client源代码目录_
    ** _3part 第三方库，目前包含hadoop相关;log库_
    ** _test 测试文件目录_
    ** _output 编译后的生成库和工具所在目录_
- # 测试hlfs
+----
+ * 测试hlfs
    
 
 == HLFS 存储虚拟机镜像 == 

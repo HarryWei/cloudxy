@@ -52,7 +52,8 @@
   * 执行测试用例 - ./test -u hdfs:///tmp/testenv/testfs   
 ----
   _可见local模式和hdfs模式只是uri都head不同而已_
-  _执行hadoop fs -ls /tmp/testenv/testfs命令你可看到类似local模式下的各种文件。hadoop shell 命令请见http://hadoop.apache.org/common/docs/r0.17.2/hdfs_user_guide.html_
+  _执行hadoop fs -ls /tmp/testenv/testfs命令你可看到类似local模式下的各种文件<br> 
+   hadoop shell 命令请见http://hadoop.apache.org/common/docs/r0.17.2/hdfs_user_guide.html_
 ----
 
 

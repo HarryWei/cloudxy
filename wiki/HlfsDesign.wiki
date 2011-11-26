@@ -34,7 +34,7 @@ LOG的内容显然必须包含被写入的数据块，还需要包含对应的�
  # Indirect block 更新   （也叫做meta-data block ，是inode中的2/3/4级索引块数据）
  # Inode          更新   （每个inode对应一个文件，如果只支持单一文件，则只用一个inode)
  # Inode map      更新    ( 单一文件则只有一个映射项）
- LOG 的布局为 ： *bold* A (data）| B (meta-data block log) | C (inode log) | D(inode_map log)。
+ LOG 的布局为 ： *bold A (data）| B (meta-data block log) | C (inode log) | D(inode_map log)*。
 ====数据检索====
   读取文件最新数据时：需要通过找到最新的inode map位，再进而找到所需文件对应inode，再进而找到文件逻辑地址对应的数据块的物理地址（段+offset)，再进而读取数据。
   最新Inode map位置按理应记录在checkpoint文件中（见错误恢复部分），HDFS初始化加载时读入；如果运行中则该inode map 驻留于内存数据结构中。

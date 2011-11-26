@@ -72,3 +72,5 @@ hadoop shell 命令请见  http://hadoop.apache.org/common/docs/r0.17.2/hdfs_use
    * 测试nbd设备
 ----
 ----
+
+== 高级用法 ==

@@ -1,13 +1,18 @@
 #summary One-sentence summary of this page.
 
-= Introduction =
+= HLFS 用户手册 =
 
-Add your content here.
+== 准备动作 ==
+基本环境要求：
+ * 32、64位Linux系统操作系统（我是在ubuntu10.4和Centos上进行开发的）
+ * 2G  以上内存
+===Hadoop 安装===
+   hlfs需要使用hadoop hdfs的append功能实现log追加操作，因此我们需要选择hadoop-0.20-append或者cloudera的ch3版本（默认支持了append功能，不用再配置 dfs.support.append=true了，如果使用其他版本一定要打开该功能），关于hadoop append问题域的分析请见http://www.cloudera.com/blog/2009/07/file-appends-in-hdfs.
+   我们建议使用cloudera的ch3，安装方式参见  https://ccp.cloudera.com/display/CDHDOC/CDH3+Installation
+===Xen 安装===   
 
+== HLFS START UP ==
 
-= Details =
+== HLFS 存储虚拟机镜像 == 
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+== HLFS 用作虚拟网盘 == 

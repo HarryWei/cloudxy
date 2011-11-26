@@ -66,15 +66,16 @@ LOG的内容显然必须包含被写入的数据块，还需要包含对应的�
 
 ==主要API==
    api实现有几个特点：我们采用C风格api；线程安全（因为访问者各自维护HLFS_CTRL上下文）；接口类似文件系统（但由于不存在多文件概念，因此不存在文件名之类概念）
- * HLFS_CTRL * init_hlfs(const char *uri);
- * int deinit_hlfs(HLFS_CTRL *ctrl);
- * int hlfs_stat  (HLFS_CTRL *ctrl,HLFS_STAT_T *stat);
- * int hlfs_open  (HLFS_CTRL *ctrl , int flag); 
- * int hlfs_close (HLFS_CTRL *ctrl);
- * int hlfs_read  (HLFS_CTRL* ctrl,char* read_buf,uint32_t read_len,uint64_t pos);
- * int hlfs_write (HLFS_CTRL* ctrl,char* write_buf,uint32_t write_len,uint64_t pos);
+ * HLFS_CTRL * init_hlfs(const char *uri)
+ * int deinit_hlfs(HLFS_CTRL *ctrl)
+ * int hlfs_stat  (HLFS_CTRL *ctrl,HLFS_STAT_T *stat)
+ * int hlfs_open  (HLFS_CTRL *ctrl , int flag)
+ * int hlfs_close (HLFS_CTRL *ctrl)
+ * int hlfs_read  (HLFS_CTRL* ctrl,char* read_buf,uint32_t read_len,uint64_t pos)
+ * int hlfs_write (HLFS_CTRL* ctrl,char* write_buf,uint32_t write_len,uint64_t pos)
 
 ==当前实现不尽人意的地方==
+
  # 内存管理粗犷式-目前代码中内存使用没有精细化，很多地方用的比较浪费（甚至可能有少量内存泄露)。所以运行时，尽量内存宽松点。如果是dom0中运行可别把dom0配置512M这么小，最少给个1G吧。
  # 连接管理未池化，有很多重复打开问题—— 这里的连接是指和后台存储（hdfs的连接句柄）。这种反复打开和关闭，在网络环境中很是耗时，我们下来会减少多余的连接开合动作。
  # 对于clean段操作中，有可能发生要删除的段还被访问的情况，这时安全的方式是采用“引用技术保护”，我们现在采用简单粗暴的大锁方式：读写时都加锁，所以未有读写操作时才会删除。后期会找机会改进。

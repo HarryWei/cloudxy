@@ -36,17 +36,16 @@
  === 测试hlfs ===
  为了方便调试目的，hlfs实现中支持了本地测试（不需要hadoop hdfs),我们称为local模式。我们首先用local模式测试
    * 编译hlfs - cd hlfs/build;cmake ../src/;make all
-   *“格式化”文件系统 
+   * 格式化hlfs文件系统 
        # mkdir /tmp/testenv //需要一个类似workshop的工作环境
        # ./output/bin/mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024 (-b是数据块大小，单位是byte， -s是段文件大小，单位是byte， -m 是虚拟磁盘的最大容量,单位是M) 
-----
-   _格式化目的是写入原数据到superblock中，这些元数据描述了该hlfs的属性信息；当格式化完成后，你会在/tmp/testenv目录下，发现testfs目录，再其下发现superblock文件，查看该文件，会发现块大小、段大小、容量限制等该hlfs的属性信息_
-----
    * 编译测试用例 - cd test;camke .;make 
    * 执行测试用例 - ./test -u local:///tmp/testenv/testfs 
-----
-    _执行完毕后，会在/tmp/testenv/testfs下发现生成的段文件_
-----  
+-----
+    * _格式化目的是写入原数据到superblock中，这些元数据描述了该hlfs的属性信息；当格式化完成后，你会在/tmp/testenv目录下，发现testfs目录，再其下发现superblock文件，查看该文件，会发现块大小、段大小、容量限制等该hlfs的属性信息_
+    * _执行完毕后，会在/tmp/testenv/testfs下发现生成的段文件_
+-----  
+
    
 
 == HLFS 存储虚拟机镜像 == 

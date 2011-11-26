@@ -56,9 +56,19 @@
 hadoop shell 命令请见  http://hadoop.apache.org/common/docs/r0.17.2/hdfs_user_guide.html
 ----
 
-
-   
-
 == HLFS 存储虚拟机镜像 == 
+如果上述步骤成功，那么可以开始尝试EBS了。使用HLFS作为虚拟机的数据盘，甚至可以做系统安装盘。
+   * 添加hlfs driver for tapdisk2 - patch?
+   * 编译，安装，激活
+   * 测试- 
+   * 作为数据盘启动
 
 == HLFS 用作虚拟网盘 == 
+   * 编译nbd
+   * 加载模块
+   * 启动nbd server 
+   * 格式化hlfs 
+   * 挂接nbd设备
+   * 测试nbd设备
+----
+----

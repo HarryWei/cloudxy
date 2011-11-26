@@ -34,7 +34,7 @@ LOG的内容显然必须包含被写入的数据块，还需要包含对应的�
  # Indirect block 更新   （也叫做meta-data block ，是inode中的2/3/4级索引块数据）
  # Inode          更新   （每个inode对应一个文件，如果只支持单一文件，则只用一个inode)
  # Inode map      更新    ( 单一文件则只有一个映射项）
- LOG 的布局为 ： *bold A (data）| B (meta-data block log) | C (inode log) | D(inode_map log)*。
+ LOG 的布局为 ： *A (data）| B (meta-data block log) | C (inode log) | D(inode_map log)*。
 ====数据检索====
   读取文件最新数据时：需要通过找到最新的inode map位，再进而找到所需文件对应inode，再进而找到文件逻辑地址对应的数据块的物理地址（段+offset)，再进而读取数据。
   最新Inode map位置按理应记录在checkpoint文件中（见错误恢复部分），HDFS初始化加载时读入；如果运行中则该inode map 驻留于内存数据结构中。
@@ -42,7 +42,7 @@ LOG的内容显然必须包含被写入的数据块，还需要包含对应的�
 
 ===空间管理 - 段=== 
   * 分段 —— 为了空间管理和回收目的，我们必须对存储空间进行分段：每个段大小并不需要固定，而且具体大小也没有硬性规定；
-   ** 每个HLFS的段被映射成一个Hadoop Dfs文件，比如大小为64M（可配置）；segment文件名字格式为<seqno>.seg，其中<seqno>从0开始递增；
+   ** 每个HLFS的段被映射成一个Hadoop Dfs文件，比如大小为64M（可配置）；segment文件名字格式为seqno.seg，其中seqno从0开始递增；
    ** 数据block的存储地址（storage address)为64字节，前部为segment文件号，尾部为segment文件内偏移量——比如6段大小是64M，则尾部需要26位；
 
  * 段回收 ——（Segment Clean）log structure 文件系统顺序追加写行为必然带来大量的旧数据，因此必须有旧数据回收机制。回收机制大体来讲需要遍历段文件中的各数据块，检查是否当前inode的索引块中的地址是否有指向它，如果没有则说明是该数据块是旧数据可以放弃。如果一个段中的所有数据块都是旧数据块，则这个段文件可被回收（从hdfs中删除）。另外当段中可用数据块很少时，也可以采取copy and remove的方式——将非旧数据的数据块主动以log形式复制写到新段中，从而使得源段中所有数据块都成为旧数据块，这是再删除其。

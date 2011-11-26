@@ -27,7 +27,6 @@
       * tools: 生成所有工具
       * test: 生成测试用例
 ----
-   注：hlfs目录说明
    ** _src hlfs库源代码目录_
    ** _nbd-2.9.15 修改后的nbd-server/nbd-client源代码目录_
    ** _3part 第三方库，目前包含hadoop相关;log库_
@@ -35,7 +34,14 @@
    ** _output 编译后的生成库和工具所在目录_
 ----
  === 测试hlfs ===
+ 为了方便调试目的，hlfs实现中支持了本地测试（不需要hadoop hdfs),我们称为local模式。我们首先用local模式测试
+   * 编译hlfs - cd hlfs/build;cmake ../src/;make all
+   *“格式化”文件系统 
+       # mkdir /tmp/testenv //需要一个类似workshop的工作环境
+       # ./output/bin/mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024 (-b是数据块大小，单位是byte， -s是段文件大小，单位是byte， -m 是虚拟磁盘的最大容量,单位是M) //格式化目的是写入原数据到superblock中，这些元数据描述了该hlfs的属性信息。
 
+   *   
+					7> ./test1 
    
 
 == HLFS 存储虚拟机镜像 == 

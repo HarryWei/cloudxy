@@ -15,11 +15,11 @@
    
 
 == HLFS START UP ==
-#获取hlfs代码和相关依赖库——在终端键入'svn checkout http://cloudxy.googlecode.com/svn/trunk/hlfs/  hlfs'
-#编译hlfs
-   ##安装cmake。
-   ###在hlfs/src/CMakeLists.txt中配置你正确的java目录，glib目录。
-   ##在hlfs/src/CMakeLists.txt中配置你期望的输出库目录(默认为hlfs/output/lib)，以及输出工具目录。
+ # 获取hlfs代码和相关依赖库——在终端键入'svn checkout http://cloudxy.googlecode.com/svn/trunk/hlfs/  hlfs'
+ # 编译hlfs
+   # 安装cmake;安装glib库。
+   # 在hlfs/src/CMakeLists.txt中配置你正确的java目录，glib目录。
+ *注：
 
 == HLFS 存储虚拟机镜像 == 
 

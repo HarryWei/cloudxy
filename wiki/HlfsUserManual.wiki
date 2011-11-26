@@ -15,6 +15,7 @@
    
 
 == HLFS START UP ==
+   #　获取hlfs代码和相关依赖库——在终端键入'svn checkout http://cloudxy.googlecode.com/svn/trunk/hlfs/  hlfs'
 
 == HLFS 存储虚拟机镜像 == 
 

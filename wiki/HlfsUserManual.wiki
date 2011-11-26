@@ -26,12 +26,12 @@
       * tools: 生成所有工具
       * test: 生成测试用例
  * 注：hlfs目录说明
-   ** src hlfs库源代码目录
-   ** nbd-2.9.15 修改后的nbd-server/nbd-client源代码目录
-   ** 3part 第三方库，目前包含hadoop相关;log库
-   ** test 测试文件目录
-   ** output 编译后的生成库和工具所在目录
-
+   ** _src hlfs库源代码目录_
+   ** _nbd-2.9.15 修改后的nbd-server/nbd-client源代码目录_
+   ** _3part 第三方库，目前包含hadoop相关;log库_
+   ** _test 测试文件目录_
+   ** _output 编译后的生成库和工具所在目录_
+ # 测试hlfs
    
 
 == HLFS 存储虚拟机镜像 == 

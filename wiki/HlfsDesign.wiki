@@ -1,4 +1,4 @@
-=hadoop dfs log structure filesystem designe=
+=hadoop dfs log structure filesystem design=
 
 ==背景介绍==
     HLFS的使用场景是为弹性云平台提供虚拟磁盘（类似amzaon的EBS）提供后台存储服务。它需要满足高可用性、高性能、能随机读写、快速故障恢复、数据快照、回滚等特性。

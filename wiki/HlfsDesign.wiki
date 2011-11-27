@@ -1,3 +1,4 @@
+#summary HLFS概要设计.
 =hadoop dfs log structure filesystem design=
 
 ==背景介绍==

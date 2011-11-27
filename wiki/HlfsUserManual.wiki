@@ -1,4 +1,4 @@
-#HLFS User Manual
+#HLFS User Manual.
 
 = HLFS 用户手册 =
 

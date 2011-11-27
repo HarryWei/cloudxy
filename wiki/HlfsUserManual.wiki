@@ -56,7 +56,7 @@
   * hdfs模式uri支持
      1. hdfs:///tmp/testenv/testfs                       //hdfs伪分布模式下使用
      2. hdfs://192.168.0.1/tmp/testenv/testfs            //默认端口为8020
-     3. hdfs://192.168.0.1:8020/tmp/testenv/testfs       //完整uri；192.168.0.1也可是主机名
+     3. hdfs://192.168.0.1:8020/tmp/testenv/testfs       //完整uri；192.168.0.1也可是主机名代替
   * 执行hadoop fs -ls /tmp/testenv/testfs命令你可看到类似local模式下的各种文件(hadoop shell 命令请见http://hadoop.apache.org/common/docs/r0.17.2/hdfs_user_guide.html)   
   * 说明一下hadoop/libxx/libhdfs.so库并非标准ch3代码编译而得，因为标准代码没有支持hflush操作，为了支持该操作，我再ch3源代码上打了hflush补丁（patch请见https://issues.apache.org/jira/browse/HDFS-2055)。 
 }}}
@@ -65,7 +65,7 @@
 如果上述步骤成功，那么可以开始尝试EBS了。使用HLFS作为虚拟机的数据盘，甚至可以做系统安装盘。
    * 添加hlfs driver for blktap2
      # 进入xen/tools目录
-     # 打上patches目录下的hlfs_driver_for_blktap2.patch - 在xen/tools目录下执行patch -p1 < patches/hlfs_driver_for_blktap2.patch
+     # 打上patches目录下的hlfs_driver_for_blktap2.patch - 在xen/tools目录下执行patch -p1 < patches/hlfs_driver_for_blktap2.patch （该patch针对xen4.1.1版本，其他版本请自己修改啦）
    * 编译blktap2，安装blktap2，激活blktap2
      # 在tools目录下执行make clean;make;make install
      # 重启动xend - service xend restart

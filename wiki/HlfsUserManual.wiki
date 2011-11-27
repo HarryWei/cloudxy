@@ -107,7 +107,7 @@
 
 == 旧数据merge功能 ==
 从设计文档中可以看到hlfs需要使用merge功能消除旧数据。而我们将merge过程分为俩步走：
- # 段统计：计算当前时刻的段活跃数据块数量，为下一阶段回收做一定预先判断。
+ # 段统计：计算当前时刻的段活跃数据块数量，为下一阶段回收做一定预先判断（注意只是预判断，当回收任务执行时，段中活跃数据块数据有可以变化）。
  # 回收段：对于那些活跃数据块小于给定阀值，但尚未为0的段，搬迁其依旧活跃的数据段（相对回收当前时间）到新段，然后在回收该段；如果活跃数已经为0，则直接回收该段。
 === 段统计 ===
  # 采用拉模式：即在通过本地客户端方式执行 — segcalc.hlfs -u uri （在uri所在目录升到成段统计文件）
@@ -115,6 +115,26 @@
   # 编译map/reduce执行程序 - cd hlfs/src/clean/Mapreducer/build;cmake .l;make
   # 将上述执行程序上传到hfds下指定目录 - hadoop fs -put hlfs/src/clean/Mapreducer/outpub/bin/mr_segcalc.hlfs /exe/
   # 下发map/reduce job - hadoop pipes -D mapred.reduce.tasks=1 -input /tmp/testenv/testfs  -output /output -program /exe/mr_cleaner
-  
+{{{
+采用推模式map/reduce实现段统计可发挥分布系统并行处理优势，但会带来额外的网络负担。
+关于C++ pipe实现map reduce程序请见pipe的例子代码。还有http://wiki.apache.org/hadoop/C%2B%2BWordCount#Upload_C.2B-.2B-_binary_files_to_HDFS等资料。
+}}} 
 
-===
+===段回收===
+ * 离线情况下，standalone方式运行段回收
+   seg.clean -u uri -s segno -w waterlevel （如果segno是-1， 那么段清理将从第一个段开始，依次往后进行清理工作；waterlevel是回收阀值，单位是数据块，如果段中活跃数据块小于waterlevel则，执行清理工作）
+   
+ * 在线情况下，运行段回收。
+   在线情况下，不能使用上述命令直接跑段回收任务，否则会造成数据破坏。在线情况下，段回收目前设计在hlfs的写入线程中实现。段回收任务相比写入请求而言，属于低优先级，因此只有当不再有写入请求的情况下，才会开始执行。
+   # tapdisk2 开启段回收
+   outpub/bin/ -p pid -u uri -c cmd -r parameter -v verbose (-p后跟正在运行的nbd主进程号， -u后跟文件系统路径，-c后跟要执行的命令，包括start_merge：段回收开启；stop_merge：段回收停止；set_copy_waterlevel：设置回收阀值；query_stat：查询状态,r后面跟着相应命令所对应的参数，-v是是否输出详细的运行信息)。
+   # nbd-server 开启段回收
+   outpub/bin/tapdisk_ops -f fsname -c cmd -r parameter -v verbose (-f后跟着文件系统名称，-c后跟要执行的命令，包括start_merge：段回收开启；stop_merge：段回收停止；set_copy_waterlevel：设置回收阀值；query_stat：查询状态, -r后面跟着相应命令所对应的参数，-v是是否输出详细的运行信息)。	
+{{{
+   对于hlfs库来说，
+   1.hlfs_clean_start(HLFS_CTRL *ctrl);
+   2.hlfs_clean_stop(HLFS_CTRL *ctrl);
+   3.int  hlfs_set_clean_level(HLFS_CTRL *ctrl,unsigned int alive_bytes);
+   等几个函数对应了上述命令的最终调用。
+   nbd-server和tapdisk2的外部控制命令实现不尽相同，tapdisk2用的更为简单，nbd-server实现复杂些，但更灵活。因此两种方式都保留，供大家参考。
+}}} 

@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#user manual for hlfs.
 
 = HLFS 用户手册 =
 

@@ -49,21 +49,16 @@ class SegUsageCalcMap: public HadoopPipes::Mapper {
             const HadoopPipes::JobConf* job = context.getJobConf();
             std::string inputDir = job->get("mapred.input.dir");
             printf("DBG:--inputDir :%s\n",inputDir.c_str());
+            const char * uri = inputDir.c_str();
             const char * fs_name = g_basename(inputDir.c_str());
-            const char * uri = g_dirname(inputDir.c_str());
 	        printf("DBG:--fs_name:%s,uri:%s\n",fs_name,uri);
-            m_storage = init_storage_handler(uri,fs_name);
+            m_storage = init_storage_handler(uri);
             HADOOP_ASSERT(m_storage != NULL, "failed to init storage handler ");
             uint32_t segment_size;
             uint32_t block_size;
-            int ret = read_fs_meta(m_storage, &segment_size, &block_size);
-            printf("DBG:--segment size:%u,block size:%u\n",segment_size,block_size);
-            SEGMENT_SIZE_MASK  = segment_size - 1;
-            SEGMENT_SIZE_SHIFT = 0;
-            while (0 != (segment_size = (segment_size >> 1)))
-            {                                                                                                         
-                SEGMENT_SIZE_SHIFT++;
-            }
+            uint32_t max_fs_size;
+            int ret = read_fs_meta(m_storage, &segment_size, &block_size,&max_fs_size);
+            printf("DBG:--segment size:%u,block size:%u,max fs size%u\n",segment_size,block_size,max_fs_size);
             m_latest_inode = load_latest_inode(m_storage); 
      	    HADOOP_ASSERT(m_latest_inode != NULL, "failed to load latest inode ");
             m_block_size = block_size;
@@ -206,9 +201,9 @@ public:
         std::string inputDir = job->get("mapred.input.dir");
         printf("DBG:--inputDir :%s\n",inputDir.c_str());
         const char * fs_name = g_basename(inputDir.c_str());
-        const char * uri = g_dirname(inputDir.c_str());
+        const char * uri = inputDir.c_str();
         printf("DBG:--fs_name:%s,uri:%s\n",fs_name,uri);
-        m_storage = init_storage_handler(uri,fs_name);
+        m_storage = init_storage_handler(uri);
         HADOOP_ASSERT(m_storage != NULL, "failed to init storage handler ");
     }
     ~SegUsageCalcWriter() {

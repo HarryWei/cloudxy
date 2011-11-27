@@ -25,12 +25,13 @@
       * all: 生成所有库和工具
       * libhlfs: 生成hlfs动态库
       * tools: 生成所有工具
-----
-   ** _src hlfs库源代码目录_
-   ** _nbd-2.9.15 修改后的nbd-server/nbd-client源代码目录_
-   ** _3part 第三方库，目前包含hadoop相关;log库_
-   ** _output 编译后的生成库和工具所在目录_
-----
+{{{
+   1. src hlfs库源代码目录_
+   2. nbd-2.9.15 修改后的nbd-server/nbd-client源代码目录
+   3. 3part 第三方库，目前包含hadoop相关;log库
+   4. output 编译后的生成库和工具所在目录
+   5. patches hlfs driver for blktap2的patch代码
+}}}
  === 测试hlfs ===
  为了方便调试目的，hlfs实现中支持了本地测试（不需要hadoop hdfs),我们称为local模式。我们首先用local模式测试
    * 编译hlfs - cd hlfs/build;cmake ../src/;make all

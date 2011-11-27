@@ -67,18 +67,22 @@ hadoop shell 命令请见  http://hadoop.apache.org/common/docs/r0.17.2/hdfs_use
   * 编译nbd  
      # cd nbd-2.9.15/build;
      # cmake ../;
-     # make (编译后内容在nbd-2.9.15/outpub下）
-   * 加载模块 - sudo modprobe nbd (nbd服务需要一个对应的内核模块，这个模块一般没有被默认加载）
-   * 启动nbd server - ./nbd-2.9.15/output/bin/nbd-server 20000 (20000是服务端口号）    
-   * 格式化hlfs 
-     mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024或<br>  mkfs.hlfs -u hdfs:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024
-   * 挂接nbd设备 - ./nbd-2.9.15/output/bin/nbd-client bs=512 127.0.0.1 20000  local:///tmp/testenv/testfs /dev/nbd0 或<br>
- ./nbd-2.9.15/output/bin/nbd-client bs=512 127.0.0.1 20000  hdfs:///tmp/testenv/testfs /dev/nbd0 
-   * 测试nbd设备
+     #  make (编译后内容在nbd-2.9.15/outpub下）
+  * 加载模块 - sudo modprobe nbd (nbd服务需要一个对应的内核模块，这个模块一般没有被默认加载）
+  * 启动nbd server - ./nbd-2.9.15/output/bin/nbd-server 20000 (20000是服务端口号）    
+  * 格式化hlfs - 如上所示 （如 mkfs.hlfs -u hdfs:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024；mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024)
+  * 挂接nbd设备 - 将nbd设备和上面格式化的fs关联（如  
+./nbd-2.9.15/output/bin/nbd-client bs=512 127.0.0.1 20000 local:///tmp/testenv/testfs /dev/nbd0；
+./nbd-2.9.15/output/bin/nbd-client bs=512 127.0.0.1 20000  hdfs:///tmp/testenv/testfs /dev/nbd0） 
+  * 测试nbd设备
      # sudo mkfs /dev/nbd0
      # sudo mount /dev/nbd0 /opt
      # do everything like a local device
 ----
+ _我们对传统nbd server和 nbd client做了一定修改_
+ # _nbd-server 只需要给出端口号，不用给出其他信息了_
+ # _nbd-client 要给出对应fs的uri地址——当和server握手时传给对方，server 再根据该uri初始化hlfs上下文，然后通过hlfs_stat获得fs大小信息，并传给client段_
+ # _我们还增额外实现了nbd-ops工具用于控制hlfs的merge行为（具体见高级用法），外部控制采用管道通讯+共享内存实现，具体请见代码_
 ----
 
 == 高级用法 ==

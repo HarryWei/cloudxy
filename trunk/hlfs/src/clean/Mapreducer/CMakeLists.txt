@@ -45,6 +45,6 @@ SET(LIBS     glib-2.0
 
 SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
 SET(SRCS mr_clean_route.cpp)
-ADD_EXECUTABLE(mr_cleaner ${SRCS})
-TARGET_LINK_LIBRARIES(mr_cleaner ${LIBS})
-SET_TARGET_PROPERTIES(mr_cleaner PROPERTIES COMPILE_FLAGS "-g")
+ADD_EXECUTABLE(mr_segcalc.hlfs ${SRCS})
+TARGET_LINK_LIBRARIES(mr_segcalc.hlfs ${LIBS})
+SET_TARGET_PROPERTIES(mr_segcalc.hlfs PROPERTIES COMPILE_FLAGS "-g")

@@ -16,7 +16,7 @@
 
 == HLFS START UP ==
  === 获取hlfs代码和相关依赖库 ===
-   在终端键入'svn checkout http://cloudxy.googlecode.com/svn/trunk/hlfs/  hlfs' （因为需要包含了第三方库缘故，因此肯恩checkout时间比较长）
+   在终端键入'svn checkout http://cloudxy.googlecode.com/svn/trunk/hlfs/ hlfs' （因为需要包含了第三方库缘故，因此肯恩checkout时间比较长。如果想修改则请用https co）
  === 编译hlfs ===
    # 安装cmake;安装glib库;安装java。
    # 修改在hlfs/src/CMakeLists.txt中配置你正确的java目录 'SET(JAVA_HOME   /usr/lib/jvm/java-6-sun)'。
@@ -65,7 +65,7 @@
 如果上述步骤成功，那么可以开始尝试EBS了。使用HLFS作为虚拟机的数据盘，甚至可以做系统安装盘。
    * 添加hlfs driver for blktap2
      # 进入xen/tools目录
-     # 打上patches目录下的hlfs_driver_for_blktap2.patch - 执行patch -p1 <　patches/hlfs_driver_for_blktap2.patch
+     # 打上patches目录下的hlfs_driver_for_blktap2.patch - 在xen/tools目录下执行patch -p1 < patches/hlfs_driver_for_blktap2.patch
    * 编译blktap2，安装blktap2，激活blktap2
      # 在tools目录下执行make clean;make;make install
      # 重启动xend - service xend restart
@@ -112,7 +112,7 @@
 === 段统计 ===
  # 采用拉模式：即在通过本地客户端方式执行 — segcalc.hlfs -u uri （在uri所在目录升到成段统计文件）
  # 采用推模式: 即采用map/reduce模式，将该任务下发到段所在机器执行，然后将段统计值用reduce方式写到段统计文件中。具体做法如下：
-  # 编译map/reduce执行程序 - cd hlfs/src/clean/Mapreducer/build;cmake .l;make
+  # 编译map/reduce执行程序 - cd hlfs/src/clean/Mapreducer/build;cmake ..;make
   # 将上述执行程序上传到hfds下指定目录 - hadoop fs -put hlfs/src/clean/Mapreducer/outpub/bin/mr_segcalc.hlfs /exe/
   # 下发map/reduce job - hadoop pipes -D mapred.reduce.tasks=1 -input /tmp/testenv/testfs  -output /output -program /exe/mr_cleaner
 {{{

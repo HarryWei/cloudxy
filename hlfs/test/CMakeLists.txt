@@ -17,15 +17,19 @@ INCLUDE_DIRECTORIES(
        ../src/include
        ../3part/log/include
 )
-
+IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 LINK_DIRECTORIES(
-      ../../output/lib32
-      ../../3part/log/lib32
-)
+    ../output/lib32
+    ../3part/log/lib32)
+ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+LINK_DIRECTORIES(
+    ../output/lib64
+    ../3part/log/lib64)
+ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(LIBS glib-2.0
          hlfs
-	 log4c)
+	     log4c)
 
 SET(TESTSRC test.c)
 ADD_EXECUTABLE(test ${TESTSRC})

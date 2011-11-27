@@ -1,3 +1,4 @@
+#summary HLFS基础问答（请优先阅读）.
 hlfs 是什么？  
  hlfs （hdfs log structrue filesystem 的缩写）是一个在hadoop hdfs 文件系统之上实现的log structrue filesystem - like 系统。但要注意它并非一个实现完整posix语义的文件系统（支持目录操作、link等），而是仅仅实现了单一文件的基本管理（open,write,read,close)的系统，所以把它称为存储系统（block-level)可能更加合适。
 

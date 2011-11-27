@@ -1,4 +1,4 @@
-#HLFS用户使用手册.
+# HLFS User Manual
 
 = HLFS 用户手册 =
 
@@ -145,7 +145,7 @@ hlfs支持log4c日志系统，但作为库，日志系统的初始化工作并�
 
 ===关于bug===
 由于人力不足（目前只有我和贾威同学），水平有限，因此内部很多功能测试不完善，留有不少bug，因此请见谅。
-如果您有兴趣试试，发现bug,欢迎提给kanghua151@msn.com，更欢迎直接修改ci。 
+如果您有兴趣试试，发现bug,欢迎提给kanghua151@msn.com 或者 cloudxy@googlegroups.com(我们的邮件列表），更欢迎直接修改ci。 
 谢谢
                          康华 
                          2011.11.27 晚

@@ -16,7 +16,7 @@
 
 == HLFS START UP ==
  === 获取hlfs代码和相关依赖库 ===
-   在终端键入'svn checkout http://cloudxy.googlecode.com/svn/trunk/hlfs/  hlfs'
+   在终端键入'svn checkout http://cloudxy.googlecode.com/svn/trunk/hlfs/  hlfs' （因为需要包含了第三方库缘故，因此肯恩checkout时间比较长）
  === 编译hlfs ===
    # 安装cmake;安装glib库;安装java。
    # 修改在hlfs/src/CMakeLists.txt中配置你正确的java目录 'SET(JAVA_HOME   /usr/lib/jvm/java-6-sun)'。
@@ -47,11 +47,15 @@
   * 编译hlfs - cd hlfs/build;cmake ../src/;make all
   * hdfs 模式下格式化hlfs文件系统 (我们以伪分布模式执行）
        # hadoop fs -mkdir hdfs:///tmp/testenv
-       # ./output/bin/mkfs.hlfs -u hdfs:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024 　
+       # ./output/bin/mkfs.hlfs -u hdfs:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024
   * 编译测试用例 - cd test;camke .;make 
   * 执行测试用例 - ./test -u hdfs:///tmp/testenv/testfs   
 ----
-  * _可见local模式和hdfs模式只是uri都head不同而已_
+  * _可见local模式和hdfs模式只是uri的head不同而已，其余用法类似_
+  * _hdfs模式uri支持
+     # hdfs:///tmp/testenv/testfs                       //hdfs伪分布模式下使用
+     # hdfs://192.168.0.1/tmp/testenv/testfs            //默认端口为8020
+     # hdfs://192.168.0.1:8020/tmp/testenv/testfs       //完整uri；192.168.0.1也可是主机名
   * _执行hadoop fs -ls /tmp/testenv/testfs命令你可看到类似local模式下的各种文件_
 hadoop shell 命令请见  http://hadoop.apache.org/common/docs/r0.17.2/hdfs_user_guide.html
 ----

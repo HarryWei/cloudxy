@@ -58,7 +58,7 @@
      2. hdfs://192.168.0.1/tmp/testenv/testfs            //默认端口为8020
      3. hdfs://192.168.0.1:8020/tmp/testenv/testfs       //完整uri；192.168.0.1也可是主机名
   * 执行hadoop fs -ls /tmp/testenv/testfs命令你可看到类似local模式下的各种文件(hadoop shell 命令请见http://hadoop.apache.org/common/docs/r0.17.2/hdfs_user_guide.html)   
-  * 说明一下hadoop/libxx/libhdfs.so库并非标准ch3代码编译而得，因为标准代码没有支持hflush操作，为了支持该操作，我再ch3源代码上打了hflush补丁（patch请见xxx)。 
+  * 说明一下hadoop/libxx/libhdfs.so库并非标准ch3代码编译而得，因为标准代码没有支持hflush操作，为了支持该操作，我再ch3源代码上打了hflush补丁（patch请见https://issues.apache.org/jira/browse/HDFS-2055)。 
 }}}
 
 == HLFS 存储虚拟机镜像 == 

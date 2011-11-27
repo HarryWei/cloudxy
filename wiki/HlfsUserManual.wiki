@@ -58,15 +58,25 @@
      # hdfs://192.168.0.1:8020/tmp/testenv/testfs       //完整uri；192.168.0.1也可是主机名
   * _执行hadoop fs -ls /tmp/testenv/testfs命令你可看到类似local模式下的各种文件_
 hadoop shell 命令请见  http://hadoop.apache.org/common/docs/r0.17.2/hdfs_user_guide.html
+  * _说明一下hadoop/libxx/libhdfs.so库并非标准ch3代码编译而得，因为标准代码没有支持hflush操作，为了支持该操作，我再ch3源代码上打了hflush补丁（patch请见xxx)_。 
 ----
 
 == HLFS 存储虚拟机镜像 == 
 如果上述步骤成功，那么可以开始尝试EBS了。使用HLFS作为虚拟机的数据盘，甚至可以做系统安装盘。
-   * 添加hlfs driver for tapdisk2 - patch?
-   * 编译，安装，激活
-   * 测试- 
-   * 作为数据盘启动
-
+   * 添加hlfs driver for blktap2
+     # 进入xen/tools目录
+     # 打上patches目录下的hlfs_driver_for_blktap2.patch - 执行patch -p1 <　patches/hlfs_driver_for_blktap2.patch
+   * 编译blktap2，安装blktap2，激活blktap2
+     # 在tools目录下执行make clean;make;make install
+     # 重启动xend - service xend restart
+   * 测试hlfs driver for blktap2
+     # local模式测试- mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024；tap-ctl create -a hlfs:local:///tmp/testenv/testfs；
+     # hdfs模式测试-  mkfs.hlfs -u hdfs:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024；tap-ctl create -a hlfs:hdfs:///tmp/testenv/testfs
+   * 作为DomU的数据盘使用-EBS用法。
+     ** 可以使用动态挂载 如 xl block-attach 0 tap2:hlfs:///tmp/testenv/testfs xvda rw 
+     或者
+     ** 通过配置文件配置 如 disk = ['tap2:aio:root/tapdisk-test/centos-mother.img,xvda,w','tap2:hlfs:local///tmp/testenv/testfs,xvdb,w']
+      
 == HLFS 用作虚拟网盘 == 
   * 编译nbd  
      # cd nbd-2.9.15/build;

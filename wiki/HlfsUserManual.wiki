@@ -50,7 +50,7 @@
        # ./output/bin/mkfs.hlfs -u hdfs:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024
   * 编译测试用例 - cd test;camke .;make 
   * 执行测试用例 - ./test -u hdfs:///tmp/testenv/testfs   
-----
+-------------
   * _可见local模式和hdfs模式只是uri的head不同而已，其余用法类似_
   * _hdfs模式uri支持
      # hdfs:///tmp/testenv/testfs                       //hdfs伪分布模式下使用
@@ -59,7 +59,7 @@
   * _执行hadoop fs -ls /tmp/testenv/testfs命令你可看到类似local模式下的各种文件_
 hadoop shell 命令请见  http://hadoop.apache.org/common/docs/r0.17.2/hdfs_user_guide.html
   * _说明一下hadoop/libxx/libhdfs.so库并非标准ch3代码编译而得，因为标准代码没有支持hflush操作，为了支持该操作，我再ch3源代码上打了hflush补丁（patch请见xxx)_。 
-----
+-------------
 
 == HLFS 存储虚拟机镜像 == 
 如果上述步骤成功，那么可以开始尝试EBS了。使用HLFS作为虚拟机的数据盘，甚至可以做系统安装盘。
@@ -73,10 +73,11 @@ hadoop shell 命令请见  http://hadoop.apache.org/common/docs/r0.17.2/hdfs_use
      # local模式测试- mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024；tap-ctl create -a hlfs:local:///tmp/testenv/testfs；
      # hdfs模式测试-  mkfs.hlfs -u hdfs:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024；tap-ctl create -a hlfs:hdfs:///tmp/testenv/testfs
    * 作为DomU的数据盘使用-EBS用法。
-     ** 可以使用动态挂载 如 xl block-attach 0 tap2:hlfs:///tmp/testenv/testfs xvda rw 
-     或者
-     ** 通过配置文件配置 如 disk = ['tap2:aio:root/tapdisk-test/centos-mother.img,xvda,w','tap2:hlfs:local///tmp/testenv/testfs,xvdb,w']
-      
+     # 可以使用动态挂载 如 xl block-attach 0 tap2:hlfs:///tmp/testenv/testfs xvda rw 
+     # 通过配置文件配置 如 disk = ['tap2:aio:root/tapdisk-test/centos-mother.img,xvda,w','tap2:hlfs:local///tmp/testenv/testfs,xvdb,w']
+   * 作为DomU的系统盘使用
+     # 直接使用生成的tapdev设备（如/dev/xen/blktap-2/tapdev0），做类似phy磁盘的使用。
+     # 使用生成的tapdev设备，格式化后，存储vhd镜像文件，再使用vhd镜像文件启动。
 == HLFS 用作虚拟网盘 == 
   * 编译nbd  
      # cd nbd-2.9.15/build;
@@ -90,7 +91,7 @@ hadoop shell 命令请见  http://hadoop.apache.org/common/docs/r0.17.2/hdfs_use
      # sudo mkfs /dev/nbd0
      # sudo mount /dev/nbd0 /opt
      # do everything like a local device
-----
+-----------------
  _我们对传统nbd server和 nbd client做了一定修改_
  # _nbd-server 只需要给出端口号，不用给出其他信息了_
  # _nbd-client 要给出对应fs的uri地址——当和server握手时传给对方，server 再根据该uri初始化hlfs上下文，然后通过hlfs_stat获得fs大小信息，并传给client段_
@@ -99,6 +100,6 @@ hadoop shell 命令请见  http://hadoop.apache.org/common/docs/r0.17.2/hdfs_use
 另外nbd还有一个讨厌的问题 —— nbd 死锁问题 -  nbd-server 如果和nbd-client如果部署在统一个机器上，在某些内核上会出现IO hang住（死锁）的问题。追其原因是：当系统内存不足时，必然需要pdflush例程将脏数据刷到磁盘已回收可用内存，而引发内存分配的肇事进程则必须同步等待上述释放动作，然后再获取刚回收来的内存继续运行。<br>
 那么可以想象当nbd-server运行时需要内存，但系统空闲内存不足时，就会触发pdflush的刷新操作，这是要被写入脏页的磁盘又是自己时（因为nbd盘作为数据盘也要被写入脏页的），则会出现死锁——因为要靠nbd-server继续运作才能将脏页写下去，而nbd-server运作的前提又是需要获得内存。<br>
 不过并非所有内核都会有这个问题（2.6.18肯定是有,新内核上后来引入pdi概念、pdflush刷新方式改变等使得死锁问题得以消除），我使用的ubuntu 2.6.35的内核就没有次问题。因此如果要在本地尝试nbd，最好使用高版本内核，或者内存给的大大的。实在不行，就麻烦你就去修改一下内核把：没记错的话，大概是在bdi_congestion处做一下手脚，让其避开nbd-server这个进程好了:)
-----
+----------------
 
 == 高级用法 ==

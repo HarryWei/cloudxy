@@ -10,7 +10,7 @@ static gboolean verbose = FALSE;
 static GOptionEntry entries[] = {
 	    {"filesystem location",'u', 0, G_OPTION_ARG_STRING,   &uri, "filesystem storage uri", "FSLOC"},
     	{"filesystem request size", 'r', 0, G_OPTION_ARG_INT, &request_size, "test request size", "REQUESTSIZE"},
-    	{"filesystem tatal size", 'm', 0, G_OPTION_ARG_INT, &total_size, "test total request size", "TOTALSIZE"},
+    	{"filesystem tatal size", 'a', 0, G_OPTION_ARG_INT, &total_size, "test total request size", "TOTALSIZE"},
     	{"verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
     	{NULL}
 };

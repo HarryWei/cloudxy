@@ -105,4 +105,16 @@
 }}}
 
 
-== 高级用法 ==
+== 旧数据merge功能 ==
+从设计文档中可以看到hlfs需要使用merge功能消除旧数据。而我们将merge过程分为俩步走：
+ # 段统计：计算当前时刻的段活跃数据块数量，为下一阶段回收做一定预先判断。
+ # 回收段：对于那些活跃数据块小于给定阀值，但尚未为0的段，搬迁其依旧活跃的数据段（相对回收当前时间）到新段，然后在回收该段；如果活跃数已经为0，则直接回收该段。
+=== 段统计 ===
+ # 采用拉模式：即在通过本地客户端方式执行 — segcalc.hlfs -u uri （在uri所在目录升到成段统计文件）
+ # 采用推模式: 即采用map/reduce模式，将该任务下发到段所在机器执行，然后将段统计值用reduce方式写到段统计文件中。具体做法如下：
+  # 编译map/reduce执行程序 - cd hlfs/src/clean/Mapreducer/build;cmake .l;make
+  # 将上述执行程序上传到hfds下指定目录 - hadoop fs -put hlfs/src/clean/Mapreducer/outpub/bin/mr_segcalc.hlfs /exe/
+  # 下发map/reduce job - hadoop pipes -D mapred.reduce.tasks=1 -input /tmp/testenv/testfs  -output /output -program /exe/mr_cleaner
+  
+
+===

@@ -64,12 +64,20 @@ hadoop shell 命令请见  http://hadoop.apache.org/common/docs/r0.17.2/hdfs_use
    * 作为数据盘启动
 
 == HLFS 用作虚拟网盘 == 
-   * 编译nbd
-   * 加载模块
-   * 启动nbd server 
+  * 编译nbd  
+     # cd nbd-2.9.15/build;
+     # cmake ../;
+     # make (编译后内容在nbd-2.9.15/outpub下）
+   * 加载模块 - sudo modprobe nbd (nbd服务需要一个对应的内核模块，这个模块一般没有被默认加载）
+   * 启动nbd server - ./nbd-2.9.15/output/bin/nbd-server 20000 (20000是服务端口号）    
    * 格式化hlfs 
-   * 挂接nbd设备
+     mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024或<br>  mkfs.hlfs -u hdfs:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024
+   * 挂接nbd设备 - ./nbd-2.9.15/output/bin/nbd-client bs=512 127.0.0.1 20000  local:///tmp/testenv/testfs /dev/nbd0 或<br>
+ ./nbd-2.9.15/output/bin/nbd-client bs=512 127.0.0.1 20000  hdfs:///tmp/testenv/testfs /dev/nbd0 
    * 测试nbd设备
+     # sudo mkfs /dev/nbd0
+     # sudo mount /dev/nbd0 /opt
+     # do everything like a local device
 ----
 ----
 

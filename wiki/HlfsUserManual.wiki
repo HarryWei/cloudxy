@@ -126,9 +126,9 @@
    
  * 在线情况下，运行段回收。
    在线情况下，不能使用上述命令直接跑段回收任务，否则会造成数据破坏。在线情况下，段回收目前设计在hlfs的写入线程中实现。段回收任务相比写入请求而言，属于低优先级，因此只有当不再有写入请求的情况下，才会开始执行。
-   # tapdisk2 开启段回收
+ # tapdisk2 开启段回收
    outpub/bin/ -p pid -u uri -c cmd -r parameter -v verbose (-p后跟正在运行的nbd主进程号， -u后跟文件系统路径，-c后跟要执行的命令，包括start_merge：段回收开启；stop_merge：段回收停止；set_copy_waterlevel：设置回收阀值；query_stat：查询状态,r后面跟着相应命令所对应的参数，-v是是否输出详细的运行信息)。
-   # nbd-server 开启段回收
+ # nbd-server 开启段回收
    outpub/bin/tapdisk_ops -f fsname -c cmd -r parameter -v verbose (-f后跟着文件系统名称，-c后跟要执行的命令，包括start_merge：段回收开启；stop_merge：段回收停止；set_copy_waterlevel：设置回收阀值；query_stat：查询状态, -r后面跟着相应命令所对应的参数，-v是是否输出详细的运行信息)。	
 {{{
    对于hlfs库来说，
@@ -138,3 +138,14 @@
    等几个函数对应了上述命令的最终调用。
    nbd-server和tapdisk2的外部控制命令实现不尽相同，tapdisk2用的更为简单，nbd-server实现复杂些，但更灵活。因此两种方式都保留，供大家参考。
 }}} 
+
+===关于日志===
+hlfs支持log4c日志系统，但作为库，日志系统的初始化工作并不会去做。如果需要使用请在调用方执行log4c_init()
+
+
+===关于bug===
+由于人力不足（目前只有我和贾威同学），水平有限，因此内部很多功能测试不完善，留有不少bug，因此请见谅。
+如果您有兴趣试试，发现bug,欢迎提给kanghua151@msn.com，更欢迎直接修改ci。 
+谢谢
+                         康华 
+                         2011.11.27 晚

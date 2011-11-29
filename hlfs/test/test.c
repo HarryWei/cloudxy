@@ -1,7 +1,8 @@
-#include "glib.h"
-#include "api/hlfs.h"
 #include <string.h>
+#include <stdint.h>
+#include "api/hlfs.h"
 #include "hlfs_log.h"
+#include "glib.h"
 
 static gchar *uri = NULL;
 static gint request_size = 0;
@@ -27,8 +28,12 @@ error_func(GOptionContext *context, GOptionGroup *group,
     }
 }
 
-
-
+/*
+ * ./test -u uri -r request_size -a total_size
+ * uri: /tmp/testenv/testfs
+ * request_size: 4096bytes
+ * total_size: 409600bytes
+ */
 int main(int argc, char *argv[]){
     if (log4c_init()) {
         g_message("log4c_init error!");
@@ -45,7 +50,7 @@ int main(int argc, char *argv[]){
         exit(EXIT_FAILURE);
     }
 
-    g_print("TEST : uri%s request size:%d,total size:%d\n",uri,request_size,total_size);
+    g_print("TEST: uri is %s, request size is %d, total size is %d\n", uri, request_size, total_size);
     char *content = (char*)g_malloc0(request_size);
     HLFS_CTRL * ctrl = init_hlfs(uri);
     g_assert(ctrl != NULL);

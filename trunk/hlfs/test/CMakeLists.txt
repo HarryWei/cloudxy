@@ -11,20 +11,22 @@ SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(HLFS)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 # include these files for building.
+SET(WORK_HOME $ENV{PWD}/../../)
+MESSAGE(STATUS "This is dir" ${WORK_HOME})
 INCLUDE_DIRECTORIES(
        /usr/include/glib-2.0 
        /usr/lib/glib-2.0/include 
-       ../src/include
-       ../3part/log/include
+       ${WORK_HOME}/src/include
+       ${WORK_HOME}/3part/log/include
 )
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 LINK_DIRECTORIES(
-    ../output/lib32
-    ../3part/log/lib32)
+    ${WORK_HOME}/output/lib32
+    ${WORK_HOME}/3part/log/lib32)
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 LINK_DIRECTORIES(
-    ../output/lib64
-    ../3part/log/lib64)
+    ${WORK_HOME}/output/lib64
+    ${WORK_HOME}/3part/log/lib64)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(LIBS glib-2.0
@@ -34,5 +36,3 @@ SET(LIBS glib-2.0
 SET(TESTSRC test.c)
 ADD_EXECUTABLE(test ${TESTSRC})
 TARGET_LINK_LIBRARIES(test ${LIBS})
-
-

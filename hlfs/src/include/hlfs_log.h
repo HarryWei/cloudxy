@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #define LOG_LEN				(1024)
-#define LOG_CONFIG_FILE_PATH		"/home/jiawei/workshop9/xiyoucloud/trunk/hlfs/nbd-2.9.15/output/bin/log4crc"
+#define LOG_CONFIG_FILE_PATH		"../../output/bin/log4crc"
 
 #define HLOG_NOTICE(msg, args...) { 										\
 	if (g_file_test(LOG_CONFIG_FILE_PATH, G_FILE_TEST_EXISTS)) {						\

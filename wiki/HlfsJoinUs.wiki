@@ -1,5 +1,5 @@
-#summary 如何加入cloudxy
-====How to join cloudxy====
+#summary Cloudxy如何加入我们
+===How to join cloudxy===
 
 ==cloudxy的邮件列表地址==
     cloudxy@googlegroups.com

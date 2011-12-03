@@ -66,7 +66,7 @@
 如果上述步骤成功，那么可以开始尝试EBS了。使用HLFS作为虚拟机的数据盘，甚至可以做系统安装盘。
    * 添加hlfs driver for blktap2
      # 进入xen/tools目录
-     # 打上patches目录下的hlfs_driver_for_blktap2.patch - 在xen/tools目录下执行patch -p1 < patches/hlfs_driver_for_blktap2.patch （该patch针对xen4.1.1版本，其他版本请自己修改啦）
+     # 打上patches目录下的hlfs_driver_for_blktap2.patch - 在xen/tools目录下执行patch -p0 < patches/hlfs_driver_for_blktap2.patch （该patch针对xen4.1.1版本，其他版本请自己修改啦;另外要记得tools/blktaps/driver/Makefile中请修改HLFS_DIR变量指向svn co出来的hlfs目录，才能正确找到对应库和头文件）
    * 编译blktap2，安装blktap2，激活blktap2
      # 在tools目录下执行make clean;make;make install
      # 重启动xend - service xend restart
@@ -152,4 +152,4 @@ hlfs支持log4c日志系统，但作为库，日志系统的初始化工作并�
 如果您有兴趣试试，发现bug,欢迎提给kanghua151@msn.com 或者 cloudxy@googlegroups.com(我们的邮件列表），更欢迎直接修改ci。 
 谢谢
                          康华 
-                         2011.11.27 晚
+                   

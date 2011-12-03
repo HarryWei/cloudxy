@@ -79,6 +79,9 @@
    * 作为DomU的系统盘使用
      # 直接使用生成的tapdev设备（如/dev/xen/blktap-2/tapdev0），做类似phy磁盘的使用。
      # 使用生成的tapdev设备，格式化后，存储vhd镜像文件，再使用vhd镜像文件启动。
+{{{
+     tap-ctl和xm或xl等虚拟机管理命令，往往需要root权限执行，当你使用sudo 或者切换root用户执行时，别忘记了必须有正确的classpath
+}}}
 == HLFS 用作虚拟网盘 == 
   * 编译nbd  
      # cd nbd-2.9.15/build;

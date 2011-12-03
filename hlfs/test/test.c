@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
         g_message("option parsing failed: %s", error->message);
         exit(EXIT_FAILURE);
     }
-
+	g_option_context_free(context);
     g_print("TEST: uri is %s, request size is %d, total size is %d\n", uri, request_size, total_size);
     char *content = (char*)g_malloc0(request_size);
     HLFS_CTRL * ctrl = init_hlfs(uri);
@@ -73,7 +73,8 @@ int main(int argc, char *argv[]){
         offset +=request_size;
         printf("offset:%d\n",offset);
     }
-    ret = hlfs_close(ctrl);
+    g_free(content);
+	ret = hlfs_close(ctrl);
     deinit_hlfs(ctrl);
     return 0;
 }

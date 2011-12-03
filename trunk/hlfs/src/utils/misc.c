@@ -130,6 +130,7 @@ int parse_from_uri(const char *uri, char ** head, char** hostname ,char** dir,ch
     char *pre_uri = g_dirname(uri);
     *fs_name = (char *) g_basename (uri);
     v = g_strsplit(pre_uri,"://",2);
+	g_free(pre_uri); 
     if(g_strv_length(v)!=2){
        g_strfreev(v);
        return -1; 

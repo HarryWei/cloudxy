@@ -81,7 +81,7 @@
      # 使用生成的tapdev设备，格式化后，存储vhd镜像文件，再使用vhd镜像文件启动。
 {{{
      * tap-ctl和xm或xl等虚拟机管理命令，往往需要root权限执行，当你使用sudo 或者切换root用户执行时，别忘记了必须有正确的classpath! 
-     * 如果xm cr 启动虚拟机，你可能会发现虚拟磁盘挂在失败！ 原因还是环境变量问题。— xm cr <xxx>命令实际上是委托xend程序去启动(以进程方式）tap-ctl；近而tap-ctrl又启动tapdisk2（同样子进程方式）、而tapdisk2会最终去执行hlfs_init（对hlfs发起connect）。我们知道子进程会自动继承父进程的环境变量，所以问题归咎为xend的环境变量到底是什么呢？（cat /proc/<xend's pid>/environ可以看到xen当前的环境变量）。 如果你的xend是系统启动完毕，且在root环境下设置CLASSPATH，再启动的，那你的CLASSPATH一定OK;但如果xend作为系统服务，当系统boot-up时候会早早的自动启动的（这时还不会去读取/etc/profile ~/.bashrc等文件），如果这样的话，你只有到/etc/init.d/xend脚本里自己手动在加入export CLASSPATH了！（记得加在xend start之前）
+     * 如果xm cr 启动虚拟机，你可能会发现虚拟磁盘挂在失败！ 原因还是环境变量问题。—— xm cr <xxx>命令实际上是委托xend程序去启动(以子进程方式）tap-ctl；近而tap-ctrl又启动tapdisk2（同样子进程方式）、而tapdisk2会最终去执行hlfs_init（对hlfs发起connect）。我们知道子进程会自动继承父进程的环境变量，所以问题归咎为xend的环境变量到底是什么呢？（cat /proc/<xend's pid>/environ可以看到xen当前的环境变量）。 如果你的xend是系统启动完毕，且在root环境下设置CLASSPATH，再启动的，那你的CLASSPATH一定OK;但如果xend作为系统服务，当系统boot-up时候会早早的自动启动的（这时还不会去读取/etc/profile ~/.bashrc等文件），如果这样的话，你只有到/etc/init.d/xend脚本里自己手动在加入“export CLASSPATH=***"了！（记得加在xend start之前）
 }}}
 == HLFS 用作虚拟网盘 == 
   * 编译nbd  

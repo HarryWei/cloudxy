@@ -11,7 +11,7 @@
  * Kelvin <kelvin.xupt@gmail.com>
  * Zhangbo <0311zhangbo@gmail.com>
  * 
- * Mail List : xiyoucloud@googlegroups.com
+ * Mail List : cloudxy@googlegroups.com
  */
 
 #ifndef _HDFS_LFS_H_
@@ -47,12 +47,18 @@ HLFS_CTRL * init_hlfs(const char *uri);
 int deinit_hlfs(HLFS_CTRL *ctrl);
 
 /*
- * hlfs_stat:
+ * hlfs_stat: Fill the structure stat
+ * @param ctrl: The global control structure.
+ * @param stat: The structure will be filled.
+ * @return value: 0 on success, else -1.
  */
 int hlfs_stat  (HLFS_CTRL *ctrl,HLFS_STAT_T *stat);
 
 /*
- * hlfs_lstat:
+ * hlfs_lstat: Fill the structure stat without initialize HLFS.
+ * @param uri: Location of HLFS.
+ * @param flag: 0 readonly; 1 writable.
+ * @return value: Return 0 on success,else return -1.
  */
 int hlfs_lstat (const char*uri,HLFS_STAT_T *stat);
 

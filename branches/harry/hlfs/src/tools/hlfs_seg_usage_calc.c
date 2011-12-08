@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
     g_message("uri is :%s",uri);
     //g_message("fsname   is :%s",fsname);
 
-
     struct back_storage *storage = init_storage_handler(uri);
     if(NULL ==storage){
        g_message("can not get storage handler for uri:%s",uri);
@@ -68,16 +67,16 @@ int main(int argc, char *argv[])
         SEGMENT_SIZE_SHIFT++;
     }
 #endif
-    struct inode * latest_inode = load_latest_inode(storage); 
+    struct inode *latest_inode = load_latest_inode(storage); 
     g_message("latest inode's timestamp :%llu",latest_inode->ctime);
     int num_entries;
-    bs_file_info_t * infos = storage->bs_file_list_dir(storage,".",&num_entries);
+    bs_file_info_t *infos = storage->bs_file_list_dir(storage,".",&num_entries);
     if(infos == NULL){
        g_message("can not get fs:%s seg entries",storage->uri);
        return -1;
     }
     g_message("there are %d files",num_entries);
-    bs_file_info_t * info = infos;
+    bs_file_info_t *info = infos;
     int i;
     GHashTable *seg_usage_hashtable = g_hash_table_new_full(g_direct_hash,g_direct_equal,NULL,NULL);//TODO
     ret = load_all_segment_usage(storage,SEGMENTS_USAGE_FILE,SEGMENTS_DEL_FILE,seg_usage_hashtable);
@@ -105,7 +104,10 @@ int main(int argc, char *argv[])
            if(tmp == NULL){
                 g_message("can not find seg:%u in segment usage file",segno);
                 seg_usage = (struct segment_usage*)g_malloc0(sizeof(struct segment_usage));
-                memset(seg_usage,0,sizeof(struct segment_usage));
+				if (NULL == seg_usage) {
+					g_message("allocate error!");
+					return -1;
+				}
 #if 0
     	        gchar * segusage_file = g_strconcat(info->name,".usage",NULL);
                 dump_segment_usage(storage,segusage_file,&seg_usage);

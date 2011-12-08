@@ -297,15 +297,12 @@ int segment_usage_calc(struct back_storage* storage, const char *segfile,
         HLOG_ERROR("open segfile:%s failed",segfile);
         return -1;
     } 
-    tmp_bit_array = g_array_new(FALSE,FALSE,sizeof(gint));
-
-   
-    char *tmp_buf = (char*)g_malloc0(SEGMENT_SIZE); /*  suppose segment size < 64M */
+    tmp_bit_array = g_array_new(FALSE,FALSE,sizeof(gint));   
+    char *tmp_buf = (char*)g_malloc0(SEGMENT_SIZE); /*suppose segment size < 64M */
     int count =storage->bs_file_pread(storage,file,tmp_buf,SEGMENT_SIZE,0);
     if(count<0){
         HLOG_ERROR("read content failed");
     }
-
     while(offset < count){
 #if 0
         ret=storage->bs_file_pread(storage,file, (char*)&lh, LOG_HEADER_LENGTH, offset) ;//TODO read 64M once
@@ -354,7 +351,6 @@ int segment_usage_calc(struct back_storage* storage, const char *segfile,
 			    	lh->start_db_no+i,db_mine_storage_addr,db_cur_storage_addr);
             if(db_mine_storage_addr != db_cur_storage_addr){
                 HLOG_DEBUG("this is overwrite data block");
-
             }else{
                 seg_usage->alive_blocks++;
                 HLOG_DEBUG("this is used data block :%llu",seg_usage->alive_blocks);
@@ -376,8 +372,7 @@ int segment_usage_calc(struct back_storage* storage, const char *segfile,
         offset += lh->log_size;
         log_idx++;    
     }
-
-    int i;
+    int i = 0;
     seg_usage->log_num = tmp_bit_array->len;
     g_free(seg_usage->bitmap);
     seg_usage->bitmap = (char*)g_malloc0((seg_usage->log_num-1)/8+1);
@@ -391,7 +386,6 @@ int segment_usage_calc(struct back_storage* storage, const char *segfile,
            //g_message("bitmap idx %x\n",seg_usage->bitmap[idx]);
        }
     }
-
     g_array_free(tmp_bit_array,TRUE);
 	HLOG_DEBUG("leave func %s",__func__);
     return 0;

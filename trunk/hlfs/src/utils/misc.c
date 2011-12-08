@@ -152,11 +152,17 @@ int parse_from_uri(const char *uri, char ** head, char** hostname ,char** dir,ch
         v2 = g_strsplit(v1[0],":",2);
         if(g_strv_length(v2)!=2){
            *hostname = g_strdup(v1[0]);
-           *dir = g_strdup(v1[1]);
+		   char _dir[128];
+		   memset(_dir, 0, 128);
+		   sprintf(_dir, "%s%s", "/", v1[1]);
+           *dir = g_strdup(_dir);
            *port = 8020;
         }else{
            *hostname = g_strdup(v2[0]);
-           *dir = g_strdup(v1[1]);
+		   char _dir[128];
+		   memset(_dir, 0, 128);
+		   sprintf(_dir, "%s%s", "/", v1[1]);
+           *dir = g_strdup(_dir);
            *port = atoi(v2[1]);
         }
     }

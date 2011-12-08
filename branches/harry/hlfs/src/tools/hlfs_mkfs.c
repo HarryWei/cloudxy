@@ -6,14 +6,12 @@
 #include "hlfs_log.h"
 
 static gchar *uri = NULL;
-//static gchar *fsname = NULL;
 static gint block_size = 0;
 static gint seg_size = 0;
 static gint max_fs_size = 0;
 static gboolean verbose = FALSE;
 static GOptionEntry entries[] = {
 	    {"filesystem location",'u', 0, G_OPTION_ARG_STRING,   &uri, "filesystem storage uri", "FSLOC"},
-   //	{"filesystme name", 'f', 0, G_OPTION_ARG_FILENAME, &fsname, "filesystem name", "NAME"},
     	{"filesystem block size", 'b', 0, G_OPTION_ARG_INT, &block_size, "filesystem block size", "BLOCKSIZE"},
     	{"filesystem segment size", 's', 0, G_OPTION_ARG_INT, &seg_size, "filesystem segment size", "SEGSIZE"},
     	{"filesystem max size", 'm', 0, G_OPTION_ARG_INT, &max_fs_size, "filesystem  max size(M)", "FS MAX SIZE"},
@@ -34,7 +32,7 @@ error_func(GOptionContext *context, GOptionGroup *group,
 }
 
 /*  mkfs.lhfs -l local://<path> -f name */
-/*  mkfs.lhfs -l http://<path>  -s name */
+/*  mkfs.lhfs -l hdfs://<path>  -s name */
 int main(int argc, char *argv[])
 {
 	if (log4c_init()) {
@@ -51,13 +49,6 @@ int main(int argc, char *argv[])
         g_message("option parsing failed: %s", error->message);
         exit(EXIT_FAILURE);
     }
-
-    //g_print("location is :%s\n",location);
-    //g_print("fsname   is :%s\n",fsname);
-    //g_print("block size   is :%d\n",block_size);
-    //g_print("segment size   is :%d\n",seg_size);
-
-//  seg_size = SEGMENT_SIZE;
     if(seg_size <= 0 ||  seg_size%(1024*1024)!=0){
        g_message("segsize <=0 or segment size must 1M margin");
        return -1;
@@ -76,14 +67,12 @@ int main(int argc, char *argv[])
        g_option_context_free(context);
        return -1;
     }
-
     if( 0!=storage->bs_file_mkdir(storage,NULL)){
         g_message("can not mkdir for our fs %s",uri);
         g_option_context_free(context);
         return -1;
     }
-
-    GKeyFile *  sb_keyfile= g_key_file_new();
+    GKeyFile *sb_keyfile= g_key_file_new();
     g_key_file_set_string(sb_keyfile,"METADATA","uri",uri);
     g_key_file_set_integer(sb_keyfile,"METADATA","block_size",block_size);
     g_key_file_set_integer(sb_keyfile,"METADATA","segment_size",seg_size);
@@ -104,7 +93,6 @@ int main(int argc, char *argv[])
        g_option_context_free(context);
        return -1;
     }
-
     g_message("sb file path 2%s",sb_file_path);
     int size = storage->bs_file_append(storage,file,(char*)data,strlen(data)+1);
     if(size != strlen(data)+1){

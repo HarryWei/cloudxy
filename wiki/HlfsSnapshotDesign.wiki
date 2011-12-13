@@ -31,7 +31,12 @@
 
 ==关于树形快照的设计==
 http://cloudxy.googlecode.com/svn/wiki/images/tree-snapshot.png
+
+未完，待续 ...........................................................
+
+
 ==API设计==
+ 我们先实现最精简的快照接口
 {{{
  int take_snapshot(HLFS_CTRL *ctrl, const char *ssname)
   给用户提供的在线方式快照接口，用户可以指定快照名

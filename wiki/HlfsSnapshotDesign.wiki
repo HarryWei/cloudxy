@@ -22,7 +22,7 @@
   * 快照的内容：
 当前活跃段中最后一个log中inode_map_entry、时间戳、以及用户定义的快照名。
   * 快照的存储方式：
-HLFS是将HDFS或LOCAL（本地文件系统）的文件用作虚拟磁盘，数据和元数据都是以HDFS或LOCAL文件的形式存在。因而我们将快照存入文件checkpoints.txt。这点请参见HLFS设计。
+HLFS是将HDFS或LOCAL（本地文件系统）的文件用作虚拟磁盘，数据和元数据都是以HDFS或LOCAL文件的形式存在。因而我们将快照存入文件 checkpoints.txt。这点请参见HLFS设计。
 
 ==API设计==
   * int take_snapshot(HLFS_CTRL `*`ctrl, const char `*`ssname)

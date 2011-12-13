@@ -20,7 +20,7 @@
   * ctrl: 全局控制结构体
   * ssname: 用户指定的快照名
   * return value: 成功返回0，失败返回<0
-  # int rm_snapshot(const char *uri, const char *ssname)
+  int rm_snapshot(const char *uri, const char *ssname)
     用户可以通过这个接口来删除指定名字的快照。
   * uri: 文件系统的位置 
   * ssname: 用户指定的快照名

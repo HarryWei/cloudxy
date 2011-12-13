@@ -1,5 +1,5 @@
 #summary HLFS快照设计.
-=HLFS snapshot design =                                     
+=HLFS snapshot design=                                     
 
 ==主要概念说明==
   *为什么需要快照

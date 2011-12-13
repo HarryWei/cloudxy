@@ -20,6 +20,7 @@
 ==We are doing==
 
 添加快照功能：http://code.google.com/p/cloudxy/wiki/HlfsSnapshotDesign
+
 如果你感兴趣，请发邮件到cloudxy@googlegroups.com
 
 

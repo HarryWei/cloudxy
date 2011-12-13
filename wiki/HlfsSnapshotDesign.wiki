@@ -28,16 +28,14 @@ HLFS是将HDFS或LOCAL（本地文件系统）的文件用作虚拟磁盘，数�
   # uri: 文件系统的位置 
   # ssname: 用户指定的快照名
   # return value: 成功返回0，失败返回-1
-  * struct inode `*`find_inode_before_time(const char `*`uri, uint64_t time, struct inode `*`inode)
+  * struct inode `*`find_inode_before_time(const char `*`uri, uint64_t time)
 用户可以通过这个接口来获取timestamp之前的inode结构体。
   # uri: 文件系统的位置 
   # time: 用户指定的时间
-  # inode: 获得的inode将存放在这里
   # return value: 成功返回inode结构体地址，失败返回NULL
-  * struct inode `*`find_inode_by_name(const char `*`uri, struct inode `*`inode, const char `*`ssname)
+  * struct inode `*`find_inode_by_name(const char `*`uri, const char `*`ssname)
 用户可以通过这个接口来获取指定名字的快照记录的inode结构体。
   # uri: 文件系统的位置 
-  # inode: 获得的inode将存放在这里
   # ssname: 用户指定的快照名
   # return value: 成功返回inode结构体地址，失败返回NULL
   * int get_inode_info(const char `*`uri, struct inode `*`inode, uint64_t `*`creat_time, uint64_t `*`length)

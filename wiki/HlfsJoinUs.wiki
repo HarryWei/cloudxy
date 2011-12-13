@@ -17,6 +17,10 @@
 ==其他问题==
     如果你还有其他问题，你可以随时发邮件到cloudxy@googlegroups.com,kanghua151@gmail.com或者harryxiyou@gmail.com我们将会在24小时之内给你回复的,谢谢。
 
+==We are doing==
+
+添加快照功能：http://code.google.com/p/cloudxy/wiki/HlfsSnapshotDesign
+如果你感兴趣，请发邮件到cloudxy@googlegroups.com
+
+
 -- 贾威威 2011.12.1
-
-

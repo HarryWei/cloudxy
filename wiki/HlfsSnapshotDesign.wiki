@@ -26,7 +26,7 @@
   * ssname: 用户指定的快照名
   * return value: 成功返回0，失败返回<0
  int find_inode_before_time(const char *uri, uint64_t time,uint64_t* inode_addr)
-  用户可以通过这个接口来获取timestamp之前的inode存储地址。
+  用户可以通过这个接口来获取timestamp之前的inode存储地址
   * uri: 文件系统的位置 
   * time: 用户指定的时间
   * inode_addr 返回inode存储地址。

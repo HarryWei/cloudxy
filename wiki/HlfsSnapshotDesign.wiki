@@ -31,7 +31,7 @@
   * time: 用户指定的时间
   * inode_addr 返回inode存储地址。
   * return value: 成功返回0,失败返回<0
- int`find_inode_by_name(const char *uri, const char *ssname,uint64_t* inode_addr)
+ int find_inode_by_name(const char *uri, const char *ssname,uint64_t* inode_addr)
   用户可以通过这个接口来获取指定名字的快照记录的inode存储地址
   * uri: 文件系统的位置 
   * ssname: 用户指定的快照名

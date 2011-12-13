@@ -30,7 +30,7 @@
  _退化的区间回收算法（不move + revmode)+时间超期限制(过期则必然回收，即便有快照)_
 
 ==关于树形快照的设计==
-http://cloudxy.googlecode.com/svn/wiki/images/tree-snapshop.png
+http://cloudxy.googlecode.com/svn/wiki/images/tree-snapshot.png
 ==API设计==
 {{{
  int take_snapshot(HLFS_CTRL *ctrl, const char *ssname)

@@ -74,7 +74,7 @@ http://cloudxy.googlecode.com/svn/wiki/images/tree-snapshot.png
   * inode: 指定的inode
   * flag: 0 只读模式， 1 可写模式
   * return value: 成功返回0，失败返回<0
- int list_all_snapshot(const char *uri，char* ss_name_array)
+ int list_all_snapshot(const char *uri，char **ss_name_array)
   给用户列出所有已存在的快照名及时间信息
   * uri: 文件系统的位置 
   * ss_name_arrary: 返回的快照名字列表

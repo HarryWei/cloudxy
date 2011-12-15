@@ -33,6 +33,6 @@ SET(LIBS glib-2.0
          hlfs
 	     log4c)
 
-SET(TESTSRC test.c)
+SET(TESTSRC lectures/g_option.c)
 ADD_EXECUTABLE(test ${TESTSRC})
 TARGET_LINK_LIBRARIES(test ${LIBS})

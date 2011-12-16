@@ -37,3 +37,16 @@ int list_all_snapshot(const char *uri, char *ss_name_array)
 	}
 	return 0;
 }
+
+int find_inode_before_time(const char *uri, uint64_t timestamp, uint64_t *inode_addr)
+{
+	struct back_storage *storage = init_storage_handler(uri);
+	// seg_info has two paras. 1, segno 2, time: the last inode's mtime
+	struct seg_info *infos = get_last_inode_time_in_segs(storage);
+	// sort infos in the light of time
+	sort(storage, infos);
+	// binary-search find the seg
+	find(infos, timestamp);
+	// find the inode_addr in the seg
+	get_inode_addr_by_time(storage, timestamp, info->segno, inode_addr);
+}

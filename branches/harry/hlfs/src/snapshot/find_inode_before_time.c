@@ -67,7 +67,7 @@ int find_inode_before_time(const char *uri, uint64_t timestamp, uint64_t *inode_
 	int tmp_time = 0;
 	for (i = 0; i < num_entries; i++) {
 		if (g_str_has_suffix(info->name, "seg")) {
-			if (info->lmtime >= timestamp && timestamp >= tmp_time) {
+			if (info->lmtime > timestamp && timestamp >= tmp_time) {
 				int ret = get_inode_addr_by_time(storage, timestamp, info->name, inode_addr);
 			}
 			tmp_time = info->lmtime;
@@ -76,4 +76,3 @@ int find_inode_before_time(const char *uri, uint64_t timestamp, uint64_t *inode_
 	}
 	return ret;
 }
-

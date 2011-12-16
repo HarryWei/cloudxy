@@ -80,7 +80,7 @@ int rm_snapshot(const char *uri, const char *ssname)
 {
 	struct back_storage *storage = init_storage_handler(uri);
 	char *tmp_buf = get_all_cp_contents(storage, CHECKPOINT_FILE);
-	// Find the ssname, and change the status value to 1.
+	// Find the ssname (Hashtable), and change the status value to 1.
 	rm_by_ssname(tmp_buf, ssname);
 	dump_cpfile(storage, tmp_buf);
 	return 0;
@@ -90,6 +90,7 @@ int find_inode_by_name(const char *uri, const char *ssname, uint64_t *inode_addr
 {
 	struct back_storage *storage = init_storage_handler(uri);
 	char *tmp_buf = get_all_cp_contents(storage, CHECKPOINT_FILE);
+	// We can use hash table to find it, O(1).
 	find_inode_addr(tmp_buf, ssname, inode_addr);
 	return 0;
 }

@@ -1,3 +1,17 @@
+#define CHECKPOINT_FILE		"checkpoint.txt"
+
+struct checkpoint {
+	uint64_t timestamp;		// cp create time
+	uint64_t inode_addr;	// inode's addr
+	char sname[79];			// cp name
+	char status;			// cp status: 0 is in use. 1 is removed.
+};
+
+struct seg_info {
+	uint32_t segno;			// segment number
+	uint32_t time;			// the mtime in the last inode of segno.
+};
+
 int get_inode_info(const char *uri, uint64_t inode_addr, uint64_t *create_time, uint64_t *length)
 {
 	storage = init_storage_handler(uri);
@@ -49,4 +63,33 @@ int find_inode_before_time(const char *uri, uint64_t timestamp, uint64_t *inode_
 	find(infos, timestamp);
 	// find the inode_addr in the seg
 	get_inode_addr_by_time(storage, timestamp, info->segno, inode_addr);
+}
+
+int take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
+{ // This api has been done
+	struct inode *cur_inode = load_latest_inode(ctrl->storage);
+	struct checkpoint *cp = g_malloc0(sizeof(struct checkpoint));
+	g_strlcpy(cp->name, ssname, SNAME_LEN);
+	cp->inode_addr = get_last_inode_storage_addr_in_seg(ctrl->storage, ctrl->last_segno);
+	cp_2text(cp, cptext);
+	dump_snapshot_text(ctrl, cptext, CHECKPOINT_FILE);
+	return 0;
+}
+
+int rm_snapshot(const char *uri, const char *ssname)
+{
+	struct back_storage *storage = init_storage_handler(uri);
+	char *tmp_buf = get_all_cp_contents(storage, CHECKPOINT_FILE);
+	// Find the ssname, and change the status value to 1.
+	rm_by_ssname(tmp_buf, ssname);
+	dump_cpfile(storage, tmp_buf);
+	return 0;
+}
+
+int find_inode_by_name(const char *uri, const char *ssname, uint64_t *inode_addr)
+{
+	struct back_storage *storage = init_storage_handler(uri);
+	char *tmp_buf = get_all_cp_contents(storage, CHECKPOINT_FILE);
+	find_inode_addr(tmp_buf, ssname, inode_addr);
+	return 0;
 }

@@ -47,6 +47,7 @@ AUX_SOURCE_DIRECTORY(common  LHFSSRCS)
 AUX_SOURCE_DIRECTORY(backend LHFSSRCS)
 AUX_SOURCE_DIRECTORY(clean LHFSSRCS)
 AUX_SOURCE_DIRECTORY(utils LHFSSRCS)
+AUX_SOURCE_DIRECTORY(snapshot LHFSSRCS)
 
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 	SET(LIBRARY_OUTPUT_PATH ${WORK_HOME}/output/lib32)
@@ -67,7 +68,7 @@ SET(LHFLIBS   glib-2.0
               gthread-2.0 
               rt
 	          hdfs
-		  log4c
+			  log4c
      	      jvm)
 
 ADD_LIBRARY(hlfs SHARED ${LHFSSRCS})

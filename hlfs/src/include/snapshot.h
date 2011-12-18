@@ -1,5 +1,5 @@
-#ifndef _HLFS_CHECKPOINT_H_
-#define _HLFS_CHECKPOINT_H_
+#ifndef _HLFS_SNAPSHOT_H_
+#define _HLFS_SNAPSHOT_H_
 
 #include <stdio.h>
 #include <stdint.h>
@@ -43,7 +43,9 @@ int load_ss_by_name(struct back_storage *storage, struct snapshot *snapshot, \
 
 /*Load all structure snapshot to a Hash table from the snapshot.txt*/
 int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable);
+
 #ifdef __cplusplus
 }
 #endif
+
 #endif

@@ -24,5 +24,8 @@ SET(LIBS glib-2.0
 	     log4c)
 
 SET(TESTSRC append_ss_delmark_test.c)
-ADD_EXECUTABLE(test ${TESTSRC})
-TARGET_LINK_LIBRARIES(test ${LIBS})
+ADD_EXECUTABLE(asdtest ${TESTSRC})
+TARGET_LINK_LIBRARIES(asdtest ${LIBS})
+
+ADD_EXECUTABLE(ss2texttest ss2text_test.c)
+TARGET_LINK_LIBRARIES(ss2texttest ${LIBS})

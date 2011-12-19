@@ -29,6 +29,7 @@ int append_ss_delmark(struct back_storage *storage, const char *ss_name);
 int ss2text(struct snapshot *ss, char *buf);
 
 /*Append the character string matching a snapshot structure to the snapshot.txt*/
+/*the buf size should be (sizeof(struct snapshot) * 2 )*/
 int dump_ss_text(struct back_storage *storage, const char *buf);
 
 /*Append the snapshot structure to the file snapshot.txt*/

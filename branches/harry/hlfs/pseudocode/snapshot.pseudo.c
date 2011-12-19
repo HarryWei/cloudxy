@@ -1,10 +1,9 @@
-#define CHECKPOINT_FILE		"checkpoint.txt"
+#define SNAPSHOT_FILE		"SNAPSHOT.txt"
 
-struct checkpoint {
+struct snapshot {
 	uint64_t timestamp;		// cp create time
 	uint64_t inode_addr;	// inode's addr
 	char sname[79];			// cp name
-	char status;			// cp status: 0 is in use. 1 is removed.
 };
 
 struct seg_info {

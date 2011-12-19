@@ -16,17 +16,18 @@ int dump_ss_delmark(struct back_storage *storage, const char *ss_name)
 
 /*if delmark file is not exist, create it*/
 	if (-1 == storage->bs_file_is_exist(storage, file_name)) {
-		g_message("ss_delmark.txt is not exist...\ncreat it\n");
+		g_message("ss_delmark.txt is not exist...creat it now\n");
 		file = storage->bs_file_create(storage, file_name);
 		if (file == NULL) {
 			HLOG_ERROR("Create ss_delmark.txt failed");
+			g_message("Create ss_delmark.txt failed");
 			g_free(buf);
 			return -1;
 		}
 		storage->bs_file_close(storage, file);
 	}
 
-	file == storage->bs_file_open(storage, file_name, BS_WRITEABLE);
+	file = storage->bs_file_open(storage, file_name, BS_WRITEABLE);
 	if (file == NULL) {
 		HLOG_ERROR("Open ss_delmark.txt failed");
 		g_message("Open ss_delmark.text failed");
@@ -49,5 +50,6 @@ int dump_ss_delmark(struct back_storage *storage, const char *ss_name)
 	
 	storage->bs_file_close(storage, file);
 	g_free(buf);
+	HLOG_DEBUG("leave func %s successfully", __func__);
 	return 0;
 }

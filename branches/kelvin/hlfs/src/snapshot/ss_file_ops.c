@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <string.h>
 #include "snapshot.h"
 #include "hlfs_log.h"
 
@@ -54,3 +56,13 @@ int append_ss_delmark(struct back_storage *storage, const char *ss_name)
 	return 0;
 }
 
+int ss2text(struct snapshot *ss, char *buf)
+{
+	HLOG_DEBUG("enter func %s", __func__);
+	memset(buf, 0, sizeof(*buf));
+	sprintf(buf, "%llu\n%s\n%s\n%llu\n%llu\n", ss->version, \
+			ss->ss_name, ss->up_ss_name, ss->ime.inode_no, \
+			ss->ime.inode_addr);
+	HLOG_DEBUG("leave func %s", __func__);
+	return 0;
+}

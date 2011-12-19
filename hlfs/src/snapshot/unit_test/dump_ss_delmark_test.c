@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	bs_file_t file = NULL;
 	char *file_name = g_build_filename("/tmp/testenv/testfs", SS_DEL_FILE, NULL);
 	g_message("path: %s", file_name);
-	file == storage->bs_file_open(storage, SS_DEL_FILE, BS_READONLY);
+	file = storage->bs_file_open(storage, SS_DEL_FILE, BS_READONLY);
 	if (file == NULL) {
 		g_message("Open file error-%m");
 		return -1;

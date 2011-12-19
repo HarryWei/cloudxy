@@ -72,7 +72,7 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 	cp->inode_addr = get_last_inode_storage_addr_in_seg(ctrl->storage, ctrl->last_segno);
 	char cptext[sizeof(struct checkpoint) * 2];
 	uint32_t len = cp_2text(cp, cptext);
-	int ret = dump_snapshot_text(ctrl, cptext, SNAPSHOT_FILE);
+	int ret = dump_snapshot_text(ctrl, cptext, CHECKPOINT_FILE);
 	g_free(cp);
 	g_free(cur_inode);
 	return ret;

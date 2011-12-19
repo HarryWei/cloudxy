@@ -9,7 +9,7 @@ SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(HLFS)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-SET(WORK_HOME   $ENV{PWD}/../)
+SET(WORK_HOME   $ENV{PWD}/..)
 MESSAGE(STATUS "This is dir " ${WORK_HOME})
 #SET(WORK_HOME   /home/kanghua/workshop2/trunk/hlfs)
 # include these files for building.

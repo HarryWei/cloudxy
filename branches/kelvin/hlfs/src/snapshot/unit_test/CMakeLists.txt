@@ -23,6 +23,6 @@ SET(LIBS glib-2.0
          hlfs
 	     log4c)
 
-SET(TESTSRC dump_ss_delmark_test.c)
+SET(TESTSRC append_ss_delmark_test.c)
 ADD_EXECUTABLE(test ${TESTSRC})
 TARGET_LINK_LIBRARIES(test ${LIBS})

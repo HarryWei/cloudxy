@@ -1,7 +1,7 @@
 #include "snapshot.h"
 #include "hlfs_log.h"
 
-int dump_ss_delmark(struct back_storage *storage, const char *ss_name)
+int append_ss_delmark(struct back_storage *storage, const char *ss_name)
 {
 	int ret = 0;
 	char *file_name = SS_DEL_FILE;
@@ -53,3 +53,4 @@ int dump_ss_delmark(struct back_storage *storage, const char *ss_name)
 	HLOG_DEBUG("leave func %s successfully", __func__);
 	return 0;
 }
+

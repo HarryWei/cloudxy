@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 /*Append the will-be deleted snapshot's ss_name to the ss_delmark.txt*/
-int dump_ss_delmark(struct back_storage *storage, const char *ss_name);
+int append_ss_delmark(struct back_storage *storage, const char *ss_name);
 
 /*Change the format of the structure snapshot to a character string*/
 int ss2text(struct snapshot *ss, char *buf);

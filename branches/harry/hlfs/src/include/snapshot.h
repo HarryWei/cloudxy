@@ -5,8 +5,9 @@
 #include <hlfs_ctrl.h>
 #include <stdio.h>
 
-#define SNAPSHOT_FILE 		"snapshot.txt"
-#define SNAME_LEN				(79)
+#define SNAPSHOT_USAGE_FILE 		"snapshot_usage.txt"
+#define SNAPSHOT_DEL_FILE 			"snapshot_delmark.txt"
+#define SNAME_LEN					(79)
 
 struct snapshot {
 	uint64_t timestamp;

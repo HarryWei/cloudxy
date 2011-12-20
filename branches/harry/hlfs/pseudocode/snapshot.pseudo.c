@@ -65,7 +65,7 @@ int find_inode_before_time(const char *uri, uint64_t timestamp, uint64_t *inode_
 }
 
 int take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
-{ // This api has been done
+{ // This api has been done, and is ok for me (tested)
 	struct inode *cur_inode = load_latest_inode(ctrl->storage);
 	struct checkpoint *cp = g_malloc0(sizeof(struct checkpoint));
 	g_strlcpy(cp->name, ssname, SNAME_LEN);
@@ -78,10 +78,11 @@ int take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 int rm_snapshot(const char *uri, const char *ssname)
 {
 	struct back_storage *storage = init_storage_handler(uri);
-	char *tmp_buf = get_all_cp_contents(storage, CHECKPOINT_FILE);
+	//char *tmp_buf = get_all_cp_contents(storage, CHECKPOINT_FILE);
 	// Find the ssname (Hashtable), and change the status value to 1.
-	rm_by_ssname(tmp_buf, ssname);
-	dump_cpfile(storage, tmp_buf);
+	//rm_by_ssname(tmp_buf, ssname);
+	snapshot_delmark2text(ssname, tmp_buf);
+	dump_delfile(storage, tmp_buf);
 	return 0;
 }
 

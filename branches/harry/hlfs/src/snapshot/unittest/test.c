@@ -78,15 +78,36 @@ int main(int argc, char *argv[]){
         printf("offset:%d\n",offset);
     }
 	// test take snapshot
-	ret = hlfs_take_snapshot(ctrl, "jiawei");
+	ret = hlfs_take_snapshot(ctrl, "jiawei1");
+	if (0 > ret) {
+		g_message("take snapshot error!");
+		exit(-1);
+	}
+	ret = hlfs_take_snapshot(ctrl, "jiawei2");
+	if (0 > ret) {
+		g_message("take snapshot error!");
+		exit(-1);
+	}
+	ret = hlfs_take_snapshot(ctrl, "jiawei3");
+	if (0 > ret) {
+		g_message("take snapshot error!");
+		exit(-1);
+	}
+	ret = hlfs_take_snapshot(ctrl, "jiawei4");
 	if (0 > ret) {
 		g_message("take snapshot error!");
 		exit(-1);
 	}
 	// test rm snapshot
-	ret = hlfs_rm_snapshot(uri, "jiawei");
+	ret = hlfs_rm_snapshot(uri, "jiawei1");
 	if (0 > ret) {
 		g_message("take snapshot error!");
+		exit(-1);
+	}
+	char *lists = NULL;
+	ret = hlfs_list_all_snapshots(uri, &lists);
+	if (0 > ret) {
+		g_message("list snapshots error!");
 		exit(-1);
 	}
     ret = hlfs_close(ctrl);

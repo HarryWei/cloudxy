@@ -20,7 +20,7 @@ static int snapshot_delmark2text(const char *ssname, char *deltext) {
 }
 
 int hlfs_rm_snapshot(const char *uri, const char *ssname) {
-	g_message("enter func %s", __func__)
+	g_message("enter func %s", __func__);
 	int ret = 0;
 	char deltext[128];
 	bs_file_t file = NULL;

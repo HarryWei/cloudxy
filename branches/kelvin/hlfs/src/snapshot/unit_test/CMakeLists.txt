@@ -29,3 +29,6 @@ TARGET_LINK_LIBRARIES(asdtest ${LIBS})
 
 ADD_EXECUTABLE(ss2texttest ss2text_test.c)
 TARGET_LINK_LIBRARIES(ss2texttest ${LIBS})
+
+ADD_EXECUTABLE(dump_sstest dump_ss_test.c)
+TARGET_LINK_LIBRARIES(dump_sstest ${LIBS})

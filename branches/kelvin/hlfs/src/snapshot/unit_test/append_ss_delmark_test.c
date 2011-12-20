@@ -12,8 +12,8 @@ int main(int argc, char **argv)
 	}
 	struct back_storage *storage = init_storage_handler(argv[1]);
 	const char *ss_name = SS_NAME;
-	dump_ss_delmark(storage, ss_name);
-	dump_ss_delmark(storage, "snapshot2");
+	append_ss_delmark(storage, ss_name);
+	append_ss_delmark(storage, "snapshot2");
 	char buf[LEN];
 
 	bs_file_t file = NULL;

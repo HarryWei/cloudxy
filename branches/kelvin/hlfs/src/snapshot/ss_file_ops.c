@@ -18,7 +18,7 @@ int append_ss_delmark(struct back_storage *storage, const char *ss_name)
 
 /*if delmark file is not exist, create it*/
 	if (-1 == storage->bs_file_is_exist(storage, file_name)) {
-		g_message("ss_delmark.txt is not exist...creat it now\n");
+		g_message("ss_delmark.txt is not exist...creat it now");
 		file = storage->bs_file_create(storage, file_name);
 		if (file == NULL) {
 			HLOG_ERROR("Create ss_delmark.txt failed");
@@ -65,4 +65,64 @@ int ss2text(struct snapshot *ss, char *buf)
 			ss->ime.inode_addr);
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
+}
+
+int dump_ss_text(struct back_storage *storage, const char *buf)
+{
+	HLOG_DEBUG("enter func %s", __func__);
+	bs_file_t file = NULL;
+	int ret = 0;
+
+	if (-1 == storage->bs_file_is_exist(storage, SS_FILE)) {
+		g_message("snapshot.txt is not exist...creat it now");
+		file = storage->bs_file_create(storage, SS_FILE);
+		if (file == NULL) {
+			HLOG_ERROR("Create snapshot.txt failed");
+			g_message("Create snapshot.txt failed");
+			return -1;
+		}
+		storage->bs_file_close(storage, file);
+	}
+
+	file = storage->bs_file_open(storage, SS_FILE, BS_WRITEABLE);
+
+	if (file == NULL) {
+		HLOG_ERROR("open file snapshot.txt failed");
+		g_message("open file snapshot.txt failed");
+		return -2;
+	}
+#if 0
+	g_message("%s", buf);
+	g_message("%d", strlen(buf));
+#endif
+	
+	if (0 > (ret = storage->bs_file_append(storage, file, buf, strlen(buf)))) {
+		HLOG_ERROR("write seg usage");
+#if 0
+		g_message("write seg error");
+#endif
+		ret = -3;
+		storage->bs_file_close(storage, file);
+		return ret;
+	}
+
+	HLOG_DEBUG("leave func %s", __func__);
+	return ret;
+}
+
+int dump_ss(struct back_storage *storage, struct snapshot *ss)
+{
+	HLOG_DEBUG("enter func %s", __func__);
+	char buf[sizeof(struct snapshot) + 5];
+	int ret = 0;
+	ss2text(ss, buf);
+#if 0
+	g_message("%s", buf);
+#endif
+	if (0 > dump_ss_text(storage, buf)) {
+		HLOG_ERROR("dump_ss_text()error");
+		return -1;
+	}
+	HLOG_DEBUG("leave func %s", __func__);
+	return ret;
 }

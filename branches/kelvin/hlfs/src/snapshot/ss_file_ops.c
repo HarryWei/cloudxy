@@ -60,7 +60,7 @@ int ss2text(struct snapshot *ss, char *buf)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	memset(buf, 0, sizeof(*buf));
-	sprintf(buf, "%llu\n%s\n%s\n%llu\n%llu\n", ss->version, \
+	sprintf(buf, "%llu\n%s\n%s\n%llu\n%llu\n\n", ss->version, \
 			ss->ss_name, ss->up_ss_name, ss->ime.inode_no, \
 			ss->ime.inode_addr);
 	HLOG_DEBUG("leave func %s", __func__);
@@ -113,7 +113,7 @@ int dump_ss_text(struct back_storage *storage, const char *buf)
 int dump_ss(struct back_storage *storage, struct snapshot *ss)
 {
 	HLOG_DEBUG("enter func %s", __func__);
-	char buf[sizeof(struct snapshot) + 5];
+	char buf[sizeof(struct snapshot) + 6];
 	int ret = 0;
 	ss2text(ss, buf);
 #if 0
@@ -125,4 +125,122 @@ int dump_ss(struct back_storage *storage, struct snapshot *ss)
 	}
 	HLOG_DEBUG("leave func %s", __func__);
 	return ret;
+}
+
+int load_ss_from_text(struct snapshot *ss, const char *buf)
+{
+	HLOG_DEBUG("enter func %s", __func__);
+	gchar **v = g_strsplit(buf, "\n", 1024);
+	gchar *_version = v[0];
+	gchar *_ss_name = v[1];
+	gchar *_up_ss_name = v[2];
+	gchar *_ime_inode_no = v[3];
+	gchar *_ime_inode_addr = v[4];
+	
+	char *endptr = NULL;
+	ss->version = strtoull(_version, &endptr, 0);
+	sprintf(ss->ss_name, "%s", _ss_name);
+	sprintf(ss->up_ss_name, "%s", _up_ss_name);
+	ss->ime.inode_no = strtoull(_ime_inode_no, &endptr, 0);
+	ss->ime.inode_addr = strtoull(_ime_inode_addr, &endptr, 0);
+
+	HLOG_DEBUG("ss->version:%llu  ss->ss_name:%s  ss->up_ss_name:%s", \
+			ss->version, ss->ss_name, ss->up_ss_name);
+	HLOG_DEBUG("ss->inode_no:%llu  ss->inode_addr:%llu", ss->ime.inode_no, \
+			ss->ime.inode_addr);
+#if 1
+	g_message("ss->version:%llu  ss->ss_name:%s  ss->up_ss_name:%s", \
+			ss->version, ss->ss_name, ss->up_ss_name);
+	g_message("ss->inode_no:%llu  ss->inode_addr:%llu", ss->ime.inode_no, \
+			ss->ime.inode_addr);
+#endif
+	g_strfreev(v);
+	HLOG_DEBUG("leave func %s", __func__);
+	return 0;
+}
+
+int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
+{
+	HLOG_DEBUG("enter func %s", __func__);
+	int i;
+
+	if (-1 == storage->bs_file_is_exist(storage, SS_FILE)) {
+		HLOG_ERROR("snapshot.txt is not exist");
+		return -1;
+	}
+
+	bs_file_info_t *file_info = storage->bs_file_info(storage, SS_FILE);
+	uint32_t file_size = file_info->size;
+	g_free(file_info);
+	HLOG_DEBUG("file_size : %ld", file_size);
+	char buf[file_size];
+	memset(buf, 0, file_size);
+	int ret = 0;
+
+	bs_file_t file = storage->bs_file_open(storage, SS_FILE, BS_READONLY);
+
+	if (file == NULL) {
+		HLOG_ERROR("open snapshot.txt error");
+		return -2;
+	}
+	
+	ret = storage->bs_file_pread(storage, file, buf, file_size, 0);
+	if (ret < 0) {
+		g_message("Read file snapshot.txt failed\n");
+		HLOG_ERROR("Read file snapshot.txt failed\n");
+		storage->bs_file_close(storage, file);
+		return -3;
+	}
+
+	gchar **sss = g_strsplit(buf, "\n\n", 0);
+	for (i = 0; i < g_strv_length(sss); i++) {
+		struct snapshot *ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
+		load_ss_from_text(ss, sss[i]);
+		g_hash_table_insert(ss_hashtable, ss->ss_name, ss);
+	}
+	g_strfreev(sss);
+	storage->bs_file_close(storage, SS_FILE); 
+
+	bs_file_info_t *file_info1 = storage->bs_file_info(storage, SS_DEL_FILE);
+	file_size = file_info1->size;
+	g_free(file_info1);
+	HLOG_DEBUG("file_size : %ld", file_size);
+	char buf1[file_size];
+	memset(buf1, 0, file_size);
+	file = storage->bs_file_open(storage, SS_DEL_FILE, BS_READONLY);
+	ret = storage->bs_file_pread(storage, file, buf1, file_size, 0);
+	if (ret < 0) {
+		HLOG_ERROR("Read ss_selmark.txt failed\n");
+		storage->bs_file_close(storage, file);
+		return -4;
+	} 
+
+	sss = g_strsplit(buf1, "\n", 0);
+	char *endptr = NULL;
+	for (i = 0; i < g_strv_length(sss); i++) {
+		HLOG_DEBUG("ss %s will be deleted\n", sss[i]);
+		g_hash_table_remove(ss_hashtable, sss[i]);
+	}
+	g_strfreev(sss);
+
+	HLOG_DEBUG("leave func %s", __func__);
+	return 0;
+}
+
+int load_ss_by_name(struct back_storage *storage, struct snapshot *ss,  \
+		const char *ss_name)
+{
+	int ret = 0;
+	GHashTable *ss_hashtable = g_hash_table_new_full(g_direct_hash, \
+			g_direct_equal, NULL, NULL);
+	load_all_ss(storage, ss_hashtable);
+	if (ret < 0) {
+		HLOG_ERROR("load all ss error");
+		return -1;
+	}
+	struct snapshot *_ss = (struct snapshot *)g_hash_table_lookup(ss_hashtable, ss_name);
+	*ss = *_ss;
+	g_free(_ss);
+	g_hash_table_destroy(ss_hashtable);
+	return 0;
 }

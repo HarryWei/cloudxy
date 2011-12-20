@@ -106,7 +106,7 @@ int dump_segment_delmark(struct back_storage* storage,const char* segment_delmar
         g_message("segment usage file not exist, create it");
         file = storage->bs_file_create(storage,segment_delmark_file); 
         if(file==NULL){
-            HLOG_ERROR("can not open segment file %s",segment_delmark_file);
+            HLOG_ERROR("can not create segment del file %s",segment_delmark_file);
             goto out; 
         }
         storage->bs_file_close(storage,file);

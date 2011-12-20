@@ -77,7 +77,14 @@ int main(int argc, char *argv[]){
         offset +=request_size;
         printf("offset:%d\n",offset);
     }
+	// test take snapshot
 	ret = hlfs_take_snapshot(ctrl, "jiawei");
+	if (0 > ret) {
+		g_message("take snapshot error!");
+		exit(-1);
+	}
+	// test rm snapshot
+	ret = hlfs_rm_snapshot(uri, "jiawei");
 	if (0 > ret) {
 		g_message("take snapshot error!");
 		exit(-1);

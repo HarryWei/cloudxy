@@ -35,3 +35,9 @@ TARGET_LINK_LIBRARIES(dump_sstest ${LIBS})
 
 ADD_EXECUTABLE(load_sstest load_ss_test.c)
 TARGET_LINK_LIBRARIES(load_sstest ${LIBS})
+
+ADD_EXECUTABLE(load_ss_from_text load_ss_from_text_test.c)
+TARGET_LINK_LIBRARIES(load_ss_from_text ${LIBS})
+
+ADD_EXECUTABLE(load_all_ss load_all_ss_test.c)
+TARGET_LINK_LIBRARIES(load_all_ss ${LIBS})

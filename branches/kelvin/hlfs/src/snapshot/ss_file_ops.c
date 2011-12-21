@@ -148,7 +148,7 @@ int load_ss_from_text(struct snapshot *ss, const char *buf)
 			ss->version, ss->ss_name, ss->up_ss_name);
 	HLOG_DEBUG("ss->inode_no:%llu  ss->inode_addr:%llu", ss->ime.inode_no, \
 			ss->ime.inode_addr);
-#if 1
+#if 0
 	g_message("ss->version:%llu  ss->ss_name:%s  ss->up_ss_name:%s", \
 			ss->version, ss->ss_name, ss->up_ss_name);
 	g_message("ss->inode_no:%llu  ss->inode_addr:%llu", ss->ime.inode_no, \
@@ -173,6 +173,9 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	uint32_t file_size = file_info->size;
 	g_free(file_info);
 	HLOG_DEBUG("file_size : %ld", file_size);
+#if 0
+	g_message("file_size:%u", file_size);
+#endif
 	char buf[file_size];
 	memset(buf, 0, file_size);
 	int ret = 0;
@@ -191,9 +194,19 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		storage->bs_file_close(storage, file);
 		return -3;
 	}
+#if 0
+	g_message("%s", buf);
+	g_message("finished");
+#endif
 
 	gchar **sss = g_strsplit(buf, "\n\n", 0);
-	for (i = 0; i < g_strv_length(sss); i++) {
+#if 0
+	while (*sss != NULL) {
+		g_message("%s", *sss);
+		*sss++;
+	}
+#endif
+	for (i = 0; i < g_strv_length(sss) - 1; i++) {
 		struct snapshot *ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
 		load_ss_from_text(ss, sss[i]);
 		g_hash_table_insert(ss_hashtable, ss->ss_name, ss);
@@ -211,17 +224,41 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	ret = storage->bs_file_pread(storage, file, buf1, file_size, 0);
 	if (ret < 0) {
 		HLOG_ERROR("Read ss_selmark.txt failed\n");
+#if 0
+		g_message("Cann't run to here");
+#endif
 		storage->bs_file_close(storage, file);
 		return -4;
 	} 
 
-	sss = g_strsplit(buf1, "\n", 0);
-	char *endptr = NULL;
-	for (i = 0; i < g_strv_length(sss); i++) {
-		HLOG_DEBUG("ss %s will be deleted\n", sss[i]);
-		g_hash_table_remove(ss_hashtable, sss[i]);
+#if 0
+	g_message("%s\n", buf1);
+#endif
+
+	gchar **sss1 = g_strsplit(buf1, "\n", 0);
+	gchar **s = sss1;
+
+#if 0
+	while (*s != NULL) {
+		printf("%s\n", *s);
+		*s++;
 	}
-	g_strfreev(sss);
+#endif
+	char *endptr = NULL;
+	for (i = 0; i < g_strv_length(sss1) - 1; i++) {
+		HLOG_DEBUG("ss %s will be deleted", sss1[i]);
+#if 1
+		g_message("%s will be deleted", sss1[i]);
+#endif
+		if (FALSE == g_hash_table_remove(ss_hashtable, sss1[i])) {
+			HLOG_DEBUG("remove table item false");
+#if 1
+			g_message("remove table item false");
+#endif 
+			return -5;
+		}
+	}
+	g_strfreev(sss1);
 
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;

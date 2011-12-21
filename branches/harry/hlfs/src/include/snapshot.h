@@ -15,4 +15,9 @@ struct snapshot {
 	char sname[SNAME_LEN];
 } __attribute__((packed));
 
+struct seg_info {
+	uint32_t segno;
+	uint64_t lmtime;
+} __attribute__((packed));
+
 #endif

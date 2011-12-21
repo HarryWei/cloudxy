@@ -11,7 +11,7 @@
 #include "storage.h"
 #include "storage_helper.h"
 
-static int get_inode_addr_by_time(struct back_storage *storage, 
+static int get_inode_addr_in_seg(struct back_storage *storage, 
 									uint64_t timestamp,
 									const char *segfile,
 									uint64_t *inode_addr)
@@ -65,14 +65,30 @@ int find_inode_before_time(const char *uri, uint64_t timestamp, uint64_t *inode_
 	bs_file_info_t *info = infos;
 	int i = 0;
 	int tmp_time = 0;
+	int count = 0;
 	for (i = 0; i < num_entries; i++) {
 		if (g_str_has_suffix(info->name, "seg")) {
+#if 0
 			if (info->lmtime > timestamp && timestamp >= tmp_time) {
 				int ret = get_inode_addr_by_time(storage, timestamp, info->name, inode_addr);
 			}
 			tmp_time = info->lmtime;
 			info += 1;
+#endif
+			count += 1;
 		}
 	}
+	struct seg_info *seg_infos = (struct seg_info *)g_malloc0(sizeof(struct seg_info) * count);
+	if (NULL == seg_infos) {
+		g_message("allocate seg_info error!");
+		return -1;
+	}
+	get_last_inode_info_in_segs(storage, infos, seg_infos, num_entries, count);
+	sort_segs_with_time(seg_infos, count);
+	int segno = 0;
+	find_seg_with_timestamp(seg_infos, timestamp, &segno);
+	char segfile[128];
+	sprintf(segfile, "%d%s%s", segno, ".", "seg");
+	get_inode_addr_in_seg(storage, timestamp, segfile, inode_addr);
 	return ret;
 }

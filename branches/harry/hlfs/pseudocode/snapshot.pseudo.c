@@ -35,7 +35,7 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, int flag)
 }
 
 int list_all_snapshot(const char *uri, char *ss_name_array)
-{
+{ // This api has been done, and is ok for me (tested)
 	storage = init_storage_handler(uri);
 	//open the cp.txt file
 	bs_file_t file = storage->open(storage, CHECKPOINT_FILE, BS_READONLY);
@@ -76,7 +76,7 @@ int take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 }
 
 int rm_snapshot(const char *uri, const char *ssname)
-{
+{ // This api has been done, and is ok for me (tested)
 	struct back_storage *storage = init_storage_handler(uri);
 	//char *tmp_buf = get_all_cp_contents(storage, CHECKPOINT_FILE);
 	// Find the ssname (Hashtable), and change the status value to 1.
@@ -87,7 +87,7 @@ int rm_snapshot(const char *uri, const char *ssname)
 }
 
 int find_inode_by_name(const char *uri, const char *ssname, uint64_t *inode_addr)
-{
+{ // This api has been done, and is ok for me (tested)
 	struct back_storage *storage = init_storage_handler(uri);
 	char *tmp_buf = get_all_cp_contents(storage, CHECKPOINT_FILE);
 	// We can use hash table to find it, O(1).

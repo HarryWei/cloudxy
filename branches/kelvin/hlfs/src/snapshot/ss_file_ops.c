@@ -170,7 +170,8 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	}
 
 	bs_file_info_t *file_info = storage->bs_file_info(storage, SS_FILE);
-	uint32_t file_size = file_info->size; g_free(file_info);
+	uint32_t file_size = file_info->size; 
+	g_free(file_info);
 	HLOG_DEBUG("file_size : %ld", file_size);
 #if 0
 	g_message("file_size:%u", file_size);

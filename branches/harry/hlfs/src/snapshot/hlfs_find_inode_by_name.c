@@ -1,5 +1,5 @@
 /*
- *  src/snapshot/hlfs_list_all_snapshots.c
+ *  src/snapshot/hlfs_find_inode_by_name.c
  *
  *  Harry Wei <harryxiyou@gmail.com> (C) 2011
  */
@@ -21,7 +21,7 @@ static int snapshot_delmark2text(const char *ssname, char *deltext) {
 }
 #endif
 
-int hlfs_list_all_snapshots(const char *uri, char **ssname) {
+int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_addr) {
 	g_message("enter func %s", __func__);
 	int ret = 0;
 	int i = 0;
@@ -68,12 +68,19 @@ int hlfs_list_all_snapshots(const char *uri, char **ssname) {
 	gchar textbuf[SNAME_LEN];
 	memset(textbuf, 0, SNAME_LEN);
 	v = g_strsplit(tmp_buf, "\n", 0);
-	*ssname = (char *)g_malloc0(sizeof(char) * info->size);
+//	*ssname = (char *)g_malloc0(sizeof(char) * info->size);
+	char *endptr = NULL;
+	int flag = 0;
 	for (i = 0; i < g_strv_length(v) - 1; i++) {
 		v1 = g_strsplit(v[i], " ", 3);
 		g_message("ssname is %s", v1[2]);
-		sprintf(textbuf, "%s ", v1[2]);
-		g_strlcat(*ssname, textbuf, info->size);
+		if (0 == g_strcmp0(sname, v1[2])) {
+			*inode_addr = strtoull(v1[1], &endptr, 0);
+			flag = 1;
+			break;
+		}
+//		sprintf(textbuf, "%s ", v1[2]);
+//		g_strlcat(*ssname, textbuf, info->size);
 	}
 out:
 	if (NULL != file) {
@@ -81,5 +88,10 @@ out:
 	}
 	g_strfreev(v);
 	g_strfreev(v1);
+	if (0 == flag) {
+		g_message("There is no your wanted ssname's inode addr");
+		ret = -1;
+	}
+	g_message("found inode_addr is %llu", *inode_addr);
 	return ret;
 }

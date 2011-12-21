@@ -110,6 +110,13 @@ int main(int argc, char *argv[]){
 		g_message("list snapshots error!");
 		exit(-1);
 	}
+	uint64_t inode_addr = 0;
+	ret = hlfs_find_inode_by_name(uri, "jiawei3", &inode_addr);
+	if (0 > ret) {
+		g_message("find inode by sname error!");
+		exit(-1);
+	}
+	g_message("inode addr is %llu", inode_addr);
     ret = hlfs_close(ctrl);
     deinit_hlfs(ctrl);
     return 0;

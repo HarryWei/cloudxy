@@ -15,7 +15,7 @@ void print_value(gpointer data, gpointer usr_data)
 main()
 {
 	struct back_storage *storage = init_storage_handler("local:///tmp/testenv/testfs");
-	GHashTable *ss_hashtable = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, NULL);
+	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	load_all_ss(storage, ss_hashtable);
 	GList *list = g_hash_table_get_keys(ss_hashtable);
 	g_list_foreach(list, print_key, NULL);

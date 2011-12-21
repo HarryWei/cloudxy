@@ -170,8 +170,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	}
 
 	bs_file_info_t *file_info = storage->bs_file_info(storage, SS_FILE);
-	uint32_t file_size = file_info->size;
-	g_free(file_info);
+	uint32_t file_size = file_info->size; g_free(file_info);
 	HLOG_DEBUG("file_size : %ld", file_size);
 #if 0
 	g_message("file_size:%u", file_size);
@@ -247,12 +246,12 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	char *endptr = NULL;
 	for (i = 0; i < g_strv_length(sss1) - 1; i++) {
 		HLOG_DEBUG("ss %s will be deleted", sss1[i]);
-#if 1
+#if 0
 		g_message("%s will be deleted", sss1[i]);
 #endif
-		if (FALSE == g_hash_table_remove(ss_hashtable, sss1[i])) {
+		if (FALSE == g_hash_table_remove(ss_hashtable, (const void*)sss1[i])) {
 			HLOG_DEBUG("remove table item false");
-#if 1
+#if 0
 			g_message("remove table item false");
 #endif 
 			return -5;
@@ -264,20 +263,44 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	return 0;
 }
 
-int load_ss_by_name(struct back_storage *storage, struct snapshot *ss,  \
+int load_ss_by_name(struct back_storage *storage, struct snapshot *ss, \
 		const char *ss_name)
 {
-	int ret = 0;
-	GHashTable *ss_hashtable = g_hash_table_new_full(g_direct_hash, \
-			g_direct_equal, NULL, NULL);
-	load_all_ss(storage, ss_hashtable);
-	if (ret < 0) {
+	int res = 0;
+	struct snapshot *_ss;
+	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, \
+			g_str_equal, NULL, NULL);
+	res = load_all_ss(storage, ss_hashtable);
+#if 0 
+	g_message("%d", ret);
+#endif
+	if (res < 0) {
 		HLOG_ERROR("load all ss error");
 		return -1;
 	}
-	struct snapshot *_ss = (struct snapshot *)g_hash_table_lookup(ss_hashtable, ss_name);
-	*ss = *_ss;
-	g_free(_ss);
+#if 0
+	g_message("seg fault test");
+#endif
+	_ss = g_hash_table_lookup(ss_hashtable, ss_name);
+	if (NULL == _ss) {
+		HLOG_DEBUG("No such key in table");
+		return -2;
+	}
+	ss->version = _ss->version;
+	sprintf(ss->ss_name, "%s", _ss->ss_name);
+	sprintf(ss->up_ss_name, "%s", _ss->up_ss_name);
+	ss->ime.inode_no = _ss->ime.inode_no;
+	ss->ime.inode_addr = _ss->ime.inode_addr;
+#if 0
+	g_message("seg fault test");
+#endif
+#if 0
+	g_message("%llu\n%s\n%s\n%llu\n%llu", _ss->version, _ss->ss_name, \
+			_ss->up_ss_name, _ss->ime.inode_no, _ss->ime.inode_addr);
+#endif
+#if 0
+	g_message("seg fault test");
+#endif
 	g_hash_table_destroy(ss_hashtable);
 	return 0;
 }

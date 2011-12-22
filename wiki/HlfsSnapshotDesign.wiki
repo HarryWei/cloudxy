@@ -67,15 +67,15 @@ typdef struct snapshot{
 ==API设计==
  我们先实现最精简的快照接口
 {{{
- int take_snapshot(HLFS_CTRL *ctrl, const char *ssname)
+ int take_snapshot(HLFS_CTRL *ctrl, const char *ss_name)
   给用户提供的在线方式快照接口，用户可以指定快照名
   * ctrl: 全局控制结构体
-  * ssname: 用户指定的快照名
+  * ss_name: 用户指定的快照名
   * return value: 成功返回0，失败返回<0
- int rm_snapshot(const char *uri, const char *ssname)
+ int rm_snapshot(const char *uri, const char *ss_name)
   用户可以通过这个接口来删除指定名字的快照
   * uri: 文件系统的位置 
-  * ssname: 用户指定的快照名
+  * ss_name: 用户指定的快照名
   * return value: 成功返回0，失败返回<0
  int find_inode_before_time(const char *uri, uint64_t time,uint64_t* inode_addr)
   用户可以通过这个接口来获取timestamp之前的inode存储地址
@@ -83,10 +83,10 @@ typdef struct snapshot{
   * time: 用户指定的时间
   * inode_addr 返回inode存储地址。
   * return value: 成功返回0,失败返回<0
- int find_inode_by_name(const char *uri, const char *ssname,uint64_t* inode_addr)
+ int find_inode_by_name(const char *uri, const char *ss_name,uint64_t* inode_addr)
   用户可以通过这个接口来获取指定名字的快照记录的inode存储地址
   * uri: 文件系统的位置 
-  * ssname: 用户指定的快照名
+  * ss_name: 用户指定的快照名
   * inode_addr 返回inode存储地址
   * return value: 成功返回0,失败返回<0
  int get_inode_info(const char *uri,uint64_t inode_addr, uint64_t *creat_time, uint64_t *length)

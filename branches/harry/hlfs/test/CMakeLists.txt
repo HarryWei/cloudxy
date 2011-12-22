@@ -30,9 +30,9 @@ LINK_DIRECTORIES(
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(LIBS glib-2.0
-         hlfs
+	#         hlfs
 	     log4c)
 
-SET(TESTSRC lectures/g_option.c)
+SET(TESTSRC lectures/g_list.c)
 ADD_EXECUTABLE(test ${TESTSRC})
 TARGET_LINK_LIBRARIES(test ${LIBS})

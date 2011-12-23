@@ -62,7 +62,7 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	if (ctrl==NULL ||(flag != 0 && flag != 1)) { /* check the parameters */
-		HLOG_ERROR("error params :falg %d",flag);
+		HLOG_ERROR("error params - flag should be 0 and 1 ");
 		return -1;
 	}
 	if(ctrl->usage_ref > 0){

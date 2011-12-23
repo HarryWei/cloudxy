@@ -91,6 +91,7 @@ int dump_ss_text(struct back_storage *storage, const char *buf)
 		g_message("open file snapshot.txt failed");
 		return -2;
 	}
+
 #if 0
 	g_message("%s", buf);
 	g_message("%d", strlen(buf));
@@ -119,9 +120,9 @@ int dump_ss(struct back_storage *storage, struct snapshot *ss)
 #if 0
 	g_message("%s", buf);
 #endif
-	if (0 > dump_ss_text(storage, buf)) {
-		HLOG_ERROR("dump_ss_text()error");
-		return -1;
+	if (0 > (ret = dump_ss_text(storage, buf))) {
+		HLOG_ERROR("dump_ss_text error");
+		return ret;
 	}
 	HLOG_DEBUG("leave func %s", __func__);
 	return ret;
@@ -223,7 +224,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	file = storage->bs_file_open(storage, SS_DEL_FILE, BS_READONLY);
 	ret = storage->bs_file_pread(storage, file, buf1, file_size, 0);
 	if (ret < 0) {
-		HLOG_ERROR("Read ss_selmark.txt failed\n");
+		HLOG_ERROR("Read ss_delmark.txt failed\n");
 #if 0
 		g_message("Cann't run to here");
 #endif

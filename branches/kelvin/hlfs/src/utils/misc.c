@@ -19,6 +19,7 @@ uint64_t get_current_time(void)
 		HLOG_ERROR("Get current time error!");
 		return -1;
 	}
+
 	HLOG_DEBUG("leave func %s", __func__);
 	return (uint64_t) t.tv_sec * 1000 + t.tv_usec / 1000;	
 }

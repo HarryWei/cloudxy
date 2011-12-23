@@ -127,6 +127,94 @@ int hlfs_clean_stop(HLFS_CTRL *ctrl);
  */
 int hlfs_set_clean_level(HLFS_CTRL *ctrl,unsigned int alive_bytes);
 
+/*
+ * take_snapshot: Take snapshot with given snapshot name
+ * @param ctrl: The global control structure
+ * @param ss_name: Snapshot name given by user
+ * @return value:
+ *  0 --- on success
+ * -1 --- creat ss file error
+ * -2 --- open ss file error
+ * -3 --- append error
+ * 
+ */
+int take_snapshot(HLFS_CTRL *ctrl, const char *ss_name);
+
+/*
+ * rm_snapshot: Delete snapshot matching the given name
+ * @param uri: The location of hlfs
+ * @param ss_name: The snapshot name given by user
+ * @return value: 
+ *  0 --- on success
+ * -1 --- creat ss delmark file error
+ * -2 --- open ss delmark file error
+ * -3 --- append error
+ */
+int rm_snapshot(const char *uri, const char *ss_name);
+
+/*
+ * find_inode_before_time: find inode created just before given time
+ * @param uri: The location of hlfs
+ * @param time: The time given by user
+ * @param inode_addr: inode address found will be here
+ * @return value: 
+ *  0 --- on success
+ * -1 --- list dir error 
+ * -2 --- find nothing
+ * -3 --- find inode in seg error
+ */
+int find_inode_before_time(const char *uri, uint64_t time, uint64_t *inode_addr);
+
+/*
+ * find_inode_by_name: find inode matching the snapshot name given by user
+ * @param uri: The location of hlfs
+ * @param ss_name: The snapshot name given by user
+ * @param inode_addr: inode address found will be here
+ * @return value: 
+ *  0 --- on success
+ * -1 --- load all snapshot error 
+ * -2 --- find nothing
+ */
+int find_inode_by_name(const char *uri, const char *ss_name, uint64_t *inode_addr);
+
+/*
+ * get_inode_info: get the creat time and file size of given inode
+ * @param uri: The location of HLFS
+ * @param inode_addr: inode address 
+ * @param creat_time: creat time will be here
+ * @param length: The length of file will be here
+ * @return value:
+ * 0 --- on success
+ * 1 --- load inode error
+ */
+int get_inode_info(const char *uri, uint64_t inode_addr, uint64_t *creat_time, \
+		uint64_t *length);
+
+/*
+ * hlfs_open_by_inode: Roll backward to given inode
+ * @param ctrl: The global control structure
+ * @param inode_addr: The inode address given by user
+ * @param flag: 0 readonly 1 writeable
+ * @return value: 
+ *  0 --- on success
+ * -1 --- parameter error
+ * -2 --- HLFS was opened by others
+ * -3 --- load inode error
+ */
+int hlfs_open_by_inode(HLFS_CTRL *ctrl, uint64_t inode_addr, int flag);
+
+/*
+ * list all snapshot names to ss_name_array
+ * @param uri: The location of HLFS
+ * @param ss_name_array: names willl be here
+ *  0 --- on success
+ * -1 --- snapshot.txt is not exist
+ * -2 --- open ss file error
+ * -3 --- read ss file error
+ * -4 --- read ss delmark file error
+ * -5 --- remove hashtable item error
+ */
+int list_all_snapshot(const char *uri, char **ss_name_array);
 #ifdef __cplusplus 
 } 
 #endif 

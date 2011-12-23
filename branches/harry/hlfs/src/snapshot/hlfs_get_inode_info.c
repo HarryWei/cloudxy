@@ -9,6 +9,7 @@
 #include "hlfs_ctrl.h"
 #include "snapshot.h"
 #include "storage_helper.h"
+#include "hlfs_log.h"
 
 int
 hlfs_get_info_info(const char *uri,

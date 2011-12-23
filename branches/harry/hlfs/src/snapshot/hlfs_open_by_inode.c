@@ -6,10 +6,12 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <glib.h>
+#include <string.h>
 #include "hlfs_ctrl.h"
 #include "snapshot.h"
 #include "storage_helper.h"
 #include "comm_define.h"
+#include "hlfs_log.h"
 
 int 
 hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
@@ -22,19 +24,19 @@ hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 		ret = -1;
 		goto out;
 	}
-	mempcpy(&ctrl->inode, inode, sizeof(struct inode));
+	memcpy(&ctrl->inode, inode, sizeof(struct inode));
 	struct inode_map_entry imap = {
 		.inode_no = HLFS_INODE_NO,
 		.inode_addr = inode_addr,
 	};
-	mempcpy(&ctrl->imap_entry, imap, sizeof(struct inode_map_entry));
+	memcpy(&ctrl->imap_entry, &imap, sizeof(struct inode_map_entry));
 	if (0 == flag) {	//the common condition
 		ctrl->rw_inode_flag = 0;
 	} else if (1 == flag) {	//forbid hlfs_write
 		ctrl->rw_inode_flag = 1;
 	} else {
 		g_message("%s -- the bad flag for hlfs open by inode", __func__);
-		ret = -1
+		ret = -1;
 	}
 out:
 	g_free(inode);

@@ -6,7 +6,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <glib.h>
+#include <stdlib.h>
+#include <string.h>
 #include "hlfs_ctrl.h"
+#include "hlfs_log.h"
 #include "snapshot.h"
 #include "storage.h"
 #include "storage_helper.h"
@@ -39,7 +42,7 @@ get_inode_addr_in_seg(struct back_storage *storage,
 		lh = (struct log_header *) (tmp_buf + offset);
 		imap = (struct inode_map_entry *) (tmp_buf + lh->log_size - sizeof(struct inode_map_entry));
 		inode = (struct inode *) (tmp_buf + lh->log_size - sizeof(struct inode_map_entry) - sizeof(struct inode));
-		if (timestamp > tmp_time && timestamp <= inode->lmtime) {
+		if (timestamp > tmp_time && timestamp <= inode->mtime) {
 			*inode_addr = imap->inode_addr;
 			goto out;
 		}
@@ -48,7 +51,7 @@ get_inode_addr_in_seg(struct back_storage *storage,
 	}
 out:
 	if (NULL != file) {
-		storage->bs_file_close(file);
+		storage->bs_file_close(storage, file);
 	}
 	return ret;
 }
@@ -88,7 +91,7 @@ get_last_inode_info_in_segs(struct back_storage *storage,
 				ret = -1;
 				goto out;
 			}
-			uint32_t size = storage->bs_file_pread(storage, file, &inode, sizeof(struct inode),
+			uint32_t size = storage->bs_file_pread(storage, file, (const char *) &inode, sizeof(struct inode),
 							info->size - sizeof(struct inode) - sizeof(struct inode_map_entry));
 			if (sizeof(struct inode) != size) {
 				g_message("%s -- read inode error!", __func__);
@@ -96,7 +99,7 @@ get_last_inode_info_in_segs(struct back_storage *storage,
 				goto out;
 			}
 			_seg_info->lmtime = inode.mtime;
-			list = g_list_append(*list, _seg_info);
+			*list = g_list_append(*list, _seg_info);
 			_seg_info += 1;
 		}
 		info += 1;
@@ -135,13 +138,13 @@ find_seg_with_timestamp(GList *list,
 	uint64_t tmp_time = 0;
 	GList *_list = g_list_copy(list);
 	while (i < g_list_length(_list)) {
-		uint64_t lmtime = (struct seg_info *)(_list->data)->lmtime;
+		uint64_t lmtime = ((struct seg_info *)(_list->data))->lmtime;
 		if ((timestamp > tmp_time) && (timestamp <= lmtime)) {
-			*segno = (struct seg_info *)(_list->data)->segno;
+			*segno = ((struct seg_info *)(_list->data))->segno;
 			goto out;
 		}
 		if (timestamp == 0) {
-			*segno = (struct seg_info *)(_list->data)->segno;
+			*segno = ((struct seg_info *)(_list->data))->segno;
 			goto out;
 		}
 		tmp_time = lmtime;
@@ -159,6 +162,7 @@ int
 hlfs_find_inode_before_time(const char *uri, 
 							uint64_t timestamp, 
 							uint64_t *inode_addr) {
+	int ret = 0;
 	struct back_storage *storage = init_storage_handler(uri);
 	if (NULL == storage) {
 		HLOG_ERROR("init storage handler error!");

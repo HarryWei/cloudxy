@@ -121,12 +121,65 @@ int hlfs_clean_stop(HLFS_CTRL *ctrl);
  */
 int hlfs_set_clean_level(HLFS_CTRL *ctrl,unsigned int alive_bytes);
 
+/*
+ * hlfs_find_inode_before_time: find a inode nearby the timestamp
+ * @para uri: the hlfs storage path
+ * @para timestamp: the timestamp of inode for searching
+ * @para inode_addr: get the inode's inode addr
+ * @return value: 0 is right, -1 is wrong
+ */
 int hlfs_find_inode_before_time(const char *uri, uint64_t timestamp, uint64_t *inode_addr);
+
+/*
+ * hlfs_get_inode_info: get a inode info in light of its addr
+ * @para uri: the hlfs storage path
+ * @para inode_addr: the addr of inode for searching
+ * @para ctime: get the inode's create time
+ * @para length: get the inode's length
+ * @return value: 0 is right, -1 is wrong
+ */
 int hlfs_get_inode_info(const char *uri, uint64_t inode_addr, uint64_t *ctime, uint64_t *length);
+
+/*
+ * hlfs_open_by_inode: load a inode in light of flag
+ * @para ctrl: the hlfs global control construction
+ * @para inode_addr: get the inode's inode addr
+ * @para flag: 0 is common style, 1 is readonly
+ * @return value: 0 is right, -1 is wrong
+ */
 int hlfs_open_by_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, int flag);
+
+/*
+ * hlfs_find_inode_by_name: find a inode in light of sname
+ * @para uri: the hlfs storage path
+ * @para sname: the sname of inode for searching
+ * @para inode_addr: get the inode's inode addr
+ * @return value: 0 is right, -1 is wrong
+ */
 int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_addr);
+
+/*
+ * hlfs_rm_snapshot: delete a snapshot in light of sname
+ * @para uri: the hlfs storage path
+ * @para ssname: the sname of inode for deleting
+ * @return value: 0 is right, -1 is wrong
+ */
 int hlfs_rm_snapshot(const char *uri, const char *ssanme);
+
+/*
+ * hlfs_list_all_snapshots: get a series snapshot names
+ * @para uri: the hlfs storage path
+ * @para ssname: store the series snapshot names
+ * @return value: 0 is right, -1 is wrong
+ */
 int hlfs_list_all_snapshots(const char *uri, char **ssname);
+
+/*
+ * hlfs_take_snapshot: take a snapshot given a snapshot name
+ * @para ctrl: the hlfs global control construction
+ * @para ssname: the snapshot's name
+ * @return value: 0 is right, -1 is wrong
+ */
 int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname);
 
 #ifdef __cplusplus 

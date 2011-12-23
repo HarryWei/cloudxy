@@ -101,6 +101,21 @@ int main(int argc, char *argv[]){
 		exit(-1);
 	}
 	g_print("inode_addr is %llu\n", inode_addr);
+	uint64_t ctime = 0;
+	uint64_t length = 0;
+	if (-1 == hlfs_get_inode_info(uri, inode_addr, &ctime, &length)) {
+		g_message("hlfs get inode info error!");
+		exit(-1);
+	}
+	g_print("ctime is %llu\n", ctime);
+	g_print("length is %llu\n", length);
+	if (-1 == hlfs_open_by_inode(ctrl, inode_addr, 1)) {
+		g_message("hlfs open by inode error!");
+		exit(-1);
+	}
+	g_print("flag is %d\n", ctrl->rw_inode_flag);
+	g_print("inode's ctime is %llu\n", ctrl->inode.ctime);
+	g_print("inode's addr %llu\n", ctrl->imap_entry.inode_addr);
 #if 0
 	// test take snapshot
 	ret = hlfs_take_snapshot(ctrl, "jiawei1");

@@ -12,8 +12,10 @@
 #include "storage_helper.h"
 #include "hlfs_log.h"
 
-static int dump_snapshot_text(struct hlfs_ctrl *ctrl, 
-		char *cptext, const char *cp_file)
+static int 
+dump_snapshot_text(struct hlfs_ctrl *ctrl, 
+					char *cptext, 
+					const char *cp_file)
 {
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
 	int ret = 0;
@@ -49,7 +51,9 @@ out:
 	return ret;
 }	
 
-static int cp_2text(struct snapshot *cp, char *cp_text)
+static int 
+cp_2text(struct snapshot *cp, 
+			char *cp_text)
 {
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
 	memset(cp_text, 0, sizeof(struct snapshot) * 2);
@@ -59,7 +63,9 @@ static int cp_2text(struct snapshot *cp, char *cp_text)
 	return n;
 }
 
-int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
+int 
+hlfs_take_snapshot(struct hlfs_ctrl *ctrl, 
+					const char *ssname)
 {
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
 	struct inode *cur_inode = load_latest_inode(ctrl->storage);

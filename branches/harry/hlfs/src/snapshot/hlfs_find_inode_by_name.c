@@ -21,7 +21,10 @@ static int snapshot_delmark2text(const char *ssname, char *deltext) {
 }
 #endif
 
-int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_addr) {
+int 
+hlfs_find_inode_by_name(const char *uri, 
+						const char *sname, 
+						uint64_t *inode_addr) {
 	g_message("enter func %s", __func__);
 	int ret = 0;
 	int i = 0;

@@ -12,14 +12,18 @@
 #include "storage_helper.h"
 #include "hlfs_log.h"
 
-static int snapshot_delmark2text(const char *ssname, char *deltext) {
+static int 
+snapshot_delmark2text(const char *ssname, 
+						char *deltext) {
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
 	int n = sprintf(deltext, "%s\n", ssname);
 	HLOG_DEBUG("dbg 77 leave func %s", __func__);
 	return n;
 }
 
-int hlfs_rm_snapshot(const char *uri, const char *ssname) {
+int 
+hlfs_rm_snapshot(const char *uri, 
+					const char *ssname) {
 	g_message("enter func %s", __func__);
 	int ret = 0;
 	char deltext[128];

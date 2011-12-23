@@ -21,7 +21,9 @@ static int snapshot_delmark2text(const char *ssname, char *deltext) {
 }
 #endif
 
-int hlfs_list_all_snapshots(const char *uri, char **ssname) {
+int 
+hlfs_list_all_snapshots(const char *uri, 
+						char **ssname) {
 	g_message("enter func %s", __func__);
 	int ret = 0;
 	int i = 0;

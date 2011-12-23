@@ -1,5 +1,5 @@
 /*
- *  src/snapshot/find_inode_before_time.c
+ *  src/snapshot/hlfs_find_inode_before_time.c
  *
  *  Harry Wei <harryxiyou@gmail.com> (C) 2011
  */
@@ -11,46 +11,54 @@
 #include "storage.h"
 #include "storage_helper.h"
 
-static int get_inode_addr_in_seg(struct back_storage *storage, 
-									uint64_t timestamp,
-									const char *segfile,
-									uint64_t *inode_addr) {
+static int 
+get_inode_addr_in_seg(struct back_storage *storage, 
+						uint64_t timestamp,
+						const char *segfile,
+						uint64_t *inode_addr) {
+	int ret = 0;
 	bs_file_t file = storage->bs_file_open(storage, segfile, BS_READONLY);
 	if (NULL == file) {
 		HLOG_ERROR("file open error");
-		return -1;
+		ret = -1;
+		goto out;
 	}
 	char *tmp_buf = (char *)g_malloc0(SEGMENT_SIZE);
 	int count = storage->bs_file_pread(storage, file, tmp_buf, SEGMENT_SIZE, 0);
 	if (0 > count) {
 		HLOG_ERROR("read content error!");
-		return -1;
+		ret = -1;
+		goto out;
 	}
 	int offset = 0;
 	int tmp_time = 0;
 	struct log_header *lh = NULL;
 	struct inode_map_entry *imap = NULL;
+	struct inode *inode = NULL;
 	while (offset < count) {
 		lh = (struct log_header *) (tmp_buf + offset);
 		imap = (struct inode_map_entry *) (tmp_buf + lh->log_size - sizeof(struct inode_map_entry));
-		if (timestamp > tmp_time && timestamp <= lh->ctime) {
+		inode = (struct inode *) (tmp_buf + lh->log_size - sizeof(struct inode_map_entry) - sizeof(struct inode));
+		if (timestamp > tmp_time && timestamp <= inode->lmtime) {
 			*inode_addr = imap->inode_addr;
 			goto out;
 		}
 		tmp_time = lh->ctime;
 		offset += lh->log_size;
 	}
-	HLOG_DEBUG("Can not find nearby timestamp in this segfile");
-	return -1;
 out:
-	HLOG_DEBUG("Find nearby timestamp in this segfile");
-	return 0;
+	if (NULL != file) {
+		storage->bs_file_close(file);
+	}
+	return ret;
 }
 
-static GList *get_last_inode_info_in_segs(struct back_storage *storage, 
-										bs_file_info_t *infos,
-										struct seg_info *seg_infos,
-										int num_entries) {
+static int 
+get_last_inode_info_in_segs(struct back_storage *storage, 
+							bs_file_info_t *infos,
+							struct seg_info *seg_infos,
+							int num_entries, 
+							GList **list) {
 	int ret = 0;
 	int i = 0;
 	bs_file_t file = NULL;
@@ -60,7 +68,7 @@ static GList *get_last_inode_info_in_segs(struct back_storage *storage,
 	char *endptr = NULL;
 	char *tmp_buf = NULL;
 	struct inode inode;
-	GList *list = NULL;
+//	GList *list = NULL;
 
 #if 0
 	tmp_buf = g_malloc0(sizeof(char) * sizeof(struct inode));
@@ -88,7 +96,7 @@ static GList *get_last_inode_info_in_segs(struct back_storage *storage,
 				goto out;
 			}
 			_seg_info->lmtime = inode.mtime;
-			list = g_list_append(list, _seg_info);
+			list = g_list_append(*list, _seg_info);
 			_seg_info += 1;
 		}
 		info += 1;
@@ -98,14 +106,59 @@ out:
 		storage->bs_file_close(storage, file);
 	}
 	g_strfreev(v);
-	return list;
+	return ret;
 }
 
-static sort_segs_with_time(struct seg_info *seg_infos, int count)  {
-	struct 
+static int 
+sort_segs_with_time(gconstpointer seg_info1, 
+					gconstpointer seg_info2) {
+	uint64_t lmtime1 = 0;
+	uint64_t lmtime2 = 0;
+
+	lmtime1 = ((struct seg_info *) seg_info1)->lmtime;
+	lmtime2 = ((struct seg_info *) seg_info2)->lmtime;
+	if (lmtime1 > lmtime2) {
+		return 1;
+	} else if (lmtime1 == lmtime2) {
+		return 0;
+	} else {
+		return -1;
+	}
 }
 
-int find_inode_before_time(const char *uri, uint64_t timestamp, uint64_t *inode_addr) {
+static int
+find_seg_with_timestamp(GList *list,
+						uint64_t timestamp,
+						int *segno) {
+	int ret = 0;
+	int i = 0;
+	uint64_t tmp_time = 0;
+	GList *_list = g_list_copy(list);
+	while (i < g_list_length(_list)) {
+		uint64_t lmtime = (struct seg_info *)(_list->data)->lmtime;
+		if ((timestamp > tmp_time) && (timestamp <= lmtime)) {
+			*segno = (struct seg_info *)(_list->data)->segno;
+			goto out;
+		}
+		if (timestamp == 0) {
+			*segno = (struct seg_info *)(_list->data)->segno;
+			goto out;
+		}
+		tmp_time = lmtime;
+		_list = g_list_next(_list);
+		i += 1;
+	}
+	g_message("We can not find inode about your timestamp, any matter???");
+	ret = -1;
+out:
+	g_list_free(_list);
+	return ret;
+}
+
+int 
+hlfs_find_inode_before_time(const char *uri, 
+							uint64_t timestamp, 
+							uint64_t *inode_addr) {
 	struct back_storage *storage = init_storage_handler(uri);
 	if (NULL == storage) {
 		HLOG_ERROR("init storage handler error!");
@@ -141,12 +194,27 @@ int find_inode_before_time(const char *uri, uint64_t timestamp, uint64_t *inode_
 		return -1;
 	}
 	GList *list = NULL;
-	list = get_last_inode_info_in_segs(storage, infos, seg_infos, num_entries);
-	sort_segs_with_time(seg_infos, count);
+	if (-1 == get_last_inode_info_in_segs(storage, infos, seg_infos, num_entries, &list)) {
+		g_message("%s -- get_last_inode_info_in_segs error!", __func__);
+		ret = -1;
+		goto out;
+	}
+	//sort_segs_with_time(seg_infos, count, list);
+	list = g_list_sort(list, sort_segs_with_time);
 	int segno = 0;
-	find_seg_with_timestamp(seg_infos, timestamp, &segno);
+	if (-1 == find_seg_with_timestamp(list, timestamp, &segno)) {
+		g_message("%s -- find_seg_with_timestamp error!", __func__);
+		ret = -1;
+		goto out;
+	}
 	char segfile[128];
 	sprintf(segfile, "%d%s%s", segno, ".", "seg");
-	get_inode_addr_in_seg(storage, timestamp, segfile, inode_addr);
+	if (-1 == get_inode_addr_in_seg(storage, timestamp, segfile, inode_addr)) {
+		g_message("%s -- get_inode_addr_in_seg error!", __func__);
+		ret = -1;
+		goto out;
+	}
+out:
+	g_list_free(list);
 	return ret;
 }

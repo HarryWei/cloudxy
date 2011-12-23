@@ -68,25 +68,28 @@ hlfs_take_snapshot(struct hlfs_ctrl *ctrl,
 					const char *ssname)
 {
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
+#if 0
 	struct inode *cur_inode = load_latest_inode(ctrl->storage);
 	if (NULL == cur_inode) {
 		HLOG_ERROR("get cur_inode error!");
 		return -1;
 	}
+#endif
 	struct snapshot *cp = NULL;
 	cp = g_malloc0(sizeof(struct snapshot));
 	if (NULL == cp) {
 		HLOG_ERROR("Allocate Error!");
 		return -1;
 	}
-	cp->timestamp = cur_inode->ctime;
+	cp->timestamp = ctrl->inode.ctime;
 	g_strlcpy(cp->sname, ssname, SNAME_LEN);
-	cp->inode_addr = get_last_inode_storage_addr_in_seg(ctrl->storage, ctrl->last_segno);
+//	cp->inode_addr = get_last_inode_storage_addr_in_seg(ctrl->storage, ctrl->last_segno);
+	cp->inode_addr = ctrl->imap_entry.inode_addr;
 	char cptext[sizeof(struct snapshot) * 2];
 	uint32_t len = cp_2text(cp, cptext);
 	int ret = dump_snapshot_text(ctrl, cptext, SNAPSHOT_USAGE_FILE);
 	g_free(cp);
-	g_free(cur_inode);
+//	g_free(cur_inode);
 	HLOG_DEBUG("dbg 77 leave func %s", __func__);
 	return ret;
 }

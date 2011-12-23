@@ -121,6 +121,14 @@ int hlfs_clean_stop(HLFS_CTRL *ctrl);
  */
 int hlfs_set_clean_level(HLFS_CTRL *ctrl,unsigned int alive_bytes);
 
+int hlfs_find_inode_before_time(const char *uri, uint64_t timestamp, uint64_t *inode_addr);
+int hlfs_get_inode_info(const char *uri, uint64_t inode_addr, uint64_t *ctime, uint64_t *length);
+int hlfs_open_by_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, int flag);
+int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_addr);
+int hlfs_rm_snapshot(const char *uri, const char *ssanme);
+int hlfs_list_all_snapshots(const char *uri, char **ssname);
+int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname);
+
 #ifdef __cplusplus 
 } 
 #endif 

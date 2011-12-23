@@ -12,7 +12,7 @@
 #include "hlfs_log.h"
 
 int
-hlfs_get_info_info(const char *uri,
+hlfs_get_inode_info(const char *uri,
 					uint64_t inode_addr,
 					uint64_t *ctime,
 					uint64_t *length) {

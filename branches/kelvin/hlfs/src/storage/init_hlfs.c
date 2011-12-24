@@ -52,7 +52,6 @@ init_hlfs(const char *uri)
     }
     ctrl->write_req_aqueue = g_async_queue_new();
     ctrl->write_rsp_aqueue = g_async_queue_new();
-
     HLOG_DEBUG("uri %s", uri);
     struct back_storage *storage = init_storage_handler(uri);
     if( storage == NULL){
@@ -96,6 +95,9 @@ init_hlfs(const char *uri)
             goto out;
         }
     }
+#if 0
+	g_message("inode_addr : %d", ctrl->imap_entry.inode_addr);
+#endif
 out:
 	HLOG_DEBUG("leave func %s", __func__);
     return ctrl;

@@ -200,7 +200,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	g_message("finished");
 #endif
 
-	gchar **sss = g_strsplit(buf, "\n\n", 0);
+	gchar **sss = g_strsplit(buf, "\n\n", 1024);
 #if 0
 	while (*sss != NULL) {
 		g_message("%s", *sss);
@@ -251,13 +251,10 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 #if 0
 		g_message("%s will be deleted", sss1[i]);
 #endif
-		if (FALSE == g_hash_table_remove(ss_hashtable, (const void*)sss1[i])) {
-			HLOG_DEBUG("remove table item false");
+		g_hash_table_remove(ss_hashtable, sss1[i]);
 #if 0
-			g_message("remove table item false");
+		g_message("remove table item false");
 #endif 
-			return -5;
-		}
 	}
 	g_strfreev(sss1);
 

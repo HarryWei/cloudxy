@@ -5,7 +5,7 @@
 #include "string.h"
 #include "hlfs_log.h"
 
-#define MAX_BUFSIZE (4 * 1024 * 1024)
+#define MAX_BUFSIZE (1 * 1024)
 
 int take_snapshot(HLFS_CTRL *ctrl, const char *ss_name)
 {
@@ -15,9 +15,18 @@ int take_snapshot(HLFS_CTRL *ctrl, const char *ss_name)
 	struct snapshot *ss;
 	ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
 
-	ss->version = get_current_time();
 	sprintf(ss->ss_name, "%s", ss_name);
 	sprintf(ss->up_ss_name, "null");
+#if 0
+	g_message("inode no:%d inode addr:%d", ctrl->imap_entry.inode_no, \
+			ctrl->imap_entry.inode_addr);
+#endif
+	struct inode *inode = load_latest_inode(ctrl->storage);
+	if (inode == NULL) {
+		g_message("error-load inode");
+		return -1;
+	}
+	ss->version = inode->ctime;
 	ss->ime.inode_no = ctrl->imap_entry.inode_no;
 	ss->ime.inode_addr = ctrl->imap_entry.inode_addr; 
 	ret = dump_ss(ctrl->storage, ss);
@@ -30,6 +39,7 @@ int take_snapshot(HLFS_CTRL *ctrl, const char *ss_name)
 	
 	HLOG_DEBUG("leave func %s", __func__);
 	g_free(ss);
+	g_free(inode);
 	g_mutex_unlock(ctrl->hlfs_access_mutex);
 	return ret;
 }
@@ -52,11 +62,16 @@ int rm_snapshot(const char *uri, const char *ss_name)
 void list_key(gpointer data, gpointer usr_data)
 {
 	HLOG_DEBUG("enter func %s", __func__);
-	if (data = NULL) {
+	if (data == NULL) {
 		HLOG_DEBUG("data is NULL");
+#if 0
+		g_message("data is NULL");
+#endif
 		return;
 	}
-	char *tmp = g_strconcat(data, "\n", NULL);
+	char *tmp;
+	tmp = (char *)g_malloc0(128);
+	tmp = g_strconcat(data, "\n", NULL);
 	g_strlcat(usr_data, tmp, MAX_BUFSIZE);
 	g_free(tmp);
 	HLOG_DEBUG("leave func %s", __func__);
@@ -66,28 +81,36 @@ int list_all_snapshot(const char *uri, char **ss_name_array)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
-	char buf[MAX_BUFSIZE];
-	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash,\
+	char *tmp_buf = NULL;
+	tmp_buf = (char *)g_malloc0(MAX_BUFSIZE);
+	*ss_name_array = tmp_buf;
+
+	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, \	
 			g_str_equal, NULL, NULL);
 	struct back_storage *storage = init_storage_handler(uri);
+#if 0
+	g_message("run here");
+#endif
 	ret = load_all_ss(storage, ss_hashtable);
+#if 0
+	g_message("run here");
+#endif
+
 	if (ret < 0) {
-		g_message("load all ss error");
+		g_message("load all ss error: %d", ret);
 		return ret;
 	}
-	GList *list = g_hash_table_get_values(ss_hashtable);
-	g_list_foreach(list, list_key, buf);
+	GList *list = g_hash_table_get_keys(ss_hashtable);
+	if (list == NULL)
+		g_message("list NULL");
+	ret = load_all_ss(storage, ss_hashtable);
+	g_list_foreach(list, list_key, *ss_name_array);
 	
-	HLOG_DEBUG("buf:%s", buf);
-	char **tmp = g_strsplit(buf, "\n", 0);
-	
-	while (*tmp != NULL) {
-		g_strlcpy(*ss_name_array, *tmp, strlen(*tmp));
-		(*tmp)++;
-		(*ss_name_array)++;
+	HLOG_DEBUG("buf:%s", *ss_name_array);
+	if (*ss_name_array == NULL) {
+		HLOG_ERROR("buf is NULL");
+		return -1;
 	}
-
-	g_strlcpy(*ss_name_array, NULL, 0);
 
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;

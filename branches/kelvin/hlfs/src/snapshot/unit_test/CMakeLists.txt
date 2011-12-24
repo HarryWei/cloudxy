@@ -41,3 +41,12 @@ TARGET_LINK_LIBRARIES(load_ss_from_text ${LIBS})
 
 ADD_EXECUTABLE(load_all_ss load_all_ss_test.c)
 TARGET_LINK_LIBRARIES(load_all_ss ${LIBS})
+
+ADD_EXECUTABLE(take_snapshot_test take_snapshot_test.c)
+TARGET_LINK_LIBRARIES(take_snapshot_test ${LIBS})
+
+ADD_EXECUTABLE(rm_snapshot_test rm_snapshot_test.c)
+TARGET_LINK_LIBRARIES(rm_snapshot_test ${LIBS})
+
+ADD_EXECUTABLE(list_all_snapshot_test list_all_snapshot_test.c)
+TARGET_LINK_LIBRARIES(list_all_snapshot_test ${LIBS})

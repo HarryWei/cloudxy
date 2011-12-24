@@ -212,7 +212,6 @@ int hlfs_open_by_inode(HLFS_CTRL *ctrl, uint64_t inode_addr, int flag);
  * -2 --- open ss file error
  * -3 --- read ss file error
  * -4 --- read ss delmark file error
- * -5 --- remove hashtable item error
  */
 int list_all_snapshot(const char *uri, char **ss_name_array);
 #ifdef __cplusplus 

@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     }
     g_message("active segno :%u",active_segno);
     for(i=0;i<num_entries;i++){
-        g_message("file:%s,size:%llu,time:%llu",info->name,info->size,info->lmtime);  
+        g_message("file:%s,size:%u,time:%llu",info->name,info->size,info->lmtime);  
         if(g_str_has_suffix(info->name,"seg")){
            g_message("valid seg file:%s",info->name);
            uint32_t segno = get_segfile_no(info->name);

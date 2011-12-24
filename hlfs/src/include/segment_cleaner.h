@@ -17,7 +17,7 @@ struct segment_usage {
 	uint64_t segno;				
 	uint64_t alive_blocks;
 	uint64_t timestamp;
-	uint64_t log_num;
+    	uint64_t log_num;
 	char *bitmap;
 };
 

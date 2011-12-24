@@ -11,87 +11,29 @@
 #include "snapshot.h"
 #include "storage_helper.h"
 #include "hlfs_log.h"
-
-static int 
-dump_snapshot_text(struct hlfs_ctrl *ctrl, 
-					char *cptext, 
-					const char *cp_file)
-{
-	HLOG_DEBUG("dbg 77 enter func %s", __func__);
-	int ret = 0;
-	int len = 0;
-	bs_file_t file = NULL;
-
-	if (-1 == ctrl->storage->bs_file_is_exist(ctrl->storage, cp_file)) {
-		HLOG_DEBUG("cp file not exist, create cp file");
-		file = ctrl->storage->bs_file_create(ctrl->storage, cp_file);
-		if (NULL == file) {
-			HLOG_ERROR("can not create cp file %s", cp_file);
-			goto out;
-		}
-		ctrl->storage->bs_file_close(ctrl->storage, file);
-	}
-	file = ctrl->storage->bs_file_open(ctrl->storage, cp_file, BS_WRITEABLE);
-	if (NULL == file) {
-		HLOG_ERROR("can not open cp file %s", cp_file);
-		goto out;
-	}
-	len = strlen(cptext);
-	HLOG_DEBUG("cp text is %s", cptext);
-	if (0 > (ret = ctrl->storage->bs_file_append(ctrl->storage, file, cptext, len))) {
-		HLOG_ERROR("write cp file error, write bytes %d", ret);
-		ret = -1;
-		goto out;
-	}
-out:
-	if (NULL != file) {
-		ctrl->storage->bs_file_close(ctrl->storage, file);
-	}
-	HLOG_DEBUG("dbg 77 leave func %s", __func__);
-	return ret;
-}	
-
-static int 
-cp_2text(struct snapshot *cp, 
-			char *cp_text)
-{
-	HLOG_DEBUG("dbg 77 enter func %s", __func__);
-	memset(cp_text, 0, sizeof(struct snapshot) * 2);
-	int n = sprintf(cp_text, "%llu %llu %s\n", 
-			cp->timestamp, cp->inode_addr, cp->sname);
-	HLOG_DEBUG("dbg 77 leave func %s", __func__);
-	return n;
-}
+#include "snapshot_helper.h"
 
 int 
 hlfs_take_snapshot(struct hlfs_ctrl *ctrl, 
 					const char *ssname)
 {
+    int ret = 0;
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
-#if 0
-	struct inode *cur_inode = load_latest_inode(ctrl->storage);
-	if (NULL == cur_inode) {
-		HLOG_ERROR("get cur_inode error!");
-		return -1;
-	}
-#endif
-	struct snapshot *cp = NULL;
-	cp = g_malloc0(sizeof(struct snapshot));
+    if(ctrl == NULL || ssname ==NULL){
+        return -1;
+    }
+	struct snapshot *cp = g_malloc0(sizeof(struct snapshot));
 	if (NULL == cp) {
 		HLOG_ERROR("Allocate Error!");
 		return -1;
 	}
-	cp->timestamp = ctrl->inode.ctime;
-	g_strlcpy(cp->sname, ssname, SNAME_LEN);
-//	cp->inode_addr = get_last_inode_storage_addr_in_seg(ctrl->storage, ctrl->last_segno);
+	cp->timestamp = get_current_time();
+	g_strlcpy(cp->sname,ssname,strlen(ssname));
 	cp->inode_addr = ctrl->imap_entry.inode_addr;
-	char cptext[sizeof(struct snapshot) * 2];
-	uint32_t len = cp_2text(cp, cptext);
-	g_static_mutex_lock(&g_snapshot_safe_write_mutex);
-	int ret = dump_snapshot_text(ctrl, cptext, SNAPSHOT_USAGE_FILE);
-	g_static_mutex_unlock(&g_snapshot_safe_write_mutex);
+    g_mutex_lock (ctrl->hlfs_access_mutex);
+	ret = dump_snapshot(ctrl->storage,SNAPSHOT_FILE,cp);
+    g_mutex_unlock (ctrl->hlfs_access_mutex);
 	g_free(cp);
-//	g_free(cur_inode);
 	HLOG_DEBUG("dbg 77 leave func %s", __func__);
 	return ret;
 }

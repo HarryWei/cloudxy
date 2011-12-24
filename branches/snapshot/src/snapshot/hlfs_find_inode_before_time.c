@@ -14,7 +14,7 @@
 #include "storage.h"
 #include "storage_helper.h"
 //#include "comm_define.h"
-
+#if 0
 static int 
 get_inode_addr_in_seg(struct back_storage *storage, 
 						uint64_t timestamp,
@@ -275,3 +275,4 @@ out:
 	g_list_free(list);
 	return ret;
 }
+#endif

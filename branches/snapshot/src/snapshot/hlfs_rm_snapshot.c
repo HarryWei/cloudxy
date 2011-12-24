@@ -11,39 +11,30 @@
 #include "snapshot.h"
 #include "storage_helper.h"
 #include "hlfs_log.h"
+#include "snapshot_helper.h"
 
-static int 
-snapshot_delmark2text(const char *ssname, 
-						char *deltext) {
-	HLOG_DEBUG("dbg 77 enter func %s", __func__);
-	int n = sprintf(deltext, "%s\n", ssname);
-	HLOG_DEBUG("dbg 77 leave func %s", __func__);
-	return n;
-}
 
-int 
-hlfs_rm_snapshot(const char *uri, 
-					const char *ssname) {
-	g_message("enter func %s", __func__);
-	int ret = 0;
-	char deltext[128];
-	bs_file_t file = NULL;
+int hlfs_rm_snapshot(const char *uri,const char *ssname) {
+    g_message("enter func %s", __func__);
+    int ret = 0;
+    char deltext[128];
+    bs_file_t file = NULL;
 
-	struct back_storage *storage = init_storage_handler(uri);
-	if (NULL == storage) {
-		HLOG_ERROR("storage init error!");
-		return -1;
-	}
-	if (-1 == storage->bs_file_is_exist(storage, SNAPSHOT_DEL_FILE)) {
-		HLOG_DEBUG("snapshot del file not exist, create it");
-		file = storage->bs_file_create(storage, SNAPSHOT_DEL_FILE);
-		if (NULL == file) {
+    struct back_storage *storage = init_storage_handler(uri);
+    if (NULL == storage) {
+        HLOG_ERROR("storage init error!");
+        return -1;
+    }
+    if (-1 == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) {
+        HLOG_DEBUG("snapshot del file not exist, create it");
+        file = storage->bs_file_create(storage, SNAPSHOT_FILE);
+        if (NULL == file) {
 			HLOG_ERROR("can not create snapshot del file!");
 			goto out;
 		}
 		storage->bs_file_close(storage, file);
 	}
-	file = storage->bs_file_open(storage, SNAPSHOT_DEL_FILE, BS_WRITEABLE);
+	file = storage->bs_file_open(storage, SNAPSHOT_FILE, BS_WRITEABLE);
 	if (NULL == file) {
 		HLOG_ERROR("can not open snapshot del file");
 		goto out;

@@ -11,7 +11,7 @@
 #include "snapshot.h"
 #include "storage_helper.h"
 #include "hlfs_log.h"
-
+#if 0
 #if 0
 static int snapshot_delmark2text(const char *ssname, char *deltext) {
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
@@ -98,3 +98,4 @@ out:
 	g_message("found inode_addr is %llu", *inode_addr);
 	return ret;
 }
+#endif

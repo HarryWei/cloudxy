@@ -12,7 +12,6 @@
 #include "storage_helper.h"
 #include "comm_define.h"
 #include "hlfs_log.h"
-
 int 
 hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 					uint64_t inode_addr,
@@ -42,4 +41,3 @@ out:
 	g_free(inode);
 	return ret;
 }
-

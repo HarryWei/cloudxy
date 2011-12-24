@@ -87,7 +87,9 @@ hlfs_take_snapshot(struct hlfs_ctrl *ctrl,
 	cp->inode_addr = ctrl->imap_entry.inode_addr;
 	char cptext[sizeof(struct snapshot) * 2];
 	uint32_t len = cp_2text(cp, cptext);
+	g_static_mutex_lock(&g_snapshot_safe_write_mutex);
 	int ret = dump_snapshot_text(ctrl, cptext, SNAPSHOT_USAGE_FILE);
+	g_static_mutex_unlock(&g_snapshot_safe_write_mutex);
 	g_free(cp);
 //	g_free(cur_inode);
 	HLOG_DEBUG("dbg 77 leave func %s", __func__);

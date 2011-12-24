@@ -9,6 +9,8 @@
 #define SNAPSHOT_DEL_FILE 			"snapshot_delmark.txt"
 #define SNAME_LEN					(79)
 
+static GStaticMutex g_snapshot_safe_write_mutex = G_STATIC_MUTEX_INIT;
+
 struct snapshot {
 	uint64_t timestamp;
 	uint64_t inode_addr;

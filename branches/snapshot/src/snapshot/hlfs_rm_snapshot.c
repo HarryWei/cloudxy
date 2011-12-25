@@ -1,6 +1,6 @@
 /*
  *  src/snapshot/hlfs_rm_snapshot.c
- *
+ 
  *  Harry Wei <harryxiyou@gmail.com> (C) 2011
  */
 #include <stdio.h>
@@ -17,9 +17,7 @@
 int hlfs_rm_snapshot(const char *uri,const char *ssname) {
     g_message("enter func %s", __func__);
     int ret = 0;
-    char deltext[128];
     bs_file_t file = NULL;
-
     struct back_storage *storage = init_storage_handler(uri);
     if (NULL == storage) {
         HLOG_ERROR("storage init error!");
@@ -39,6 +37,7 @@ int hlfs_rm_snapshot(const char *uri,const char *ssname) {
 		HLOG_ERROR("can not open snapshot del file");
 		goto out;
 	}
+    char deltext[128];
 	memset(deltext, 0, 128);
 	uint32_t len = snapshot_delmark2text(ssname, deltext);
 	HLOG_DEBUG("delbuf is %s", deltext);

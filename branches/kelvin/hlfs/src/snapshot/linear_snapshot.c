@@ -4,11 +4,17 @@
 #include "storage_helper.h"
 #include "string.h"
 #include "hlfs_log.h"
+#include "logger.h"
 
 #define MAX_BUFSIZE (1 * 1024)
 
+
 int take_snapshot(HLFS_CTRL *ctrl, const char *ss_name)
 {
+	if (ctrl->imap_entry.inode_addr == 0) {
+		HLOG_DEBUG("No data in HLFS.");
+		return 1;
+	}
 	HLOG_DEBUG("enter func %s", __func__);
 	g_mutex_lock(ctrl->hlfs_access_mutex);
 	int ret = 0;
@@ -21,25 +27,21 @@ int take_snapshot(HLFS_CTRL *ctrl, const char *ss_name)
 	g_message("inode no:%d inode addr:%d", ctrl->imap_entry.inode_no, \
 			ctrl->imap_entry.inode_addr);
 #endif
-	struct inode *inode = load_latest_inode(ctrl->storage);
-	if (inode == NULL) {
-		g_message("error-load inode");
-		return -1;
-	}
-	ss->version = inode->ctime;
+	ss->version = ctrl->inode.ctime;
 	ss->ime.inode_no = ctrl->imap_entry.inode_no;
 	ss->ime.inode_addr = ctrl->imap_entry.inode_addr; 
-	ret = dump_ss(ctrl->storage, ss);
+	
+	ret = dump_ss(ctrl->storage, ss, 0);
 
 	if (ret < 0) {
 		HLOG_ERROR("dump ss error");
 		g_message("dump ss error");
+		g_mutex_unlock(ctrl->hlfs_access_mutex);
 		return ret;
 	}
 	
 	HLOG_DEBUG("leave func %s", __func__);
 	g_free(ss);
-	g_free(inode);
 	g_mutex_unlock(ctrl->hlfs_access_mutex);
 	return ret;
 }
@@ -141,15 +143,29 @@ int get_inode_info(const char *uri, uint64_t inode_addr, \
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	struct back_storage *storage = init_storage_handler(uri);
+
+/*read superblock. Get SEGMENT_SIZE_SHIFT ... used by load_inode*/
+	struct super_block *sb = (struct super_block *)g_malloc0(sizeof(struct super_block));
+	if (0 > read_fs_superblock(storage, sb)) {
+		g_message("read fs superblock error");
+		return -1;
+	}
+#if 0
+	g_message("%llu - inode_addr", inode_addr);
+#endif 
 	struct inode *inode = load_inode(storage, inode_addr);
 
 	if (inode == NULL)
 		return -1;
+#if 0
+	g_message("%llu %llu", inode->ctime, inode->length);
+#endif
 	*creat_time = inode->ctime;
 	*length = inode->length;
 
 	HLOG_DEBUG("leave func %s", __func__);
 	g_free(inode);
+	g_free(sb);
 	return 0;
 }
 
@@ -182,6 +198,7 @@ int hlfs_open_by_inode(HLFS_CTRL *ctrl, uint64_t inode_addr, int flag)
 int find_segfile_contain_inode(struct back_storage *storage, \
 		uint64_t time, uint32_t *segno)
 {
+#if 0
 	HLOG_DEBUG("enter func %s", __func__);
 	int num_entries = 0;
 	int i;
@@ -214,11 +231,13 @@ int find_segfile_contain_inode(struct back_storage *storage, \
 	if (info->lmtime == time) 
 		return 1;
 	return 0;
+#endif
 }
 
 int find_inode_in_seg(struct back_storage *storage,  uint32_t segno, \
 		uint64_t time, uint64_t *inode_addr)
 {
+#if 0
 	HLOG_DEBUG("enter func %s", __func__);
 	char segfile_name[SEGMENT_FILE_NAME_MAX];
 	int offset = 0;
@@ -247,11 +266,13 @@ int find_inode_in_seg(struct back_storage *storage,  uint32_t segno, \
 	HLOG_DEBUG("leave func %s", __func__);
 	g_free(buf);
 	return 0;
+#endif
 }
 
 int find_inode_before_time(const char *uri, uint64_t time, \
 		uint64_t *inode_addr)
 {
+#if 0
 	HLOG_DEBUG("enter func %s", __func__);
 	struct back_storage *storage = init_storage_handler(uri);
 	uint32_t segno = 0;
@@ -271,4 +292,5 @@ int find_inode_before_time(const char *uri, uint64_t time, \
 
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
+#endif
 }

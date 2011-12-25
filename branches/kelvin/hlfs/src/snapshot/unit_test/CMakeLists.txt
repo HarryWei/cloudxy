@@ -50,3 +50,6 @@ TARGET_LINK_LIBRARIES(rm_snapshot_test ${LIBS})
 
 ADD_EXECUTABLE(list_all_snapshot_test list_all_snapshot_test.c)
 TARGET_LINK_LIBRARIES(list_all_snapshot_test ${LIBS})
+
+ADD_EXECUTABLE(find_inode_by_name_test find_inode_by_name_test.c)
+TARGET_LINK_LIBRARIES(find_inode_by_name_test ${LIBS})

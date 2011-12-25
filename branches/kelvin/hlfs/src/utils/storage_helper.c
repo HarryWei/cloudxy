@@ -187,7 +187,10 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
        HLOG_ERROR("can not get fs:%s seg entries",storage->uri);
        return -1;
     }
-    HLOG_DEBUG("how much file :%d\n",num_entries);
+    HLOG_DEBUG("how much file :%d",num_entries);
+#if 0
+	g_message("how much file :%d",num_entries);
+#endif
     int i=0;
     const char* latest_file = NULL;
     uint64_t latest_st_mtime = 0;
@@ -256,7 +259,9 @@ struct inode *load_inode(struct back_storage * storage,uint64_t inode_storage_ad
 	}
 	uint32_t offset = get_offset(inode_storage_addr); 
     const char segfile[SEGMENT_FILE_NAME_MAX];
+	HLOG_DEBUG("seg num : %u", get_segno(inode_storage_addr));
     build_segfile_name(get_segno(inode_storage_addr),segfile);
+	HLOG_DEBUG("segfile name : %s", segfile);
 	HLOG_DEBUG("inode_addr %lld,offset %u", inode_storage_addr,offset);
 	if (0 == storage->bs_file_is_exist(storage, segfile)) {
 		if (NULL == (file = storage->bs_file_open(storage, segfile, BS_READONLY))) {

@@ -14,6 +14,8 @@ void print_value(gpointer data, gpointer usr_data)
 
 main()
 {
+	if (log4c_init())
+		g_message("log4c init error");
 	struct back_storage *storage = init_storage_handler("local:///tmp/testenv/testfs");
 	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	load_all_ss(storage, ss_hashtable);
@@ -26,4 +28,3 @@ main()
 	g_hash_table_destroy(ss_hashtable);
 	return 0;
 }
-	

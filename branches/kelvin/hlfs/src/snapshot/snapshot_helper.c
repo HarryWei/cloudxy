@@ -5,17 +5,18 @@
 
 int append_ss_delmark(struct back_storage *storage, const char *ss_name)
 {
+	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
-	char *file_name = SS_DEL_FILE;
-	char *buf = (char *)g_malloc0(sizeof(*ss_name) + 1);
+	char *buf = (char *)g_malloc0(strlen(ss_name) + 22);
 	gint size = 0;
-	size = g_sprintf(buf, "%s\n", ss_name);
+	size = g_sprintf(buf, "-%s#null#null#null#null\n", ss_name);
+	HLOG_DEBUG("size: %d", size);
 
 	HLOG_DEBUG("enter func %s", __func__);
 	HLOG_DEBUG("size will be written to the file:%d", size);
 
 	bs_file_t file = NULL;
-
+#if 0
 /*if delmark file is not exist, create it*/
 	if (-1 == storage->bs_file_is_exist(storage, file_name)) {
 		g_message("ss_delmark.txt is not exist...creat it now");
@@ -28,11 +29,11 @@ int append_ss_delmark(struct back_storage *storage, const char *ss_name)
 		}
 		storage->bs_file_close(storage, file);
 	}
+#endif
 
-	file = storage->bs_file_open(storage, file_name, BS_WRITEABLE);
+	file = storage->bs_file_open(storage, SS_FILE, BS_WRITEABLE);
 	if (file == NULL) {
-		HLOG_ERROR("Open ss_delmark.txt failed");
-		g_message("Open ss_delmark.text failed");
+		HLOG_ERROR("Open snapshot.txt failed");
 		g_free(buf);
 		return -2;
 	}
@@ -48,7 +49,6 @@ int append_ss_delmark(struct back_storage *storage, const char *ss_name)
 
 	HLOG_DEBUG("append delmark buf successfully");
 	HLOG_DEBUG("append size: %d", ret);
-	g_message("append size: %d", ret);
 	
 	storage->bs_file_close(storage, file);
 	g_free(buf);
@@ -56,13 +56,23 @@ int append_ss_delmark(struct back_storage *storage, const char *ss_name)
 	return 0;
 }
 
-int ss2text(struct snapshot *ss, char *buf)
+int ss2text(struct snapshot *ss, char *buf, int flag)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	memset(buf, 0, sizeof(*buf));
-	sprintf(buf, "%llu\n%s\n%s\n%llu\n%llu\n\n", ss->version, \
-			ss->ss_name, ss->up_ss_name, ss->ime.inode_no, \
-			ss->ime.inode_addr);
+	if (flag == 0) {
+		sprintf(buf, "+%s#%s#%llu#%llu#%llu\n",	ss->ss_name, \
+				ss->up_ss_name, ss->version, ss->ime.inode_no, \
+				ss->ime.inode_addr);
+	} else if (flag == 1) {
+		sprintf(buf, "-%s#%s#%llu#%llu#%llu\n",	ss->ss_name, \
+				ss->up_ss_name, ss->version, ss->ime.inode_no, \
+				ss->ime.inode_addr);
+	
+	} else {
+		HLOG_ERROR("flag input error");
+		return -1;
+	}
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }
@@ -111,12 +121,12 @@ int dump_ss_text(struct back_storage *storage, const char *buf)
 	return ret;
 }
 
-int dump_ss(struct back_storage *storage, struct snapshot *ss)
+int dump_ss(struct back_storage *storage, struct snapshot *ss, int flag)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	char buf[sizeof(struct snapshot) + 6];
 	int ret = 0;
-	ss2text(ss, buf);
+	ss2text(ss, buf, flag);
 #if 0
 	g_message("%s", buf);
 #endif
@@ -128,16 +138,24 @@ int dump_ss(struct back_storage *storage, struct snapshot *ss)
 	return ret;
 }
 
-int load_ss_from_text(struct snapshot *ss, const char *buf)
+int load_ss_from_text(struct snapshot *ss, const char *buf, int *flag)
 {
 	HLOG_DEBUG("enter func %s", __func__);
-	gchar **v = g_strsplit(buf, "\n", 1024);
-	gchar *_version = v[0];
-	gchar *_ss_name = v[1];
-	gchar *_up_ss_name = v[2];
+	gchar **v = g_strsplit(buf, "#", 1024);
+	gchar *_ss_name = v[0] + 1;
+	gchar *_up_ss_name = v[1];
+	gchar *_version = v[2];
 	gchar *_ime_inode_no = v[3];
 	gchar *_ime_inode_addr = v[4];
-	
+	if ('+' == v[0][0]) {
+		*flag = 0;
+	} else if ('-' == v[0][0]) {
+		*flag = 1;
+	} else {
+		HLOG_ERROR("flag parse error");
+		g_strfreev(v);
+		return -1;
+	}
 	char *endptr = NULL;
 	ss->version = strtoull(_version, &endptr, 0);
 	sprintf(ss->ss_name, "%s", _ss_name);
@@ -174,9 +192,6 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	uint32_t file_size = file_info->size; 
 	g_free(file_info);
 	HLOG_DEBUG("file_size : %ld", file_size);
-#if 0
-	g_message("file_size:%u", file_size);
-#endif
 	char buf[file_size];
 	memset(buf, 0, file_size);
 	int ret = 0;
@@ -200,63 +215,33 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	g_message("finished");
 #endif
 
-	gchar **sss = g_strsplit(buf, "\n\n", 1024);
+	gchar **sss = g_strsplit(buf, "\n", 1024);
 #if 0
 	while (*sss != NULL) {
 		g_message("%s", *sss);
 		*sss++;
 	}
 #endif
+	HLOG_DEBUG("g strv length:%d:", g_strv_length(sss));
 	for (i = 0; i < g_strv_length(sss) - 1; i++) {
+		int flag = -1;
 		struct snapshot *ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
-		load_ss_from_text(ss, sss[i]);
-		g_hash_table_insert(ss_hashtable, ss->ss_name, ss);
+		load_ss_from_text(ss, sss[i], &flag);
+		if (flag == 0) {
+			g_hash_table_insert(ss_hashtable, ss->ss_name, ss);
+			HLOG_DEBUG("insert --------------%s", ss->ss_name);
+		} else if (flag == 1) {
+			g_hash_table_remove(ss_hashtable, ss->ss_name);
+			HLOG_DEBUG("remove --------------%s", ss->ss_name);
+			g_free(ss);
+			continue;
+		} else {
+			HLOG_DEBUG("error - flag");
+			return -4;
+		}
 	}
 	g_strfreev(sss);
 	storage->bs_file_close(storage, SS_FILE); 
-
-	bs_file_info_t *file_info1 = storage->bs_file_info(storage, SS_DEL_FILE);
-	file_size = file_info1->size;
-	g_free(file_info1);
-	HLOG_DEBUG("file_size : %ld", file_size);
-	char buf1[file_size];
-	memset(buf1, 0, file_size);
-	file = storage->bs_file_open(storage, SS_DEL_FILE, BS_READONLY);
-	ret = storage->bs_file_pread(storage, file, buf1, file_size, 0);
-	if (ret < 0) {
-		HLOG_ERROR("Read ss_delmark.txt failed\n");
-#if 0
-		g_message("Cann't run to here");
-#endif
-		storage->bs_file_close(storage, file);
-		return -4;
-	} 
-
-#if 0
-	g_message("%s\n", buf1);
-#endif
-
-	gchar **sss1 = g_strsplit(buf1, "\n", 0);
-	gchar **s = sss1;
-
-#if 0
-	while (*s != NULL) {
-		printf("%s\n", *s);
-		*s++;
-	}
-#endif
-	char *endptr = NULL;
-	for (i = 0; i < g_strv_length(sss1) - 1; i++) {
-		HLOG_DEBUG("ss %s will be deleted", sss1[i]);
-#if 0
-		g_message("%s will be deleted", sss1[i]);
-#endif
-		g_hash_table_remove(ss_hashtable, sss1[i]);
-#if 0
-		g_message("remove table item false");
-#endif 
-	}
-	g_strfreev(sss1);
 
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;

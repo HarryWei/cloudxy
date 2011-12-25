@@ -53,27 +53,27 @@ int main()
 	char *uri = "local:///tmp/testenv/testfs";
 	struct back_storage *storage = init_storage_handler(uri);
 
-	if (0 > dump_ss(storage, &ss)) {
+	if (0 > dump_ss(storage, &ss, 0)) {
 		g_message("dump error");
 		return -1;
 	}
-	if (0 > dump_ss(storage, &ss1)) {
+	if (0 > dump_ss(storage, &ss1, 0)) {
 		g_message("dump error");
 		return -1;
 	}
-	if (0 > dump_ss(storage, &ss2)) {
+	if (0 > dump_ss(storage, &ss2, 0)) {
 		g_message("dump error");
 		return -1;
 	}
-	if (0 > dump_ss(storage, &ss3)) {
+	if (0 > dump_ss(storage, &ss3, 0)) {
 		g_message("dump error");
 		return -1;
 	}
-	if (0 > dump_ss(storage, &ss4)) {
+	if (0 > dump_ss(storage, &ss4, 0)) {
 		g_message("dump error");
 		return -1;
 	}
-	if (0 > dump_ss(storage, &ss5)) {
+	if (0 > dump_ss(storage, &ss5, 0)) {
 		g_message("dump error");
 		return -1;
 	}

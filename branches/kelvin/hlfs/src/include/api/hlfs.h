@@ -132,6 +132,7 @@ int hlfs_set_clean_level(HLFS_CTRL *ctrl,unsigned int alive_bytes);
  * @param ctrl: The global control structure
  * @param ss_name: Snapshot name given by user
  * @return value:
+ *  1 --- There is no data in HLFS.
  *  0 --- on success
  * -1 --- creat ss file error
  * -2 --- open ss file error

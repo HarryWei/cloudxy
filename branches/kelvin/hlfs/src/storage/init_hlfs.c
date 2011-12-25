@@ -53,12 +53,21 @@ init_hlfs(const char *uri)
     ctrl->write_req_aqueue = g_async_queue_new();
     ctrl->write_rsp_aqueue = g_async_queue_new();
     HLOG_DEBUG("uri %s", uri);
+#if 0
+	g_message("run here");
+#endif
     struct back_storage *storage = init_storage_handler(uri);
     if( storage == NULL){
         HLOG_ERROR("[uri:%s] can not accessable",uri);
         g_free(ctrl);
         return NULL;
     }
+#if 0
+	g_message("run here");
+	g_message("storage name:%s, uri: %s", (char *)storage->storage_name, \
+			storage->uri);
+#endif
+
     HLOG_DEBUG("storage name:%s,uri %s\n",
     (char *) storage->storage_name,storage->uri);
     ctrl->storage = storage;
@@ -72,14 +81,23 @@ init_hlfs(const char *uri)
     HLOG_DEBUG("superblock read over\n");
     uint32_t segno=0;
     uint32_t offset = 0;
+#if 0
+	g_message("run here");
+#endif
 
     if(0 != get_cur_latest_segment_info(ctrl->storage,&segno,&offset)){
         g_free(ctrl);
         ctrl = NULL;
         goto out;
     }
+#if 0
+	g_message("run here");
+#endif
 
     ctrl->write_task_run = 1;
+#if 0
+	g_message("run here");
+#endif
     GThread * log_write_thread = g_thread_create((GThreadFunc) log_write_task,ctrl,TRUE,NULL);
     ctrl->log_write_thread = log_write_thread;
     ctrl->ctrl_region = &CTRL_REGION;

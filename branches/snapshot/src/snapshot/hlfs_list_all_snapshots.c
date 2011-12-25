@@ -1,7 +1,6 @@
 /*
  *  src/snapshot/hlfs_list_all_snapshots.c
  *
- *  Harry Wei <harryxiyou@gmail.com> (C) 2011
  */
 #include <stdio.h>
 #include <stdint.h>

@@ -36,3 +36,6 @@ SET(LIBS glib-2.0
 SET(TESTSRC test.c)
 ADD_EXECUTABLE(test ${TESTSRC})
 TARGET_LINK_LIBRARIES(test ${LIBS})
+
+ADD_EXECUTABLE(test_hlfs_list_all_snapshots test_hlfs_list_all_snapshots.c)
+TARGET_LINK_LIBRARIES(test_hlfs_list_all_snapshots ${LIBS})

@@ -48,7 +48,14 @@ static void test_take_snapshot(Fixture *fixture, const void *data)
 		i++;
 	}
 
+	char *tmp_buf = NULL;
+
+	int res = hlfs_list_all_snapshots((const char *)data, &tmp_buf);
+	g_assert_cmpint(res, ==, 0);
+	g_message("%s", tmp_buf);
+
 	g_free(buf);
+	g_free(tmp_buf);
 	g_free(content);
 	return;
 }

@@ -136,7 +136,6 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	int i;
-
 	if (-1 == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) {
 		HLOG_ERROR("snapshot.txt is not exist");
 		return -1;

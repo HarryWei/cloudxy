@@ -19,7 +19,7 @@ hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 	int ret = 0;
 	struct inode *inode = load_inode(ctrl->storage, inode_addr);
 	if (inode == NULL) {
-		g_message("%s -- load_inode error!", __func__);
+		HLOG_ERROR("%s -- load_inode error!", __func__);
 		ret = -1;
 		goto out;
 	}
@@ -34,7 +34,7 @@ hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 	} else if (1 == flag) {	//forbid hlfs_write
 		ctrl->rw_inode_flag = 1;
 	} else {
-		g_message("%s -- the bad flag for hlfs open by inode", __func__);
+		HLOG_ERROR("%s -- the bad flag for hlfs open by inode", __func__);
 		ret = -1;
 	}
 out:

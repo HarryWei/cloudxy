@@ -19,13 +19,13 @@ hlfs_get_inode_info(const char *uri,
 	int ret = 0;
 	struct back_storage *storage = init_storage_handler(uri);
 	if (NULL == uri) {
-		g_message("%s -- init storage handler error!", __func__);
+		HLOG_ERROR("%s -- init storage handler error!", __func__);
 		ret = -1;
 		goto out;
 	}
 	struct inode *inode = load_inode(storage, inode_addr);
 	if (NULL == inode) {
-		g_message("%s -- load inode error!", __func__);
+		HLOG_ERROR("%s -- load inode error!", __func__);
 		ret = -1;
 		goto out;
 	}

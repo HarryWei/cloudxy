@@ -1,29 +1,21 @@
-/*
- *  src/snapshot/hlfs_find_inode_by_name.c
- *
- */
-#include <stdio.h>
-#include <stdint.h>
-#include <glib.h>
-#include <string.h>
-#include "hlfs_ctrl.h"
 #include "snapshot.h"
-#include "storage_helper.h"
-#include "hlfs_log.h"
-#if 0
-static int snapshot_delmark2text(const char *ssname, char *deltext) {
-	HLOG_DEBUG("dbg 77 enter func %s", __func__);
-	int n = sprintf(deltext, "%s\n", ssname);
-	HLOG_DEBUG("dbg 77 leave func %s", __func__);
-	return n;
-}
-#endif
 
-int 
-hlfs_find_inode_by_name(const char *uri, 
-						const char *sname, 
-						uint64_t *inode_addr) {
-    int ret = 0;
-	g_message("enter func %s", __func__);
+int hlfs_find_inode_by_name(const char *uri, const char *sname, \
+		uint64_t *inode_addr)
+{
+	HLOG_DEBUG("enter func %s", __func__);
+	struct back_storage *storage = init_storage_handler(uri);
+	struct snapshot *ss;
+	int ret = 0;
+	
+	ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
+
+	if (0 > (ret = load_ss_by_name(storage, ss, sname))) {
+		HLOG_ERROR("load ss by name error");
+		return ret;
+	}
+	
+	*inode_addr = ss->inode_addr;
+	HLOG_DEBUG("leave func %s", __func__);
 	return ret;
 }

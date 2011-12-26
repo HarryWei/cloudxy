@@ -172,7 +172,7 @@ int hlfs_rm_snapshot(const char *uri, const char *ssanme);
  * @para ssname: store the series snapshot names
  * @return value: 0 is right, -1 is wrong
  */
-int hlfs_list_all_snapshots(const char *uri, char **ssname);
+int hlfs_list_all_snapshots(const char *uri, char **ss_name_array);
 
 /*
  * hlfs_take_snapshot: take a snapshot given a snapshot name

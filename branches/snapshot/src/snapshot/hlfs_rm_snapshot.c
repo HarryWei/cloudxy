@@ -11,7 +11,6 @@
 #include "snapshot.h"
 #include "storage_helper.h"
 #include "hlfs_log.h"
-#include "snapshot_helper.h"
 
 
 int hlfs_rm_snapshot(const char *uri,const char *ssname) {

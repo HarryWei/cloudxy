@@ -11,11 +11,8 @@
 #include "snapshot.h"
 #include "storage_helper.h"
 #include "hlfs_log.h"
-#include "snapshot_helper.h"
 
-int 
-hlfs_take_snapshot(struct hlfs_ctrl *ctrl, 
-					const char *ssname)
+int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 {
     int ret = 0;
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);

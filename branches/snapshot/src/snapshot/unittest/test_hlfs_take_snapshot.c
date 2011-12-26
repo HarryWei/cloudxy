@@ -10,7 +10,6 @@
 #include "hlfs_ctrl.h"
 #include "hlfs_log.h"
 #include "snapshot.h"
-#include "snapshot_helper.h"
 #include "storage_helper.h"
 
 typedef struct {

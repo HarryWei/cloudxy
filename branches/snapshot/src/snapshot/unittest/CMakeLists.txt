@@ -39,3 +39,6 @@ TARGET_LINK_LIBRARIES(test ${LIBS})
 
 ADD_EXECUTABLE(test_hlfs_list_all_snapshots test_hlfs_list_all_snapshots.c)
 TARGET_LINK_LIBRARIES(test_hlfs_list_all_snapshots ${LIBS})
+
+ADD_EXECUTABLE(test_hlfs_find_inode_by_name test_hlfs_find_inode_by_name.c)
+TARGET_LINK_LIBRARIES(test_hlfs_find_inode_by_name ${LIBS})

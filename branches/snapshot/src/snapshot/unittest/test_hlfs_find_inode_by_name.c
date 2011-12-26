@@ -1,5 +1,5 @@
 /*
- *  snapshot/unittest/test_hlfs_list_all_snapshots.c
+ *  snapshot/unittest/test_hlfs_find_inode_by_name.c
  *  
  *  Kelvin  <kelvin.xupt@gmail.com>
  */

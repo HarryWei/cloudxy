@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 #include <hlfs_ctrl.h>
 #include <stdio.h>
 #include "hlfs_log.h"
@@ -6,8 +7,8 @@
 
 int snapshot2text(const struct snapshot *snapshot, char *textbuf) {
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
-	memset(textbuf, 0, sizeof(struct snapshot) * 2);
-	int n = sprintf(textbuf, "%s%s#%llu#%llu#%s\n", "+", snapshot->sname, \
+	memset(textbuf, 0, strlen(textbuf));
+	int n = sprintf(textbuf, "+%s#%llu#%llu#%s\n", snapshot->sname, \
 			snapshot->timestamp, snapshot->inode_addr, snapshot->up_sname);
 	HLOG_DEBUG("dbg 77 leave func %s", __func__);
 	return n;
@@ -56,7 +57,7 @@ out:
 int snapshot_delmark2text(const char *ssname, char *textbuf) {
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
 	memset(textbuf, 0, sizeof(struct snapshot) * 2);
-	int n = sprintf(textbuf, "%s%s###\n", "-", ssname);
+	int n = sprintf(textbuf, "-%s###\n", ssname);
 	HLOG_DEBUG("dbg 77 leave func %s", __func__);
 	return n;
 }

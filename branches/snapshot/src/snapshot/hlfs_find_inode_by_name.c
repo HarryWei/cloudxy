@@ -1,3 +1,11 @@
+/*
+ * This file implements the snapshot module API hlfs_find_inode_by_name()
+ * 
+ * By Kelvin <kelvin.xupt@gmail.com>
+ *
+ * Time : 2011.12.26
+ */
+
 #include "snapshot.h"
 
 int hlfs_find_inode_by_name(const char *uri, const char *sname, \

@@ -1,3 +1,10 @@
+/*
+ * This file implements the snapshot module API hlfs_list_all_snapshots()
+ * 
+ * By Kelvin <kelvin.xupt@gmail.com>
+ *
+ */
+
 #include "snapshot.h"
 
 #define MAX_BUFSIZE 1024
@@ -50,6 +57,7 @@ int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
 	g_list_foreach(list, list_key, *ss_name_array);
 	
 	HLOG_DEBUG("buf:%s", *ss_name_array);
+	g_hash_table_destroy(ss_hashtable);
 	if (*ss_name_array == NULL) {
 		HLOG_ERROR("buf is NULL");
 		return -1;

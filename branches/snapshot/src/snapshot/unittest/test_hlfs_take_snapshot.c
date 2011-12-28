@@ -34,30 +34,37 @@ do_snapshot(Fixture *fixture, int i) {
 	memset(buffer, 0, 128);
 	if (0 == i) {
 		sprintf(buffer, "%s%d", "snapshot", i);
+		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (1 == i) {
 		sprintf(buffer, "%s", " ");
+		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (2 == i) {
 		sprintf(buffer, "%s", "+");
+		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (3 == i) {
 		sprintf(buffer, "%s", "##@");
+		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (4 == i) {
 		sprintf(buffer, "%s", "..");
+		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (5 == i) {
 		sprintf(buffer, "%s", " **");
+		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (6 == i) {
 		sprintf(buffer, "%s", "1234");
+		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	}

@@ -11,6 +11,7 @@
 #include "snapshot.h"
 #include "storage_helper.h"
 #include "hlfs_log.h"
+#include "misc.h"
 
 int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 {
@@ -25,7 +26,7 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 		return -1;
 	}
 	cp->timestamp = get_current_time();
-	g_strlcpy(cp->sname,ssname,strlen(ssname));
+	g_strlcpy(cp->sname,ssname,HLFS_FILE_NAME_MAX);
 	cp->inode_addr = ctrl->imap_entry.inode_addr;
     g_mutex_lock (ctrl->hlfs_access_mutex);
 	ret = dump_snapshot(ctrl->storage,SNAPSHOT_FILE,cp);

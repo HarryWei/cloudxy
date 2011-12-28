@@ -13,10 +13,10 @@
 #include "hlfs_log.h"
 #include "misc.h"
 
-int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
-{
+int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname) {
     int ret = 0;
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
+	g_message("77 dbg sname is [%s]", ssname);
     if(ctrl == NULL || ssname ==NULL){
         return -1;
     }
@@ -26,7 +26,11 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 		return -1;
 	}
 	cp->timestamp = get_current_time();
-	g_strlcpy(cp->sname,ssname,HLFS_FILE_NAME_MAX);
+	if ((strlen(ssname) + 1) > HLFS_FILE_NAME_MAX) {
+		HLOG_ERROR("error, snapshot name beyond max length!");
+		return -1;
+	}
+	g_strlcpy(cp->sname,ssname,strlen(ssname) + 1);
 	cp->inode_addr = ctrl->imap_entry.inode_addr;
     g_mutex_lock (ctrl->hlfs_access_mutex);
 	ret = dump_snapshot(ctrl->storage,SNAPSHOT_FILE,cp);

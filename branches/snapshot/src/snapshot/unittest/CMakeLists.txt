@@ -32,11 +32,13 @@ ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(LIBS glib-2.0
          hlfs
-	     log4c)
+	     log4c
+		 gcov)
 
 SET(TESTSRC test_hlfs_take_snapshot.c)
 ADD_EXECUTABLE(test ${TESTSRC})
 TARGET_LINK_LIBRARIES(test ${LIBS})
+SET_TARGET_PROPERTIES(test PROPERTIES COMPILE_FLAGS "-ftest-coverage -fprofile-arcs")
 
 #ADD_EXECUTABLE(test_hlfs_list_all_snapshots test_hlfs_list_all_snapshots.c)
 #TARGET_LINK_LIBRARIES(test_hlfs_list_all_snapshots ${LIBS})

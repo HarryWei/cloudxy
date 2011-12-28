@@ -136,12 +136,11 @@ int load_ss_from_text(struct snapshot *ss, const char *buf, int *flag)
 int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 {
 	HLOG_DEBUG("enter func %s", __func__);
-	int i;
+	int i = 0;
 	if (-1 == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) {
 		HLOG_ERROR("snapshot.txt is not exist");
 		return -1;
 	}
-
 	bs_file_info_t *file_info = storage->bs_file_info(storage, SNAPSHOT_FILE);
 	uint32_t file_size = file_info->size; 
 	g_free(file_info);
@@ -149,14 +148,11 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	char buf[file_size];
 	memset(buf, 0, file_size);
 	int ret = 0;
-
 	bs_file_t file = storage->bs_file_open(storage, SNAPSHOT_FILE, BS_READONLY);
-
 	if (file == NULL) {
 		HLOG_ERROR("open snapshot.txt error");
 		return -2;
 	}
-	
 	ret = storage->bs_file_pread(storage, file, buf, file_size, 0);
 	if (ret < 0) {
 		g_message("Read file snapshot.txt failed\n");
@@ -164,18 +160,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		storage->bs_file_close(storage, file);
 		return -3;
 	}
-#if 0
-	g_message("%s", buf);
-	g_message("finished");
-#endif
-
 	gchar **sss = g_strsplit(buf, "\n", 1024);
-#if 0
-	while (*sss != NULL) {
-		g_message("%s", *sss);
-		*sss++;
-	}
-#endif
 	HLOG_DEBUG("g strv length:%d:", g_strv_length(sss));
 	for (i = 0; i < g_strv_length(sss) - 1; i++) {
 		int flag = -1;
@@ -196,7 +181,6 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	}
 	g_strfreev(sss);
 	storage->bs_file_close(storage, SNAPSHOT_FILE); 
-
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }

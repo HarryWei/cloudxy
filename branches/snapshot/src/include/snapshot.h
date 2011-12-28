@@ -1,11 +1,8 @@
 #ifndef __HLFS_SNAPSHOT_H_
 #define __HLFS_SNAPSHOT_H_
 
-#include <glib.h>
-#include "hlfs_log.h"
 #include <stdint.h>
-#include <hlfs_ctrl.h>
-#include <stdio.h>
+#include "hlfs_ctrl.h"
 #include "comm_define.h"
 #include "storage.h"
 

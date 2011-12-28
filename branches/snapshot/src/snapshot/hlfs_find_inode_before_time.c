@@ -13,8 +13,12 @@
 #include "snapshot.h"
 #include "storage.h"
 #include "storage_helper.h"
+
 static int 
-get_iaddr_bytime_in_seg(struct back_storage *storage, uint64_t timestamp,const char *segfile,uint64_t *inode_addr) {
+get_iaddr_bytime_in_seg(struct back_storage *storage, 
+						uint64_t timestamp,
+						const char *segfile,
+						uint64_t *inode_addr) {
 	g_message("enter func %s", __func__);
     uint32_t segment_size,block_size,max_fs_size;
 	int ret = read_fs_meta(storage,&segment_size, &block_size,&max_fs_size);
@@ -71,9 +75,9 @@ out:
 }
 
 static int 
-sort_finfo_with_time(bs_file_info_t* linfo, bs_file_info_t* rinfo) {
-	uint64_t llmtime = (bs_file_info_t*)linfo->lmtime;
-	uint64_t rlmtime = (bs_file_info_t*)rinfo->lmtime;
+sort_finfo_with_time(gconstpointer linfo, gconstpointer rinfo) {
+	uint64_t llmtime = ((bs_file_info_t *) linfo)->lmtime;
+	uint64_t rlmtime = ((bs_file_info_t *) rinfo)->lmtime;
 	if (llmtime > rlmtime) {
 		return 1;
 	} else if (llmtime == rlmtime) {
@@ -103,10 +107,10 @@ hlfs_find_inode_before_time(const char *uri, uint64_t timestamp,uint64_t *inode_
     g_message("there re %d files", num_entries);
     bs_file_info_t *info = infos;
     int i = 0;
-    GSList *info_list = NULL;
+    GList *info_list = NULL;
     for (i = 0; i < num_entries; i++) {
         if (g_str_has_suffix(info->name, "seg")) {
-            info_list = g_slist_append(info_list,info);
+            info_list = g_list_append(info_list,info);
 		}
 		info ++;
 	}
@@ -127,7 +131,7 @@ hlfs_find_inode_before_time(const char *uri, uint64_t timestamp,uint64_t *inode_
 	char segfile[512];
     uint32_t segno = get_segfile_no(info->name);
     build_segfile_name(segno,segfile);
-    ret = get_iaddr_bytime_in_seg(storage,segfile,timestamp,inode_addr);
+    ret = get_iaddr_bytime_in_seg(storage, timestamp, segfile, inode_addr);
 out:
 	g_list_free(info_list);
 	return ret;

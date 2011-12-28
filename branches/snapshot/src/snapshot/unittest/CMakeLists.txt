@@ -7,6 +7,7 @@
 SET(CMAKE_BUILD_TYPE "Debug") 
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g")
 SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -ftest-coverage -fprofile-arcs")
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(HLFS)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
@@ -33,12 +34,12 @@ SET(LIBS glib-2.0
          hlfs
 	     log4c)
 
-SET(TESTSRC test.c)
+SET(TESTSRC test_hlfs_take_snapshot.c)
 ADD_EXECUTABLE(test ${TESTSRC})
 TARGET_LINK_LIBRARIES(test ${LIBS})
 
-ADD_EXECUTABLE(test_hlfs_list_all_snapshots test_hlfs_list_all_snapshots.c)
-TARGET_LINK_LIBRARIES(test_hlfs_list_all_snapshots ${LIBS})
+#ADD_EXECUTABLE(test_hlfs_list_all_snapshots test_hlfs_list_all_snapshots.c)
+#TARGET_LINK_LIBRARIES(test_hlfs_list_all_snapshots ${LIBS})
 
-ADD_EXECUTABLE(test_hlfs_find_inode_by_name test_hlfs_find_inode_by_name.c)
-TARGET_LINK_LIBRARIES(test_hlfs_find_inode_by_name ${LIBS})
+#ADD_EXECUTABLE(test_hlfs_find_inode_by_name test_hlfs_find_inode_by_name.c)
+#TARGET_LINK_LIBRARIES(test_hlfs_find_inode_by_name ${LIBS})

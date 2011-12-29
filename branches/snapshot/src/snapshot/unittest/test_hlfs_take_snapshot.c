@@ -19,7 +19,7 @@ typedef struct {
 } Fixture;
 
 static void 
-take_snapshot_setup(Fixture *fixture, const void *data) {
+hlfs_take_snapshot_setup(Fixture *fixture, const void *data) {
 	const char *uri = (const char *)data;
 	fixture->ctrl = init_hlfs(uri);
 	int ret = hlfs_open(fixture->ctrl, 1);
@@ -72,7 +72,7 @@ do_snapshot(Fixture *fixture, int i) {
 }
 
 static void 
-test_take_snapshot(Fixture *fixture, const void *data) {
+test_hlfs_take_snapshot(Fixture *fixture, const void *data) {
 	char content[REQ_SIZE];
 	int offset = 0;
 	int i = 0;
@@ -89,7 +89,7 @@ test_take_snapshot(Fixture *fixture, const void *data) {
 }
 
 static void 
-take_snapshot_tear_down(Fixture *fixture, const void *data) {
+hlfs_take_snapshot_tear_down(Fixture *fixture, const void *data) {
 	hlfs_close(fixture->ctrl);
 	deinit_hlfs(fixture->ctrl);
 	return;
@@ -97,11 +97,11 @@ take_snapshot_tear_down(Fixture *fixture, const void *data) {
 
 int main(int argc, char **argv) {
 	g_test_init(&argc, &argv, NULL);
-	g_test_add("/tmp/unittest", 
+	g_test_add("/misc/hlfs_take_snapshot", 
 				Fixture, 
 				"local:///tmp/testenv/testfs",
-				take_snapshot_setup, 
-				test_take_snapshot, 
-				take_snapshot_tear_down);
+				hlfs_take_snapshot_setup, 
+				test_hlfs_take_snapshot, 
+				hlfs_take_snapshot_tear_down);
 	return g_test_run();
 }

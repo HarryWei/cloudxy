@@ -16,7 +16,6 @@
 int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname) {
     int ret = 0;
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
-	g_message("77 dbg sname is [%s]", ssname);
     if(ctrl == NULL || ssname ==NULL){
         return -1;
     }

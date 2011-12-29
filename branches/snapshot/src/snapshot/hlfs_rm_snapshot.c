@@ -13,7 +13,7 @@
 #include "hlfs_log.h"
 
 int hlfs_rm_snapshot(const char *uri,const char *ssname) {
-    g_message("enter func %s", __func__);
+    HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
     bs_file_t file = NULL;
     struct back_storage *storage = init_storage_handler(uri);
@@ -47,6 +47,6 @@ out:
 	if (NULL != file) {
 		storage->bs_file_close(storage, file);
 	}
-    g_message("leave func %s", __func__);
+    HLOG_DEBUG("leave func %s", __func__);
 	return ret;
 }

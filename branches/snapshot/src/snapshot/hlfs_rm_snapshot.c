@@ -12,9 +12,8 @@
 #include "storage_helper.h"
 #include "hlfs_log.h"
 
-
 int hlfs_rm_snapshot(const char *uri,const char *ssname) {
-    HLOG_ERROR("enter func %s", __func__);
+    g_message("enter func %s", __func__);
     int ret = 0;
     bs_file_t file = NULL;
     struct back_storage *storage = init_storage_handler(uri);
@@ -40,13 +39,14 @@ int hlfs_rm_snapshot(const char *uri,const char *ssname) {
 	memset(deltext, 0, 128);
 	uint32_t len = snapshot_delmark2text(ssname, deltext);
 	HLOG_DEBUG("delbuf is %s", deltext);
-	if (0 > (ret = storage->bs_file_append(storage, file, deltext, len))) {
-		HLOG_ERROR("append del text failed: %d!", ret);
+	if (0 > storage->bs_file_append(storage, file, deltext, len)) {
+		HLOG_ERROR("append del text failed!");
 		ret = -1;
 	}
 out:
 	if (NULL != file) {
 		storage->bs_file_close(storage, file);
 	}
+    g_message("leave func %s", __func__);
 	return ret;
 }

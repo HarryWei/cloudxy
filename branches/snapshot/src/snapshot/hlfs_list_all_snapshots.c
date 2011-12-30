@@ -13,11 +13,16 @@
 #include "hlfs_log.h"
 #include "snapshot.h"
 
-#define MAX_BUFSIZE 1024
+#define MAX_BUFSIZE (4 * 1024)
 
+/* 
+ * list_key() will be the parameter of the function g_list_foreach() which will 
+ * be invoked by hlfs_list_all_snapshots().
+ */
 void list_key(gpointer data, gpointer usr_data)
 {
 	HLOG_DEBUG("enter func %s", __func__);
+	int size = 0;
 	if (data == NULL) {
 		HLOG_DEBUG("data is NULL");
 		return ;
@@ -29,11 +34,19 @@ void list_key(gpointer data, gpointer usr_data)
 		return ;
 	}
 	tmp = g_strconcat(data, "\n", NULL);
-	g_strlcat(usr_data, tmp, MAX_BUFSIZE);
+	size = g_strlcat(usr_data, tmp, MAX_BUFSIZE);
+	if (MAX_BUFSIZE < size) {
+		HLOG_ERROR("MAX_BUFSIZE is not enough");
+		return;
+	}
 	g_free(tmp);
 	HLOG_DEBUG("leave func %s", __func__);
 }
 
+/*
+ * hlfs_list_all_snapshots is one of snapshot module's APIs.It's function is 
+ * loading all snapshot names to the memery.
+ */
 int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
 {
 	HLOG_DEBUG("enter func %s", __func__);
@@ -46,19 +59,22 @@ int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
 		goto out;
 	}
 	*ss_name_array = tmp_buf;
-	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, \
+			NULL, NULL);
 	struct back_storage *storage = init_storage_handler(uri);
 	if (NULL == storage) {
 		HLOG_ERROR("init storage handler error!");
-		ret = -1;
+		ret = -2;
 		goto out;
 	}
+
 	ret = load_all_ss(storage, ss_hashtable);
 	if (ret < 0) {
 		HLOG_ERROR("load all ss error: %d", ret);
-		ret = -1;
+		ret = -3;
 		goto out;
 	}
+
 	GList *list = g_hash_table_get_keys(ss_hashtable);
 	if (list == NULL) {
 		HLOG_DEBUG("list NULL");
@@ -66,10 +82,17 @@ int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
 	ret = load_all_ss(storage, ss_hashtable);
 	g_list_foreach(list, list_key, *ss_name_array);
 	HLOG_DEBUG("buf:%s", *ss_name_array);
+
+	if (0 > rewrite_snapshot_file(storage, ss_hashtable)) {
+		HLOG_ERROR("rewrite snapshot.txt error");
+		return -4;
+	}
+
 	g_hash_table_destroy(ss_hashtable);
+
 	if (*ss_name_array == NULL) {
-		HLOG_ERROR("buf is NULL");
-		return -1;
+		HLOG_DEBUG("Buf is NULL after listing");
+		return -5;
 	}
 out:
 	HLOG_DEBUG("leave func %s", __func__);

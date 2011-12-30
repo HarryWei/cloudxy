@@ -188,21 +188,18 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 int load_ss_by_name(struct back_storage *storage, struct snapshot *ss, \
 		const char *ss_name)
 {
+	HLOG_DEBUG("enter func %s", __func__);
 	int res = 0;
 	struct snapshot *_ss;
 	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, \
 			g_str_equal, NULL, NULL);
+
 	res = load_all_ss(storage, ss_hashtable);
-#if 0 
-	g_message("%d", ret);
-#endif
 	if (res < 0) {
 		HLOG_ERROR("load all ss error");
 		return -1;
 	}
-#if 0
-	g_message("seg fault test");
-#endif
+
 	_ss = g_hash_table_lookup(ss_hashtable, ss_name);
 	if (NULL == _ss) {
 		HLOG_DEBUG("No such key in table");
@@ -212,17 +209,51 @@ int load_ss_by_name(struct back_storage *storage, struct snapshot *ss, \
 	sprintf(ss->sname, "%s", _ss->sname);
 	sprintf(ss->up_sname, "%s", _ss->up_sname);
 	ss->inode_addr = _ss->inode_addr;
-#if 0
-	g_message("seg fault test");
-#endif
-#if 0
-	g_message("%llu\n%s\n%s\n%llu\n%llu", _ss->version, _ss->sname, \
-			_ss->up_sname, _ss->ime.inode_no, _ss->ime.inode_addr);
-#endif
-#if 0
-	g_message("seg fault test");
-#endif
+
 	g_hash_table_destroy(ss_hashtable);
+	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }
 
+void dump_ss_one_by_one(gpointer data, gpointer storage)
+{
+	HLOG_DEBUG("enter func %s", __func__);
+	struct snapshot *ss = (struct snapshot *)data;
+	char *file_name = SNAPSHOT_FILE;
+
+	if (NULL == ss || NULL == storage) {
+		HLOG_ERROR("Param error");
+		return;
+	}
+
+	if (0 > dump_snapshot(storage, file_name, ss)) {
+		HLOG_ERROR("dump ss error");
+		return;
+	}
+	HLOG_DEBUG("leave func %s", __func__);
+}
+
+int rewrite_snapshot_file(struct back_storage *storage, GHashTable *ss_hashtable)
+{
+	HLOG_DEBUG("enter func %s", __func__);
+
+	if((0 == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) && \
+			(0 > storage->bs_file_delete(storage, SNAPSHOT_FILE))) {
+		HLOG_ERROR("remove snapshot.txt failed");
+		return -1;
+	}
+
+	bs_file_t file = storage->bs_file_create(storage, SNAPSHOT_FILE);
+	if (file == NULL) {
+		HLOG_ERROR("create snapshot.txt error");
+		return -2;
+	}
+	storage->bs_file_close(storage, file);
+
+	GList *list = g_hash_table_get_values(ss_hashtable);
+	g_list_foreach(list, dump_ss_one_by_one, storage);
+	g_list_free(list);
+
+	HLOG_DEBUG("leave func %s", __func__);
+	return 0;
+}

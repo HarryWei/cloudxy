@@ -13,6 +13,8 @@
 
 #define REQ_SIZE 4096
 #define TOTAL_SIZE 409600
+#define PATH "local:///tmp/testenv/testfs"
+#define SS_NAME "snapshot4"
 
 typedef struct {
 	struct hlfs_ctrl *ctrl;
@@ -49,6 +51,11 @@ static void test_take_snapshot(Fixture *fixture, const void *data)
 	}
 
 	char *tmp_buf = NULL;
+
+	if (0 > hlfs_rm_snapshot(PATH, SS_NAME)) {
+		g_message("rm snapshot error");
+		return -1;
+	}
 
 	int res = hlfs_list_all_snapshots((const char *)data, &tmp_buf);
 	g_assert_cmpint(res, ==, 0);

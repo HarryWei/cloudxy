@@ -35,13 +35,13 @@ SET(LIBS glib-2.0
 	     log4c
 		 gcov)
 
-SET(TESTSRC test_hlfs_find_inode_before_time.c)
+SET(TESTSRC test_hlfs_get_inode_info.c)
 ADD_EXECUTABLE(test ${TESTSRC})
 TARGET_LINK_LIBRARIES(test ${LIBS})
 SET_TARGET_PROPERTIES(test PROPERTIES COMPILE_FLAGS "-ftest-coverage -fprofile-arcs")
 
-ADD_EXECUTABLE(test_hlfs_list_all_snapshots test_hlfs_list_all_snapshots.c)
-TARGET_LINK_LIBRARIES(test_hlfs_list_all_snapshots ${LIBS})
+#ADD_EXECUTABLE(test_hlfs_list_all_snapshots test_hlfs_list_all_snapshots.c)
+#TARGET_LINK_LIBRARIES(test_hlfs_list_all_snapshots ${LIBS})
 
-ADD_EXECUTABLE(test_hlfs_find_inode_by_name test_hlfs_find_inode_by_name.c)
-TARGET_LINK_LIBRARIES(test_hlfs_find_inode_by_name ${LIBS})
+#ADD_EXECUTABLE(test_hlfs_find_inode_by_name test_hlfs_find_inode_by_name.c)
+#TARGET_LINK_LIBRARIES(test_hlfs_find_inode_by_name ${LIBS})

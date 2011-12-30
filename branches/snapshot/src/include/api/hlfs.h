@@ -11,7 +11,7 @@
  * Kelvin <kelvin.xupt@gmail.com>
  * Zhangbo <0311zhangbo@gmail.com>
  * 
- * Mail List : xiyoucloud@googlegroups.com
+ * Mail List : cloudxy@googlegroups.com
  */
 
 #ifndef _HDFS_LFS_H_

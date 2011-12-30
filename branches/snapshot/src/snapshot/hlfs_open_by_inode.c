@@ -12,6 +12,7 @@
 #include "storage_helper.h"
 #include "comm_define.h"
 #include "hlfs_log.h"
+
 int 
 hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 					uint64_t inode_addr,
@@ -19,7 +20,7 @@ hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 	int ret = 0;
 	struct inode *inode = load_inode(ctrl->storage, inode_addr);
 	if (inode == NULL) {
-		HLOG_ERROR("%s -- load_inode error!", __func__);
+		HLOG_ERROR("load_inode error!");
 		ret = -1;
 		goto out;
 	}
@@ -34,7 +35,7 @@ hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 	} else if (1 == flag) {	//forbid hlfs_write
 		ctrl->rw_inode_flag = 1;
 	} else {
-		HLOG_ERROR("%s -- the bad flag for hlfs open by inode", __func__);
+		HLOG_ERROR("the bad flag for hlfs open by inode");
 		ret = -1;
 	}
 out:

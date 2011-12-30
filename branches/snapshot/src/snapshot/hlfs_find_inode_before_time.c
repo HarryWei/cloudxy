@@ -51,7 +51,7 @@ get_iaddr_bytime_in_seg(struct back_storage *storage,
 	}
 	g_message("%s -- count is %d", __func__, count);
 	int offset = 0;
-	uint64_t tmp_time = 0;
+//	uint64_t tmp_time = 0;
 	struct log_header *lh = NULL;
 	struct inode_map_entry *imap = NULL;
 	struct inode *inode = NULL;
@@ -69,7 +69,7 @@ get_iaddr_bytime_in_seg(struct back_storage *storage,
 		imap = (struct inode_map_entry *) (tmp_buf + offset + lh->log_size - sizeof(struct inode_map_entry));
 		g_message("%s -- This inode addr is %llu", __func__, imap->inode_addr);
 		inode = (struct inode *) (tmp_buf + offset + lh->log_size - sizeof(struct inode_map_entry) - sizeof(struct inode));
-		g_message("%s -- tmp_time is %llu, This inode's mtime is %llu", __func__, tmp_time, inode->mtime);
+		g_message("%s -- This inode's mtime is %llu", __func__, inode->mtime);
 	    *inode_addr = imap->inode_addr;
 		if ((timestamp <= inode->mtime)) {
 			goto out;

@@ -153,7 +153,7 @@ hlfs_find_inode_before_time(const char *uri,
 #endif
     /* to find inode in give seg */
 	char segfile[512];
-	memset(0, segfile, 512);
+	memset(segfile, 0, 512);
     uint32_t segno = get_segfile_no(info->name);
     build_segfile_name(segno,segfile);
     ret = get_iaddr_bytime_in_seg(storage, timestamp, segfile, inode_addr);

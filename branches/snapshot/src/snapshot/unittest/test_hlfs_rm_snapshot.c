@@ -102,6 +102,8 @@ test_hlfs_rm_snapshot(Fixture *fixture, const void *data) {
 	int ret = 0;
 	ret = hlfs_rm_snapshot(uri, "snapshot0");
 	g_assert(ret == 0);
+	ret = hlfs_rm_snapshot(uri, "snapshot0");
+	g_assert(ret == 0);
 	ret = hlfs_rm_snapshot(uri, "bug here");
 	g_assert(ret == 0);
 	g_message("leave func %s", __func__);

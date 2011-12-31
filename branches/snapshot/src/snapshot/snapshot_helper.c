@@ -57,7 +57,7 @@ out1:
 int snapshot_delmark2text(const char *ssname, char *textbuf) {
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
 	memset(textbuf, 0, 128);
-	int n = sprintf(textbuf, "-%s@@##$$##\n", ssname);
+	int n = sprintf(textbuf, "-%s@@##$$###\n", ssname);
 	HLOG_DEBUG("dbg 77 leave func %s", __func__);
 	return n;
 }
@@ -105,33 +105,39 @@ out2:
 int load_ss_from_text(struct snapshot *ss, const char *buf, int *flag)
 {
 	HLOG_DEBUG("enter func %s", __func__);
-    gchar **v = g_strsplit(buf, "@@##$$", 4);
-    gchar *_ss_name = v[0] + 1;
-    gchar *_version = v[1];
-	gchar *_ime_inode_addr = v[2];
-    gchar *_up_ss_name = v[3];
-	if (((strlen(_ss_name) + 1) > HLFS_FILE_NAME_MAX) ||
-			(strlen(_up_ss_name) + 1) > HLFS_FILE_NAME_MAX) {
-		HLOG_ERROR("snapshot name or up snapshot name beyond max length!");
-		return -1;
-	}
+    gchar **v = g_strsplit(buf, "@@##$$", 2);
     if ('+' == v[0][0]) {
         *flag = 0;
+		gchar **_v = g_strsplit(v[1], "@@##$$", 3);
+    	gchar *_ss_name = v[0] + 1;
+    	gchar *_version = _v[0];
+		gchar *_ime_inode_addr = _v[1];
+    	gchar *_up_ss_name = _v[2];
+		if (((strlen(_ss_name) + 1) > HLFS_FILE_NAME_MAX) ||
+				(strlen(_up_ss_name) + 1) > HLFS_FILE_NAME_MAX) {
+			HLOG_ERROR("snapshot name or up snapshot name beyond max length!");
+			return -1;
+		}
+    	char *endptr = NULL;
+		ss->timestamp = strtoull(_version, &endptr, 0); 
+    	sprintf(ss->sname, "%s", _ss_name);
+		sprintf(ss->up_sname, "%s", _up_ss_name);
+		ss->inode_addr = strtoull(_ime_inode_addr, &endptr, 0); 
+		HLOG_DEBUG("ss->timestamp:%llu  ss->sname:%s  ss->up_sname:%s, \
+					ss->inode_addr: %llu", ss->timestamp, ss->sname, 
+					ss->up_sname, ss->inode_addr);
+		g_strfreev(_v);
     } else if ('-' == v[0][0]) {
         *flag = 1;
+    	sprintf(ss->sname, "%s", v[0] + 1);
+		sprintf(ss->up_sname, "%s", "removed");
+		ss->timestamp = 0;
+		ss->inode_addr = 0;
     } else {
 		HLOG_ERROR("flag parse error");
 		g_strfreev(v);
 		return -1; 
 	}   
-    char *endptr = NULL;
-	ss->timestamp = strtoull(_version, &endptr, 0); 
-    sprintf(ss->sname, "%s", _ss_name);
-	sprintf(ss->up_sname, "%s", _up_ss_name);
-	ss->inode_addr = strtoull(_ime_inode_addr, &endptr, 0); 
-	HLOG_DEBUG("ss->timestamp:%llu  ss->sname:%s  ss->up_sname:%s, \
-				ss->inode_addr: %llu", ss->timestamp, ss->sname, 
-				ss->up_sname, ss->inode_addr);
 	g_strfreev(v);
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
@@ -142,6 +148,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
 	int i = 0;
+	g_message("%s -- 77 dbg", __func__);
 	if (-1 == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) {
 		HLOG_ERROR("snapshot.txt is not exist");
 		ret = -1;
@@ -153,6 +160,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		ret = -1;
 		return ret;
 	}
+	g_message("%s -- 77 dbg", __func__);
 	uint32_t file_size = file_info->size; 
 	g_free(file_info);
 	HLOG_DEBUG("file_size : %u", file_size);
@@ -164,6 +172,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		ret = -2;
 		return ret;
 	}
+	g_message("%s -- 77 dbg", __func__);
 	ret = storage->bs_file_pread(storage, file, buf, file_size, 0);
 	if (ret < 0) {
 		HLOG_ERROR("Read file snapshot.txt failed\n");
@@ -174,29 +183,36 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		return ret;
 	}
 	gchar **sss = g_strsplit(buf, "\n", 0);
-	HLOG_DEBUG("g strv length:%d:", g_strv_length(sss));
+	g_message("g strv length:%d:", g_strv_length(sss));
+	g_message("%s -- 77 dbg", __func__);
 	for (i = 0; i < g_strv_length(sss) - 1; i++) {
 		int flag = -1;
 		struct snapshot *ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
 		if (NULL == ss) {
-			HLOG_ERROR("Allocate error!");
+			g_message("Allocate error!");
 			if (NULL != file) {
 				storage->bs_file_close(storage, file);
 			}
 			ret = -1;
 			return ret;
 		}
+		g_message("7771 dbg");
 		load_ss_from_text(ss, sss[i], &flag);
+		g_message("7772 dbg");
 		if (flag == 0) {
 			g_hash_table_insert(ss_hashtable, ss->sname, ss);
-			HLOG_DEBUG("insert snapshot [%s]", ss->sname);
+			g_message("insert snapshot [%s]", ss->sname);
 		} else if (flag == 1) {
-			g_hash_table_remove(ss_hashtable, ss->sname);
-			HLOG_DEBUG("remove snapshot [%s]", ss->sname);
+			g_message("remove snapshot [%s]", ss->sname);
+			if (TRUE != g_hash_table_remove(ss_hashtable, ss->sname)) {
+				g_message("snapshot [%s] remove from hash table error!", ss->sname);
+				return -1;
+			}
+			g_message("remove snapshot [%s]", ss->sname);
 			g_free(ss);
 			continue;
 		} else {
-			HLOG_DEBUG("error - flag");
+			g_message("error - flag");
 			g_strfreev(sss);
 			if (NULL != file) {
 				storage->bs_file_close(storage, file);
@@ -205,6 +221,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 			return ret;
 		}
 	}
+	g_message("%s -- 77 dbg", __func__);
 	g_strfreev(sss);
 	storage->bs_file_close(storage, SNAPSHOT_FILE); 
 	HLOG_DEBUG("leave func %s", __func__);

@@ -57,7 +57,7 @@ out1:
 int snapshot_delmark2text(const char *ssname, char *textbuf) {
 	HLOG_DEBUG("dbg 77 enter func %s", __func__);
 	memset(textbuf, 0, 128);
-	int n = sprintf(textbuf, "-%s@@##$$###\n", ssname);
+	int n = sprintf(textbuf, "-%s@@##$$\n", ssname);
 	HLOG_DEBUG("dbg 77 leave func %s", __func__);
 	return n;
 }

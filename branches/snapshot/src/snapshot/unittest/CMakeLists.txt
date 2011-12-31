@@ -7,7 +7,6 @@
 SET(CMAKE_BUILD_TYPE "Debug") 
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g")
 SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
-SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -ftest-coverage -fprofile-arcs")
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(HLFS)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
@@ -37,8 +36,9 @@ SET(LIBS glib-2.0
 
 SET(TESTSRC test_hlfs_rm_snapshot.c)
 ADD_EXECUTABLE(test ${TESTSRC})
+ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
 TARGET_LINK_LIBRARIES(test ${LIBS})
-SET_TARGET_PROPERTIES(test PROPERTIES COMPILE_FLAGS "-ftest-coverage -fprofile-arcs")
+TARGET_LINK_LIBRARIES(test -fprofile-arcs -ftest-coverage)
 
 #ADD_EXECUTABLE(test_hlfs_list_all_snapshots test_hlfs_list_all_snapshots.c)
 #TARGET_LINK_LIBRARIES(test_hlfs_list_all_snapshots ${LIBS})

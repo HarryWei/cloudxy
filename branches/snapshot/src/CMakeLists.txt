@@ -69,7 +69,8 @@ SET(LHFLIBS   glib-2.0
               rt
 	          hdfs
 		  log4c
-     	      jvm)
+     	      jvm
+			  gcov)
 
 ADD_LIBRARY(hlfs SHARED ${LHFSSRCS})
 # Set linked libs with target.¡¡
@@ -78,6 +79,8 @@ TARGET_LINK_LIBRARIES(hlfs ${LHFLIBS})
 SET_TARGET_PROPERTIES(hlfs PROPERTIES COMPILE_FLAGS "-g")
 # Set linked property.
 # SET_TARGET_PROPERTIES(hlfs PROPERTIES LINK_FLAGS "")
+ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+TARGET_LINK_LIBRARIES(hlfs -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(libhlfs hlfs)
 
 #----------------------- Make tools ---------------------------#
@@ -97,13 +100,16 @@ ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 SET(TOOLLIBS glib-2.0
              hlfs
 	     log4c
-	         hdfs)
+	         hdfs
+			 gcov)
 
 SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
 SET(TOOLSRCS tools/hlfs_mkfs.c)
 ADD_EXECUTABLE(mkfs.hlfs ${TOOLSRCS})
 TARGET_LINK_LIBRARIES(mkfs.hlfs ${TOOLLIBS})
 SET_TARGET_PROPERTIES(mkfs.hlfs PROPERTIES COMPILE_FLAGS "-g")
+ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+TARGET_LINK_LIBRARIES(mkfs.hlfs -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(tools mkfs.hlfs)
 
 
@@ -111,6 +117,8 @@ SET(TOOLSRCS tools/hlfs_seg_usage_calc.c)
 ADD_EXECUTABLE(segcalc.hlfs ${TOOLSRCS})
 TARGET_LINK_LIBRARIES(segcalc.hlfs ${TOOLLIBS})
 SET_TARGET_PROPERTIES(segcalc.hlfs PROPERTIES COMPILE_FLAGS "-g")
+ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+TARGET_LINK_LIBRARIES(segcalc.hlfs -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(tools segcalc.hlfs)
 
 
@@ -118,22 +126,36 @@ SET(TOOLSRCS tools/hlfs_seg_clean.c)
 ADD_EXECUTABLE(seg.clean ${TOOLSRCS})
 TARGET_LINK_LIBRARIES(seg.clean ${TOOLLIBS})
 SET_TARGET_PROPERTIES(seg.clean PROPERTIES COMPILE_FLAGS "-g")
+ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+TARGET_LINK_LIBRARIES(seg.clean -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(tools seg.clean)
 
 SET(TOOLSRCS tools/nbd_ops.c)
 ADD_EXECUTABLE(nbd_ops ${TOOLSRCS})
 TARGET_LINK_LIBRARIES(nbd_ops ${TOOLLIBS})
 SET_TARGET_PROPERTIES(nbd_ops PROPERTIES COMPILE_FLAGS "-g")
+ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+TARGET_LINK_LIBRARIES(nbd_ops -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(tools nbd_ops)
 
 SET(TOOLSRCS tools/tapdisk_ops.c)
 ADD_EXECUTABLE(tapdisk_ops ${TOOLSRCS})
 TARGET_LINK_LIBRARIES(tapdisk_ops ${TOOLLIBS})
 SET_TARGET_PROPERTIES(tapdisk_ops PROPERTIES COMPILE_FLAGS "-g")
-ADD_DEPENDENCIES(tools nbd_ops)
+ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+TARGET_LINK_LIBRARIES(tapdisk_ops -fprofile-arcs -ftest-coverage)
+ADD_DEPENDENCIES(tools tapdisk_ops)
 
+SET(TOOLSRCS snapshot/unittest/test_hlfs_rm_snapshot.c)
+ADD_EXECUTABLE(test ${TOOLSRCS})
+TARGET_LINK_LIBRARIES(test ${TOOLLIBS})
+SET_TARGET_PROPERTIES(test PROPERTIES COMPILE_FLAGS "-g")
+ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+TARGET_LINK_LIBRARIES(test -fprofile-arcs -ftest-coverage)
+ADD_DEPENDENCIES(tools test)
 
 #---------------------- Make Test ------------------------------#
+
 
 #--------------------- Make all end -----------------------------#
 ADD_DEPENDENCIES(all hlfs mkfs.hlfs test1)

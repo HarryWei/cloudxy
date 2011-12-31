@@ -217,21 +217,19 @@ out:
 	return 0;
 }
 
-int load_ss_by_name(struct back_storage *storage, struct snapshot *ss, \
-		const char *ss_name)
+int load_ss_by_name(struct back_storage *storage, 
+					struct snapshot *ss, 
+					const char *ss_name)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	int res = 0;
-	struct snapshot *_ss;
-	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, \
-			g_str_equal, NULL, NULL);
-
+	struct snapshot *_ss = NULL;
+	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	res = load_all_ss(storage, ss_hashtable);
 	if (res < 0) {
 		HLOG_ERROR("load all ss error");
 		return -1;
 	}
-
 	_ss = g_hash_table_lookup(ss_hashtable, ss_name);
 	if (NULL == _ss) {
 		HLOG_DEBUG("No such key in table");
@@ -241,7 +239,6 @@ int load_ss_by_name(struct back_storage *storage, struct snapshot *ss, \
 	sprintf(ss->sname, "%s", _ss->sname);
 	sprintf(ss->up_sname, "%s", _ss->up_sname);
 	ss->inode_addr = _ss->inode_addr;
-
 	g_hash_table_destroy(ss_hashtable);
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;

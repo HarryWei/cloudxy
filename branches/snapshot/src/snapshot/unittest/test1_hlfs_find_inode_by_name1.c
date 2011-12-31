@@ -118,7 +118,7 @@ test_hlfs_find_inode_before_time(Fixture *fixture, const void *data) {
 #endif
 
 static void 
-hlfs_list_all_snapshots_setup(Fixture *fixture, const void *data) {
+hlfs_find_inode_by_name_setup(Fixture *fixture, const void *data) {
 	g_message("enter func %s", __func__);
 	const char *uri = (const char *)data;
 	fixture->ctrl = init_hlfs(uri);
@@ -132,23 +132,46 @@ hlfs_list_all_snapshots_setup(Fixture *fixture, const void *data) {
 }
 
 static void 
-test_hlfs_list_all_snapshots(Fixture *fixture, const void *data) {
+test_hlfs_find_inode_by_name(Fixture *fixture, const void *data) {
 	g_message("enter func %s", __func__);
 	const char *uri = (const char *)data;
-	char *snapshots = NULL;
-	int ret = hlfs_list_all_snapshots(uri, &snapshots);
+	uint64_t inode_addr = 0;
+	int ret = hlfs_find_inode_by_name(uri, "snapshot0", &inode_addr);
 	g_assert(ret == 0);
-	char **v = g_strsplit(snapshots, "\n", 0);
-	int i = 0;
-	for(i = 0; i < g_strv_length(v) - 1; i++) {
-		g_message("%d's snapshot name is [%s]", i, v[i]);
-	}
-	g_strfreev(v);
+	g_message("snapshot0's inode_addr is [%llu]", inode_addr);
+	inode_addr = 0;
+	ret = hlfs_find_inode_by_name(uri, " ", &inode_addr);
+	g_assert(ret == 0);
+	g_message(" 's inode_addr is [%llu]", inode_addr);
+	inode_addr = 0;
+	ret = hlfs_find_inode_by_name(uri, "+", &inode_addr);
+	g_assert(ret == 0);
+	g_message("+'s inode_addr is [%llu]", inode_addr);
+	inode_addr = 0;
+	ret = hlfs_find_inode_by_name(uri, "1234", &inode_addr);
+	g_assert(ret == 0);
+	g_message("1234's inode_addr is [%llu]", inode_addr);
+	inode_addr = 0;
+	ret = hlfs_find_inode_by_name(uri, " **", &inode_addr);
+	g_assert(ret == 0);
+	g_message(" **'s inode_addr is [%llu]", inode_addr);
+	inode_addr = 0;
+	ret = hlfs_find_inode_by_name(uri, "..", &inode_addr);
+	g_assert(ret == 0);
+	g_message("..'s inode_addr is [%llu]", inode_addr);
+	inode_addr = 0;
+	ret = hlfs_find_inode_by_name(uri, "##@", &inode_addr);
+	g_assert(ret == 0);
+	g_message("##@'s inode_addr is [%llu]", inode_addr);
+	inode_addr = 0;
+	ret = hlfs_find_inode_by_name(uri, "jiawei", &inode_addr);
+	g_assert(ret == 0);
+	g_message("jiawei's inode_addr is [%llu]", inode_addr);
 	g_message("leave func %s", __func__);
 }
 
 static void 
-hlfs_list_all_snapshots_tear_down(Fixture *fixture, const void *data) {
+hlfs_find_inode_by_name_tear_down(Fixture *fixture, const void *data) {
 	g_message("enter func %s", __func__);
 	hlfs_close(fixture->ctrl);
 	deinit_hlfs(fixture->ctrl);
@@ -162,12 +185,12 @@ int main(int argc, char **argv) {
 		g_message("log4c init error!");
 	}
 	g_test_init(&argc, &argv, NULL);
-	g_test_add("/misc/hlfs_list_all_snapshots", 
+	g_test_add("/misc/hlfs_find_inode_by_name", 
 				Fixture, 
 				"local:///tmp/testenv/testfs",
-				hlfs_list_all_snapshots_setup, 
-				test_hlfs_list_all_snapshots, 
-				hlfs_list_all_snapshots_tear_down);
+				hlfs_find_inode_by_name_setup, 
+				test_hlfs_find_inode_by_name, 
+				hlfs_find_inode_by_name_tear_down);
 	g_message("leave func %s", __func__);
 	return g_test_run();
 }

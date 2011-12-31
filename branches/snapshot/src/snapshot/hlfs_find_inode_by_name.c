@@ -12,8 +12,7 @@
 #include "snapshot.h"
 #include "hlfs_log.h"
 
-int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_addr) 
-{
+int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_addr) {
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
 	struct snapshot *ss = NULL;

@@ -15,28 +15,22 @@
 static int 
 is_sname_exist(struct back_storage *storage,
 				const char *sname) {
-	g_message("enter func %s", __func__);
-	g_message("77 dbg");
 	GHashTable *shash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-	g_message("77 dbg");
 	int ret = load_all_ss(storage, shash);
-	g_message("77 dbg");
 	if (0 > ret) {
-		g_message("load all ss error!");
+		HLOG_ERROR("load all ss error!");
 		return -1;
 	}
 	if (NULL == g_hash_table_lookup(shash, sname)) {
-		g_message("we can not find %s in the hash table!", sname);
-		return -1;
+		HLOG_DEBUG("we can not find %s in the hash table!", sname);
+		return 1;
 	}
 	g_hash_table_destroy(shash);
-	g_message("leave func %s", __func__);
 	return 0;
 }
 
 int 
 hlfs_rm_snapshot(const char *uri,const char *ssname) {
-    HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
     bs_file_t file = NULL;
     struct back_storage *storage = init_storage_handler(uri);
@@ -44,9 +38,12 @@ hlfs_rm_snapshot(const char *uri,const char *ssname) {
         HLOG_ERROR("storage init error!");
         return -1;
     }
-	if (-1 == is_sname_exist(storage, ssname)) {
-		g_message("snapshot %s is not exist, right???", ssname);
-		return -1;
+	if (1 == (ret = is_sname_exist(storage, ssname))) {
+		HLOG_DEBUG("snapshot %s is not exist, right???", ssname);
+		goto out;
+	} else if (-1 == ret) {
+		HLOG_ERROR("is sname exist error!");
+		goto out;
 	}
     if (-1 == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) {
         HLOG_DEBUG("snapshot del file not exist, create it");

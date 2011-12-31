@@ -250,7 +250,7 @@ int load_ss_by_name(struct back_storage *storage,
 	_ss = g_hash_table_lookup(ss_hashtable, ss_name);
 	if (NULL == _ss) {
 		HLOG_DEBUG("No such key in table");
-		return -2;
+		return 1;
 	}
 	ss->timestamp = _ss->timestamp;
 	sprintf(ss->sname, "%s", _ss->sname);

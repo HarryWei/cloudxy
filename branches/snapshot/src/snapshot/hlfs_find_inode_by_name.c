@@ -13,7 +13,6 @@
 #include "hlfs_log.h"
 
 int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_addr) {
-	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
 	struct snapshot *ss = NULL;
 	struct back_storage *storage = init_storage_handler(uri);
@@ -32,6 +31,9 @@ int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_
 		HLOG_ERROR("load ss by name error");
 		g_free(ss);
 		ret = -1;
+		goto out;
+	} else if (1 == ret) {
+		HLOG_ERROR("We can not find the snapshot name");
 		goto out;
 	}
 	*inode_addr = ss->inode_addr;

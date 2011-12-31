@@ -126,7 +126,7 @@ int hlfs_set_clean_level(HLFS_CTRL *ctrl,unsigned int alive_bytes);
  * @para uri: the hlfs storage path
  * @para timestamp: the timestamp of inode for searching
  * @para inode_addr: get the inode's inode addr
- * @return value: 0 is right, -1 is wrong
+ * @return value: 0 is right, -1 is wrong, 1 is no segfiles in back storage
  */
 int hlfs_find_inode_before_time(const char *uri, uint64_t timestamp, uint64_t *inode_addr);
 
@@ -154,7 +154,7 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, int flag);
  * @para uri: the hlfs storage path
  * @para sname: the sname of inode for searching
  * @para inode_addr: get the inode's inode addr
- * @return value: 0 is right, -1 is wrong
+ * @return value: 0 is right, -1 is wrong, 1 is no this snapshot name
  */
 int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_addr);
 
@@ -162,7 +162,7 @@ int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_
  * hlfs_rm_snapshot: delete a snapshot in light of sname
  * @para uri: the hlfs storage path
  * @para ssname: the sname of inode for deleting
- * @return value: 0 is right, -1 is wrong
+ * @return value: 0 is right, -1 is wrong, 1 is ssname not exist
  */
 int hlfs_rm_snapshot(const char *uri, const char *ssanme);
 
@@ -170,7 +170,7 @@ int hlfs_rm_snapshot(const char *uri, const char *ssanme);
  * hlfs_list_all_snapshots: get a series snapshot names
  * @para uri: the hlfs storage path
  * @para ssname: store the series snapshot names
- * @return value: 0 is right, -1 is wrong
+ * @return value: 0 is right, -1 is wrong, 1 is no snapshots
  */
 int hlfs_list_all_snapshots(const char *uri, char **ss_name_array);
 

@@ -165,7 +165,7 @@ test_hlfs_find_inode_by_name(Fixture *fixture, const void *data) {
 	g_message("##@'s inode_addr is [%llu]", inode_addr);
 	inode_addr = 0;
 	ret = hlfs_find_inode_by_name(uri, "jiawei", &inode_addr);
-	g_assert(ret == 0);
+	g_assert(ret == 1);
 	g_message("jiawei's inode_addr is [%llu]", inode_addr);
 	g_message("leave func %s", __func__);
 }

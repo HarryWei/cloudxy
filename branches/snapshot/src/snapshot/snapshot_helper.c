@@ -6,17 +6,14 @@
 #include "snapshot.h"
 
 int snapshot2text(const struct snapshot *snapshot, char *textbuf) {
-	HLOG_DEBUG("dbg 77 enter func %s", __func__);
 	memset(textbuf, 0, strlen(textbuf));
 	int n = sprintf(textbuf, "+%s@@##$$%llu@@##$$%llu@@##$$%s\n", snapshot->sname, \
 			snapshot->timestamp, snapshot->inode_addr, snapshot->up_sname);
-	HLOG_DEBUG("dbg 77 leave func %s", __func__);
 	return n;
 }
 
 int dump_snapshot(struct back_storage *storage, const char *snapshot_file, \
 		struct snapshot *snapshot) {
-	HLOG_DEBUG("dbg 77 enter func %s", __func__);
     if(snapshot_file == NULL || snapshot == NULL || storage == NULL){
         return -1;
     }
@@ -50,21 +47,17 @@ out1:
 	if (NULL != file) {
 		storage->bs_file_close(storage, file);
 	}
-	HLOG_DEBUG("dbg 77 leave func %s", __func__);
 	return ret;
 }
 
 int snapshot_delmark2text(const char *ssname, char *textbuf) {
-	HLOG_DEBUG("dbg 77 enter func %s", __func__);
 	memset(textbuf, 0, 128);
 	int n = sprintf(textbuf, "-%s@@##$$\n", ssname);
-	HLOG_DEBUG("dbg 77 leave func %s", __func__);
 	return n;
 }
 
 int dump_snapshot_delmark(struct back_storage *storage, const char *snapshot_file, \
 		const char *ssname){
-	HLOG_DEBUG("dbg 77 enter func %s", __func__);
     if(snapshot_file == NULL || ssname == NULL || storage == NULL){
         return -1;
     }
@@ -98,13 +91,11 @@ out2:
 	if (NULL != file) {
 		storage->bs_file_close(storage, file);
 	}
-	HLOG_DEBUG("dbg 77 leave func %s", __func__);
 	return ret;
 }
 
 int load_ss_from_text(struct snapshot *ss, const char *buf, int *flag)
 {
-	HLOG_DEBUG("enter func %s", __func__);
     gchar **v = g_strsplit(buf, "@@##$$", 2);
     if ('+' == v[0][0]) {
         *flag = 0;
@@ -139,13 +130,11 @@ int load_ss_from_text(struct snapshot *ss, const char *buf, int *flag)
 		return -1; 
 	}   
 	g_strfreev(v);
-	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }
 
 int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 {
-	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
 	int i = 0;
 	g_message("%s -- 77 dbg", __func__);
@@ -160,7 +149,6 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		ret = -1;
 		return ret;
 	}
-	g_message("%s -- 77 dbg", __func__);
 	uint32_t file_size = file_info->size; 
 	g_free(file_info);
 	HLOG_DEBUG("file_size : %u", file_size);
@@ -172,7 +160,6 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		ret = -2;
 		return ret;
 	}
-	g_message("%s -- 77 dbg", __func__);
 	ret = storage->bs_file_pread(storage, file, buf, file_size, 0);
 	if (ret < 0) {
 		HLOG_ERROR("Read file snapshot.txt failed\n");
@@ -184,7 +171,6 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	}
 	gchar **sss = g_strsplit(buf, "\n", 0);
 	g_message("g strv length:%d:", g_strv_length(sss));
-	g_message("%s -- 77 dbg", __func__);
 	for (i = 0; i < g_strv_length(sss) - 1; i++) {
 		int flag = -1;
 		struct snapshot *ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
@@ -221,10 +207,8 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 			return ret;
 		}
 	}
-	g_message("%s -- 77 dbg", __func__);
 	g_strfreev(sss);
 	storage->bs_file_close(storage, SNAPSHOT_FILE); 
-	HLOG_DEBUG("leave func %s", __func__);
 #if 0
 out:
 	if (NULL != file) {
@@ -238,7 +222,6 @@ int load_ss_by_name(struct back_storage *storage,
 					struct snapshot *ss, 
 					const char *ss_name)
 {
-	HLOG_DEBUG("enter func %s", __func__);
 	int res = 0;
 	struct snapshot *_ss = NULL;
 	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
@@ -257,13 +240,11 @@ int load_ss_by_name(struct back_storage *storage,
 	sprintf(ss->up_sname, "%s", _ss->up_sname);
 	ss->inode_addr = _ss->inode_addr;
 	g_hash_table_destroy(ss_hashtable);
-	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }
 
 void dump_ss_one_by_one(gpointer data, gpointer storage)
 {
-	HLOG_DEBUG("enter func %s", __func__);
 	if (NULL == data || NULL == storage) {
 		HLOG_ERROR("Param error");
 		return;
@@ -274,12 +255,10 @@ void dump_ss_one_by_one(gpointer data, gpointer storage)
 		HLOG_ERROR("dump ss error");
 		return;
 	}
-	HLOG_DEBUG("leave func %s", __func__);
 }
 
 int rewrite_snapshot_file(struct back_storage *storage, GHashTable *ss_hashtable)
 {
-	HLOG_DEBUG("enter func %s", __func__);
 	if((0 == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) && 
 			(0 > storage->bs_file_delete(storage, SNAPSHOT_FILE))) {
 		HLOG_ERROR("remove snapshot.txt failed");
@@ -294,6 +273,5 @@ int rewrite_snapshot_file(struct back_storage *storage, GHashTable *ss_hashtable
 	GList *list = g_hash_table_get_values(ss_hashtable);
 	g_list_foreach(list, dump_ss_one_by_one, storage);
 	g_list_free(list);
-	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }

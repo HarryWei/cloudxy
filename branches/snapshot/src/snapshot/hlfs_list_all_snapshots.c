@@ -27,19 +27,21 @@ void list_key(gpointer data, gpointer usr_data)
 		HLOG_DEBUG("data is NULL");
 		return ;
 	}
-	char *tmp = NULL;
+	char tmp[128];
+#if 0
 	tmp = (char *)g_malloc0(128);
 	if (NULL == tmp) {
 		HLOG_ERROR("Allocate error!");
 		return ;
 	}
-	tmp = g_strconcat(data, "\n", NULL);
+#endif
+	memset(tmp, 0, 128);
+	sprintf(tmp, "%s\n", (char *)data);
 	size = g_strlcat(usr_data, tmp, MAX_BUFSIZE);
 	if (MAX_BUFSIZE < size) {
 		HLOG_ERROR("MAX_BUFSIZE is not enough");
 		return;
 	}
-	g_free(tmp);
 	HLOG_DEBUG("leave func %s", __func__);
 }
 
@@ -51,45 +53,51 @@ int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
+#if 0
 	char *tmp_buf = NULL;
 	tmp_buf = (char *)g_malloc0(MAX_BUFSIZE);
-	if (NULL == tmp_buf) {
+	if (NULL == tmp_buf) { //TODO if size of snapshot.txt > MAX_BUFSIZE
 		HLOG_ERROR("Allocate error!");
 		ret = -1;
 		goto out;
 	}
 	*ss_name_array = tmp_buf;
-	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, \
-			NULL, NULL);
+#endif
+	*ss_name_array = (char *)g_malloc0(MAX_BUFSIZE);
+	if (NULL == *ss_name_array) { //TODO if size of snapshot.txt > MAX_BUFSIZE
+		HLOG_ERROR("Allocate error!");
+		ret = -1;
+		goto out;
+	}
+	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	struct back_storage *storage = init_storage_handler(uri);
 	if (NULL == storage) {
 		HLOG_ERROR("init storage handler error!");
 		ret = -2;
 		goto out;
 	}
-
 	ret = load_all_ss(storage, ss_hashtable);
 	if (ret < 0) {
 		HLOG_ERROR("load all ss error: %d", ret);
 		ret = -3;
 		goto out;
 	}
-
-	GList *list = g_hash_table_get_keys(ss_hashtable);
-	if (list == NULL) {
-		HLOG_DEBUG("list NULL");
+	if (0 == g_hash_table_size(ss_hashtable)) {
+		HLOG_DEBUG("We may have not taken snapshot yet!!!");
+		g_free(*ss_name_array);
+		*ss_name_array = NULL;
+		ret = 1;
+		goto out;
 	}
-	ret = load_all_ss(storage, ss_hashtable);
+	GList *list = g_hash_table_get_keys(ss_hashtable);
+//	ret = load_all_ss(storage, ss_hashtable);
 	g_list_foreach(list, list_key, *ss_name_array);
 	HLOG_DEBUG("buf:%s", *ss_name_array);
-
 	if (0 > rewrite_snapshot_file(storage, ss_hashtable)) {
 		HLOG_ERROR("rewrite snapshot.txt error");
 		return -4;
 	}
-
 	g_hash_table_destroy(ss_hashtable);
-
 	if (*ss_name_array == NULL) {
 		HLOG_DEBUG("Buf is NULL after listing");
 		return -5;

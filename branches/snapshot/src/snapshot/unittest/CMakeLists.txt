@@ -35,7 +35,7 @@ SET(LIBS glib-2.0
 	     log4c
 		 gcov)
 
-SET(TESTSRC test_hlfs_open_by_inode.c)
+SET(TESTSRC test1_hlfs_list_all_snapshots.c)
 ADD_EXECUTABLE(test ${TESTSRC})
 TARGET_LINK_LIBRARIES(test ${LIBS})
 SET_TARGET_PROPERTIES(test PROPERTIES COMPILE_FLAGS "-ftest-coverage -fprofile-arcs")

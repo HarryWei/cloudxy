@@ -59,12 +59,12 @@ int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
 	if (NULL == tmp_buf) { //TODO if size of snapshot.txt > MAX_BUFSIZE
 		HLOG_ERROR("Allocate error!");
 		ret = -1;
-		goto out;
+		return ret;
 	}
 	*ss_name_array = tmp_buf;
 #endif
 	*ss_name_array = (char *)g_malloc0(MAX_BUFSIZE);
-	if (NULL == *ss_name_array) { //TODO if size of snapshot.txt > MAX_BUFSIZE
+	if (NULL == *ss_name_array) { 
 		HLOG_ERROR("Allocate error!");
 		ret = -1;
 		goto out;
@@ -90,21 +90,32 @@ int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
 		goto out;
 	}
 	GList *list = g_hash_table_get_keys(ss_hashtable);
-//	ret = load_all_ss(storage, ss_hashtable);
-	g_list_foreach(list, list_key, *ss_name_array);
-	HLOG_DEBUG("buf:%s", *ss_name_array);
-	if (0 > rewrite_snapshot_file(storage, ss_hashtable)) {
-		HLOG_ERROR("rewrite snapshot.txt error");
-		ret = -1;
+	if (list == NULL) {
+		HLOG_DEBUG("list NULL");
+		ret = -4;
 		goto out;
 	}
-	g_hash_table_destroy(ss_hashtable);
+
+	g_list_foreach(list, list_key, *ss_name_array);
+	HLOG_DEBUG("buf:%s", *ss_name_array);
+	if (strlen(*ss_name_array) == 0) {
+		HLOG_ERROR("ss_name_array is empty");
+		ret = -5;
+		goto out;
+	}
+
+	if (0 > rewrite_snapshot_file(storage, ss_hashtable)) {
+		HLOG_ERROR("rewrite snapshot.txt error");
+		ret = -6;
+		goto out;
+	}
 	if (*ss_name_array == NULL) {
 		HLOG_DEBUG("Buf is NULL after listing");
-		ret = -1;
+		ret = -7;
 		goto out;
 	}
 out:
+	g_hash_table_destroy(ss_hashtable);
 	HLOG_DEBUG("leave func %s", __func__);
 	return ret;
 }

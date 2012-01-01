@@ -46,15 +46,21 @@ int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
-	
+#if 0
 	if (NULL == *ss_name_array) { 
 		HLOG_ERROR("No buf available!");
 		ret = -1;
 		return ret;
 	}
-	
-	*ss_name_array = (char *)realloc(*ss_name_array, MAX_BUFSIZE);
-	memset(*ss_name_array, 0, MAX_BUFSIZE);
+#endif
+	//TODO If size of snapshot.txt > MAX_BUFSIZE
+	*ss_name_array = (char *)g_malloc0(MAX_BUFSIZE);
+	if (NULL == *ss_name_array) {
+		g_message("Allocate error!");
+		ret = -1;
+		goto out;
+	}
+//	memset(*ss_name_array, 0, MAX_BUFSIZE);
 
 	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	struct back_storage *storage = init_storage_handler(uri);

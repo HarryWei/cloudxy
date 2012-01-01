@@ -232,11 +232,13 @@ int load_ss_by_name(struct back_storage *storage,
 	res = load_all_ss(storage, ss_hashtable);
 	if (res < 0) {
 		HLOG_ERROR("load all ss error");
+		g_hash_table_destroy(ss_hashtable);
 		return -1;
 	}
 	_ss = g_hash_table_lookup(ss_hashtable, ss_name);
 	if (NULL == _ss) {
 		HLOG_DEBUG("No such key in table");
+		g_hash_table_destroy(ss_hashtable);
 		return 1;
 	}
 	ss->timestamp = _ss->timestamp;

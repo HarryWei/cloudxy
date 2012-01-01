@@ -146,7 +146,7 @@ ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
 TARGET_LINK_LIBRARIES(tapdisk_ops -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(tools tapdisk_ops)
 
-SET(TOOLSRCS snapshot/unittest/test_hlfs_take_snapshot.c)
+SET(TOOLSRCS snapshot/unittest/test_hlfs_open_by_inode.c)
 ADD_EXECUTABLE(test ${TOOLSRCS})
 TARGET_LINK_LIBRARIES(test ${TOOLLIBS})
 SET_TARGET_PROPERTIES(test PROPERTIES COMPILE_FLAGS "-g")

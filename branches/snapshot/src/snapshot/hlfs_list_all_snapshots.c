@@ -98,9 +98,10 @@ int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
 		goto out;
 	}
 
-out:
+out: //TODO ret is out of control, we should fix it
 	g_free(storage);
 	g_hash_table_destroy(ss_hashtable);
 	HLOG_DEBUG("leave func %s", __func__);
+	g_message("ret is %d", ret);
 	return ret;
 }

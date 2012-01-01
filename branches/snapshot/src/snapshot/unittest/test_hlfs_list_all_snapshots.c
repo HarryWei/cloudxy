@@ -81,13 +81,12 @@ static void test_no_ss_exist(Fixture *fixture)
 
 void test_ss_exist(Fixture *fixture) 
 {
-	HLFS_CTRL *ctrl = init_hlfs(fixture->uri);
-	if (NULL == ctrl) {
+	if (NULL == fixture->ctrl) {
 		g_message("init_hlfs error");
 		return;
 	}
 
-	if (0 > hlfs_open(ctrl, 1)) {
+	if (0 > hlfs_open(fixture->ctrl, 1)) {
 		g_message("Open hlfs error");
 		return;
 	}
@@ -99,7 +98,7 @@ void test_ss_exist(Fixture *fixture)
 	char *buf = (char *)g_malloc0(128);
 
 	while (offset < TOTAL_SIZE) {
-		int ret1 = hlfs_write(ctrl, content, REQ_SIZE, offset);
+		int ret1 = hlfs_write(fixture->ctrl, content, REQ_SIZE, offset);
 		if (ret1 != REQ_SIZE) {
 			g_message("write error");
 			return;
@@ -108,7 +107,7 @@ void test_ss_exist(Fixture *fixture)
 		g_message("offset: %d", offset);
 
 		sprintf(buf, "snapshot%d", i);
-		if (0 > hlfs_take_snapshot(ctrl, buf)) {
+		if (0 > hlfs_take_snapshot(fixture->ctrl, buf)) {
 			g_message("snapshot %s was taken error", buf);
 			return;
 		}

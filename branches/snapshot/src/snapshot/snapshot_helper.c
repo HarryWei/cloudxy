@@ -171,13 +171,16 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	if (file == NULL) {
 		HLOG_ERROR("open snapshot.txt error");
 		ret = -2;
-		goto out;
+		g_free(buf);
+		goto out1;
 	}
 	ret = storage->bs_file_pread(storage, file, buf, file_size, 0);
 	if (ret < 0) {
 		HLOG_ERROR("Read file snapshot.txt failed\n");
+		g_free(buf);
+		storage->bs_file_close(storage, file);
 		ret = -3;
-		goto out;
+		goto out1;
 	}
 	storage->bs_file_close(storage, file);
 
@@ -215,7 +218,6 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	}
 out2:
 	g_strfreev(sss);
-out:
 	g_free(buf);
 out1:
 	return ret;

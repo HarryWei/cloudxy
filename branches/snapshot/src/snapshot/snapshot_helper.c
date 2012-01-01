@@ -142,12 +142,14 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		HLOG_ERROR("snapshot.txt is not exist");
 		ret = -1;
 		return ret;
+//		goto out;
 	}
 	bs_file_info_t *file_info = storage->bs_file_info(storage, SNAPSHOT_FILE);
 	if (NULL == file_info) {
 		HLOG_ERROR("get snapshot info error!");
 		ret = -1;
 		return ret;
+//		goto out;
 	}
 	uint32_t file_size = file_info->size; 
 	g_free(file_info);
@@ -159,6 +161,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		HLOG_ERROR("open snapshot.txt error");
 		ret = -2;
 		return ret;
+//		goto out;
 	}
 	ret = storage->bs_file_pread(storage, file, buf, file_size, 0);
 	if (ret < 0) {
@@ -168,6 +171,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		}
 		ret = -3;
 		return ret;
+//		goto out;
 	}
 	gchar **sss = g_strsplit(buf, "\n", 0);
 	g_message("g strv length:%d:", g_strv_length(sss));
@@ -181,6 +185,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 			}
 			ret = -1;
 			return ret;
+//			goto out;
 		}
 		g_message("7771 dbg");
 		load_ss_from_text(ss, sss[i], &flag);
@@ -192,7 +197,9 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 			g_message("remove snapshot [%s]", ss->sname);
 			if (TRUE != g_hash_table_remove(ss_hashtable, ss->sname)) {
 				g_message("snapshot [%s] remove from hash table error!", ss->sname);
-				return -1;
+				ret = -1;
+				return ret;
+//				goto out;
 			}
 			g_message("remove snapshot [%s]", ss->sname);
 			g_free(ss);
@@ -205,6 +212,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 			}
 			ret = -4;
 			return ret;
+//			goto out;
 		}
 	}
 	g_strfreev(sss);
@@ -215,7 +223,7 @@ out:
 		storage->bs_file_close(storage, file);
 	}
 #endif
-	return 0;
+	return ret;
 }
 
 int load_ss_by_name(struct back_storage *storage, 

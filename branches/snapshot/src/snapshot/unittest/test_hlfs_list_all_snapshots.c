@@ -58,7 +58,7 @@ static void test_setup(Fixture *fixture, const void *data)
 	return ;
 }
 
-static void test_no_ss_exist(Fixture *fixture)
+static void test_no_ss_exist(Fixture *fixture, const void *data)
 {
 	g_message("enter function test_ssfile_not_exist");
 	struct back_storage *storage = NULL;
@@ -79,7 +79,7 @@ static void test_no_ss_exist(Fixture *fixture)
 	g_free(res);
 }
 
-void test_ss_exist(Fixture *fixture) 
+void test_ss_exist(Fixture *fixture, const void *data) 
 {
 	if (NULL == fixture->ctrl) {
 		g_message("init_hlfs error");

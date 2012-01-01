@@ -9,7 +9,8 @@ SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g")
 SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(HLFS)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+#CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 # include these files for building.
 SET(WORK_HOME $ENV{PWD}/../../../..)
 MESSAGE(STATUS "This is dir" ${WORK_HOME})
@@ -36,16 +37,9 @@ SET(LIBS glib-2.0
 
 #SET(TESTSRC test_hlfs_rm_snapshot.c)
 
-
-
-
-
 #ADD_EXECUTABLE(test ${TESTSRC})
 #TARGET_LINK_LIBRARIES(test ${LIBS})
 #TARGET_LINK_LIBRARIES(test -fprofile-arcs -ftest-coverage)
-
-
-
 
 #ADD_EXECUTABLE(test_hlfs_list_all_snapshots test_hlfs_list_all_snapshots.c)
 #TARGET_LINK_LIBRARIES(test_hlfs_list_all_snapshots ${LIBS})

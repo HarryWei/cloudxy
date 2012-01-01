@@ -58,7 +58,7 @@ static void test_setup(Fixture *fixture, const void *data)
 	return;
 }
 
-static void test_find_by_name(Fixture *fixture) 
+static void test_find_by_name(Fixture *fixture, const void *data) 
 {
 	char *content = (char *)g_malloc0(REQ_SIZE);
 	int offset = 0;
@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
 		g_message("log4c init error!");
 	}
 	g_test_init(&argc, &argv, NULL);
-	g_test_add("/misc/find_by_name", 
+	g_test_add("/misc/hlfs_find_inode_by_name", 
 				Fixture, 
 				g_get_current_dir(),
 				test_setup, 

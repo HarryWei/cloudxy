@@ -74,7 +74,7 @@ int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
 	}
 	if (0 == g_hash_table_size(ss_hashtable)) {
 		HLOG_DEBUG("We may have not taken snapshot yet!!!");
-		sprintf(buf, "");
+		sprintf(*ss_name_array, "");
 		ret = 0;
 		goto out;
 	}

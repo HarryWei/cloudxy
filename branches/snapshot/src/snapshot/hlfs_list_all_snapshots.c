@@ -52,10 +52,8 @@ int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
 		ret = -1;
 		return ret;
 	}
-	if (MAX_BUFSIZE > sizeof(*ss_name_array)) {
-		HLOG_ERROR("buf size is not enough");
-		return -1;
-	}
+	
+	*ss_name_array = (char *)realloc(*ss_name_array, MAX_BUFSIZE);
 	memset(*ss_name_array, 0, MAX_BUFSIZE);
 
 	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);

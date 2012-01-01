@@ -146,7 +146,6 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 {
 	int ret = 0;
 	int i = 0;
-	g_message("%s -- 77 dbg", __func__);
 	if (-1 == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) {
 		HLOG_ERROR("snapshot.txt is not exist");
 		ret = -1;
@@ -180,50 +179,44 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		ret = -3;
 		goto out;
 	}
+	storage->bs_file_close(storage, file);
+
 	gchar **sss = g_strsplit(buf, "\n", 0);
-	g_message("g strv length:%d:", g_strv_length(sss));
+	HLOG_DEBUG("g strv length:%d:", g_strv_length(sss));
 	for (i = 0; i < g_strv_length(sss) - 1; i++) {
 		int flag = -1;
 		struct snapshot *ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
 		if (NULL == ss) {
 			g_message("Allocate error!");
-			g_strfreev(sss);
-			ret = -1;
-			goto out;
+			ret = -4;
+			goto out2;
 		}
-		g_message("7771 dbg");
 		load_ss_from_text(ss, sss[i], &flag);
-		g_message("7772 dbg");
 		if (flag == 0) {
 			g_hash_table_insert(ss_hashtable, ss->sname, ss);
-			g_message("insert snapshot [%s]", ss->sname);
+			HLOG_DEBUG("insert snapshot [%s]", ss->sname);
 		} else if (flag == 1) {
-			g_message("remove snapshot [%s]", ss->sname);
+			HLOG_DEBUG("remove snapshot [%s]", ss->sname);
 			if (TRUE != g_hash_table_remove(ss_hashtable, ss->sname)) {
-				g_message("snapshot [%s] remove from hash table error!", ss->sname);
+				HLOG_ERROR("snapshot [%s] remove from hash table error!", ss->sname);
 				g_free(ss);
-				g_strfreev(sss);
-				ret = -1;
-				goto out;
+				ret = -5;
+				goto out2;
 			}
-			g_message("remove snapshot [%s]", ss->sname);
+			HLOG_DEBUG("remove snapshot [%s]", ss->sname);
 			g_free(ss);
 			continue;
 		} else {
 			g_message("error - flag");
 			g_free(ss);
-			g_strfreev(sss);
-			ret = -4;
-			goto out;
+			ret = -6;
+			goto out2;
 		}
 	}
+out2:
 	g_strfreev(sss);
-	storage->bs_file_close(storage, SNAPSHOT_FILE); 
 out:
 	g_free(buf);
-	if (NULL != file) {
-		storage->bs_file_close(storage, file);
-	}
 out1:
 	return ret;
 }

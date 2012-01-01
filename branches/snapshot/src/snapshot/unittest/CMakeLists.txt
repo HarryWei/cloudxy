@@ -34,14 +34,30 @@ SET(LIBS glib-2.0
 	     log4c
 		 gcov)
 
-SET(TESTSRC test_hlfs_rm_snapshot.c)
-ADD_EXECUTABLE(test ${TESTSRC})
-ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
-TARGET_LINK_LIBRARIES(test ${LIBS})
-TARGET_LINK_LIBRARIES(test -fprofile-arcs -ftest-coverage)
+#SET(TESTSRC test_hlfs_rm_snapshot.c)
+
+
+
+
+
+#ADD_EXECUTABLE(test ${TESTSRC})
+#TARGET_LINK_LIBRARIES(test ${LIBS})
+#TARGET_LINK_LIBRARIES(test -fprofile-arcs -ftest-coverage)
+
+
+
 
 #ADD_EXECUTABLE(test_hlfs_list_all_snapshots test_hlfs_list_all_snapshots.c)
 #TARGET_LINK_LIBRARIES(test_hlfs_list_all_snapshots ${LIBS})
 
 #ADD_EXECUTABLE(test_hlfs_find_inode_by_name test_hlfs_find_inode_by_name.c)
+file(GLOB testfiles "test_*.c")
+foreach(testfile ${testfiles})
+    #GET_FILENAME_COMPONENT(basename ${testname} ${testfile} NAME)
+        GET_FILENAME_COMPONENT(testname ${testfile} NAME_WE)
+        ADD_EXECUTABLE(${testname} ${testfile})
+        ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+        TARGET_LINK_LIBRARIES(${testname} ${LIBS})
+endforeach(testfile)
+
 #TARGET_LINK_LIBRARIES(test_hlfs_find_inode_by_name ${LIBS})

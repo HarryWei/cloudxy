@@ -20,7 +20,7 @@ struct back_storage* init_storage_handler(const char* uri)
 	HLOG_DEBUG("enter func %s", __func__);
     int ret =0;
     struct back_storage* storage = NULL;
-    gchar* back_storage_type;
+    gchar* back_storage_type = NULL;
     char *head=NULL;
     char *hostname=NULL;
     char *dir=NULL;
@@ -459,19 +459,23 @@ int load_latest_inode_map_entry(struct back_storage *storage,
 	HLOG_DEBUG("enter func %s", __func__);
    int ret = 0;
    const char segfile_name[SEGMENT_FILE_NAME_MAX];
-   build_segfile_name(segno,segfile_name);
+   memset((char *) segfile_name, SEGMENT_FILE_NAME_MAX, 0);
+   ret = build_segfile_name(segno,segfile_name);
+   if (-1 == ret) {
+	   HLOG_ERROR("build segfile name error!");
+	   return -1;
+   }
    bs_file_t file = storage->bs_file_open(storage,segfile_name,BS_READONLY); 
    if(file==NULL){
       HLOG_ERROR("can not open segment file %s",segfile_name);
       return -1; 
    }
-
-   uint64_t inode_map_entry_pos = last_offset - 
-                        sizeof(struct inode_map_entry);
-   HLOG_DEBUG("inode map entry pos %llu",inode_map_entry_pos);
+   HLOG_ERROR("last offset is %d", last_offset);
+   uint64_t inode_map_entry_pos = (uint64_t) last_offset - sizeof(struct inode_map_entry);
+   HLOG_ERROR("inode map entry pos %llu", inode_map_entry_pos);
    if(sizeof(struct inode_map_entry) != 
                  storage->bs_file_pread(storage,
-                 file,(char*)ime,
+                 file,(char*) ime,
                  sizeof(struct inode_map_entry),
                  inode_map_entry_pos)){
        HLOG_ERROR("can not read inode map entry ");

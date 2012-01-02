@@ -11,7 +11,7 @@ SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(HLFS)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 # include these files for building.
-SET(WORK_HOME $ENV{PWD}/../..)
+SET(WORK_HOME $ENV{PWD}/..)
 MESSAGE(STATUS "This is dir" ${WORK_HOME})
 INCLUDE_DIRECTORIES(
        /usr/include/glib-2.0 
@@ -30,9 +30,9 @@ LINK_DIRECTORIES(
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(LIBS glib-2.0
-	#         hlfs
+        hlfs
 	     log4c)
 
-SET(TESTSRC lectures/g_list.c)
+SET(TESTSRC test.c)
 ADD_EXECUTABLE(test ${TESTSRC})
 TARGET_LINK_LIBRARIES(test ${LIBS})

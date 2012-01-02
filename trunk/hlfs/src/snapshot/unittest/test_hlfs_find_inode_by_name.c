@@ -22,7 +22,7 @@ typedef struct {
 	char *uri;
 } Fixture;
 
-static void test_setup(Fixture *fixture) 
+static void test_setup(Fixture *fixture, const void *data) 
 {
 	system("mkdir /tmp/testenv");
 	system("cd ../../../../build && ./build_local.sh");
@@ -66,7 +66,7 @@ static void test_find_by_name(Fixture *fixture, const void *data)
 	return;
 }
 
-static void test_tear_down(Fixture *fixture) 
+static void test_tear_down(Fixture *fixture, const void *data) 
 {
 	deinit_hlfs(fixture->ctrl);
 	g_free(fixture->uri);

@@ -31,8 +31,6 @@ static int is_init_log_path = 0;
 		printf(msg, ##args);																	\
 		printf("\n");																			\
 	}																							\
-	g_free(hlog_path);																			\
-	g_free(log4cfile);																			\
 }
 
 #define HLOG_TRACE(msg, args...) { 																\
@@ -54,8 +52,6 @@ static int is_init_log_path = 0;
 		printf(msg, ##args);																	\
 		printf("\n");																			\
 	}																							\
-	g_free(hlog_path);																			\
-	g_free(log4cfile);																			\
 }
 
 #define HLOG_FATAL(msg, args...) { 																\
@@ -77,8 +73,6 @@ static int is_init_log_path = 0;
 		printf(msg, ##args);																	\
 		printf("\n");																			\
 	}																							\
-	g_free(hlog_path);																			\
-	g_free(log4cfile);																			\
 }
 
 #define HLOG_DEBUG(msg, args...) { 																\
@@ -100,8 +94,6 @@ static int is_init_log_path = 0;
 		printf(msg, ##args);																	\
 		printf("\n");																			\
 	}																							\
-	g_free(hlog_path);																			\
-	g_free(log4cfile);																			\
 }
 
 #define HLOG_INFO(msg, args...) { 																\
@@ -123,8 +115,6 @@ static int is_init_log_path = 0;
 		printf(msg, ##args);																	\
 		printf("\n");																			\
 	}																							\
-	g_free(hlog_path);																			\
-	g_free(log4cfile);																			\
 }
 
 #define HLOG_ERROR(msg, args...) { 																\
@@ -146,8 +136,6 @@ static int is_init_log_path = 0;
 		printf(msg, ##args);																	\
 		printf("\n");																			\
 	}																							\
-	g_free(hlog_path);																			\
-	g_free(log4cfile);																			\
 }
 
 #define HLOG_WARN(msg, args...) { 																\
@@ -169,8 +157,6 @@ static int is_init_log_path = 0;
 		printf(msg, ##args);																	\
 		printf("\n");																			\
 	}																							\
-	g_free(hlog_path);																			\
-	g_free(log4cfile);																			\
 }
 static char __msg_log[LOG_LEN];
 static log4c_category_t *__mycat;

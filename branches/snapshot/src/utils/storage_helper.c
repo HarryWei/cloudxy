@@ -56,8 +56,8 @@ out:
     g_free(dir);
     if(ret !=0){
         free(storage);
-	HLOG_ERROR("ret is not 0, so error happened");
-       storage = NULL;
+		HLOG_ERROR("ret is not 0, so error happened");
+        storage = NULL;
     }
 	HLOG_DEBUG("leave func %s", __func__);
     return storage;
@@ -459,12 +459,14 @@ int load_latest_inode_map_entry(struct back_storage *storage,
 	HLOG_DEBUG("enter func %s", __func__);
    int ret = 0;
    const char segfile_name[SEGMENT_FILE_NAME_MAX];
-   memset((char *) segfile_name, SEGMENT_FILE_NAME_MAX, 0);
-   ret = build_segfile_name(segno,segfile_name);
+//   memset((char *) segfile_name, SEGMENT_FILE_NAME_MAX, 0);
+   build_segfile_name(segno,segfile_name);
+#if 0
    if (-1 == ret) {
 	   HLOG_ERROR("build segfile name error!");
 	   return -1;
    }
+#endif
    bs_file_t file = storage->bs_file_open(storage,segfile_name,BS_READONLY); 
    if(file==NULL){
       HLOG_ERROR("can not open segment file %s",segfile_name);
@@ -475,7 +477,7 @@ int load_latest_inode_map_entry(struct back_storage *storage,
    HLOG_ERROR("inode map entry pos %llu", inode_map_entry_pos);
    if(sizeof(struct inode_map_entry) != 
                  storage->bs_file_pread(storage,
-                 file,(char*) ime,
+                 file,(char*)ime,
                  sizeof(struct inode_map_entry),
                  inode_map_entry_pos)){
        HLOG_ERROR("can not read inode map entry ");

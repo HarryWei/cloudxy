@@ -7,8 +7,8 @@
 # _So_that we can debug it.
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(HLFS)
-#CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+#CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 SET(WORK_HOME   $ENV{PWD}/..)
 MESSAGE(STATUS "This is dir " ${WORK_HOME})
@@ -17,8 +17,8 @@ MESSAGE(STATUS "This is dir " ${WORK_HOME})
 SET(HADOOP_HOME ${WORK_HOME}/3part/hadoop)
 SET(LOG_HOME ${WORK_HOME}/3part/log)
 #MESSAGE(STATUS "This is dir " ${HADOOP_HOME})
-#SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
-SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk)
+SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
+#SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk)
 INCLUDE_DIRECTORIES(
        /usr/include/glib-2.0 
        /usr/lib/glib-2.0/include 
@@ -105,6 +105,7 @@ SET(TOOLLIBS glib-2.0
 	         hdfs
 			 gcov)
 
+#SET(CMAKE_INSTALL_PREFIX /usr)
 SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
 SET(TOOLSRCS tools/hlfs_mkfs.c)
 ADD_EXECUTABLE(mkfs.hlfs ${TOOLSRCS})
@@ -112,6 +113,7 @@ TARGET_LINK_LIBRARIES(mkfs.hlfs ${TOOLLIBS})
 SET_TARGET_PROPERTIES(mkfs.hlfs PROPERTIES COMPILE_FLAGS "-g")
 ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
 TARGET_LINK_LIBRARIES(mkfs.hlfs -fprofile-arcs -ftest-coverage)
+#INSTALL(TARGETS mkfs.hlfs RUNTIME DESTINATION bin)
 ADD_DEPENDENCIES(tools mkfs.hlfs)
 
 
@@ -147,14 +149,6 @@ SET_TARGET_PROPERTIES(tapdisk_ops PROPERTIES COMPILE_FLAGS "-g")
 ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
 TARGET_LINK_LIBRARIES(tapdisk_ops -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(tools tapdisk_ops)
-
-SET(TOOLSRCS snapshot/unittest/test_hlfs_open_by_inode.c)
-ADD_EXECUTABLE(test ${TOOLSRCS})
-TARGET_LINK_LIBRARIES(test ${TOOLLIBS})
-SET_TARGET_PROPERTIES(test PROPERTIES COMPILE_FLAGS "-g")
-ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
-TARGET_LINK_LIBRARIES(test -fprofile-arcs -ftest-coverage)
-ADD_DEPENDENCIES(tools test)
 
 #---------------------- Make Test ------------------------------#
 

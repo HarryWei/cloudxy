@@ -1,7 +1,6 @@
 /*
  *  hlfs/src/snapshot/unittest/test_hlfs_list_all_snapshots.c
  *  Kelvin <kelvin.xupt@gmail.com> (C) 2011
- *  test_setup() and test_tear_down() are writen by Harry.
  */
 
 #include <glib.h>

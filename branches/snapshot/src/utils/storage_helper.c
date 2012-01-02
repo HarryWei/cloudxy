@@ -453,28 +453,27 @@ out:
  
 
 int load_latest_inode_map_entry(struct back_storage *storage,
-			uint32_t segno, uint32_t last_offset,
+			const uint32_t segno, const uint32_t last_offset,
 				struct inode_map_entry *ime)
 {
 	HLOG_DEBUG("enter func %s", __func__);
+   HLOG_DEBUG("777 dbg last offset is %u, seg no is %u", last_offset, segno);
    int ret = 0;
    const char segfile_name[SEGMENT_FILE_NAME_MAX];
-//   memset((char *) segfile_name, SEGMENT_FILE_NAME_MAX, 0);
-   build_segfile_name(segno,segfile_name);
-#if 0
+   memset((char *) segfile_name, SEGMENT_FILE_NAME_MAX, 0);
+   ret = build_segfile_name(segno,segfile_name);
    if (-1 == ret) {
 	   HLOG_ERROR("build segfile name error!");
 	   return -1;
    }
-#endif
    bs_file_t file = storage->bs_file_open(storage,segfile_name,BS_READONLY); 
    if(file==NULL){
       HLOG_ERROR("can not open segment file %s",segfile_name);
       return -1; 
    }
-   HLOG_ERROR("last offset is %d", last_offset);
+   HLOG_DEBUG("777 dbg last offset is %d", last_offset);
    uint64_t inode_map_entry_pos = (uint64_t) last_offset - sizeof(struct inode_map_entry);
-   HLOG_ERROR("inode map entry pos %llu", inode_map_entry_pos);
+   HLOG_DEBUG("777 dbg inode map entry pos %llu", inode_map_entry_pos);
    if(sizeof(struct inode_map_entry) != 
                  storage->bs_file_pread(storage,
                  file,(char*)ime,

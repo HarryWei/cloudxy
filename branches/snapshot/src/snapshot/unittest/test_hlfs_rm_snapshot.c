@@ -90,12 +90,23 @@ hlfs_rm_snapshot_setup(Fixture *fixture, const void *data) {
 	const char *test_dir = (const char *)data;
 	g_print("test env dir is %s\n", test_dir);
 	char *fs_dir = g_build_filename(test_dir, "testfs", NULL);
-	g_assert(g_mkdir(fs_dir, 0700) == 0);
+//	g_assert(g_mkdir(fs_dir, 0700) == 0);
 	char *uri = g_malloc0(128);
 	g_assert(uri != NULL);
 	snprintf(uri, 128, "%s%s", "local://", fs_dir);
 //	char *uri = g_build_path(tmp, fs_dir, NULL);
 	g_print("uri is %s\n", uri);
+	pid_t status;
+	const char cmd[256];
+	memset((char *) cmd, 0, 256);
+	sprintf((char *) cmd, "%s %s %s %s %d %s %d %s %d", "../mkfs.hlfs", 
+								"-u", uri,
+								"-b", 8192,
+								"-s", 67108864,
+								"-m", 1024);
+	g_message("cmd is [%s]", cmd);
+	status = system(cmd);
+#if 0
 	GKeyFile *sb_keyfile = g_key_file_new();
 	g_key_file_set_string(sb_keyfile, "METADATA", "uri", uri);
 	g_key_file_set_integer(sb_keyfile, "METADATA", "block_size", 8196);
@@ -109,6 +120,7 @@ hlfs_rm_snapshot_setup(Fixture *fixture, const void *data) {
 		g_print("error msg is %s", error->message);
 		error = NULL;
 	}
+#endif
 	fixture->uri = uri;
 	g_print("fixture->uri is %s\n", fixture->uri);
 	fixture->ctrl = init_hlfs(fixture->uri);
@@ -116,8 +128,8 @@ hlfs_rm_snapshot_setup(Fixture *fixture, const void *data) {
 	int ret = hlfs_open(fixture->ctrl, 1);
 	g_assert(ret == 0);
 	take_snapshot(fixture, data);
-	g_key_file_free(sb_keyfile);
-	g_free(sb_file_path);
+//	g_key_file_free(sb_keyfile);
+//	g_free(sb_file_path);
 	g_free(fs_dir);
 	return ;
 }
@@ -165,6 +177,13 @@ hlfs_rm_snapshot_tear_down(Fixture *fixture, const void *data) {
 	const char *test_dir = (const char *) data;
 	g_print("clean dir path: %s\n", test_dir);
 	char *fs_dir = g_build_filename(test_dir, "testfs", NULL);
+	pid_t status;
+	const char cmd[256];
+	memset((char *) cmd, 0, 256);
+	sprintf((char *) cmd, "%s %s %s", "rm", "-r", fs_dir);
+	g_message("cmd is [%s]", cmd);
+	status = system(cmd);
+#if 0
 	struct back_storage *storage = init_storage_handler(fixture->uri);
 	g_assert(storage != NULL);
 	int nums = 0;
@@ -189,8 +208,12 @@ hlfs_rm_snapshot_tear_down(Fixture *fixture, const void *data) {
 //	g_free(sb_file);
 	g_free(storage);
 	g_free(infos);
+#endif
+	g_free(fs_dir);
+	g_free(fixture->uri);
 	hlfs_close(fixture->ctrl);
 	deinit_hlfs(fixture->ctrl);
+	return;
 	return;
 }
 

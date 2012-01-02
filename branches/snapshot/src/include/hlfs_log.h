@@ -8,13 +8,18 @@
 
 #define LOG_LEN				(1024)
 static char *hlog_path = NULL;
-static char *log4cfile = NULL;
+static char log4cfile[128] = {0};
+static int is_init_log_path = 0;
 //#define LOG_CONFIG_FILE_PATH		"/home/jiawei/workshop15/snapshot/src/snapshot/unittest/build/log4crc"
 
 #define HLOG_NOTICE(msg, args...) { 															\
-	hlog_path = g_get_current_dir();															\
-	setenv("LOG4C_RCPATH", hlog_path, 1);														\
-	log4cfile = g_build_filename(hlog_path, "log4crc", NULL);									\
+	if (0 == is_init_log_path) {																\
+		hlog_path = g_get_current_dir();														\
+		setenv("LOG4C_RCPATH", hlog_path, 1);													\
+		sprintf(log4cfile, "%s/%s", hlog_path, "log4crc");										\
+		g_free(hlog_path);																		\
+		is_init_log_path = 1;																	\
+	}																							\
 	if (g_file_test(log4cfile, G_FILE_TEST_EXISTS)) {											\
 		if (NULL == __mycat) {																	\
 			__mycat = log4c_category_get("hlfslog");											\
@@ -31,9 +36,13 @@ static char *log4cfile = NULL;
 }
 
 #define HLOG_TRACE(msg, args...) { 																\
-	hlog_path = g_get_current_dir();															\
-	setenv("LOG4C_RCPATH", hlog_path, 1);														\
-	log4cfile = g_build_filename(hlog_path, "log4crc", NULL);									\
+	if (0 == is_init_log_path) {																\
+		hlog_path = g_get_current_dir();														\
+		setenv("LOG4C_RCPATH", hlog_path, 1);													\
+		sprintf(log4cfile, "%s/%s", hlog_path, "log4crc");										\
+		g_free(hlog_path);																		\
+		is_init_log_path = 1;																	\
+	}																							\
 	if (g_file_test(log4cfile, G_FILE_TEST_EXISTS)) {											\
 		if (NULL == __mycat) {																	\
 			__mycat = log4c_category_get("hlfslog");											\
@@ -50,9 +59,13 @@ static char *log4cfile = NULL;
 }
 
 #define HLOG_FATAL(msg, args...) { 																\
-	hlog_path = g_get_current_dir();															\
-	setenv("LOG4C_RCPATH", hlog_path, 1);														\
-	log4cfile = g_build_filename(hlog_path, "log4crc", NULL);									\
+	if (0 == is_init_log_path) {																\
+		hlog_path = g_get_current_dir();														\
+		setenv("LOG4C_RCPATH", hlog_path, 1);													\
+		sprintf(log4cfile, "%s/%s", hlog_path, "log4crc");										\
+		g_free(hlog_path);																		\
+		is_init_log_path = 1;																	\
+	}																							\
 	if (g_file_test(log4cfile, G_FILE_TEST_EXISTS)) {											\
 		if (NULL == __mycat) {																	\
 			__mycat = log4c_category_get("hlfslog");											\
@@ -69,9 +82,13 @@ static char *log4cfile = NULL;
 }
 
 #define HLOG_DEBUG(msg, args...) { 																\
-	hlog_path = g_get_current_dir();															\
-	setenv("LOG4C_RCPATH", hlog_path, 1);														\
-	log4cfile = g_build_filename(hlog_path, "log4crc", NULL);									\
+	if (0 == is_init_log_path) {																\
+		hlog_path = g_get_current_dir();														\
+		setenv("LOG4C_RCPATH", hlog_path, 1);													\
+		sprintf(log4cfile, "%s/%s", hlog_path, "log4crc");										\
+		g_free(hlog_path);																		\
+		is_init_log_path = 1;																	\
+	}																							\
 	if (g_file_test(log4cfile, G_FILE_TEST_EXISTS)) {											\
 		if (NULL == __mycat) {																	\
 			__mycat = log4c_category_get("hlfslog");											\
@@ -88,9 +105,13 @@ static char *log4cfile = NULL;
 }
 
 #define HLOG_INFO(msg, args...) { 																\
-	hlog_path = g_get_current_dir();															\
-	setenv("LOG4C_RCPATH", hlog_path, 1);														\
-	log4cfile = g_build_filename(hlog_path, "log4crc", NULL);									\
+	if (0 == is_init_log_path) {																\
+		hlog_path = g_get_current_dir();														\
+		setenv("LOG4C_RCPATH", hlog_path, 1);													\
+		sprintf(log4cfile, "%s/%s", hlog_path, "log4crc");										\
+		g_free(hlog_path);																		\
+		is_init_log_path = 1;																	\
+	}																							\
 	if (g_file_test(log4cfile, G_FILE_TEST_EXISTS)) {											\
 		if (NULL == __mycat) {																	\
 			__mycat = log4c_category_get("hlfslog");											\
@@ -107,9 +128,13 @@ static char *log4cfile = NULL;
 }
 
 #define HLOG_ERROR(msg, args...) { 																\
-	hlog_path = g_get_current_dir();															\
-	setenv("LOG4C_RCPATH", hlog_path, 1);														\
-	log4cfile = g_build_filename(hlog_path, "log4crc", NULL);									\
+	if (0 == is_init_log_path) {																\
+		hlog_path = g_get_current_dir();														\
+		setenv("LOG4C_RCPATH", hlog_path, 1);													\
+		sprintf(log4cfile, "%s/%s", hlog_path, "log4crc");										\
+		g_free(hlog_path);																		\
+		is_init_log_path = 1;																	\
+	}																							\
 	if (g_file_test(log4cfile, G_FILE_TEST_EXISTS)) {											\
 		if (NULL == __mycat) {																	\
 			__mycat = log4c_category_get("hlfslog");											\
@@ -126,9 +151,13 @@ static char *log4cfile = NULL;
 }
 
 #define HLOG_WARN(msg, args...) { 																\
-	hlog_path = g_get_current_dir();															\
-	setenv("LOG4C_RCPATH", hlog_path, 1);														\
-	log4cfile = g_build_filename(hlog_path, "log4crc", NULL);									\
+	if (0 == is_init_log_path) {																\
+		hlog_path = g_get_current_dir();														\
+		setenv("LOG4C_RCPATH", hlog_path, 1);													\
+		sprintf(log4cfile, "%s/%s", hlog_path, "log4crc");										\
+		g_free(hlog_path);																		\
+		is_init_log_path = 1;																	\
+	}																							\
 	if (g_file_test(log4cfile, G_FILE_TEST_EXISTS)) {											\
 		if (NULL == __mycat) {																	\
 			__mycat = log4c_category_get("hlfslog");											\

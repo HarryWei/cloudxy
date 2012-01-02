@@ -17,7 +17,7 @@ typedef void* bs_fs_t;
 typedef struct file_info{
   const char name[SEGMENT_FILE_NAME_MAX];
   char       is_dir;
-  uint32_t   size;
+  uint64_t   size;
   uint64_t   lmtime;
 }bs_file_info_t;
 

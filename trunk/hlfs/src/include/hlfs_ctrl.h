@@ -80,6 +80,7 @@ struct hlfs_ctrl {
     GMutex * hlfs_access_mutex;
     GThread *log_write_thread;
     int usage_ref;
+	int rw_inode_flag;
 };
 
 typedef struct hlfs_stat{

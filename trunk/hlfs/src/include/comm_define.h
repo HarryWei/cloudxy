@@ -4,6 +4,7 @@
 #define G_LOG_HLFS_DOMAIN   "HLFS"
 #define HLFS_INODE_NO  (77)
 #define SEGMENT_FILE_NAME_MAX (64)
+#define HLFS_FILE_NAME_MAX (64)
 
 //#define SEGMENT_SIZE        (64*1024*1024UL)
 //#define SEGMENT_SIZE_MASK   (SEGMENT_SIZE-1)  

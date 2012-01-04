@@ -32,6 +32,8 @@ int hlfs_close(struct hlfs_ctrl *ctrl){
     if(ctrl->cur_read_file_handler!=NULL){
        ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->cur_read_file_handler);
     }
+	if (ctrl->alive_ss_name != NULL) 
+		g_free(ctrl->alive_ss_name);
     ctrl->usage_ref--;
     HLOG_DEBUG("leave func:%s",__func__);
     return ret;

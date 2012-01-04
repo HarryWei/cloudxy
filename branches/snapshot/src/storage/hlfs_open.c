@@ -100,6 +100,7 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
     ctrl->last_offset += size;
 #endif
 	ctrl->usage_ref++;
+	ctrl->alive_ss_name = NULL;
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }

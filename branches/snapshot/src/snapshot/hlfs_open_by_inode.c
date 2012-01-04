@@ -13,8 +13,7 @@
 #include "comm_define.h"
 #include "hlfs_log.h"
 
-int 
-hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
+int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 					uint64_t inode_addr,
 					int flag) {
 	int ret = 0;
@@ -38,6 +37,8 @@ hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 		HLOG_ERROR("the bad flag for hlfs open by inode");
 		ret = -1;
 	}
+	
+	ctrl->alive_ss_name = (char *)g_malloc0(MAX_FILE_NAME_LEN);
 out:
 	g_free(inode);
 	return ret;

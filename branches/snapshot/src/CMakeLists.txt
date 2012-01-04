@@ -17,7 +17,7 @@ MESSAGE(STATUS "This is dir " ${WORK_HOME})
 SET(HADOOP_HOME ${WORK_HOME}/3part/hadoop)
 SET(LOG_HOME ${WORK_HOME}/3part/log)
 #MESSAGE(STATUS "This is dir " ${HADOOP_HOME})
-SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
+SET(JAVA_HOME 	/mnt/jdk1.7.0)
 #SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk)
 INCLUDE_DIRECTORIES(
        /usr/include/glib-2.0 
@@ -89,19 +89,19 @@ ADD_DEPENDENCIES(libhlfs hlfs)
 ADD_CUSTOM_TARGET(tools)
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 LINK_DIRECTORIES(
-	${LOG_HOME}/lib32
+		${LOG_HOME}/lib32
     	${HADOOP_HOME}/lib32
         ${WORK_HOME}/output/lib32)
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 LINK_DIRECTORIES(
-	${LOG_HOME}/lib64
+		${LOG_HOME}/lib64
     	${HADOOP_HOME}/lib64
         ${WORK_HOME}/output/lib64)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(TOOLLIBS glib-2.0
              hlfs
-	     log4c
+			 log4c
 	         hdfs
 			 gcov)
 

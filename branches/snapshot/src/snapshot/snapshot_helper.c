@@ -281,3 +281,56 @@ int rewrite_snapshot_file(struct back_storage *storage, GHashTable *ss_hashtable
 	g_list_free(list);
 	return 0;
 }
+
+void rebuild_hashtable_use_usn_keys(gpointer data, gpointer ss_hashtable)
+{
+	return;
+}
+
+int load_all_ss_use_up_sname_keys(struct back_storage *storage, \
+		GHashTable *ss_hashtable_use_up_sname_keys)
+{
+	GHashTable *ss_hashtable_use_name_keys = g_hash_table_new_full(g_str_hash, \
+			g_str_equal, NULL, NULL);
+	int ret = load_all_ss(storage, ss_hashtable_use_name_keys);
+	if (ret < 0) {
+		HLOG_ERROR("load all ss by name error");
+		g_hash_table_destroy(ss_hashtable_use_name_keys);
+		return -1;
+	}
+	GList *list = g_hash_table_get_values(ss_hashtable_use_name_keys);
+	g_list_foreach(list, rebuild_hashtable_use_usn_keys, ss_hashtable_use_up_sname_keys);
+	g_list_free(list);
+	g_hash_table_destroy(ss_hashtable_use_up_sname_keys);
+	return 0;
+}
+
+void rebuild_hashtable_use_ia_keys(gpointer data, gpointer ss_hashtable)
+{
+	return;
+}
+
+int load_all_ss_use_inode_addr_keys(struct back_storage *storage, \
+		GHashTable *ss_hashtable_use_inode_addr_keys)
+{
+	GHashTable *ss_hashtable_use_name_keys = g_hash_table_new_full(g_str_hash, \
+			g_str_equal, NULL, NULL);
+	int ret = load_all_ss(storage, ss_hashtable_use_name_keys);
+	if (ret < 0) {
+		HLOG_ERROR("load all ss by name error");
+		g_hash_table_destroy(ss_hashtable_use_name_keys);
+		return -1;
+	}
+	GList *list = g_hash_table_get_values(ss_hashtable_use_name_keys);
+	g_list_foreach(list, rebuild_hashtable_use_ia_keys, \
+			ss_hashtable_use_inode_addr_keys);
+	g_list_free(list);
+	g_hash_table_destroy(ss_hashtable_use_inode_addr_keys);
+	return 0;
+}
+
+int find_up_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, \
+		char **up_ss_name)
+{
+	return 0;
+}

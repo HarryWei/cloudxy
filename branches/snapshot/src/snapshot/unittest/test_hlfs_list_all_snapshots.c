@@ -52,6 +52,7 @@ static void test_no_ss_exist(Fixture *fixture, const void *data)
 	
 	g_message("leave function test_ssfile_not_exist");
 	g_free(res);
+	g_free(storage);
 }
 
 void test_ss_exist(Fixture *fixture, const void *data) 

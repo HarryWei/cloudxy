@@ -131,7 +131,7 @@ hlfs_get_inode_info_setup(Fixture *fixture, const void *data) {
 	pid_t status;
 	const char cmd[256];
 	memset((char *) cmd, 0, 256);
-	sprintf((char *) cmd, "%s %s %s %s %d %s %d %s %d", "../mkfs.hlfs", 
+	sprintf((char *) cmd, "%s %s %s %s %d %s %d %s %d", "../../../../output/bin/mkfs.hlfs", 
 								"-u", uri,
 								"-b", 8192,
 								"-s", 67108864,

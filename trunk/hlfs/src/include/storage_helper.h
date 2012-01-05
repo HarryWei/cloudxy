@@ -18,7 +18,7 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
 uint64_t get_last_inode_storage_addr_in_seg( struct back_storage * storage, uint64_t segno);
 int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,uint32_t *offset);
 uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,struct inode *inode, uint64_t db_no,uint32_t block_size);
-int load_latest_inode_map_entry(struct back_storage *storage,uint64_t segno,uint64_t last_offset,struct inode_map_entry *ime);
+int load_latest_inode_map_entry(struct back_storage *storage,uint32_t segno,uint32_t last_offset,struct inode_map_entry *ime);
 
 #ifdef __cplusplus 
 } 

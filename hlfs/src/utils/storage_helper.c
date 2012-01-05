@@ -192,13 +192,14 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
     const char* latest_file = NULL;
     uint64_t latest_st_mtime = 0;
     bs_file_info_t * info = infos;
+    *offset = 0;
     for(i=0;i<num_entries;i++){
         HLOG_DEBUG("file:%s,size:%llu,time:%llu\n",info->name,info->size,info->lmtime);  
         if(g_str_has_suffix(info->name,"seg")){
              if(latest_st_mtime < info->lmtime){
                 latest_st_mtime = info->lmtime;
                 latest_file = info->name;
-                //*offset = info->size;
+                *offset = info->size;
 #if 0
                 if(info->size == 0){
                     HLOG_DEBUG("meta data .................. not update ?");
@@ -222,7 +223,7 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
         HLOG_DEBUG("segno :%d",*segno);
         g_strfreev(v);
 #if 1
-        if(info->size == 0){
+        if(*offset == 0){
            HLOG_DEBUG("meta data .................. not update ?");
            ret = restore_last_segno_file(storage->uri,latest_file); 
            g_assert(0==ret);

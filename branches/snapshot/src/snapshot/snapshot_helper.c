@@ -380,8 +380,13 @@ int load_all_ss_use_inode_addr_keys(struct back_storage *storage, \
 
 void find_up_inode_addr(gpointer data, gpointer usr_data)
 {
-	uint64_t tmp = *(uint64_t *)data;
+	HLOG_DEBUG("enter func %s", __func__);
+	uint64_t tmp = (uint64_t)data;
 	inode_cup_t *inode_cup = (inode_cup_t *)usr_data;
+	if ((tmp < inode_cup->cur_inode_addr) && ((inode_cup->cur_inode_addr - \
+					tmp) < (inode_cup->cur_inode_addr - inode_cup->up_inode_addr))) 
+		inode_cup->up_inode_addr = tmp;
+	HLOG_DEBUG("leave func %s", __func__);
 }
 
 int find_up_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, \
@@ -407,7 +412,7 @@ int find_up_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, \
 		return -1;
 	}
 	g_list_foreach(list, find_up_inode_addr, inode_cup);
-	if (inode_cup->up_inode_addr <= 0) {
+	if (inode_cup->up_inode_addr == 0) {
 		HLOG_DEBUG("No up_inode_addr exist");
 		*up_ss_name = NULL;
 	} else {

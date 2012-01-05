@@ -15,6 +15,11 @@ struct snapshot {
 	char up_sname[HLFS_FILE_NAME_MAX]; /*  for tree style snapshot  */
 } __attribute__((packed));
 
+typedef struct {
+	uint64_t cur_inode_addr;
+	uint64_t up_inode_addr;
+} inode_cup_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif

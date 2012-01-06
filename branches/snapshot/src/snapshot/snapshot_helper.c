@@ -436,7 +436,7 @@ int find_up_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char *
 		HLOG_DEBUG("There is no snapshot yet, use inode addr as up snapshot name...");
 		sprintf(*up_ss_name, "%llu", inode_addr);
 	}
-	for (i = 0; i < g_list_length; i++) {
+	for (i = 0; i < g_list_length(list); i++) {
 		struct snapshot *ss = (struct snapshot *) g_list_nth_data(list, i);
 		if (inode_addr == ss->inode_addr) {
 			sprintf(*up_ss_name, "%s", ss->sname);

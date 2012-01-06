@@ -19,10 +19,12 @@ is_sname_exist(struct back_storage *storage,
 	int ret = load_all_ss(storage, shash);
 	if (0 > ret) {
 		HLOG_ERROR("load all ss error!");
+		g_hash_table_destroy(shash);
 		return -1;
 	}
 	if (NULL == g_hash_table_lookup(shash, sname)) {
 		HLOG_DEBUG("we can not find %s in the hash table!", sname);
+		g_hash_table_destroy(shash);
 		return 1;
 	}
 	g_hash_table_destroy(shash);
@@ -63,10 +65,13 @@ hlfs_rm_snapshot(const char *uri,const char *ssname) {
 	memset(deltext, 0, 128);
 	uint32_t len = snapshot_delmark2text(ssname, deltext);
 	HLOG_DEBUG("delbuf is %s", deltext);
+	g_mutex_lock(ctrl->hlfs_access_mutex);
 	if (0 > storage->bs_file_append(storage, file, deltext, len)) {
 		HLOG_ERROR("append del text failed!");
+		g_mutex_unlock(ctrl->hlfs_access_mutex);
 		ret = -1;
 	}
+	g_mutex_unlock(ctrl->hlfs_access_mutex);
 out:
 	if (NULL != file) {
 		storage->bs_file_close(storage, file);

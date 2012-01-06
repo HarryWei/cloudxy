@@ -97,12 +97,14 @@ int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
 		ret = -5;
 		goto out;
 	}
-
+	g_mutex_lock(ctrl->hlfs_access_mutex);
 	if (0 > rewrite_snapshot_file(storage, ss_hashtable)) {
 		HLOG_ERROR("rewrite snapshot.txt error");
+		g_mutex_unlock(ctrl->hlfs_access_mutex);
 		ret = -6;
 		goto out;
 	}
+	g_mutex_unlock(ctrl->hlfs_access_mutex);
 
 out: //TODO ret is out of control, we should fix it
 	g_free(storage);

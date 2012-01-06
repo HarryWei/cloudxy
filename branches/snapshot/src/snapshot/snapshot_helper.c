@@ -185,7 +185,9 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		ret = -2;
 		goto out;
 	}
+	g_mutex_lock(ctrl->hlfs_access_mutex);
 	ret = storage->bs_file_pread(storage, file, buf, file_size, 0);
+	g_mutex_unlock(ctrl->hlfs_access_mutex);
 	if (ret < 0) {
 		HLOG_ERROR("Read file snapshot.txt failed\n");
 		storage->bs_file_close(storage, file);

@@ -42,7 +42,9 @@ get_iaddr_bytime_in_seg(struct back_storage *storage,
 		ret = -1;
 		goto out;
 	}
+	g_mutex_lock(ctrl->hlfs_access_mutex);
 	int count = storage->bs_file_pread(storage, file, tmp_buf,SEGMENT_SIZE, 0);
+	g_mutex_unlock(ctrl->hlfs_access_mutex);
 	if (0 > count) {
 		HLOG_ERROR("read content error!");
 		ret = -1;

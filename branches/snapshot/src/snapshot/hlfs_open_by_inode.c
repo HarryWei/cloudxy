@@ -37,8 +37,17 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 		HLOG_ERROR("the bad flag for hlfs open by inode");
 		ret = -1;
 	}
-	
+	if (0 > find_up_ss_name_of_inode(ctrl, inode_addr, &ctrl->alive_ss_name)) {
+		HLOG_ERROR("find up ss name error!");
+		ret = -1;
+	}
+#if 0
 	ctrl->alive_ss_name = (char *)g_malloc0(MAX_FILE_NAME_LEN);
+	if (NULL == ctrl->alive_ss_name) {
+		HLOG_ERROR("Allocate error!");
+		return -1;
+	}
+#endif
 out:
 	g_free(inode);
 	return ret;

@@ -381,7 +381,7 @@ int load_all_ss_use_inode_addr_keys(struct back_storage *storage, \
 void find_up_inode_addr(gpointer data, gpointer usr_data)
 {
 	HLOG_DEBUG("enter func %s", __func__);
-	uint64_t tmp = (uint64_t)data;
+	uint64_t tmp = *((uint64_t *) data);
 	inode_cup_t *inode_cup = (inode_cup_t *)usr_data;
 	if ((tmp < inode_cup->cur_inode_addr) && ((inode_cup->cur_inode_addr - \
 					tmp) < (inode_cup->cur_inode_addr - inode_cup->up_inode_addr))) 
@@ -389,29 +389,28 @@ void find_up_inode_addr(gpointer data, gpointer usr_data)
 	HLOG_DEBUG("leave func %s", __func__);
 }
 
-int find_up_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, \
-		char **up_ss_name)
+int find_up_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char **up_ss_name)
 {
 	HLOG_DEBUG("enter func %s", __func__);
-	inode_cup_t *inode_cup = (inode_cup_t *)g_malloc0(sizeof(inode_cup_t));
-	inode_cup->cur_inode_addr = inode_addr;
-	inode_cup->up_inode_addr = 0;
-	GHashTable *ss_hashtable = g_hash_table_new_full(g_direct_hash, g_direct_equal, \
-			NULL, NULL);
-	if (load_all_ss_use_inode_addr_keys(ctrl->storage, ss_hashtable) < 0) {
+//	inode_cup_t *inode_cup = (inode_cup_t *)g_malloc0(sizeof(inode_cup_t));
+//	inode_cup->cur_inode_addr = inode_addr;
+//	inode_cup->up_inode_addr = 0;
+	GHashTable *ss_hashtable = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, NULL);
+	if (load_all_ss(ctrl->storage, ss_hashtable) < 0) {
 		HLOG_ERROR("load all ss error!");
 		g_hash_table_destroy(ss_hashtable);
 		HLOG_DEBUG("leave func %s", __func__);
 		return -1;
 	}
-	GList *list = g_hash_table_get_keys(ss_hashtable);
+	GList *list = g_hash_table_get_values(ss_hashtable);
 	if (list == NULL) {
-		HLOG_ERROR("get keys error");
+		HLOG_ERROR("get values error");
 		g_hash_table_destroy(ss_hashtable);
 		HLOG_DEBUG("leave func %s", __func__);
 		return -1;
 	}
-	g_list_foreach(list, find_up_inode_addr, inode_cup);
+#if 0
+	g_list_foreach(list, find_up_inode_addr, &inode_addr);
 	if (inode_cup->up_inode_addr == 0) {
 		HLOG_DEBUG("No up_inode_addr exist");
 		*up_ss_name = NULL;
@@ -423,6 +422,28 @@ int find_up_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, \
 		sprintf(*up_ss_name, "%s", tmp_ss->sname);
 	}
 	g_free(inode_cup);
+#endif
+	int i = 0;
+	int len = g_list_length(list);
+	*up_ss_name = (char *)g_malloc0(sizeof(char) * MAX_FILE_NAME_LEN);
+	if (NULL == *up_ss_name) {
+		HLOG_ERROR("Allocate Error!");
+		return -1;
+	}
+	if (0 == len) {
+		HLOG_DEBUG("There is no snapshot yet, use inode addr as up snapshot name...");
+		sprintf(*up_ss_name, "%llu", inode_addr);
+	}
+	for (i = 0; i < g_list_length; i++) {
+		struct snapshot *ss = (struct snapshot *) g_list_nth_data(list, i);
+		if (inode_addr == ss->inode_addr) {
+			sprintf(*up_ss_name, "%s", ss->sname);
+			goto out;
+		}
+	}
+	HLOG_DEBUG("We can not find the inode_addr's snapshot, so use inode addr as up ss name");
+	sprintf(*up_ss_name, "%llu", inode_addr);
+out:
 	g_list_free(list);
 	g_hash_table_destroy(ss_hashtable);
 	HLOG_DEBUG("leave func %s", __func__);

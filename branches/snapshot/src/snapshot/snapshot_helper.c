@@ -381,7 +381,7 @@ int load_all_ss_use_inode_addr_keys(struct back_storage *storage, \
 void find_up_inode_addr(gpointer data, gpointer usr_data)
 {
 	HLOG_DEBUG("enter func %s", __func__);
-	uint64_t tmp = *((uint64_t *) data);
+	uint64_t tmp = (uint64_t) GPOINTER_TO_INT(data);
 	inode_cup_t *inode_cup = (inode_cup_t *)usr_data;
 	if ((tmp < inode_cup->cur_inode_addr) && ((inode_cup->cur_inode_addr - \
 					tmp) < (inode_cup->cur_inode_addr - inode_cup->up_inode_addr))) 

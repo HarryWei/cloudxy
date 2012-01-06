@@ -29,7 +29,10 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname) {
 		return -1;
 	}
 	g_strlcpy(cp->sname,ssname,strlen(ssname) + 1);
+	g_strlcpy(cp->up_sname,ctrl->alive_ss_name,strlen(ctrl->alive_ss_name) + 1);
 	cp->inode_addr = ctrl->imap_entry.inode_addr;
+	memset(ctrl->alive_ss_name, 0, strlen(ctrl->alive_ss_name));
+	sprintf(ctrl->alive_ss_name, "%s", ssname);
     g_mutex_lock (ctrl->hlfs_access_mutex);
 	ret = dump_snapshot(ctrl->storage,SNAPSHOT_FILE,cp);
     g_mutex_unlock (ctrl->hlfs_access_mutex);

@@ -31,6 +31,47 @@ is_sname_exist(struct back_storage *storage,
 	return 0;
 }
 
+static int
+is_delete(struct back_storage *storage,
+			const char *sname) {
+	GHashTable *shash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	int ret = load_all_ss(storage, shash);
+	if (0 > ret) {
+		HLOG_ERROR("load all ss error!");
+		g_hash_table_destroy(shash);
+		return -1;
+	}
+#if 0
+	struct snapshot *ss = g_hash_take_lookup(shash, sname);
+	if (NULL == ss) {
+		HLOG_ERROR("look up ss error!");
+		g_hash_table_destroy(shash);
+		return -1;
+	}
+#endif
+	Glist *list = g_hash_table_get_values(shash) ;
+	if (NULL == list) {
+		HLOG_ERROR("hash table get values error!");
+		g_hash_table_destroy(shash);
+		return -1;
+	}
+	int len = g_list_length(list);
+	if (0 == len) {
+		HLOG_ERROR("There is no snapshots, right?");
+		g_hash_table_destroy(shash);
+		g_free(list);
+		return -1;
+	}
+	int i = 0;
+	for (i = 0; i < g_list_length(list); i++) {
+		struct snapshot *_ss = g_list_nth_data(list, i);
+		if (0 == g_strcmp0(_ss->up_sname, sname)) {
+			return 1; // can not delete it
+		}
+	}
+	return 0; // can delete it
+}
+
 int 
 hlfs_rm_snapshot(const char *uri,const char *ssname) {
     int ret = 0;
@@ -45,6 +86,13 @@ hlfs_rm_snapshot(const char *uri,const char *ssname) {
 		goto out;
 	} else if (-1 == ret) {
 		HLOG_ERROR("is sname exist error!");
+		goto out;
+	}
+	if (1 == (ret = is_delete(storage, ssname))) {
+		HLOG_DEBUG("snapshot %s can not be deleted", ssname);
+		goto out;
+	} else if (-1 == ret) {
+		HLOG_ERROR("is_delete executed error!");
 		goto out;
 	}
     if (-1 == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) {

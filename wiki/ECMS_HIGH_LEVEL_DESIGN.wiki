@@ -95,12 +95,14 @@ Node Controller 和Master Serivce不同，它的消息处理主要是执行虚�
      {noreply, State}.  
   do_cmd_process(State, X, From) ->
      %执行虚拟机管理脚本等
-     system(do_vm_control.sh)
+     os:cmd(do_vm_control.sh)
      %最后回应给master 
      gen_server:reply(From, Reply). 
 }}}
-
-
+==== Master Service 跨机器故障恢复(failover) ====
+为了能快速异地跨机器failover(如果master service所在物理机器故障则需要快速选择其他机器上启动master service)，Master Service 采取“状态远程化”策略，将所有上下文数据都存储在分布冗余数据库中。虽然我们并非一个无状态服务器，但服务器状态持续化到远端数据库中能有效防止系统崩溃丢失状态数据或者硬盘损坏丢失元数据的问题。
+===== 实现提示 =====
+我们在erlang系统中使用其提供的mnesia分布、多副本数据库作数据存储，它的特性完全满足我们需求。我们目前配置3个数据副本即可确保数据安全。
 
 
 

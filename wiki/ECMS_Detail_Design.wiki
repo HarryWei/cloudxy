@@ -34,7 +34,7 @@
 || *描述* || 根据给定的虚拟机名字，终止指定的虚拟机 ||
 || *参数* || {vm_id} ||
 || *备注* || 客户端发向master service  ||
-|| *请求包* || 对master 的请求包：<br>*cmd:*{vm_stop_2_m}<br>*content:*{vm_id:<br>｝ ||
+|| *请求包* || 对master 的请求包：<br>*cmd:*{vm_stop_2_m}<br>*content:*{<br>vm_id:<br>｝ ||
 || *应答包* || master service 返回的应答包<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>} ||
 || *应用场景* || 客户需要停止正在运行的虚拟机时 ||
 || *步骤* || 1.master创建一个进程vm_stop_2_m，并将{vm_id}参数传递给vm_stop_2_m进程；<br>2.vm_stop_2_m进程首先检查参数的合法性；<br>3.根据{vm_id}寻找其所对应的node节点名称node_name；<br>4.向node_name发送vm_stop_2_s请求，并传递参数{node_name,vm_id}；<br>5.如果第4步操作成功，则释放{vm_id}所对应的虚拟机资源；<br>6.如果以上所有步骤操作成功，返回成功信息，否则返回失败信息。 ||

@@ -12,7 +12,12 @@
 || *描述* || 根据给定参数，在master中记录vm 配置信息 ||
 || *参数* || {vcpu_count,mem_size,vm_password,vm_hostname,os_type} ||
 || *备注* || 客户端发向master service ||
-|| *请求包* || master service 返回的应答包<br>&nbsp&nbsp&nbsp&nbsp sunjaing ||
+|| *请求包* || 
+{{{
+sfudanf
+dasfasdfas
+}}}
+ ||
 || *应答包* ||  ||
 || *应用场景* || 客户请求创建虚拟机时 ||
 || *步骤* ||  ||
@@ -24,11 +29,3 @@
     <td>vm_create_2_m/td>
   </tr>
 </table>
-
-{{{
- int take_snapshot(HLFS_CTRL *ctrl, const char *ss_name)
-  给用户提供的在线方式快照接口，用户可以指定快照名
-  * ctrl: 全局控制结构体
-  * ss_name: 用户指定的快照名
-  * return value: 成功返回0，失败返回<0
-}}}

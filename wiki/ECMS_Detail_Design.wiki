@@ -160,3 +160,41 @@
 || *应用场景* || 虚拟机在master那里注册的时候 ||
 || *步骤* || 1.master接收到请求之后，首先创建一个进程get_vm_status_2_m，并向这个进程传递{vm_id}参数；<br>2.get_vm_status_2_m进程接收到参数之后，首先进行参数合法性检查；<br>3.在虚拟机信息表中寻找vm_id所对应的node_name；<br>4.向node_name发送get_vm_status_2_s请求，并传递参数{node_name,vm_id}，将会返回结果保存到{errno:msg,vm_id,vm_mem_used,vm_cpu_used,vm_status}中；<br>5.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果获取失败，则返回失败信息 ||
+
+====  Node Controller命令设计 ====
+*1.vm_start_2_s*
+|| *命令号* || vm_start_2_s ||
+|| *描述* || 创建虚拟机，并且启动创建的虚拟机 ||
+|| *参数* || {node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri} ||
+|| *备注* || master service发向node controller ||
+|| *请求包* || 对node的请求包：<br>*cmd:*{vm_start_2_s}<br>content:{<br>node_name:<br>vm_id:<br>is_first_start:<br>vcpu_count:<br>mem_size:<br>vm_password:<br>vm_hostname:<br>ip_addr:<br>mac_addr:<br>vnc_password:<br>os_type:<br>sysdisk_uri:系统盘镜像uri<br>} ||
+|| *应答包* || node controller返回的应答包:{<br>errno: (int32)（0代表成功）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>} ||
+|| *应用场景* || 当master请求node创建虚拟机时 ||
+|| *步骤* || 1.node接到请求之后创建一个进程vm_start_2_s，将{node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri}参数传递给vm_start_2_s进程；<br>2.vm_start_2_s进程首先检查参数的合法性；<br>3.根据参数生成虚拟机配置文件，作为下一步调用启动脚本的参数；<br>4.调用start_vm.sh脚本来启动虚拟机；<br>5.如果以上操作都成功，返回成功信息，否则返回失败信息。<br> ||
+|| *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果该宿主机上有运行没有资源可供创建新的虚拟机，则返回资源不够用信息<br>3.如果创建并启动虚拟机失败，则返回启动失败信息<br>4.如果在脚本实现中没有考虑第一次启动的问题，则返回出错信息||
+
+*2.vm_stop_2_s*
+|| *命令号* || vm_stop_2_s ||
+|| *描述* || 停止指定node上的虚拟机 ||
+|| *参数* || {node_name,vm_id} ||
+|| *备注* || master service发向node controller ||
+|| *请求包* || 对node的请求包:<br>*cmd:*{vm_stop_2_s}<br>*content:*{<br>node_name:<br>vm_id:<br>} ||
+|| *应答包* || node controller返回的应答包:{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）} ||
+|| *应用场景* || 当master请求node停止虚拟机时 ||
+|| *步骤* || 1.node接收到请求之后，创建一个进程vm_stop_2_s进程，并向该进程传递{node_name,vm_id}参数；<br>2.vm_stop_2_s进程首先检查参数的合法性；<br>3.调用vm_stop.sh脚本来停止虚拟机{vm_id}；<br>4.如果以上所有操作成功，返回成功信息，否则返回错误信息。 ||
+|| *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果停止虚拟机失败，则返回停止失败信息 ||
+
+*3.vm_destroy_2_s*
+|| *命令号* || vm_destroy_2_s ||
+|| *描述* || 销毁node上的指定虚拟机 ||
+|| *参数* || {node_name,vm_id} ||
+|| *备注* || master service发向node controller ||
+|| *请求包* || 对node的请求包：<br>*cmd:*{vm_destroy_2_s}<br>*content:*{<br>
+	    node_name:
+        vm_id:
+	｝
+} ||
+|| *应答包* ||  ||
+|| *应用场景* ||  ||
+|| *步骤* ||  ||
+|| *异常处理* ||  ||

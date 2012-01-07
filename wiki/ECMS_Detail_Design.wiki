@@ -12,7 +12,7 @@
 || *描述* || 根据给定参数，在master中记录vm 配置信息 ||
 || *参数* || {vcpu_count,mem_size,vm_password,vm_hostname,os_type} ||
 || *备注* || 客户端发向master service ||
-|| *请求包* || master service 返回的应答包<br>        sunjaing ||
+|| *请求包* || master service 返回的应答包<br>&nbsp&nbsp&nbsp&nbsp sunjaing ||
 || *应答包* ||  ||
 || *应用场景* || 客户请求创建虚拟机时 ||
 || *步骤* ||  ||

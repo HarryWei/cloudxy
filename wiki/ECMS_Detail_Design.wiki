@@ -1,5 +1,5 @@
 #summary ECMS详细设计（暂主要包括数据表、脚本和虚拟机命令设计）
-= ECMS详细设计（主要包括数据表、脚本和虚拟机命令设计） =
+= Elastic Cloud Manage System（ECMS） 详细设计 =
 ----
 ||a||b||c||
 == 数据表的设计 ==

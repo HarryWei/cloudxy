@@ -21,6 +21,6 @@
 <table border="1px" cellspacing="0px" style="border-collapse:collapse">
   <tr>
     <td> *命令号* </td>
-    <td>vm_create_2_m &nbsp</td>
+    <td>vm_create_2_m||sdfdssdf||</td>
   </tr>
 </table>

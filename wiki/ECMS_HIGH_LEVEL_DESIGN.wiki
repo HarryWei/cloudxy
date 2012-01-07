@@ -50,8 +50,38 @@ ECMS 的系统架构采用传统的MASTER/SLAVE模式，分别对应——总控
 ==== Master Service 消息处理 ====
 Master Serivce 消息处理采用：异步消息接收进程  +  多进程（erlang中是协程，不过我们文中仍成其进程吧）同步消息处理模型（类似于半同步半异步模型，只不过erlang协程很轻，所以现场创建、使用完销毁即可，不需要像传统方式那样以线程池实现之）。
 ==== 实现提示 ====
-
-
+消息处理采用Erlang 中 gen_server 框架实现,具体实现有如下考虑：
+ * handle_call 中spawn新进程负责具体的消息处理；
+ * 回应句柄(From)需要告诉消息处理例程，以便命令执行完毕后，进行回应。
+ * handle_call中不负责消息回应，而是采用noreply模式，以防止堵塞后续命令；
+伪代码片如下 ：
+{{{
+handle_call({foo,X}, From, State) -> 
+    	spawn_link(fun() -> do_cmd_process(State, X, From) end),
+    	{noreply, State}.  
+do_cmd_process(State, X, From) ->
+           % 获得node controller的reference
+           {Node,Ncname}  =  get_node_contrllor(X,State) 
+           % 构造给node controller的命令消息
+           {Msg} = build_nc_msg (X,State)
+           % 发送消息给node controller
+           {Node,Ncname} ! Msg,
+           receive
+           		{{Node,Ncname} , Res} ->  
+%处理从node controller的响应消息
+do_replay_process(); 
+      		{'DOWN', {Node,Ncname}, _, _, _} ->
+                                   %处理node 宕机事件
+do_node_down_process(); 
+                        after 5000 - > 
+ 			 %通讯超时处理 
+do_timeout_process()
+           end.
+           gen_server:reply(From, Reply).           %最后回应给客户端
+}}}
+注：
+ * Receive 处理属于异步消息处理，我们还可以简化成同步消息处理——采用gen_server:call({Node,Ncname},Msg,Timeout}代替更为简便。
+ * do_cmd_process 在单独进程中执行，且会存在修改元数据等动作所以，所以对元数据修改需要枷锁。erlang中是采用transaction对数据库表枷锁。
 
 
 

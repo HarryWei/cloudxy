@@ -8,19 +8,12 @@
 == 虚拟机管理命令的设计 ==
 === Master Service命令设计 ===
 *1.vm_create_2_m*
-|| *命令号* ||
-|| *描述* ||
-|| *参数* ||
-|| *备注* ||
-|| *请求包* ||
-|| *应答包* ||
-|| *应用场景* ||
-|| *步骤* ||
-|| *异常处理* ||
-
-<table border="1px" bordercolor="#000000" cellspacing="0px" style="border-collapse:collapse">
-<tr>
-<td>
-fanyingfei
-</td>
-</tr>
+|| *命令号* || *vm_create_2_m* ||
+|| *描述* || *根据给定参数，在master中记录vm 配置信息* ||
+|| *参数* || *{vcpu_count,mem_size,vm_password,vm_hostname,os_type}* ||
+|| *备注* || *客户端发向master service* ||
+|| *请求包* || ** ||
+|| *应答包* || ** ||
+|| *应用场景* || *客户请求创建虚拟机时* ||
+|| *步骤* || ** ||
+|| *异常处理* || *如果参数不合法，则返回创建失败信息* ||

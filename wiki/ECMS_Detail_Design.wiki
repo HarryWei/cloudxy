@@ -21,6 +21,19 @@
 <table border="1px" cellspacing="0px" style="border-collapse:collapse">
   <tr>
     <td> *命令号* </td>
-    <td>vm_create_2_m||sdfdssdf||</td>
+    <td>vm_create_2_m/td>
   </tr>
 </table>
+
+{{{
+ int take_snapshot(HLFS_CTRL *ctrl, const char *ss_name)
+  给用户提供的在线方式快照接口，用户可以指定快照名
+  * ctrl: 全局控制结构体
+  * ss_name: 用户指定的快照名
+  * return value: 成功返回0，失败返回<0
+ int rm_snapshot(const char *uri, const char *ss_name)
+  用户可以通过这个接口来删除指定名字的快照
+  * uri: 文件系统的位置 
+  * ss_name: 用户指定的快照名
+  * return value: 成功返回0，失败返回<0
+}}}

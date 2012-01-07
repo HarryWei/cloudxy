@@ -18,7 +18,7 @@
 || *步骤* ||
 || *异常处理* ||
 
-<table border="1px" cellspacing="0px">
+<table border="1px" bordercolor="#000000" cellspacing="0px" style="border-collapse:collapse">
 <tr>
 <td>
 fanyingfei

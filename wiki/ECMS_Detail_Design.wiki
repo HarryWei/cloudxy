@@ -83,3 +83,14 @@
 || *应用场景* ||  ||
 || *步骤* || 1.master接收到卸载磁盘请求之后，首先创建一个进程disk_detach_2_m，并给这个进程传递{disk_id,vm_id}参数；<br>2.disk_detach_2_m进程接收到参数之后，首先进行参数合法性检查；<br>3.查询虚拟机状态表，找到{vm_id}所对应的node_name；<br>4.向node_name发送disk_detach_2_s请求，并传递参数{node_name,disk_id,vm_id}；<br>5.如果第4步操作成功，则更新磁盘信息表，否则不更新；<br>6.如果以上所有操作成功，则返回成功信息，否则返回失败信息。 ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果卸载失败，则返回卸载失败信息 ||
+
+*8.disk_destroy_2_m*
+|| *命令号* || disk_destroy_2_m ||
+|| *描述* || 销毁磁盘 ||
+|| *参数* || {disk_id,vm_id} ||
+|| *备注* || 客户端发向master service ||
+|| *请求包* || 对master 的请求包：<br>*cmd:*{disk_destroy_2_m}<br>*content:*{<br>disk_id:<br>vm_id:<br>｝ ||
+|| *应答包* || master service返回的应答包:{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息} ||
+|| *应用场景* || 当客户发送销毁请求时 ||
+|| *步骤* || 1.master接收到销毁磁盘请求，创建进程disk_destroy_2_m，并向这个进程传递参数{disk_id,vm_id}；<br>2.disk_destroy_2_m接收到参数之后，首先检查参数的合法性；<br>3.判断{disk_id}是否被卸载，如果没有卸载，则直接返回失败信息，否则进行第4步骤；<br>4.根据{vm_id}寻找所对应的节点node_name；<br>5.向node_name发送disk_destroy_2_s请求，并且传递参数{node_name,disk_id,vm_id}；<br>6.如果销毁成功，则销毁磁盘配置表中的{disk_id}所对应的项；<br>7.如果以上所有操作成功，则返回成功信息，否则返回失败信息。 ||
+|| *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果销毁失败，则返回销毁失败信息 ||

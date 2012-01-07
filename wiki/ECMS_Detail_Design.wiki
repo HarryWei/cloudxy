@@ -17,8 +17,7 @@
 || *应用场景* || 客户请求创建虚拟机时 ||
 || *步骤* || 1.master创建一个新的进程vm_create_2_m，将{vcpu_count,mem_size,vm_password,vm_hostname,os_type}参数传递给vm_create_2_m进程；<br>2.vm_create_2_m进程首先对所传递参数的合法性进行检查；<br>3.vm_create_2_m进程生成一个能够唯一标识虚拟机的名字，存入vm_id变量中，并将is_first_start变量设置为true；<br>4.vm_create_2_m进程生成{vm_id,vcpu_count,mem_size,vm_password,vm_hostname,os_type,is_first_start})虚拟机资源配置表，并将其记录到后端数据库中；<br>5.上面几步操作都成功，则返回{errno=0:msg,vm_id}，否则返回创建失败。 ||
 || *异常处理* || 如果参数不合法，则返回创建失败信息 ||
-
-{{{
+||  ||  {{{
 <table border="1px" cellspacing="0px" style="border-collapse:collapse">
 <tr>
 <td>
@@ -27,7 +26,7 @@
 1.master创建一个新的进程vm_create_2_m，将 <br>
 2.a孙讲啊点噶速度gas大哥阿斯顿飞
 </table>
-}}}
+}}} ||
 
 
 dasfuasdnf asdfasdf

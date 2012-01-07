@@ -28,3 +28,16 @@
 || *应用场景* || 客户请求启动自己创建的虚拟机时 ||
 || *步骤* || 1.master创建一个新的进程vm_start_2_m，将{vm_id}参数传递给vm_start_2_m进程；<br>2.vm_start_2_m进程首先对所传递参数的合法性进行检查；<br>3.判断vm_id虚拟机是不是已经被创建；<br>4.从后端数据库中恢复出vm_id虚拟机配置表：{vm_id,vcpu_count,mem_size,vm_password,vm_hostname,os_type,is_first_start};<br>5.从NETWORK_RESOURCE资源表中寻找没有被分配出去的ip和mac地址；<br>6.生成一个vnc的密码，存入变量vnc_password；<br>7.根据os_type生成系统盘镜像的uri，存入变量sysdisk_uri中；<br>8.申请资源{vcpu_count,mem_size}，选择一个有宿主机node_name，要求node_name上能够满足所申请的资源；<br>9.向node_name发送vm_start_2_s请求，传递的参数为{node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri};<br>10.如果上一步的调用出错，则释放之前申请的虚拟机资源；<br>11.以上所有操作成功，返回成功信息，否则返回失败信息。 ||
 || *异常处理* || 1.如果参数不合法，则返回创建失败信息<br>2.如果与node节点通信失败，则返回通信失败信息<br>3.如果宿主机没有资源可以创建虚拟机，则返回资源不够用信息<br>4.如果启动虚拟机失败，则返回启动失败信息 ||
+
+*3.vm_stop_2_m*
+|| *命令号* || vm_stop_2_m ||
+|| *描述* || 根据给定的虚拟机名字，终止指定的虚拟机 ||
+|| *参数* || {vm_id} ||
+|| *备注* || 客户端发向master service  ||
+|| *请求包* || 对master 的请求包：<br>*cmd:*{vm_stop_2_m}<br>*content:*{vm_id:<br>｝ ||
+|| *应答包* || master service 返回的应答包<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>} ||
+|| *应用场景* || 客户需要停止正在运行的虚拟机时 ||
+|| *步骤* || 1.master创建一个进程vm_stop_2_m，并将{vm_id}参数传递给vm_stop_2_m进程；<br>2.vm_stop_2_m进程首先检查参数的合法性；<br>3.根据{vm_id}寻找其所对应的node节点名称node_name；<br>4.向node_name发送vm_stop_2_s请求，并传递参数{node_name,vm_id}；<br>5.如果第4步操作成功，则释放{vm_id}所对应的虚拟机资源；<br>6.如果以上所有步骤操作成功，返回成功信息，否则返回失败信息。 ||
+|| *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node节点通信失败，则返回通信失败信息<br>3.如果停止虚拟机失败，则返回停止失败信息 ||
+
+*4.*

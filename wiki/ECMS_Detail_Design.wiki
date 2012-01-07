@@ -17,7 +17,3 @@
 || *应用场景* ||
 || *步骤* ||
 || *异常处理* ||
-
-<table border=1>
-<tr><td>fanyingfei</td></tr>
-</table>

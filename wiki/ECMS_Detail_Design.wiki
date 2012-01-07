@@ -17,3 +17,19 @@
 || *应用场景* || 客户请求创建虚拟机时 ||
 || *步骤* ||  ||
 || *异常处理* || 如果参数不合法，则返回创建失败信息 ||
+
+
+{| border="1" cellspacing="0" cellpadding="5" align="center"
+! 这
+! 是
+|- 
+| 个
+| 表格
+|-
+| colspan=2 |
+{| border=3
+| 表格嵌套
+|-
+| style="background:#ff3322" | 见否？
+|}
+|}

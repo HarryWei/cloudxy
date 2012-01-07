@@ -18,6 +18,4 @@
 || *步骤* ||
 || *异常处理* ||
 
-|| *Year* || *Temperature (low)* || *Temperature (high)* ||
-|| *Year* || *Temperature (low)* || *Temperature (high)* ||
-|| *Year* || *Temperature (low)* || *Temperature (high)* ||
+|| *Year* ||

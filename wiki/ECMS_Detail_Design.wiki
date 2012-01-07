@@ -72,3 +72,14 @@
 || *应用场景* || 创建好磁盘，需要往虚拟机上挂载使用时候 ||
 || *步骤* || 1.master接收到请求之后，首先创建一个新的进程disk_attach_2_m，并将{disk_id,vm_id}参数传递给这个进程；<br>2.disk_attach_2_m进程接收到参数之后，首先进行参数合法性的检查；<br>3.根据{disk_id}来生成{disk_uri}；<br>4.根据{disk_id}从后端数据库中恢复出磁盘配置文件的信息{disk_id,disk_size,is_first_attach}，并且将这些信息记录在{disk_uri}名下；<br>5.查询vm_id所对应的节点名字node_name；<br>6.向node_name发送disk_attach_2_s请求，并且传递{disk_uri}名下的参数{node_name,disk_uri,vm_id,disk_size,is_first_attach}；<br>7.如果第6步操作成功，则更新磁盘信息表（包括is_first_attach的更改）；8.如果以上所有操作成功，则返回成功信息，否则返回失败信息。 ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果挂载失败，则返回挂载失败信息 ||
+
+*7.disk_detach_2_m*
+|| *命令号* || disk_detach_2_m ||
+|| *描述* || 卸载磁盘 ||
+|| *参数* || {disk_id,vm_id} ||
+|| *备注* || 客户端发向master service ||
+|| *请求包* || 对master 的请求包：<br>*cmd:*{disk_detach_2_m}<br>*content:*{disk_id:<br>vm_id:<br>｝ ||
+|| *应答包* || master service 返回的应答包:{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>} ||
+|| *应用场景* ||  ||
+|| *步骤* || 1.master接收到卸载磁盘请求之后，首先创建一个进程disk_detach_2_m，并给这个进程传递{disk_id,vm_id}参数；<br>2.disk_detach_2_m进程接收到参数之后，首先进行参数合法性检查；<br>3.查询虚拟机状态表，找到{vm_id}所对应的node_name；<br>4.向node_name发送disk_detach_2_s请求，并传递参数{node_name,disk_id,vm_id}；<br>5.如果第4步操作成功，则更新磁盘信息表，否则不更新；<br>6.如果以上所有操作成功，则返回成功信息，否则返回失败信息。 ||
+|| *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果卸载失败，则返回卸载失败信息 ||

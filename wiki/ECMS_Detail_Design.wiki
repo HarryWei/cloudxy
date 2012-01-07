@@ -12,11 +12,7 @@
 || *描述* || 根据给定参数，在master中记录vm 配置信息 ||
 || *参数* || {vcpu_count,mem_size,vm_password,vm_hostname,os_type} ||
 || *备注* || 客户端发向master service ||
-|| *请求包* || master service 返回的应答包 {
-    errno：为0代表成功，不为0时，表示一种错误类型
-    msg：表示成功或者失败的具体信息
-    vm_id：返回创建好的虚拟机名字
-} ||
+|| *请求包* || master service 返回的应答包 {<br>errno：为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>vm_id：返回创建好的虚拟机名字} ||
 || *应答包* || master service 返回的应答包 {<br>errno：为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>vm_id：返回创建好的虚拟机名字<br>} ||
 || *应用场景* || 客户请求创建虚拟机时 ||
 || *步骤* || 1.master创建一个新的进程vm_create_2_m，将{vcpu_count,mem_size,vm_password,vm_hostname,os_type}参数传递给vm_create_2_m进程；<br>2.vm_create_2_m进程首先对所传递参数的合法性进行检查；<br>3.vm_create_2_m进程生成一个能够唯一标识虚拟机的名字，存入vm_id变量中，并将is_first_start变量设置为true；<br>4.vm_create_2_m进程生成{vm_id,vcpu_count,mem_size,vm_password,vm_hostname,os_type,is_first_start})虚拟机资源配置表，并将其记录到后端数据库中；<br>5.上面几步操作都成功，则返回{errno=0:msg,vm_id}，否则返回创建失败。 ||

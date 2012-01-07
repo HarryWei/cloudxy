@@ -79,13 +79,26 @@ do_cmd_process(State, X, From) ->
          end.
          gen_server:reply(From, Reply).  %最后回应给客户端
 }}}
-注：
+注意：
  * Receive 处理属于异步消息处理，我们还可以简化成同步消息处理——采用gen_server:call({Node,Ncname},Msg,Timeout}代替更为简便。
  * do_cmd_process 在单独进程中执行，且会存在修改元数据等动作所以，所以对元数据修改需要枷锁。erlang中是采用transaction对数据库表枷锁。
 
+==== Node Controller 消息处理 ====
+Node Controller 消息处理场模型和Master Controller一样，都属于异步消息接收进程  +  多进程（erlang中是协程）同步消息处理模型（类似于半同步半异步模型）。
+其中同步消息处理用于执行虚拟机启动、关闭等耗时任务。这些任务需另起单独进程同步执行。
 
-
-
+===== 实现提示 =====
+Node Controller 和Master Serivce不同，它的消息处理主要是执行虚拟机控制脚本。伪代码片如下 ：
+{{{
+  handle_call({foo,X}, From, State) -> 
+     spawn_link(fun() -> do_cmd_process(State, X, From) end),
+     {noreply, State}.  
+  do_cmd_process(State, X, From) ->
+     %执行虚拟机管理脚本等
+     system(do_vm_control.sh)
+     %最后回应给master 
+     gen_server:reply(From, Reply). 
+}}}
 
 
 

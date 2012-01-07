@@ -13,7 +13,9 @@
 #include "storage_helper.h"
 #include "comm_define.h"
 #include "hlfs_log.h"
-		
+
+#if 0
+
 int creat_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr)
 {
 	HLOG_DEBUG("enter func %s", __func__);
@@ -40,6 +42,8 @@ int creat_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr)
 	return 0;
 }
 
+#endif
+
 int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 					uint64_t inode_addr,
 					int flag) {
@@ -65,6 +69,7 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 		HLOG_ERROR("the bad flag for hlfs open by inode");
 		ret = -1;
 	}
+	ctrl->alive_ss_name = NULL;
 	if (0 > find_up_ss_name_of_inode(ctrl, inode_addr, &ctrl->alive_ss_name)) {
 		HLOG_ERROR("find up ss name error!");
 		ret = -1;
@@ -89,6 +94,7 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 		creat_auto_snapshot(ctrl, inode_addr);
 	}
 	g_hash_table_destroy(ss_hashtable);
+#endif
 out:
 	g_free(inode);
 	return ret;

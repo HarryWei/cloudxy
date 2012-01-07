@@ -26,24 +26,16 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 		HLOG_ERROR("Allocate Error!");
 		return -1;
 	}
-	struct inode *inode = load_inode(ctrl->storage, ctrl->imap_entry.inode_addr);
-	if (inode == NULL) {
-		HLOG_ERROR("load inode error");
-		g_free(cp);
-		return -1;
-	}
-	cp->timestamp = inode->ctime;
+	cp->timestamp = get_current_time();
 	g_free(inode);
-
 	if ((strlen(ssname) + 1) > HLFS_FILE_NAME_MAX) {
 		HLOG_ERROR("error, snapshot name beyond max length!");
 		return -1;
 	}
-	
 	g_strlcpy(cp->sname, ssname, strlen(ssname) + 1);
 	g_strlcpy(cp->up_sname,ctrl->alive_ss_name,strlen(ctrl->alive_ss_name) + 1);
 	cp->inode_addr = ctrl->imap_entry.inode_addr;
-	sprintf(cp->up_sname, "%s", ctrl->alive_ss_name);
+	memset(ctrl->alive_ss_name, 0, (strlen(ctrl->alive_ss_name) + 1));
 	sprintf(ctrl->alive_ss_name, "%s", cp->sname);
 
     g_mutex_lock (ctrl->hlfs_access_mutex);

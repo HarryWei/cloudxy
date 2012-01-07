@@ -5,6 +5,32 @@
 #include "hlfs_log.h"
 #include "snapshot.h"
 
+int creat_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr)
+{
+	HLOG_DEBUG("enter func %s", __func__);
+	char *up_ss_name = NULL;
+	struct snapshot *ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot)); 
+	sprintf(ss->sname, "%llu", inode_addr);
+	find_up_ss_name_of_inode(ctrl, inode_addr, &up_ss_name);
+	sprintf(ss->up_sname, "%s", up_ss_name);
+	ss->inode_addr = inode_addr;
+
+	struct inode* inode = load_inode(ctrl->storage, inode_addr);
+	if (inode == NULL) {
+		HLOG_ERROR("load inode error");
+		g_free(ss);
+		g_free(up_ss_name);
+		return -1;
+	}
+	ss->timestamp = inode->ctime;
+	dump_snapshot(ctrl->storage, SNAPSHOT_FILE, ss);
+	g_free(ss);
+	g_free(up_ss_name);
+	g_free(inode);
+	HLOG_DEBUG("leave func %s", __func__);
+	return 0;
+}
+
 int snapshot2text(const struct snapshot *snapshot, char *textbuf) 
 {
 	HLOG_DEBUG("enter func %s", __func__);
@@ -394,6 +420,7 @@ void find_up_inode_addr(gpointer data, gpointer usr_data)
 int find_up_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char **up_ss_name)
 {
 	HLOG_DEBUG("enter func %s", __func__);
+	int ret = 0;
 //	inode_cup_t *inode_cup = (inode_cup_t *)g_malloc0(sizeof(inode_cup_t));
 //	inode_cup->cur_inode_addr = inode_addr;
 //	inode_cup->up_inode_addr = 0;
@@ -444,10 +471,15 @@ int find_up_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char *
 		}
 	}
 	HLOG_DEBUG("We can not find the inode_addr's snapshot, so use inode addr as up ss name");
+	if (0 > create_auto_snapshot(ctrl, inode_addr)) {
+		HLOG_ERROR("create auto snapshot error!");
+		ret = -1;
+		goto out;
+	}
 	sprintf(*up_ss_name, "%llu", inode_addr);
 out:
 	g_list_free(list);
 	g_hash_table_destroy(ss_hashtable);
 	HLOG_DEBUG("leave func %s", __func__);
-	return 0;
+	return ret;
 }

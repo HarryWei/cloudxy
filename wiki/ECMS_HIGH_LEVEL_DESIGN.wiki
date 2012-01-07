@@ -32,13 +32,13 @@ EMCS是为用户提供按需分配物理资源的基础服务平台 ——Infras
   # 用户权限认证体系.
   # WEB UI系统.
 === 基本架构 ===
-ECMS 的系统架构采用传统的MASTER/SLAVE模式，分别对应 ：  “总控服务” Master Service  和“宿主机控制服务” Node Controller.
- * Master Service 负责
+ECMS 的系统架构采用传统的MASTER/SLAVE模式，分别对应——总控服务 Master Service  和 宿主机控制服务Node Controller.
+ * Master Service负责
 # 系统原数据管理:维护系统各种资源数据，以及控制和状态数据
 # 系统命令处理:负责处理虚拟机控制、监控等各种管理命令处理
 # 系统负载监控
 # 虚拟机运行状态监控
- * Node Controller 负责
+ * Node Controller负责
   # 按照总控服务指示执行具体虚拟机类命令
   # 监控虚拟机运行状态
   # 监控宿主机运行状态

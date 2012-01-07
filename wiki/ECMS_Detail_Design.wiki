@@ -136,8 +136,7 @@
 || *请求包* || 对master 的请求包：<br>*cmd:*{get_vm_info_2_m}<br>*content:*{<br>vm_id:<br>} ||
 || *应答包* || master service 返回的应答包:{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>vm_id：<br>vcpu_count：<br>mem_size：<br>vm_password：<br>vm_hostname：<br>os_type：<br>is_first_start：<br>vm_vnc_port：<br>vnc_password：<br>ip_addr：<br>mac_addr：<br>sysdisk_uri：<br>disk_id1:disk_uri,disk_size,is_first_attach:<br>disk_id2:disk_uri,disk_size,is_first_attach:<br>......<br>} ||
 || *应用场景* || 查看虚拟机配置的时候 ||
-|| *步骤* || 1.master接收到请求之后，创建进程get_vm_info_2_m，并传递参数{vm_id}；<br>2.get_vm_info_2_m进程接收到参数之后，首先进行参数合法性检查；<br>3.然后再后端数据库虚拟机配置信息表中查找对应的信息，保存到
-{vm_id,vcpu_count,mem_size,vm_password,vm_hostname,os_type,is_first_start,vm_vnc_port,vnc_password,ip_addr,mac_addr,sysdisk_uri,disks[{disk_id1:disk_uri,disk_size,is_first_attach},{disk_id2,...},...]}；<br>4.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
+|| *步骤* || 1.master接收到请求之后，创建进程get_vm_info_2_m，并传递参数{vm_id}；<br>2.get_vm_info_2_m进程接收到参数之后，首先进行参数合法性检查；<br>3.然后再后端数据库虚拟机配置信息表中查找对应的信息，保存到{vm_id,vcpu_count,mem_size,vm_password,vm_hostname,os_type,is_first_start,vm_vnc_port,vnc_password,ip_addr,mac_addr,sysdisk_uri,disks[{disk_id1:disk_uri,disk_size,is_first_attach},{disk_id2,...},...]}；<br>4.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果获取失败，则返回失败信息 ||
 
 *13.get_node_status_2_m*

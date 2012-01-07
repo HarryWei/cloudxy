@@ -45,7 +45,7 @@
 || *描述* || 销毁指定虚拟机 ||
 || *参数* || {vm_id} ||
 || *备注* || 客户端发向master service ||
-|| *请求包* || 对master 的请求包：<br>*cmd:*{vm_destroy_2_m}<br>*content:*{vm_id:<br>｝ ||
+|| *请求包* || 对master 的请求包：<br>*cmd:*{vm_destroy_2_m}<br>*content:*{<br>vm_id:<br>｝ ||
 || *应答包* || master service 返回的应答包：{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>} ||
 || *应用场景* || 客户需要销毁已经关闭的虚拟机时 ||
 || *步骤* || 1.master接收到请求之后，立即创建一个进程vm_destroy_2_m，并向这个进程传递{vm_id}参数；<br>2.vm_destroy_2_m进程首先检查参数的合法性；<br>3.根据{vm_id}寻找对应的node节点名字node_name；<br>4.向node_name发送vm_destroy_2_s请求，并传递参数{node_name,vm_id}；<br>5.如果第4操作成功，则从后端数据库中销毁{vm_id}所对应的虚拟机配置记录，并且释放有关{vm_id}的所有资源；<br>6.如果以上操作都成功，则返回成功信息，否则返回失败信息。 ||

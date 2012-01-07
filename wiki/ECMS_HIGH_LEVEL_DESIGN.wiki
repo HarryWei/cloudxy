@@ -115,8 +115,11 @@ erlang系统中的supervisor 行为就是看门狗行为，我们的master servi
 Master service 需要知道node controller是否活着（分布系统的普遍需求）。如果node controller已经死掉，则master service就无法下发命令，这时需要从资源池中屏蔽该节点,防止在选择改点上的资源，同时也需要报告用户等。
 要实现这种快速发现对方是否活着的需求，最常用的方式是双方建立单项或双向的心跳消息（每隔一定间隔单项活着双向发送消息确认对方活着），如果失去心跳消息则认为对方以死。
 ==== 实现提示 =====
- * erlang 中的link和moniter就是用于实现双向和单项心跳。我们只需要在master server和node controller 之间建立上述关系就能实现双方感知对方是否终止。（心跳的tick间隔erlang中也是可配置的）。对我们的场景中，master启动node上的node controller 服务时采用spawn link，即可建立连接。
-  * 对于我们来说，监控节点故障（而非进程）似乎更有效，因此建议由master向node方向使用montiro_node（node,true）即可——Node 倒掉可立刻发现（进程link似乎不是立刻发现的）。
-  * 集群中的节点发生网络故障后（并非宕机），有可能重新上线（网络恢复）。这时就需要相互发现对方上线，从而再次建立关系。 再次感谢erlang，monitor_node不但能发现node down,而且也能发现node up（node up目前erlang 实现中若发现，必须要去何其通讯，比如ping，所以可考虑master后台定期运行类似ping的探活机制）。
-  * 当master 收到node up事件后， 需要通过命令检测是node是否是物理重启（查看其上的node controller是否运行——实现check alive 消息，或者pid = rpc:call(OtherNode, erlang,whereis,[node control]) && is_process_alive(pid)），如果是物理重启则需要再次远程启动node controller服务。
-  * master 如果重启，需要先从数据库中读出node信息，重新进行monitor。然后检查node controller是否活着，如果没活着，则需要远程启动其。
+ * erlang 中的link和moniter就是用于实现双向和单项心跳。我们只需要在master server和node controller 之间建立上述关系就能实现双方感知对方是否终止。（心跳的tick间隔erlang中也是可配置的）。对我们的场景中，master启动node上的node controller 服务时采用spawn link，即可建立连接
+ * 对于我们来说，监控节点故障（而非进程）似乎更有效，因此建议由master向node方向使用montiro_node（node,true）即可——Node 倒掉可立刻发现（进程link似乎不是立刻发现的）
+ * 集群中的节点发生网络故障后（并非宕机），有可能重新上线（网络恢复）。这时就需要相互发现对方上线，从而再次建立关系。 再次感谢erlang，monitor_node不但能发现node down,而且也能发现node up（node up目前erlang 实现中若发现，必须要去何其通讯，比如ping，所以可考虑master后台定期运行类似ping的探活机制）
+ * 当master 收到node up事件后， 需要通过命令检测是node是否是物理重启（查看其上的node controller是否运行——实现check alive 消息，或者pid = rpc:call(OtherNode, erlang,whereis,[node control]) && is_process_alive(pid)），如果是物理重启则需要再次远程启动node controller服务。
+ * master 如果重启，需要先从数据库中读出node信息，重新进行monitor。然后检查node controller是否活着，如果没活着，则需要远程启动其。
+注意：
+ * Node Controller在我们服务中不需要监控Master Controller是否活着，至于状态上报时，master如果倒闭，也只需重试即可（Master Controller具有唯一逻辑名，即便换机器启动了也无妨）。
+ * 除了心跳发现外，master给node下发管理命令时，如果node宕机也会主动发现故障。这也可以作为一种故障发现方式。

@@ -123,3 +123,15 @@ Master service 需要知道node controller是否活着（分布系统的普遍�
 注意：
  * Node Controller在我们服务中不需要监控Master Controller是否活着，至于状态上报时，master如果倒闭，也只需重试即可（Master Controller具有唯一逻辑名，即便换机器启动了也无妨）。
  * 除了心跳发现外，master给node下发管理命令时，如果node宕机也会主动发现故障。这也可以作为一种故障发现方式。
+
+==== Master Service 位置定位 ====
+对于master service的位置定位我们使用逻辑名，而不是直接使用ip地址和port，这样才能做到位置透明。客户端（node controller和client api）和 master service通讯都使用逻辑地址，这样即便master service的物理位置发生变化，也不影响服务被正确寻址。 当然系统必须维护逻辑名到实际物理地址之间的映射关系，当master service发生变化时，也要改变映射关系。
+===== 实现提示 =====
+Erlang  系统有一个globe模块，它的主要功能之一就是提供一个服务（进程）全局注册服务。一个服务会注册一个全局唯一的逻辑名，以供访问。当服务终止时系统自动注销该逻辑名。我们的master service 一经启动则注册一个全局逻辑名称，node controller等访问它都利用这个公所周知的名字访问。如果master service 所在机器发生故障发生故障,master service 也随之终止，系统则自动取消该注册名，服务不再可用；当master service在新机器上重新启动后会再次注册逻辑名称，服务重新可用。
+
+==== Node Controller位置定位 ====
+Master service 和node controller 通讯需要能定位Node Controller。不过和Master Controller不通，Node Controller这里不再使用注册全局逻辑名方式。原因是Node controller在系统中不是唯一性角色，它会有数目不定的多个，且随时都有可能动态新增。
+因此我们要么采用Node Controller启动后向Master Service注册自己位置（pid)的方式解决master service 到node controller的寻址问题。要么就要给Node controller找一个不变的命名，比如节点名+node controller应用名——这里的节点名应该是一个机器一个，不重复的固定名字。
+==== 实现提示 =====
+在erlang中消息发送大约四种形式：ServerRef = Name | {Name,Node} | {global,GlobalName} | pid 。
+我们Node Controller使用 {Name,Node}形式，其中Node名称如下所示，Name为Node Controller的本地注册名。Node 的名字可在在node 启动时需要给定，不可重复。我们可以使用宿主机的hostname(必须唯一)建议我们初期先使用唯一不变的主机名做node名字—— 主机名人工配置，不可重复。当机器节点加入时，管理员向master service  发出add node 命令——告诉master node 的位置信息——在erlang中你甚至还可以由master 远程启动node controller。

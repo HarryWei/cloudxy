@@ -19,8 +19,8 @@
 || *异常处理* || 如果参数不合法，则返回创建失败信息 ||
 
 <table border="1px" cellspacing="0px" style="border-collapse:collapse">
-  <tr bgcolor="red">
+  <tr>
     <td>命令号</td>
-    <td bgcolor="red">vm_create_2_m</td>
+    <td>vm_create_2_m</td>
   </tr>
 </table>

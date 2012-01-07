@@ -51,4 +51,16 @@
 || *步骤* || 1.master接收到请求之后，立即创建一个进程vm_destroy_2_m，并向这个进程传递{vm_id}参数；<br>2.vm_destroy_2_m进程首先检查参数的合法性；<br>3.根据{vm_id}寻找对应的node节点名字node_name；<br>4.向node_name发送vm_destroy_2_s请求，并传递参数{node_name,vm_id}；<br>5.如果第4操作成功，则从后端数据库中销毁{vm_id}所对应的虚拟机配置记录，并且释放有关{vm_id}的所有资源；<br>6.如果以上操作都成功，则返回成功信息，否则返回失败信息。 ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node节点通信失败，则返回通信失败信息<br>3.如果销毁虚拟机失败，则返回销毁失败信息 ||
 
-*5.*
+*5.disk_create_2_m*
+|| *命令号* || disk_create_2_m ||
+|| *描述* || 创建磁盘 ||
+|| *参数* || {disk_size} ||
+|| *备注* || 客户端发向master service ||
+|| *请求包* || 对master 的请求包：<br>*cmd:*{disk_create_2_m}<br>*content:*{<br>disk_size:<br>｝ ||
+|| *应答包* || master service返回的应答包：{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>disk_id:创建的虚拟机id<br>
+} ||
+|| *应用场景* || 需要往虚拟机上挂载磁盘，而没有磁盘时 ||
+|| *步骤* || 1.master接收到请求之后，创建一个进程disk_create_2_m进程，并且向这个进程传递参数{disk_size}；<br>2.disk_create_2_m进程接收到参数之后，首先检查参数的合法性；<br>3.使用递增方式生成一个唯一标识磁盘的id号，记录到disk_id中，设置is_first_attach=true，并记录到disk_id名下；<br>4.将disk_id名下的{disk_id,disk_size,is_first_attach}，存储到后端数据库中的磁盘信息表中；<br>5.如果以上操作都成功，则返回成功信息，否则返回失败信息。 ||
+|| *异常处理* || 如果参数不合法，则返回参数错误信息 ||
+
+*6.*

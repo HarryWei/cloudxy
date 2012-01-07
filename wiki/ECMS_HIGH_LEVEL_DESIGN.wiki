@@ -47,7 +47,8 @@ ECMS 的系统架构采用传统的MASTER/SLAVE模式，分别对应——总控
   ** ECMS 实现采用面向分布系统的ERLANG语言实现,erlang 的丰富的OTP库和消息处理潜质是我们实现分布式调度的不二选择
   ** 虚拟机控制采用shell脚本继承管理类命令实现（暂不采用api接口编程实现），虽然不很专业，但可满足我们当前需求
 == Master Service 和Node Controller 设计概要 ==
-=== Master Service 消息处理 ===
+一些关键技术点阐述
+=== 1.Master Service 消息处理 ===
 Master Serivce 消息处理采用：异步消息接收进程  +  多进程（erlang中是协程，不过我们文中仍成其进程吧）同步消息处理模型（类似于半同步半异步模型，只不过erlang协程很轻，所以现场创建、使用完销毁即可，不需要像传统方式那样以线程池实现之）。
 === 实现提示 ===
 消息处理采用Erlang 中 gen_server 框架实现,具体实现有如下考虑：
@@ -83,7 +84,7 @@ do_cmd_process(State, X, From) ->
  * Receive 处理属于异步消息处理，我们还可以简化成同步消息处理——采用gen_server:call({Node,Ncname},Msg,Timeout}代替更为简便。
  * do_cmd_process 在单独进程中执行，且会存在修改元数据等动作所以，所以对元数据修改需要枷锁。erlang中是采用transaction对数据库表枷锁。
 
-=== Node Controller 消息处理 ===
+=== 2.Node Controller 消息处理 ===
 Node Controller 消息处理场模型和Master Controller一样，都属于异步消息接收进程  +  多进程（erlang中是协程）同步消息处理模型（类似于半同步半异步模型）。
 其中同步消息处理用于执行虚拟机启动、关闭等耗时任务。这些任务需另起单独进程同步执行。
 
@@ -100,7 +101,7 @@ Node Controller 和Master Serivce不同，它的消息处理主要是执行虚�
      gen_server:reply(From, Reply). 
 }}}
 
-=== Master Service 跨机器故障恢复(failover) ===
+=== 3.Master Service 跨机器故障恢复(failover) ===
 为了能快速异地跨机器failover(如果master service所在物理机器故障则需要快速选择其他机器上启动master service)，Master Service 采取“状态远程化”策略，将所有上下文数据都存储在分布冗余数据库中。虽然我们并非一个无状态服务器，但服务器状态持续化到远端数据库中能有效防止系统崩溃丢失状态数据或者硬盘损坏丢失元数据的问题。
 ==== 实现提示 ====
 我们在erlang系统中使用其提供的mnesia分布、多副本数据库作数据存储，它的特性完全满足我们需求。我们目前配置3个数据副本即可确保数据安全。

@@ -112,7 +112,7 @@
 || *参数* || {node_name} ||
 || *备注* || 客户端发向master service ||
 || *请求包* || 对master 的请求包：<br>*cmd:*{drop_node_2_m}<br>*content:*{<br>node_name:string<br>} ||
-|| *应答包* || master service 返回的应答包:{<br>errno: (int32)（0代表成功）<br>msg: (str)（当err_no不为0时用于说明错误具体原因）} ||
+|| *应答包* || master service 返回的应答包:{<br>errno: (int32)（0代表成功）<br>msg: (str)（当err_no不为0时用于说明错误具体原因）<br>} ||
 || *应用场景* || 当该宿主机需要从集群中去除时，其上不能有运行态虚拟机。否则不能去除该节点。 ||
 || *步骤* || 1.master接收到请求之后，首先创建一个进程drop_node_2_m，并向这个进程传递{node_name}参数；<br>2.drop_node_2_m进程接收到参数之后，首先检查参数的合法性；<br>3.从后端数据库中的node状态表中检查node_name上是否有虚拟机，如果有虚拟机，则返回操作失败信息；<br>4.取消对node_name的监控；<br>5.向node_name发送stop_nc_service_2_s请求，并传递参数{noe_name};<br>6.如果第5步操作成功，则删除node_name相关的表项；<br>7.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
 || *异常处理* || 1.如果与该节点通讯失败，则直接返回通讯失败错误<br>2.如果该宿主机上有运行太虚拟机，则返回对应错误 ||
@@ -133,7 +133,7 @@
 || *描述* || 返回node 上指定的vm 静态配置信息 ||
 || *参数* || {vm_id} ||
 || *备注* || 客户端发向master service ||
-|| *请求包* || 对master 的请求包：<br>*cmd:*{get_vm_info_2_m}*content:{<br>vm_id:<br>} ||
+|| *请求包* || 对master 的请求包：<br>*cmd:*{get_vm_info_2_m}<br>*content:*{<br>vm_id:<br>} ||
 || *应答包* || master service 返回的应答包:{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>vm_id：<br>vcpu_count：<br>mem_size：<br>vm_password：<br>vm_hostname：<br>os_type：<br>is_first_start：<br>vm_vnc_port：<br>vnc_password：<br>ip_addr：<br>mac_addr：<br>sysdisk_uri：<br>disk_id1:disk_uri,disk_size,is_first_attach:<br>disk_id2:disk_uri,disk_size,is_first_attach:<br>......<br>} ||
 || *应用场景* || 查看虚拟机配置的时候 ||
 || *步骤* || 1.master接收到请求之后，创建进程get_vm_info_2_m，并传递参数{vm_id}；<br>2.get_vm_info_2_m进程接收到参数之后，首先进行参数合法性检查；<br>3.然后再后端数据库虚拟机配置信息表中查找对应的信息，保存到
@@ -146,7 +146,7 @@
 || *参数* || {node_name} ||
 || *备注* || 1.客户端发向master service<br>2.挂载磁盘操作中，需要查询vm_id所对应的node_name ||
 || *请求包* || 对master 的请求包：<br>*cmd:*{get_node_status_2_m}<br>*content:*{<br>node_name:<br>} ||
-|| *应答包* || master service 返回的应答包:{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>node_name:<br>vm_ids:当前node上的所有虚拟机名字的列表<br>mem_used：<br>cpu_used：<br>ip_addr：<br>mac_addr：<br>enable：当前node是不是出于可用状态} ||
+|| *应答包* || master service 返回的应答包:{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>node_name:<br>vm_ids:当前node上的所有虚拟机名字的列表<br>mem_used：<br>cpu_used：<br>ip_addr：<br>mac_addr：<br>enable：当前node是不是出于可用状态<br>} ||
 || *应用场景* || 虚拟机在master那里注册的时候 ||
 || *步骤* || 1.master接收到请求之后，首先创建一个进程get_node_status_2_m，并传递参数{node_name}；<br>2.get_node_status_2_m接收到参数之后，首先进行参数的合法性检查；<br>3.向node_name发送get_node_status_2_s请求，并传递参数{node_name}，并将结果保存到{errno:msg,node_name,vm_ids,mem_used,cpu_used,ip_addr,mac_addr,enable}中；<br>4.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果获取失败，则返回失败信息 ||
@@ -156,7 +156,7 @@
 || *描述* || 获取vm的状态信息 ||
 || *参数* || {vm_id} ||
 || *备注* || 客户端发向master service  ||
-|| *请求包* || 对master 的请求包：<br>*cmd:*{get_vm_status_2_m}<br>*content:*{<br>vm_id:} ||
+|| *请求包* || 对master 的请求包：<br>*cmd:*{get_vm_status_2_m}<br>*content:*{<br>vm_id:<br>} ||
 || *应答包* || master service 返回的应答包:{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>vm_id:<br>vm_mem_used:<br>vm_cpu_used:<br>vm_status:<br>} ||
 || *应用场景* || 虚拟机在master那里注册的时候 ||
 || *步骤* || 1.master接收到请求之后，首先创建一个进程get_vm_status_2_m，并向这个进程传递{vm_id}参数；<br>2.get_vm_status_2_m进程接收到参数之后，首先进行参数合法性检查；<br>3.在虚拟机信息表中寻找vm_id所对应的node_name；<br>4.向node_name发送get_vm_status_2_s请求，并传递参数{node_name,vm_id}，将会返回结果保存到{errno:msg,vm_id,vm_mem_used,vm_cpu_used,vm_status}中；<br>5.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||

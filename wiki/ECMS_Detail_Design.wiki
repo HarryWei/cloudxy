@@ -140,7 +140,7 @@
 || *请求包* || 对master 的请求包：<br>*cmd:*{get_node_info_2_m}<br>*content:*{<br>node_name:<br>} ||
 || *应答包* || master service 返回的应答包:{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>node_mem_size:<br>node_cpu_count:<br>node_ip_addr:<br>node_mac_addr:} ||
 || *应用场景* || 1.节点注册<br>2.在add_node_2_m命令中，添加新节点的时候 ||
-|| *步骤* || 1.master接收到请求之后，创建进程get_node_info_2_m，并将参数{node_name}传递给这个进程；<br>2.get_node_info_2_m进程接收到参数之后，首先进行参数合法性检查；<br>3.向node_name发送get_node_info_2_s请求，并传递参数{node_name}，将获取到的信息保存在{errno:msg,node_mem_size,node_cpu_count,node_ip_addr,node_mac_addr}中；<br>4.如果以上都操作成功，则返回步骤3种所获取到信息，否则返回失败信息。 ||
+|| *步骤* || <code>1.master接收到请求之后，创建进程get_node_info_2_m，并将参数{node_name}传递给这个进程；</code><code>2.get_node_info_2_m进程接收到参数之后，首先进行参数合法性检查；</code><code>3.向node_name发送get_node_info_2_s请求，并传递参数{node_name}，将获取到的信息保存在{errno:msg,node_mem_size,node_cpu_count,node_ip_addr,node_mac_addr}中；</code><code>4.如果以上都操作成功，则返回步骤3种所获取到信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果获取失败，则返回失败信息 ||
 
 *12.get_vm_info_2_m*
@@ -151,7 +151,7 @@
 || *请求包* || 对master 的请求包：<br>*cmd:*{get_vm_info_2_m}<br>*content:*{<br>vm_id:<br>} ||
 || *应答包* || master service 返回的应答包:{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>vm_id：<br>vcpu_count：<br>mem_size：<br>vm_password：<br>vm_hostname：<br>os_type：<br>is_first_start：<br>vm_vnc_port：<br>vnc_password：<br>ip_addr：<br>mac_addr：<br>sysdisk_uri：<br>disk_id1:disk_uri,disk_size,is_first_attach:<br>disk_id2:disk_uri,disk_size,is_first_attach:<br>......<br>} ||
 || *应用场景* || 查看虚拟机配置的时候 ||
-|| *步骤* || 1.master接收到请求之后，创建进程get_vm_info_2_m，并传递参数{vm_id}；<br>2.get_vm_info_2_m进程接收到参数之后，首先进行参数合法性检查；<br>3.然后再后端数据库虚拟机配置信息表中查找对应的信息，保存到{vm_id,vcpu_count,mem_size,vm_password,vm_hostname,os_type,is_first_start,vm_vnc_port,vnc_password,ip_addr,mac_addr,sysdisk_uri,disks[{disk_id1:disk_uri,disk_size,is_first_attach},{disk_id2,...},...]}；<br>4.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
+|| *步骤* || <code>1.master接收到请求之后，创建进程get_vm_info_2_m，并传递参数{vm_id}；</code><code>2.get_vm_info_2_m进程接收到参数之后，首先进行参数合法性检查；</code><code>3.然后再后端数据库虚拟机配置信息表中查找对应的信息，保存到{vm_id,vcpu_count,mem_size,vm_password,vm_hostname,os_type,is_first_start,vm_vnc_port,vnc_password,ip_addr,mac_addr,sysdisk_uri,disks[{disk_id1:disk_uri,disk_size,is_first_attach},{disk_id2,...},...]}；</code><code>4.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果获取失败，则返回失败信息 ||
 
 *13.get_node_status_2_m*
@@ -162,7 +162,7 @@
 || *请求包* || 对master 的请求包：<br>*cmd:*{get_node_status_2_m}<br>*content:*{<br>node_name:<br>} ||
 || *应答包* || master service 返回的应答包:{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>node_name:<br>vm_ids:当前node上的所有虚拟机名字的列表<br>mem_used：<br>cpu_used：<br>ip_addr：<br>mac_addr：<br>enable：当前node是不是出于可用状态<br>} ||
 || *应用场景* || 虚拟机在master那里注册的时候 ||
-|| *步骤* || 1.master接收到请求之后，首先创建一个进程get_node_status_2_m，并传递参数{node_name}；<br>2.get_node_status_2_m接收到参数之后，首先进行参数的合法性检查；<br>3.向node_name发送get_node_status_2_s请求，并传递参数{node_name}，并将结果保存到{errno:msg,node_name,vm_ids,mem_used,cpu_used,ip_addr,mac_addr,enable}中；<br>4.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
+|| *步骤* || <code>1.master接收到请求之后，首先创建一个进程get_node_status_2_m，并传递参数{node_name}；</code><code>2.get_node_status_2_m接收到参数之后，首先进行参数的合法性检查；</code><code>3.向node_name发送get_node_status_2_s请求，并传递参数{node_name}，并将结果保存到{errno:msg,node_name,vm_ids,mem_used,cpu_used,ip_addr,mac_addr,enable}中；</code><code>4.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果获取失败，则返回失败信息 ||
 
 *14.get_vm_status_2_m*
@@ -173,7 +173,7 @@
 || *请求包* || 对master 的请求包：<br>*cmd:*{get_vm_status_2_m}<br>*content:*{<br>vm_id:<br>} ||
 || *应答包* || master service 返回的应答包:{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>vm_id:<br>vm_mem_used:<br>vm_cpu_used:<br>vm_status:<br>} ||
 || *应用场景* || 虚拟机在master那里注册的时候 ||
-|| *步骤* || 1.master接收到请求之后，首先创建一个进程get_vm_status_2_m，并向这个进程传递{vm_id}参数；<br>2.get_vm_status_2_m进程接收到参数之后，首先进行参数合法性检查；<br>3.在虚拟机信息表中寻找vm_id所对应的node_name；<br>4.向node_name发送get_vm_status_2_s请求，并传递参数{node_name,vm_id}，将会返回结果保存到{errno:msg,vm_id,vm_mem_used,vm_cpu_used,vm_status}中；<br>5.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
+|| *步骤* || <code>1.master接收到请求之后，首先创建一个进程get_vm_status_2_m，并向这个进程传递{vm_id}参数；</code><code>2.get_vm_status_2_m进程接收到参数之后，首先进行参数合法性检查；</code><code>3.在虚拟机信息表中寻找vm_id所对应的node_name；</code><code>4.向node_name发送get_vm_status_2_s请求，并传递参数{node_name,vm_id}，将会返回结果保存到{errno:msg,vm_id,vm_mem_used,vm_cpu_used,vm_status}中；</code><code>5.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果获取失败，则返回失败信息 ||
 
 ====  Node Controller命令设计 ====
@@ -185,7 +185,7 @@
 || *请求包* || 对node的请求包：<br>*cmd:*{vm_start_2_s}<br>*content:*{<br>node_name:<br>vm_id:<br>is_first_start:<br>vcpu_count:<br>mem_size:<br>vm_password:<br>vm_hostname:<br>ip_addr:<br>mac_addr:<br>vnc_password:<br>os_type:<br>sysdisk_uri:系统盘镜像uri<br>} ||
 || *应答包* || node controller返回的应答包:{<br>errno: (int32)（0代表成功）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>} ||
 || *应用场景* || 当master请求node创建虚拟机时 ||
-|| *步骤* || 1.node接到请求之后创建一个进程vm_start_2_s，将{node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri}参数传递给vm_start_2_s进程；<br>2.vm_start_2_s进程首先检查参数的合法性；<br>3.根据参数生成虚拟机配置文件，作为下一步调用启动脚本的参数；<br>4.调用start_vm.sh脚本来启动虚拟机；<br>5.如果以上操作都成功，返回成功信息，否则返回失败信息。<br> ||
+|| *步骤* || <code>1.node接到请求之后创建一个进程vm_start_2_s，将{node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri}参数传递给vm_start_2_s进程；</code><code>2.vm_start_2_s进程首先检查参数的合法性；</code><code>3.根据参数生成虚拟机配置文件，作为下一步调用启动脚本的参数；</code><code>4.调用start_vm.sh脚本来启动虚拟机；</code><code>5.如果以上操作都成功，返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果该宿主机上有运行没有资源可供创建新的虚拟机，则返回资源不够用信息<br>3.如果创建并启动虚拟机失败，则返回启动失败信息<br>4.如果在脚本实现中没有考虑第一次启动的问题，则返回出错信息||
 
 *2.vm_stop_2_s*
@@ -218,7 +218,7 @@
 || *请求包* || 对node的请求包：<br>*cmd:*{disk_attach_2_s}<br>*content:*{<br>node_name:<br>disk_uri:<br>vm_id:<br>disk_size:<br>is_first_attach:是否为第一次挂载<br>} ||
 || *应答包* || node controller返回的应答包:{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>} ||
 || *引用场景* || 当master请求挂载磁盘时 ||
-|| *步骤* || 1.接收到请求之后，首先创建一个进程disk_attach_2_s，并且传递master所请求的参数{node_name,disk_uri,vm_id,disk_size,is_first_attach}；<br>2.disk_attach_2_s进程接收到参数之后，首先进行参数合法性的检查；<br>3.判断is_first_attach,如果是第一次挂载，则执行disk_create.sh脚本，并传递参数{disk_uri,disk_size}；<br>4.执行挂载脚本disk_attach.sh，并传递参数{disk_uri+vm_id}；<br>5.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
+|| *步骤* || <code>1.接收到请求之后，首先创建一个进程disk_attach_2_s，并且传递master所请求的参数{node_name,disk_uri,vm_id,disk_size,is_first_attach}；</code><code>2.disk_attach_2_s进程接收到参数之后，首先进行参数合法性的检查；</code><code>3.判断is_first_attach,如果是第一次挂载，则执行disk_create.sh脚本，并传递参数{disk_uri,disk_size}；</code><code>4.执行挂载脚本disk_attach.sh，并传递参数{disk_uri+vm_id}；</code><code>5.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果挂载失败，则返回挂载失败信息 ||
 
 *5.disk_detach_2_s*
@@ -284,7 +284,7 @@
 || *请求包* || 对node的请求包：<br>*cmd:*{get_node_status_2_s}<br>*content:*{node_name：<br>} ||
 || *应答包* || node controller返回的应答包:{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>node_name:<br>vm_ids:当前node上的所有虚拟机名字的列表<br>mem_used：<br>cpu_used：<br>ip_addr：<br>mac_addr：<br>enable：当前node是不是处于可用状态<br>} ||
 || *引用场景* || 当master请求获取静态node信息时 ||
-|| *步骤* || 1.首先创建一个进程get_node_status_2_s，并向这个进程传递参数{node_name}；<br>2.get_node_status_2_s接收到参数之后，首先进行参数合法性检查；<br>3.执行get_node_status.sh脚本，并将结果保存到{errno:msg,node_name,vm_ids,mem_used,cpu_used,ip_addr,mac_addr,enable}中；<br>4.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
+|| *步骤* || <code>1.首先创建一个进程get_node_status_2_s，并向这个进程传递参数{node_name}；</code><code>2.get_node_status_2_s接收到参数之后，首先进行参数合法性检查；</code><code>3.执行get_node_status.sh脚本，并将结果保存到{errno:msg,node_name,vm_ids,mem_used,cpu_used,ip_addr,mac_addr,enable}中；</code><code>4.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果获取失败，则返回失败信息 ||
 
 *11.get_vm_status_2_s*
@@ -295,5 +295,5 @@
 || *请求包* || 对node的请求包：<br>*cmd:*{get_vm_status_2_s}<br>*content:*{<br>node_name：<br>vm_id:<br>} ||
 || *应答包* || node controller返回的应答包：{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>vm_id:<br>vm_mem_used:<br>vm_cpu_used:<br>vm_status:<br>} ||
 || *引用场景* || 当master请求获取node上的vm状态信息时 ||
-|| *步骤* || 1.接收到请求之后，创建一个进程get_vm_status_2_s进程，并传递参数{node_name,vm_id}；<br>2.get_vm_status_2_s接收到参数之后，首先进行参数合法性检查；<br>3.执行get_vm_status.sh脚本，并传递参数{vm_id}，将执行结果保存到{errno:msg,vm_id,vm_mem_used,vm_cpu_used,vm_status}中;<br>4.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
+|| *步骤* || <code>1.接收到请求之后，创建一个进程get_vm_status_2_s进程，并传递参数{node_name,vm_id}；</code><code>2.get_vm_status_2_s接收到参数之后，首先进行参数合法性检查；</code><code>3.执行get_vm_status.sh脚本，并传递参数{vm_id}，将执行结果保存到{errno:msg,vm_id,vm_mem_used,vm_cpu_used,vm_status}中;</code><code>4.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果获取失败，则返回失败信息 ||

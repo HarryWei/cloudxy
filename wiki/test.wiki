@@ -10,5 +10,5 @@
 <hello target="world"/>
 </code>
 
-<pre>
+<pre>asdfasdfasdf
 </pre>

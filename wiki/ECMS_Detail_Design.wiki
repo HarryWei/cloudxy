@@ -1,7 +1,7 @@
 #summary Elastic Cloud Manage System（ECMS） 详细设计（暂主要包括数据表、脚本和虚拟机命令设计）
 
 == Elastic Cloud Manage System（ECMS） 详细设计 ==
-<wiki:toc max_depth="5" />
+<wiki:toc max_depth="6" />
 ----
 === 数据表的设计 ===
 ==== 1.网络资源表（NETWORK_RESOURCE） ====
@@ -71,7 +71,7 @@
 === 虚拟机管理命令的设计 ===
 ====  Master Service命令设计 ====
 
-*1.vm_create_2_m*
+===== 1.vm_create_2_m =====
 || *命令号* || vm_create_2_m ||
 || *描述* || 根据给定参数，在master中记录vm 配置信息 ||
 || *参数* || {vcpu_count,mem_size,vm_password,vm_hostname,os_type} ||
@@ -82,7 +82,7 @@
 || *步骤* || <code>1.master创建一个新的进程vm_create_2_m，将{vcpu_count,mem_size,vm_password,vm_hostname,os_type}参数传递给vm_create_2_m进程；</code><code>2.vm_create_2_m进程首先对所传递参数的合法性进行检查；</code><code>3.vm_create_2_m进程生成一个能够唯一标识虚拟机的名字，存入vm_id变量中，并将is_first_start变量设置为true；</code><code>4.vm_create_2_m进程生成{vm_id,vcpu_count,mem_size,vm_password,vm_hostname,os_type,is_first_start})虚拟机资源配置表，并将其记录到后端数据库中；</code><code>5.上面几步操作都成功，则返回{errno=0:msg,vm_id}，否则返回创建失败。</code> ||
 || *异常处理* || 如果参数不合法，则返回创建失败信息 ||
 
-*2.vm_start_2_m*
+===== 2.vm_start_2_m =====
 || *命令号* || vm_start_2_m ||
 || *描述* || 根据给定的虚拟机名字，启动指定的虚拟机 ||
 || *参数* || {vm_id} ||
@@ -93,7 +93,7 @@
 || *步骤* || <code>1.master创建一个新的进程vm_start_2_m，将{vm_id}参数传递给vm_start_2_m进程；</code><code>2.vm_start_2_m进程首先对所传递参数的合法性进行检查；</code><code>3.判断vm_id虚拟机是不是已经被创建；</code><code>4.从后端数据库中恢复出vm_id虚拟机配置表：{vm_id,vcpu_count,mem_size,vm_password,vm_hostname,os_type,is_first_start};</code><code>5.从NETWORK_RESOURCE资源表中寻找没有被分配出去的ip和mac地址；</code><code>6.生成一个vnc的密码，存入变量vnc_password；</code><code>7.根据os_type生成系统盘镜像的uri，存入变量sysdisk_uri中；</code><code>8.申请资源{vcpu_count,mem_size}，选择一个有宿主机node_name，要求node_name上能够满足所申请的资源；</code><code>9.向node_name发送vm_start_2_s请求，传递的参数为{node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri};</code><code>10.如果上一步的调用出错，则释放之前申请的虚拟机资源；</code><code>11.以上所有操作成功，返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回创建失败信息<br>2.如果与node节点通信失败，则返回通信失败信息<br>3.如果宿主机没有资源可以创建虚拟机，则返回资源不够用信息<br>4.如果启动虚拟机失败，则返回启动失败信息 ||
 
-*3.vm_stop_2_m*
+===== 3.vm_stop_2_m =====
 || *命令号* || vm_stop_2_m ||
 || *描述* || 根据给定的虚拟机名字，终止指定的虚拟机 ||
 || *参数* || {vm_id} ||
@@ -104,7 +104,7 @@
 || *步骤* || <code>1.master创建一个进程vm_stop_2_m，并将{vm_id}参数传递给vm_stop_2_m进程；</code><code>2.vm_stop_2_m进程首先检查参数的合法性；</code><code>3.根据{vm_id}寻找其所对应的node节点名称node_name；</code><code>4.向node_name发送vm_stop_2_s请求，并传递参数{node_name,vm_id}；</code><code>5.如果第4步操作成功，则释放{vm_id}所对应的虚拟机资源；</code><code>6.如果以上所有步骤操作成功，返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node节点通信失败，则返回通信失败信息<br>3.如果停止虚拟机失败，则返回停止失败信息 ||
 
-*4.vm_destroy_2_m*
+===== 4.vm_destroy_2_m =====
 || *命令号* || vm_destroy_2_m ||
 || *描述* || 销毁指定虚拟机 ||
 || *参数* || {vm_id} ||
@@ -115,7 +115,7 @@
 || *步骤* || <code>1.master接收到请求之后，立即创建一个进程vm_destroy_2_m，并向这个进程传递{vm_id}参数；</code><code>2.vm_destroy_2_m进程首先检查参数的合法性；</code><code>3.根据{vm_id}寻找对应的node节点名字node_name；</code><code>4.向node_name发送vm_destroy_2_s请求，并传递参数{node_name,vm_id}；</code><code>5.如果第4操作成功，则从后端数据库中销毁{vm_id}所对应的虚拟机配置记录，并且释放有关{vm_id}的所有资源；</code><code>6.如果以上操作都成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node节点通信失败，则返回通信失败信息<br>3.如果销毁虚拟机失败，则返回销毁失败信息 ||
 
-*5.disk_create_2_m*
+===== 5.disk_create_2_m =====
 || *命令号* || disk_create_2_m ||
 || *描述* || 创建磁盘 ||
 || *参数* || {disk_size} ||
@@ -126,7 +126,7 @@
 || *步骤* || <code>1.master接收到请求之后，创建一个进程disk_create_2_m进程，并且向这个进程传递参数{disk_size}；</code><code>2.disk_create_2_m进程接收到参数之后，首先检查参数的合法性；</code><code>3.使用递增方式生成一个唯一标识磁盘的id号，记录到disk_id中，设置is_first_attach=true，并记录到disk_id名下；</code><code>4.将disk_id名下的{disk_id,disk_size,is_first_attach}，存储到后端数据库中的磁盘信息表中；</code><code>5.如果以上操作都成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 如果参数不合法，则返回参数错误信息 ||
 
-*6.disk_attach_2_m*
+===== 6.disk_attach_2_m =====
 || *命令号* || disk_attach_2_m ||
 || *描述* || 挂载磁盘 ||
 || *参数* || {disk_id,vm_id} ||
@@ -137,7 +137,7 @@
 || *步骤* || <code>1.master接收到请求之后，首先创建一个新的进程disk_attach_2_m，并将{disk_id,vm_id}参数传递给这个进程；</code><code>2.disk_attach_2_m进程接收到参数之后，首先进行参数合法性的检查；</code><code>3.根据{disk_id}来生成{disk_uri}；</code><code>4.根据{disk_id}从后端数据库中恢复出磁盘配置文件的信息{disk_id,disk_size,is_first_attach}，并且将这些信息记录在{disk_uri}名下；</code><code>5.查询vm_id所对应的节点名字node_name；</code><code>6.向node_name发送disk_attach_2_s请求，并且传递{disk_uri}名下的参数{node_name,disk_uri,vm_id,disk_size,is_first_attach}；</code><code>7.如果第6步操作成功，则更新磁盘信息表（包括is_first_attach的更改）；</code><code>8.如果以上所有操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果挂载失败，则返回挂载失败信息 ||
 
-*7.disk_detach_2_m*
+===== 7.disk_detach_2_m =====
 || *命令号* || disk_detach_2_m ||
 || *描述* || 卸载磁盘 ||
 || *参数* || {disk_id,vm_id} ||
@@ -148,7 +148,7 @@
 || *步骤* || <code>1.master接收到卸载磁盘请求之后，首先创建一个进程disk_detach_2_m，并给这个进程传递{disk_id,vm_id}参数；</code><code>2.disk_detach_2_m进程接收到参数之后，首先进行参数合法性检查；</code><code>3.查询虚拟机状态表，找到{vm_id}所对应的node_name；</code><code>4.向node_name发送disk_detach_2_s请求，并传递参数{node_name,disk_id,vm_id}；</code><code>5.如果第4步操作成功，则更新磁盘信息表，否则不更新；</code><code>6.如果以上所有操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果卸载失败，则返回卸载失败信息 ||
 
-*8.disk_destroy_2_m*
+===== 8.disk_destroy_2_m =====
 || *命令号* || disk_destroy_2_m ||
 || *描述* || 销毁磁盘 ||
 || *参数* || {disk_id,vm_id} ||
@@ -159,7 +159,7 @@
 || *步骤* || <code>1.master接收到销毁磁盘请求，创建进程disk_destroy_2_m，并向这个进程传递参数{disk_id,vm_id}；</code><code>2.disk_destroy_2_m接收到参数之后，首先检查参数的合法性；</code><code>3.判断{disk_id}是否被卸载，如果没有卸载，则直接返回失败信息，否则进行第4步骤；</code><code>4.根据{vm_id}寻找所对应的节点node_name；</code><code>5.向node_name发送disk_destroy_2_s请求，并且传递参数{node_name,disk_id,vm_id}；</code><code>6.如果销毁成功，则销毁磁盘配置表中的{disk_id}所对应的项；</code><code>7.如果以上所有操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果销毁失败，则返回销毁失败信息 ||
 
-*9.add_node_2_m*
+===== 9.add_node_2_m =====
 || *命令号* || add_node_2_m ||
 || *描述* || 将宿主机加入到集群中 ||
 || *参数* || {node_name} ||
@@ -170,7 +170,7 @@
 || *步骤* || <code>1.master接收到请求之后，创建一个进程add_node_2_m进程，并向这个进程传递{node_name}参数；</code><code>2.add_node_2_m进程接收到参数之后，首先进行参数合法性检查；</code><code>3.向node_name发送start_nc_service_2_s请求，并传递参数{node_name};</code><code>4.获取node_name上的宿主机资源信息（可以通过get_node_info_2_m命令来获取）；</code><code>5.更新宿主机资源信息表；</code><code>6.对节点状态（node down | node up）进行监控（erlang:monitor_node）;</code><code>7.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 如果与该节点通讯失败，则直接返回通讯失败错误 ||
 
-*10.drop_node_2_m*
+===== 10.drop_node_2_m =====
 || *命令号* || drop_node_2_m ||
 || *描述* || 将宿主机从集群中去除 ||
 || *参数* || {node_name} ||
@@ -181,7 +181,7 @@
 || *步骤* || <code>1.master接收到请求之后，首先创建一个进程drop_node_2_m，并向这个进程传递{node_name}参数；</code><code>2.drop_node_2_m进程接收到参数之后，首先检查参数的合法性；</code><code>3.从后端数据库中的node状态表中检查node_name上是否有虚拟机，如果有虚拟机，则返回操作失败信息；</code><code>4.取消对node_name的监控；</code><code>5.向node_name发送stop_nc_service_2_s请求，并传递参数{noe_name};</code><code>6.如果第5步操作成功，则删除node_name相关的表项；</code><code>7.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果与该节点通讯失败，则直接返回通讯失败错误<br>2.如果该宿主机上有运行太虚拟机，则返回对应错误 ||
 
-*11.get_node_info_2_m*
+===== 11.get_node_info_2_m =====
 || *命令号* || get_node_info_2_m ||
 || *描述* || 返回node 静态配置信息 ||
 || *参数* || {node_name} ||
@@ -192,7 +192,7 @@
 || *步骤* || <code>1.master接收到请求之后，创建进程get_node_info_2_m，并将参数{node_name}传递给这个进程；</code><code>2.get_node_info_2_m进程接收到参数之后，首先进行参数合法性检查；</code><code>3.向node_name发送get_node_info_2_s请求，并传递参数{node_name}，将获取到的信息保存在{errno:msg,node_mem_size,node_cpu_count,node_ip_addr,node_mac_addr}中；</code><code>4.如果以上都操作成功，则返回步骤3种所获取到信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果获取失败，则返回失败信息 ||
 
-*12.get_vm_info_2_m*
+===== 12.get_vm_info_2_m =====
 || *命令号* || get_vm_info_2_m ||
 || *描述* || 返回node 上指定的vm 静态配置信息 ||
 || *参数* || {vm_id} ||
@@ -203,7 +203,7 @@
 || *步骤* || <code>1.master接收到请求之后，创建进程get_vm_info_2_m，并传递参数{vm_id}；</code><code>2.get_vm_info_2_m进程接收到参数之后，首先进行参数合法性检查；</code><code>3.然后再后端数据库虚拟机配置信息表中查找对应的信息，保存到{vm_id,vcpu_count,mem_size,vm_password,vm_hostname,os_type,is_first_start,vm_vnc_port,vnc_password,ip_addr,mac_addr,sysdisk_uri,disks[{disk_id1:disk_uri,disk_size,is_first_attach},{disk_id2,...},...]}；</code><code>4.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果获取失败，则返回失败信息 ||
 
-*13.get_node_status_2_m*
+===== 13.get_node_status_2_m =====
 || *命令号* || get_node_status_2_m ||
 || *描述* || 返回node 的状态信息 ||
 || *参数* || {node_name} ||
@@ -214,7 +214,7 @@
 || *步骤* || <code>1.master接收到请求之后，首先创建一个进程get_node_status_2_m，并传递参数{node_name}；</code><code>2.get_node_status_2_m接收到参数之后，首先进行参数的合法性检查；</code><code>3.向node_name发送get_node_status_2_s请求，并传递参数{node_name}，并将结果保存到{errno:msg,node_name,vm_ids,mem_used,cpu_used,ip_addr,mac_addr,enable}中；</code><code>4.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果获取失败，则返回失败信息 ||
 
-*14.get_vm_status_2_m*
+===== 14.get_vm_status_2_m =====
 || *命令号* || ge_vm_status_2_m ||
 || *描述* || 获取vm的状态信息 ||
 || *参数* || {vm_id} ||
@@ -226,7 +226,7 @@
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果获取失败，则返回失败信息 ||
 
 ====  Node Controller命令设计 ====
-*1.vm_start_2_s*
+===== 1.vm_start_2_s =====
 || *命令号* || vm_start_2_s ||
 || *描述* || 创建虚拟机，并且启动创建的虚拟机 ||
 || *参数* || {node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri} ||
@@ -237,7 +237,7 @@
 || *步骤* || <code>1.node接到请求之后创建一个进程vm_start_2_s，将{node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri}参数传递给vm_start_2_s进程；</code><code>2.vm_start_2_s进程首先检查参数的合法性；</code><code>3.根据参数生成虚拟机配置文件，作为下一步调用启动脚本的参数；</code><code>4.调用start_vm.sh脚本来启动虚拟机；</code><code>5.如果以上操作都成功，返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果该宿主机上有运行没有资源可供创建新的虚拟机，则返回资源不够用信息<br>3.如果创建并启动虚拟机失败，则返回启动失败信息<br>4.如果在脚本实现中没有考虑第一次启动的问题，则返回出错信息||
 
-*2.vm_stop_2_s*
+===== 2.vm_stop_2_s =====
 || *命令号* || vm_stop_2_s ||
 || *描述* || 停止指定node上的虚拟机 ||
 || *参数* || {node_name,vm_id} ||
@@ -248,7 +248,7 @@
 || *步骤* || <code>1.node接收到请求之后，创建一个进程vm_stop_2_s进程，并向该进程传递{node_name,vm_id}参数；</code><code>2.vm_stop_2_s进程首先检查参数的合法性；</code><code>3.调用vm_stop.sh脚本来停止虚拟机{vm_id}；</code><code>4.如果以上所有操作成功，返回成功信息，否则返回错误信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果停止虚拟机失败，则返回停止失败信息 ||
 
-*3.vm_destroy_2_s*
+===== 3.vm_destroy_2_s =====
 || *命令号* || vm_destroy_2_s ||
 || *描述* || 销毁node上的指定虚拟机 ||
 || *参数* || {node_name,vm_id} ||
@@ -259,7 +259,7 @@
 || *步骤* || <code>1.node接收到请求之后，创建一个进程vm_destroy_2_s进程，并向该进程传递{node_name,vm_id}参数；</code><code>2.vm_destroy_2_s进程首先检查参数的合法性；</code><code>3.调用vm_destroy.sh脚本来销毁虚拟机{vm_id}；</code><code>4.如果以上所有操作成功，返回成功信息，否则返回错误信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果要销毁的虚拟机没有关闭，则返回虚拟没有关闭，不能销毁的信息<br>3.如果销毁虚拟机失败，则返回销毁失败信息 ||
 
-*4.disk_attach_2_s*
+===== 4.disk_attach_2_s =====
 || *命令号* || disk_attach_2_s ||
 || *描述* || 挂载磁盘到指定虚拟机上 ||
 || *参数* || {node_name,disk_uri,vm_id,disk_size,is_first_attach} ||
@@ -270,7 +270,7 @@
 || *步骤* || <code>1.接收到请求之后，首先创建一个进程disk_attach_2_s，并且传递master所请求的参数{node_name,disk_uri,vm_id,disk_size,is_first_attach}；</code><code>2.disk_attach_2_s进程接收到参数之后，首先进行参数合法性的检查；</code><code>3.判断is_first_attach,如果是第一次挂载，则执行disk_create.sh脚本，并传递参数{disk_uri,disk_size}；</code><code>4.执行挂载脚本disk_attach.sh，并传递参数{disk_uri+vm_id}；</code><code>5.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果挂载失败，则返回挂载失败信息 ||
 
-*5.disk_detach_2_s*
+===== 5.disk_detach_2_s =====
 || *命令号* || disk_detach_2_s ||
 || *描述* || 卸载挂载到虚拟机上的磁盘 ||
 || *参数* || {node_name,disk_id,vm_id} ||
@@ -281,7 +281,7 @@
 || *步骤* || <code>1.接收到请求之后，首先创建一个disk_detache_2_s进程，并向这个进程传递参数{node_name,disk_id,vm_id}；</code><code>2.disk_detach_2_s进程接收到参数之后，首先检查参数的合法性；</code><code>3.执行disk_detach.sh脚本，并传递参数disk_id；</code><code>4.如果以上操作都成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果卸载失败，则返回卸载失败信息 ||
 
-*6.disk_destroy_2_s*
+===== 6.disk_destroy_2_s =====
 || *命令号* || disk_destroy_2_s ||
 || *描述* || 销毁挂载到虚拟机上的磁盘 ||
 || *参数* || {node_name,disk_id,vm_id} ||
@@ -292,7 +292,7 @@
 || *步骤* || <code>1.接收到请求之后，首先创建disk_destroy_2_s进程，并传递参数{node_name,disk_id,vm_id}；</code><code>2.disk_destroy_2_s进程接收参数之后，首先检查参数的合法性；</code><code>3.判断{disk_id}是被挂载，如果被挂载，直接返回失败信息，否则进行第4步骤；</code><code>4.执行disk_destroy.sh脚本，并传递参数{disk_id}；</code><code>5.如果以上操作都成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果销毁失败，则返回销毁失败信息 ||
 
-*7.start_nc_service_2_s*
+===== 7.start_nc_service_2_s =====
 || *命令号* || start_nc_service ||
 || *描述* || 启动节点上的nc服务 ||
 || *参数* || {node_name} ||
@@ -303,7 +303,7 @@
 || *步骤* || <code></code> ||
 || *异常处理* ||  ||
 
-*8.stop_nc_service_2_s*
+===== 8.stop_nc_service_2_s =====
 || *命令号* || stop_nc_service ||
 || *描述* || 停止节点上的nc服务 ||
 || *参数* || {node_name} ||
@@ -314,7 +314,7 @@
 || *步骤* || <code></code> ||
 || *异常处理* ||  ||
 
-*9.get_node_info_2_s*
+===== 9.get_node_info_2_s =====
 || *命令号* || get_node_info_2_s ||
 || *描述* || 获取node节点上的静态信息，返回给master ||
 || *参数* || {node_name} ||
@@ -325,7 +325,7 @@
 || *步骤* || <code>1.接收到请求之后，创建一个新的进程get_node_info_2_s，并向这个进程传递参数{node_name}；</code><code>2.get_node_info_2_s进程接收到参数之后，首先进行参数合法性的检查；</code><code>3.执行get_node_info.sh脚本，获取{errno:msg,node_mem_size,node_cpu_count,node_ip_addr,node_mac_addr}信息；</code><code>4.如果以上操作都成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果获取失败，则返回失败信息<br> ||
 
-*10.get_node_status_2_s*
+===== 10.get_node_status_2_s =====
 || *命令号* || get_node_status_2_s ||
 || *描述* || 获取node节点的状态信息，返回给master ||
 || *参数* || {node_name} ||
@@ -336,7 +336,7 @@
 || *步骤* || <code>1.首先创建一个进程get_node_status_2_s，并向这个进程传递参数{node_name}；</code><code>2.get_node_status_2_s接收到参数之后，首先进行参数合法性检查；</code><code>3.执行get_node_status.sh脚本，并将结果保存到{errno:msg,node_name,vm_ids,mem_used,cpu_used,ip_addr,mac_addr,enable}中；</code><code>4.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果获取失败，则返回失败信息 ||
 
-*11.get_vm_status_2_s*
+===== 11.get_vm_status_2_s =====
 || *命令号* || get_vm_status_2_s ||
 || *描述* || 获取vm的状态信息，返回给master ||
 || *参数* || {node_name,vm_id} ||

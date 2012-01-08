@@ -8,3 +8,9 @@
 
 
 <wiki:gadget url="..." width="540" height="400" />
+
+<?xml version="1.0" encoding="UTF-8" ?> 
+<Module>
+  <ModulePrefs title="remote content example" />
+  <Content type="url" href="http://code.google.com" />
+</Module>

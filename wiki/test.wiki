@@ -9,12 +9,4 @@
 
 <wiki:gadget url="sadfasdf" width="540" height="400"/>
 
-<?xml version="1.0" encoding="UTF-8" ?> 
-<Module>
-  <ModulePrefs title="hello world example" /> 
-  <Content type="html">
-     <![CDATA[ 
-       Hello, world!
-     ]]>
-  </Content> 
-</Module>
+<wiki:gadget url="http://google-code-feed-gadget.googlecode.com/svn/trunk/gadget.xml" up_feeds="http://google-code-featured.blogspot.com/atom.xml"  width="500" height="340" border="0"/>

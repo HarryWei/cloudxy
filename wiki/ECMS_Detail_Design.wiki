@@ -66,6 +66,15 @@
 === 脚本的设计 ===
 涉及到的脚本有：vm_start.sh,vm_stop,vm_destroy,disk_attach.sh,disk_detach.sh,disk_destroy.sh,get_node_info.sh,get_node_status.h,get_vm_status.sh.
 
+==== vm_start.sh ====
+|| *脚本名称* ||  ||
+|| *作用* ||  ||
+|| *接受参数* ||  ||
+|| *返回值* ||  ||
+|| *结果影响* ||  ||
+|| *借助工具* ||  ||
+|| *实现描述* ||  ||
+
 ----
 === 虚拟机管理命令的设计 ===
 ====  Master Service命令设计 ====

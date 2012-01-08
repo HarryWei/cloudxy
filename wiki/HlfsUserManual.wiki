@@ -88,7 +88,7 @@
   * 编译nbd  
      # cd nbd-2.9.15/build;
      # cmake ../;
-     # make (编译后内容在nbd-2.9.15/outpub下）
+     # make (编译后内容在nbd-2.9.15/output下）
   * 加载模块 - sudo modprobe nbd (nbd服务需要一个对应的内核模块，这个模块一般没有被默认加载）
   * 启动nbd server - ./nbd-2.9.15/output/bin/nbd-server 20000 (20000是服务端口号）    
   * 格式化hlfs - 如上所示 （如 mkfs.hlfs -u hdfs:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024；mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024)

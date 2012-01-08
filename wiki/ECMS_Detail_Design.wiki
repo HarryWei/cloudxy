@@ -189,12 +189,92 @@
 || *描述* || 销毁node上的指定虚拟机 ||
 || *参数* || {node_name,vm_id} ||
 || *备注* || master service发向node controller ||
-|| *请求包* || 对node的请求包：<br>*cmd:*{vm_destroy_2_s}<br>*content:*{<br>
-	    node_name:
-        vm_id:
-	｝
-} ||
-|| *应答包* ||  ||
-|| *应用场景* ||  ||
+|| *请求包* || 对node的请求包：<br>*cmd:*{vm_destroy_2_s}<br>*content:*{<br>node_name:<br>vm_id:<br>} ||
+
+*4.disk_attach_2_s*
+|| *命令号* || disk_attach_2_s ||
+|| *描述* || 挂载磁盘到指定虚拟机上 ||
+|| *参数* || {node_name,disk_uri,vm_id,disk_size,is_first_attach} ||
+|| *备注* || master service发向node controller ||
+|| *请求包* || 对node的请求包：<br>*cmd:*{disk_attach_2_s}<br>*content:*{<br>node_name:<br>disk_uri:<br>vm_id:<br>disk_size:<br>is_first_attach:是否为第一次挂载<br>} ||
+|| *应答包* || node controller返回的应答包:{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>} ||
+|| *引用场景* || 当master请求挂载磁盘时 ||
+|| *步骤* || 1.接收到请求之后，首先创建一个进程disk_attach_2_s，并且传递master所请求的参数{node_name,disk_uri,vm_id,disk_size,is_first_attach}；<br>2.disk_attach_2_s进程接收到参数之后，首先进行参数合法性的检查；<br>3.判断is_first_attach,如果是第一次挂载，则执行disk_create.sh脚本，并传递参数{disk_uri,disk_size}；<br>4.执行挂载脚本disk_attach.sh，并传递参数{disk_uri+vm_id}；<br>5.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
+|| *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果挂载失败，则返回挂载失败信息 ||
+
+*5.disk_detach_2_s*
+|| *命令号* || disk_detach_2_s ||
+|| *描述* || 卸载挂载到虚拟机上的磁盘 ||
+|| *参数* || {node_name,disk_id,vm_id} ||
+|| *备注* || master service发向node controller ||
+|| *请求包* || 对node的请求包：<br>*cmd:*{disk_detach_2_s}<br>*content:*{<br>node_name：<br>disk_id：<br>vm_id：<br>} ||
+|| *应答包* || node controller返回的应答包：{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>} ||
+|| *引用场景* || 当master请求卸载磁盘时 ||
+|| *步骤* || 1.接收到请求之后，首先创建一个disk_detache_2_s进程，并向这个进程传递参数{node_name,disk_id,vm_id}；<br>2.disk_detach_2_s进程接收到参数之后，首先检查参数的合法性；<br>3.执行disk_detach.sh脚本，并传递参数disk_id；<br>4.如果以上操作都成功，则返回成功信息，否则返回失败信息。 ||
+|| *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果卸载失败，则返回卸载失败信息 ||
+
+*6.disk_destroy_2_s*
+|| *命令号* || disk_destroy_2_s ||
+|| *描述* || 销毁挂载到虚拟机上的磁盘 ||
+|| *参数* || {node_name,disk_id,vm_id} ||
+|| *备注* || master service发向node controller ||
+|| *请求包* || 对node的请求包：<br>*cmd:*{disk_destroy_2_s}<br>*content:*{<br>node_name：<br>disk_id：<br>vm_id：<br>} ||
+|| *应答包* || node controller返回的应答包：{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>} ||
+|| *引用场景* || 当master请求销毁磁盘时 ||
+|| *步骤* || 1.接收到请求之后，首先创建disk_destroy_2_s进程，并传递参数{node_name,disk_id,vm_id}；<br>2.disk_destroy_2_s进程接收参数之后，首先检查参数的合法性；<br>3.判断{disk_id}是被挂载，如果被挂载，直接返回失败信息，否则进行第4步骤；<br>4.执行disk_destroy.sh脚本，并传递参数{disk_id}；<br>5.如果以上操作都成功，则返回成功信息，否则返回失败信息。 ||
+|| *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果销毁失败，则返回销毁失败信息 ||
+
+*7.start_nc_service_2_s*
+|| *命令号* || start_nc_service ||
+|| *描述* || 启动节点上的nc服务 ||
+|| *参数* || {node_name} ||
+|| *备注* || master service发向node controller ||
+|| *请求包* || 对node的请求包：<br>*cmd:*{start_nc_service_2_s}<br>*content:*{<br>node_name：<br>} ||
+|| *应答包* || node controller返回的应答包：{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>} ||
+|| *引用场景* || 添加新节点 ||
 || *步骤* ||  ||
 || *异常处理* ||  ||
+
+*8.stop_nc_service_2_s*
+|| *命令号* || stop_nc_service ||
+|| *描述* || 停止节点上的nc服务 ||
+|| *参数* || {node_name} ||
+|| *备注* || master service发向node controller ||
+|| *请求包* || 对node的请求包：<br>*cmd:*{disk_destroy_2_s}<br>*content:*{<br>node_name：<br>} ||
+|| *应答包* || node controller返回的应答包：{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>} ||
+|| *引用场景* || 删除节点时 ||
+|| *步骤* ||  ||
+|| *异常处理* ||  ||
+
+*9.get_node_info_2_s*
+|| *命令号* || get_node_info_2_s ||
+|| *描述* || 获取node节点上的静态信息，返回给master ||
+|| *参数* || {node_name} ||
+|| *备注* || master service发向node controller ||
+|| *请求包* || 对node的请求包：<br>*cmd:*{get_node_info_2_s}<br>*content:*{<br>node_name：<br>} ||
+|| *应答包* || node controller返回的应答包：{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>node_mem_size:<br>node_cpu_count:<br>node_ip_addr:<br>node_mac_addr:<br>} ||
+|| *引用场景* || 当master请求获取静态node信息时 ||
+|| *步骤* || 1.接收到请求之后，创建一个新的进程get_node_info_2_s，并向这个进程传递参数{node_name}；<br>2.get_node_info_2_s进程接收到参数之后，首先进行参数合法性的检查；<br>3.执行get_node_info.sh脚本，获取{errno:msg,node_mem_size,node_cpu_count,node_ip_addr,node_mac_addr}信息；<br>4.如果以上操作都成功，则返回成功信息，否则返回失败信息。 ||
+|| *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果获取失败，则返回失败信息<br> ||
+
+*10.get_node_status_2_s*
+|| *命令号* || get_node_status_2_s ||
+|| *描述* || 获取node节点的状态信息，返回给master ||
+|| *参数* || {node_name} ||
+|| *备注* || master service发向node controller ||
+|| *请求包* || 对node的请求包：<br>*cmd:*{get_node_status_2_s}<br>*content:*{node_name：<br>} ||
+|| *应答包* || node controller返回的应答包:{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>node_name:<br>vm_ids:当前node上的所有虚拟机名字的列表<br>mem_used：<br>cpu_used：<br>ip_addr：<br>mac_addr：<br>enable：当前node是不是处于可用状态<br>} ||
+|| *引用场景* || 当master请求获取静态node信息时 ||
+|| *步骤* || 1.首先创建一个进程get_node_status_2_s，并向这个进程传递参数{node_name}；<br>2.get_node_status_2_s接收到参数之后，首先进行参数合法性检查；<br>3.执行get_node_status.sh脚本，并将结果保存到{errno:msg,node_name,vm_ids,mem_used,cpu_used,ip_addr,mac_addr,enable}中；<br>4.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
+|| *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果获取失败，则返回失败信息 ||
+
+*11.get_vm_status_2_s*
+|| *命令号* || get_vm_status_2_s ||
+|| *描述* || 获取vm的状态信息，返回给master ||
+|| *参数* || {node_name,vm_id} ||
+|| *备注* || master service发向node controller ||
+|| *请求包* || 对node的请求包：<br>*cmd:*{get_vm_status_2_s}<br>*content:*{<br>node_name：<br>vm_id:<br>} ||
+|| *应答包* || node controller返回的应答包：{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>vm_id:<br>vm_mem_used:<br>vm_cpu_used:<br>vm_status:<br>} ||
+|| *引用场景* || 当master请求获取node上的vm状态信息时 ||
+|| *步骤* || 1.接收到请求之后，创建一个进程get_vm_status_2_s进程，并传递参数{node_name,vm_id}；<br>2.get_vm_status_2_s接收到参数之后，首先进行参数合法性检查；<br>3.执行get_vm_status.sh脚本，并传递参数{vm_id}，将执行结果保存到{errno:msg,vm_id,vm_mem_used,vm_cpu_used,vm_status}中;<br>4.如果以上操作成功，则返回成功信息，否则返回失败信息。 ||
+|| *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果获取失败，则返回失败信息 ||

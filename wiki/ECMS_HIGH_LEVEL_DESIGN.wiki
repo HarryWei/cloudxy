@@ -1,9 +1,8 @@
 #summary Elastic Cloud Manage System（ECMS） 概要设计
 
-<wiki:toc max_depth="3" />
-
 = Elastic Cloud Manage System（ECMS） 概要设计 =
 
+<wiki:toc max_depth="3" />
 
 == 背景介绍 ==
 EMCS是为用户提供按需分配物理资源的基础服务平台 ——Infrastructure As a Service。EMCS 主要借助虚拟机技术实现物理计算机资源（计算资源、存储资源、网络资源等）的再划分、隔离、以及现场分配和回收。用户已完全独占方式获得虚拟机实例（其上已运行标准操作系统），具体使用方式也由用户自裁。

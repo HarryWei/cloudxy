@@ -8,4 +8,5 @@
 
 || <code language="c"><br><hello target="world"/></code> ||
 
-<wiki:gadget url="http://example.com/gadget.xml" height="200" border="0" /> 
+
+<wiki:gadget url="http://www.baidu.com" height="200" border="0" /> 

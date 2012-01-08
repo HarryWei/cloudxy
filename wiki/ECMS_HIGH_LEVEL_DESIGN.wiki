@@ -172,6 +172,7 @@ vm启动所需资源都描述在master service 的资源池中。资源类别具
  * 内存、cpu等是node congroller上报的宿主机资源
  * 空闲ip和mac和vm uuid等是master自维护资源，其中空闲ip资源应预先人工导
  * mac地址和vm uuid等都master可现场计算随机值获得。 
+ * IP地址资源我们初期采用由管理员预先导入的办法，而不是自动产生。
 注意：其中我们没有记录磁盘资源是因为，因为整个集群的磁盘都被统一池化，而且hlfs支持thing provision，所以你几乎可以不考虑磁盘容量问题了。
 
 === 11.存储优化策略 ===

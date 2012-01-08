@@ -8,4 +8,4 @@
 
 || <code language="c"><br><hello target="world"/></code> ||
 
-<wiki:toc max_depth="2" />
+<wiki:gadget url="http://example.com/gadget.xml" height="200" border="0" /> 

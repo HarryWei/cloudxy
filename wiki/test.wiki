@@ -9,3 +9,6 @@
 <code language="c">
 <hello target="world"/>
 </code>
+
+<pre>
+</pre>

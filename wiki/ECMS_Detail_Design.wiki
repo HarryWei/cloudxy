@@ -129,16 +129,7 @@
 || *借助工具* ||  ||
 || *实现描述* ||  ||
 
-==== 8.get_node_info.sh ====
-|| *脚本名称* || get_node_info.sh ||
-|| *作用* || 获取宿主机的静态信息 ||
-|| *接受参数* || {node_name} ||
-|| *返回值* || {errno:msg,node_mem_size,node_cpu_count,node_ip_addr,node_mac_addr} ||
-|| *结果影响* ||  ||
-|| *借助工具* ||  ||
-|| *实现描述* ||  ||
-
-==== 9.get_node_status.sh ====
+==== 8.get_node_status.sh ====
 || *脚本名称* || get_node_status.sh ||
 || *作用* || 获取宿主机状态信息 ||
 || *接受参数* || {node_name} ||
@@ -147,7 +138,7 @@
 || *借助工具* ||  ||
 || *实现描述* || <code>1.检查node_name参数是不是本宿主机的名字；</code><code>2.通过xm工具获取宿主机上的虚拟机名字，并保存到vm_ids变量中；</code><code>3.通过top工具获取宿主机的内存和cpu使用情况；</code><code>4.如果宿主机的内存和cpu资源还有剩余，则设置enable为true，否则设置为false；</code><code>5.如果以上所有操作成功，则返回获取到的信息，否则返回失败信息。</code>||
 
-==== 10.get_vm_status.sh ====
+==== 9.get_vm_status.sh ====
 || *脚本名称* || get_vm_status.sh ||
 || *作用* || 获取虚拟机状态信息 ||
 || *接受参数* || {node_name} ||

@@ -64,7 +64,7 @@
 
 ----
 === 脚本的设计 ===
-涉及到的脚本有：
+涉及到的脚本有：vm_start.sh,vm_stop,vm_destroy,disk_attach.sh,disk_detach.sh,disk_destroy.sh,get_node_info.sh,get_node_status.h,get_vm_status.sh.
 
 ----
 === 虚拟机管理命令的设计 ===
@@ -233,7 +233,7 @@
 || *请求包* || 对node的请求包：<br>*cmd:*{vm_start_2_s}<br>*content:*{<br>node_name:<br>vm_id:<br>is_first_start:<br>vcpu_count:<br>mem_size:<br>vm_password:<br>vm_hostname:<br>ip_addr:<br>mac_addr:<br>vnc_password:<br>os_type:<br>sysdisk_uri:系统盘镜像uri<br>} ||
 || *应答包* || node controller返回的应答包:{<br>errno: (int32)（0代表成功）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>} ||
 || *应用场景* || 当master请求node创建虚拟机时 ||
-|| *步骤* || <code>1.node接到请求之后创建一个进程vm_start_2_s，将{node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri}参数传递给vm_start_2_s进程；</code><code>2.vm_start_2_s进程首先检查参数的合法性；</code><code>3.根据参数生成虚拟机配置文件，作为下一步调用启动脚本的参数；</code><code>4.调用start_vm.sh脚本来启动虚拟机；</code><code>5.如果以上操作都成功，返回成功信息，否则返回失败信息。</code> ||
+|| *步骤* || <code>1.node接到请求之后创建一个进程vm_start_2_s，将{node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri}参数传递给vm_start_2_s进程；</code><code>2.vm_start_2_s进程首先检查参数的合法性；</code><code>3.根据参数生成虚拟机配置文件，作为下一步调用启动脚本的参数；</code><code>4.调用vm_start.sh脚本来启动虚拟机；</code><code>5.如果以上操作都成功，返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果该宿主机上有运行没有资源可供创建新的虚拟机，则返回资源不够用信息<br>3.如果创建并启动虚拟机失败，则返回启动失败信息<br>4.如果在脚本实现中没有考虑第一次启动的问题，则返回出错信息||
 
 ===== 2.vm_stop_2_s =====

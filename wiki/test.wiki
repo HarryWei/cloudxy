@@ -8,7 +8,6 @@
 
 <code language="c">
 <hello target="world"/>
-</code>
-
 <pre>asdfasdfasdf
 </pre>
+</code>

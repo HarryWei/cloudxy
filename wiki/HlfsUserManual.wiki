@@ -99,10 +99,10 @@
      # do everything like a local device
 
 {{{
-我们对传统nbd server和 nbd client做了一定修改_
+我们对传统nbd server和 nbd client做了一定修改：
  1. nbd-server 只需要给出端口号，不用给出其他信息了
- 2. nbd-client 要给出对应fs的uri地址——当和server握手时传给对方，server 再根据该uri初始化hlfs上下文，然后通过hlfs_stat获得fs大小信息，并传给client段
- 3. 我们还增额外实现了nbd-ops工具用于控制hlfs的merge行为（具体见高级用法），外部控制采用管道通讯+共享内存实现，具体请见代码
+ 2. nbd-client 要给出对应fs的uri地址——当和server握手时传给对方，server 再根据该uri初始化hlfs上下文，然后通过hlfs_stat获得fs大小信息，并传给client端
+ 3. 我们还额外实现了nbd-ops工具用于控制hlfs的merge行为（具体见高级用法），外部控制采用管道通讯+共享内存实现，具体请见代码
     
    另外nbd还有一个讨厌的问题 —— nbd 死锁问题值得注意 :
    nbd-server 如果和nbd-client如果部署在统一个机器上，在某些内核上会出现IO hang住（死锁）的问题。追其原因是：当系统内存不足时，必然需要pdflush例程将脏数据刷到磁盘已回收可用内存，而引发内存分配的肇事进程则必须同步等待上述释放动作，然后再获取刚回收来的内存继续运行。

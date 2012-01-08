@@ -288,7 +288,7 @@
 || *请求包* || 对master 的请求包：<br>*cmd:*{get_node_info_2_m}<br>*content:*{<br>node_name:<br>} ||
 || *应答包* || master service 返回的应答包:{<br>errno:errno为0代表成功，不为0时，表示一种错误类型<br>msg：表示成功或者失败的具体信息<br>node_mem_size:<br>node_cpu_count:<br>node_ip_addr:<br>node_mac_addr:} ||
 || *应用场景* || 1.节点注册<br>2.在add_node_2_m命令中，添加新节点的时候 ||
-|| *步骤* || <code>1.master接收到请求之后，创建进程get_node_info_2_m，并将参数{node_name}传递给这个进程；</code><code>2.get_node_info_2_m进程接收到参数之后，首先进行参数合法性检查；</code><code>3.向node_name发送get_node_info_2_s请求，并传递参数{node_name}，将获取到的信息保存在{errno:msg,node_mem_size,node_cpu_count,node_ip_addr,node_mac_addr}中；</code><code>4.如果以上都操作成功，则返回步骤3种所获取到信息，否则返回失败信息。</code> ||
+|| *步骤* || <code>1.master接收到请求之后，创建进程get_node_info_2_m，并将参数{node_name}传递给这个进程；</code><code>2.get_node_info_2_m进程接收到参数之后，首先进行参数合法性检查；</code><code>3.从后端数据库中的节点信息表中，找到节点信息，并将获取到的信息保存在{errno:msg,node_mem_size,node_cpu_count,node_ip_addr,node_mac_addr}中；</code><code>4.如果以上都操作成功，则返回步骤3种所获取到信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数不合法，则返回参数错误信息<br>2.如果与node通信失败，则返回通信失败的信息<br>3.如果获取失败，则返回失败信息 ||
 
 ===== 12.get_vm_info_2_m =====
@@ -413,18 +413,7 @@
 || *步骤* || <code></code> ||
 || *异常处理* ||  ||
 
-===== 9.get_node_info_2_s =====
-|| *命令号* || get_node_info_2_s ||
-|| *描述* || 获取node节点上的静态信息，返回给master ||
-|| *参数* || {node_name} ||
-|| *备注* || master service发向node controller ||
-|| *请求包* || 对node的请求包：<br>*cmd:*{get_node_info_2_s}<br>*content:*{<br>node_name：<br>} ||
-|| *应答包* || node controller返回的应答包：{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>node_mem_size:<br>node_cpu_count:<br>node_ip_addr:<br>node_mac_addr:<br>} ||
-|| *引用场景* || 当master请求获取静态node信息时 ||
-|| *步骤* || <code>1.接收到请求之后，创建一个新的进程get_node_info_2_s，并向这个进程传递参数{node_name}；</code><code>2.get_node_info_2_s进程接收到参数之后，首先进行参数合法性的检查；</code><code>3.执行get_node_info.sh脚本，获取{errno:msg,node_mem_size,node_cpu_count,node_ip_addr,node_mac_addr}信息；</code><code>4.如果以上操作都成功，则返回成功信息，否则返回失败信息。</code> ||
-|| *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果获取失败，则返回失败信息<br> ||
-
-===== 10.get_node_status_2_s =====
+===== 9.get_node_status_2_s =====
 || *命令号* || get_node_status_2_s ||
 || *描述* || 获取node节点的状态信息，返回给master ||
 || *参数* || {node_name} ||
@@ -435,7 +424,7 @@
 || *步骤* || <code>1.首先创建一个进程get_node_status_2_s，并向这个进程传递参数{node_name}；</code><code>2.get_node_status_2_s接收到参数之后，首先进行参数合法性检查；</code><code>3.执行get_node_status.sh脚本，并将结果保存到{errno:msg,node_name,vm_ids,mem_used,cpu_used,enable}中；</code><code>4.如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果获取失败，则返回失败信息 ||
 
-===== 11.get_vm_status_2_s =====
+===== 10.get_vm_status_2_s =====
 || *命令号* || get_vm_status_2_s ||
 || *描述* || 获取vm的状态信息，返回给master ||
 || *参数* || {node_name,vm_id} ||

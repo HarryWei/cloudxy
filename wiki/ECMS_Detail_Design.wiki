@@ -1,6 +1,6 @@
 #summary Elastic Cloud Manage System（ECMS） 详细设计（暂主要包括数据表、脚本和虚拟机命令设计）
 
-<wiki:toc max_depth="5" />
+<wiki:toc max_depth="3" />
 
 == Elastic Cloud Manage System（ECMS） 详细设计 ==
 ----

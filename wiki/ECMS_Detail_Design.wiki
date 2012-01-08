@@ -167,7 +167,7 @@
 || *描述* || 创建虚拟机，并且启动创建的虚拟机 ||
 || *参数* || {node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri} ||
 || *备注* || master service发向node controller ||
-|| *请求包* || 对node的请求包：<br>*cmd:*{vm_start_2_s}<br>content:{<br>node_name:<br>vm_id:<br>is_first_start:<br>vcpu_count:<br>mem_size:<br>vm_password:<br>vm_hostname:<br>ip_addr:<br>mac_addr:<br>vnc_password:<br>os_type:<br>sysdisk_uri:系统盘镜像uri<br>} ||
+|| *请求包* || 对node的请求包：<br>*cmd:*{vm_start_2_s}<br>*content:*{<br>node_name:<br>vm_id:<br>is_first_start:<br>vcpu_count:<br>mem_size:<br>vm_password:<br>vm_hostname:<br>ip_addr:<br>mac_addr:<br>vnc_password:<br>os_type:<br>sysdisk_uri:系统盘镜像uri<br>} ||
 || *应答包* || node controller返回的应答包:{<br>errno: (int32)（0代表成功）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>} ||
 || *应用场景* || 当master请求node创建虚拟机时 ||
 || *步骤* || 1.node接到请求之后创建一个进程vm_start_2_s，将{node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri}参数传递给vm_start_2_s进程；<br>2.vm_start_2_s进程首先检查参数的合法性；<br>3.根据参数生成虚拟机配置文件，作为下一步调用启动脚本的参数；<br>4.调用start_vm.sh脚本来启动虚拟机；<br>5.如果以上操作都成功，返回成功信息，否则返回失败信息。<br> ||
@@ -190,6 +190,10 @@
 || *参数* || {node_name,vm_id} ||
 || *备注* || master service发向node controller ||
 || *请求包* || 对node的请求包：<br>*cmd:*{vm_destroy_2_s}<br>*content:*{<br>node_name:<br>vm_id:<br>} ||
+|| *应答包* || node controller返回的应答包：{<br>errno: (int32)（0代表成功，不为0时，表示错误类型）<br>msg: (str)（当errno不为0时用于说明错误的具体原因）<br>} ||
+|| *引用场景* || 当master请求node销毁虚拟机时 ||
+|| *步骤* || 1.node接收到请求之后，创建一个进程vm_destroy_2_s进程，并向该进程传递{node_name,vm_id}参数；<br>2.vm_destroy_2_s进程首先检查参数的合法性；<br>3.调用vm_destroy.sh脚本来销毁虚拟机{vm_id}；<br>4.如果以上所有操作成功，返回成功信息，否则返回错误信息。 ||
+|| *异常处理* || 1.如果参数检查不合法，则返回参数错误信息<br>2.如果要销毁的虚拟机没有关闭，则返回虚拟没有关闭，不能销毁的信息<br>3.如果销毁虚拟机失败，则返回销毁失败信息 ||
 
 *4.disk_attach_2_s*
 || *命令号* || disk_attach_2_s ||

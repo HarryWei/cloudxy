@@ -99,7 +99,7 @@
      # do everything like a local device
 
 {{{
-我们对传统nbd server和 nbd client做了一定修改：
+我们对传统nbd server和 nbd client做了一些修改：
  1. nbd-server 只需要给出端口号，不用给出其他信息了
  2. nbd-client 要给出对应fs的uri地址——当和server握手时传给对方，server 再根据该uri初始化hlfs上下文，然后通过hlfs_stat获得fs大小信息，并传给client端
  3. 我们还额外实现了nbd-ops工具用于控制hlfs的merge行为（具体见高级用法），外部控制采用管道通讯+共享内存实现，具体请见代码

@@ -99,7 +99,7 @@
 || *接受参数* || {disk_uri,disk_size} ||
 || *返回值* || {errno,msg} ||
 || *结果影响* ||  ||
-|| *借助工具* ||  ||
+|| *借助工具* || <code>1.c检查参数合法性；</code><code>2.运行mkfs.hdfs disk_uri disk_size；</code><code>3如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 || *实现描述* ||  ||
 
 ==== 5.disk_attach.sh ====
@@ -109,7 +109,7 @@
 || *返回值* || {errno,msg} ||
 || *结果影响* ||  ||
 || *借助工具* ||  ||
-|| *实现描述* ||  ||
+|| *实现描述* || <code>1.检查参数合法性；</code><code>2.tap-ctl + disk_uir创建虚拟块设备；</code><code>3.xm attach +vm_id+设备名称送入虚拟机；</code><code>如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
 
 ==== 6.disk_detach.sh ====
 || *脚本名称* || disk_detach.sh ||
@@ -117,7 +117,7 @@
 || *接受参数* || {disk_id} ||
 || *返回值* || {errno,msg} ||
 || *结果影响* ||  ||
-|| *借助工具* ||  ||
+|| *借助工具* || <code>1.检查参数的合法性；</code><code>2.xm dettach vmid 卸载虚拟机块设备；</code><code>3.tap-ctl卸载本地虚拟磁盘；</code><code>4.如果以上操作成功，则返成功信息，否则返回失败信息。</code> ||
 || *实现描述* ||  ||
 
 ==== 7.disk_destroy.sh ====

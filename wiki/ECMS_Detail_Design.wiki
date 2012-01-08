@@ -25,7 +25,7 @@
 || *vm_id* || 主键 || 字符串 ||  || 唯一标识虚拟机的名字 ||
 || *ip_addr* ||  || 字符串 ||  || ip地址 ||
 || *mac_addr* ||  || 字符串 ||  || mac地址 ||
-|| *vnc_password* ||  ||  || 字符串 || vnc软件的密码 ||
+|| *vnc_password* ||  || 字符串 ||  || vnc软件的密码 ||
 || *sysdisk_uri* ||  || 字符串 ||  || 系统盘的uri ||
 || *vm_vnc_port* ||  || uint ||  || vnc软件的端口号 ||
 

@@ -80,6 +80,7 @@ init_hlfs(const char *uri)
     }
 
     ctrl->write_task_run = 1;
+	ctrl->alive_ss_name = NULL;
     GThread * log_write_thread = g_thread_create((GThreadFunc) log_write_task,ctrl,TRUE,NULL);
     ctrl->log_write_thread = log_write_thread;
     ctrl->ctrl_region = &CTRL_REGION;

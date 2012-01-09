@@ -21,7 +21,7 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
     }
     
 	int ret = 0;
-	struct snapshot *cp = g_malloc0(sizeof(struct snapshot));
+	struct snapshot *cp = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
 	if (NULL == cp) {
 		HLOG_ERROR("Allocate Error!");
 		return -1;
@@ -32,6 +32,15 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 		return -1;
 	}
 	g_strlcpy(cp->sname, ssname, strlen(ssname) + 1);
+	if (NULL == ctrl->alive_ss_name) {
+		ctrl->alive_ss_name = (char *)g_malloc0(MAX_FILE_NAME_LEN);
+		if (NULL == ctrl->alive_ss_name) {
+			HLOG_ERROR("allocate error!");
+			return -1;
+		}
+		create_auto_snapshot(ctrl, ctrl->imap_entry.inode_addr);
+		snprintf(ctrl->alive_ss_name, MAX_FILE_NAME_LEN, "%llu", ctrl->imap_entry.inode_addr);
+	}
 	g_strlcpy(cp->up_sname,ctrl->alive_ss_name,strlen(ctrl->alive_ss_name) + 1);
 	cp->inode_addr = ctrl->imap_entry.inode_addr;
 	memset(ctrl->alive_ss_name, 0, (strlen(ctrl->alive_ss_name) + 1));

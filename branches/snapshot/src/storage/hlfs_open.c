@@ -104,5 +104,3 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }
-
-

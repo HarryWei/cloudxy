@@ -12,7 +12,7 @@ struct snapshot {
 	uint64_t timestamp;
 	uint64_t inode_addr;
 	char sname[HLFS_FILE_NAME_MAX];
-	char up_sname[HLFS_FILE_NAME_MAX]; /*  for tree style snapshot  */
+	char up_sname[HLFS_FILE_NAME_MAX]; /* for tree style snapshot */
 } __attribute__((packed));
 
 #if 0

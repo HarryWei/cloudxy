@@ -67,8 +67,11 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 		HLOG_ERROR("the bad flag for hlfs open by inode");
 		ret = -1;
 	}
-	ctrl->alive_ss_name = NULL;
-	if (0 > find_up_ss_name_of_inode(ctrl, inode_addr, &ctrl->alive_ss_name)) {
+	if (NULL != ctrl->alive_ss_name) {
+		g_free(ctrl->alive_ss_name);
+		ctrl->alive_ss_name = NULL;
+	}
+	if (0 > find_ss_name_of_inode(ctrl, inode_addr, &ctrl->alive_ss_name)) {
 		HLOG_ERROR("find up ss name error!");
 		ret = -1;
 	}

@@ -32,6 +32,7 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 		return -1;
 	}
 	g_strlcpy(cp->sname, ssname, strlen(ssname) + 1);
+	/* record the up snapshot name of a snapshot */
 	if (NULL == ctrl->alive_ss_name) {
 		ctrl->alive_ss_name = (char *)g_malloc0(MAX_FILE_NAME_LEN);
 		if (NULL == ctrl->alive_ss_name) {

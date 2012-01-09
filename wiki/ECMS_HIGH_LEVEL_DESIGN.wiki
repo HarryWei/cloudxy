@@ -114,7 +114,7 @@ erlang系统中的supervisor 行为就是看门狗行为，我们的master servi
 注：supervisor我们只用于监控本地服务，而不从master节点远程监控slave节点—— 虽然erlang的supervisor 也可远程监控（跨节点），但不提倡跨节点使用（原因去google吧）。
 
 === 4.Node Controller故障发现(心跳) ===
-Master service 需要知道node controller是否活着（分布系统的普遍需求）。如果node controller已经死掉，则master service就无法下发命令，这时需要从资源池中屏蔽该节点,防止在选择改点上的资源，同时也需要报告用户等。
+Master service 需要知道node controller是否活着（分布系统的普遍需求）。如果node controller已经死掉，则master service就无法下发命令，这时需要从资源池中屏蔽该节点,防止在选择该点上的资源，同时也需要报告用户等。
 要实现这种快速发现对方是否活着的需求，最常用的方式是双方建立单项或双向的心跳消息（每隔一定间隔单项活着双向发送消息确认对方活着），如果失去心跳消息则认为对方以死。
 === 实现提示 ====
  * erlang 中的link和moniter就是用于实现双向和单项心跳。我们只需要在master server和node controller 之间建立上述关系就能实现双方感知对方是否终止。（心跳的tick间隔erlang中也是可配置的）。对我们的场景中，master启动node上的node controller 服务时采用spawn link，即可建立连接

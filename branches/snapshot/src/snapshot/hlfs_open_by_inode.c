@@ -15,7 +15,6 @@
 #include "hlfs_log.h"
 
 #if 0
-
 int creat_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr)
 {
 	HLOG_DEBUG("enter func %s", __func__);
@@ -41,7 +40,6 @@ int creat_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr)
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }
-
 #endif
 
 int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,

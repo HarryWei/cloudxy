@@ -15,4 +15,5 @@ int load_snapshot_from_text(struct back_storage *storage,const char* snapshot_fi
 // for tree snapshot
 // find inode_addr's snapshot name
 int find_up_ss_name_of_inode(struct hlfs_ctrl *, uint64_t , char **);
+int create_auto_snapshot(struct hlfs_ctrl *, uint64_t);
 #endif 

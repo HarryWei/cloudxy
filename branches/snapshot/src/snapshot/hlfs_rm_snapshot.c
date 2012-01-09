@@ -1,6 +1,6 @@
 /*
  *  src/snapshot/hlfs_rm_snapshot.c
- 
+ *
  *  Harry Wei <harryxiyou@gmail.com> (C) 2011
  */
 #include <stdio.h>
@@ -49,7 +49,7 @@ is_delete(struct back_storage *storage,
 		return -1;
 	}
 #endif
-	Glist *list = g_hash_table_get_values(shash) ;
+	GList *list = g_hash_table_get_values(shash);
 	if (NULL == list) {
 		HLOG_ERROR("hash table get values error!");
 		g_hash_table_destroy(shash);
@@ -113,13 +113,13 @@ hlfs_rm_snapshot(const char *uri,const char *ssname) {
 	memset(deltext, 0, 128);
 	uint32_t len = snapshot_delmark2text(ssname, deltext);
 	HLOG_DEBUG("delbuf is %s", deltext);
-	g_mutex_lock(ctrl->hlfs_access_mutex);
+//	g_mutex_lock(ctrl->hlfs_access_mutex);
 	if (0 > storage->bs_file_append(storage, file, deltext, len)) {
 		HLOG_ERROR("append del text failed!");
-		g_mutex_unlock(ctrl->hlfs_access_mutex);
+//		g_mutex_unlock(ctrl->hlfs_access_mutex);
 		ret = -1;
 	}
-	g_mutex_unlock(ctrl->hlfs_access_mutex);
+//	g_mutex_unlock(ctrl->hlfs_access_mutex);
 out:
 	if (NULL != file) {
 		storage->bs_file_close(storage, file);

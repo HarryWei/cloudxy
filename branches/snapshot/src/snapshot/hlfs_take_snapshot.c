@@ -27,7 +27,6 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 		return -1;
 	}
 	cp->timestamp = get_current_time();
-	g_free(inode);
 	if ((strlen(ssname) + 1) > HLFS_FILE_NAME_MAX) {
 		HLOG_ERROR("error, snapshot name beyond max length!");
 		return -1;

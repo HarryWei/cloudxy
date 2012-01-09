@@ -1,11 +1,12 @@
 #include <stdint.h>
 #include <string.h>
-#include <hlfs_ctrl.h>
 #include <stdio.h>
+#include "hlfs_ctrl.h"
+#include "storage_helper.h"
 #include "hlfs_log.h"
 #include "snapshot.h"
 
-int creat_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr)
+int create_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	char *up_ss_name = NULL;
@@ -211,9 +212,9 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 		ret = -2;
 		goto out;
 	}
-	g_mutex_lock(ctrl->hlfs_access_mutex);
+//	g_mutex_lock(ctrl->hlfs_access_mutex);
 	ret = storage->bs_file_pread(storage, file, buf, file_size, 0);
-	g_mutex_unlock(ctrl->hlfs_access_mutex);
+//	g_mutex_unlock(ctrl->hlfs_access_mutex);
 	if (ret < 0) {
 		HLOG_ERROR("Read file snapshot.txt failed\n");
 		storage->bs_file_close(storage, file);
@@ -364,6 +365,7 @@ int load_all_ss_use_up_sname_keys(struct back_storage *storage, \
 	return 0;
 }
 
+#if 0
 void rebuild_hashtable_use_ia_keys(gpointer data, gpointer ss_hashtable)
 {
 	HLOG_DEBUG("enter func %s", __func__);
@@ -416,6 +418,7 @@ void find_up_inode_addr(gpointer data, gpointer usr_data)
 		inode_cup->up_inode_addr = tmp;
 	HLOG_DEBUG("leave func %s", __func__);
 }
+#endif
 
 int find_up_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char **up_ss_name)
 {

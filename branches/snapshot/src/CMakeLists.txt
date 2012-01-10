@@ -7,8 +7,8 @@
 # _So_that we can debug it.
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(HLFS)
-#CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+#CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 SET(WORK_HOME   $ENV{PWD}/..)
 MESSAGE(STATUS "This is dir " ${WORK_HOME})
@@ -18,8 +18,8 @@ SET(HADOOP_HOME ${WORK_HOME}/3part/hadoop)
 SET(LOG_HOME ${WORK_HOME}/3part/log)
 #MESSAGE(STATUS "This is dir " ${HADOOP_HOME})
 #SET(JAVA_HOME 	/mnt/jdk1.7.0)
-SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk)
-#SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
+#SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk)
+SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
 INCLUDE_DIRECTORIES(
        /usr/include/glib-2.0 
        /usr/lib/glib-2.0/include 

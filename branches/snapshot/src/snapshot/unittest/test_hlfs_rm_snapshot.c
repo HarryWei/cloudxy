@@ -146,7 +146,7 @@ test_hlfs_rm_snapshot(Fixture *fixture, const void *data) {
 	g_assert(ret == 0);
 	ret = hlfs_rm_snapshot(uri, "1234");
 	g_assert(ret == 0);
-#if 0
+#if 1
 	ret = hlfs_rm_snapshot(uri, " ");
 	g_assert(ret == 0);
 	ret = hlfs_rm_snapshot(uri, " **");

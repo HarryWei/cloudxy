@@ -144,14 +144,12 @@ renew_tree_snapshots(struct back_storage *storage,
 		g_hash_table_destroy(shash);
 		return -1;
 	}
-#if 1
 	struct snapshot *ss = g_hash_table_lookup(shash, sname);
 	if (NULL == ss) {
 		HLOG_ERROR("look up ss error!");
 		g_hash_table_destroy(shash);
 		return -1;
 	}
-#endif
 	GList *list = g_hash_table_get_values(shash);
 	if (NULL == list) {
 		HLOG_ERROR("hash table get values error!");
@@ -183,7 +181,6 @@ renew_tree_snapshots(struct back_storage *storage,
 	g_free(list);
 	return 0;
 }
-
 #endif
 
 int 

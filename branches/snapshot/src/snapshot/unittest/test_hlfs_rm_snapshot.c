@@ -75,6 +75,7 @@ take_snapshot(Fixture *fixture, const void *data) {
 
 	memset(content, 0, REQ_SIZE);
 	while (offset < TOTAL_SIZE) {
+		g_message("77 dbg i is %d", i);
 		int ret1 = hlfs_write(fixture->ctrl, content, REQ_SIZE, offset);
 		g_assert_cmpint(ret1, ==, REQ_SIZE);
 		do_snapshot(fixture, i);
@@ -139,12 +140,13 @@ test_hlfs_rm_snapshot(Fixture *fixture, const void *data) {
 	g_message("enter func %s", __func__);
 	const char *uri = fixture->uri;
 	g_message("uri is [%s]", uri);
-#if 0
 	int ret = 0;
 	ret = hlfs_rm_snapshot(uri, "snapshot0");
+	g_message("ret is %d", ret);
 	g_assert(ret == 0);
 	ret = hlfs_rm_snapshot(uri, "1234");
 	g_assert(ret == 0);
+#if 0
 	ret = hlfs_rm_snapshot(uri, " ");
 	g_assert(ret == 0);
 	ret = hlfs_rm_snapshot(uri, " **");

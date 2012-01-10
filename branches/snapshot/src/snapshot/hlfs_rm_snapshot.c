@@ -215,7 +215,7 @@ hlfs_rm_snapshot(const char *uri,const char *ssname) {
 		HLOG_ERROR("is sname exist error!");
 		goto out;
 	}
-	if (0 > (ret = renew_tree_snapshots(storage, ssname))) {
+	if (0 > renew_tree_snapshots(storage, ssname)) {
 		HLOG_DEBUG("renew tree snapshot error!!!");
 		goto out;
 	}

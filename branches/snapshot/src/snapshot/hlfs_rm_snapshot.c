@@ -31,6 +31,109 @@ is_sname_exist(struct back_storage *storage,
 	return 0;
 }
 
+int renew_tree_snapshots(struct back_storage *storage, const char *sname)
+{
+	HLOG_DEBUG("enter func %s", __func__);
+	int ret = 0;
+	int i = 0;
+	if (-1 == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) {
+		HLOG_ERROR("snapshot.txt is not exist");
+		ret = -1;
+		goto out1;
+	}
+	bs_file_info_t *file_info = storage->bs_file_info(storage, SNAPSHOT_FILE);
+	if (NULL == file_info) {
+		HLOG_ERROR("get snapshot info error!");
+		ret = -1;
+		goto out1;
+	}
+	uint32_t file_size = file_info->size; 
+	g_free(file_info);
+	HLOG_DEBUG("file_size : %u", file_size);
+	char *buf = (char *)g_malloc0(sizeof(char) * file_size);
+	if (NULL == buf) {
+		HLOG_ERROR("Allocate error!");
+		ret = -1;
+		goto out1;
+	}
+	bs_file_t file = NULL;
+	file = storage->bs_file_open(storage, SNAPSHOT_FILE, BS_READONLY);
+	if (file == NULL) {
+		HLOG_ERROR("open snapshot.txt error");
+		ret = -2;
+		goto out;
+	}
+//	g_mutex_lock(ctrl->hlfs_access_mutex);
+	ret = storage->bs_file_pread(storage, file, buf, file_size, 0);
+//	g_mutex_unlock(ctrl->hlfs_access_mutex);
+	if (ret < 0) {
+		HLOG_ERROR("Read file snapshot.txt failed\n");
+		storage->bs_file_close(storage, file);
+		ret = -3;
+		goto out;
+	}
+	storage->bs_file_close(storage, file);
+
+	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	gchar **sss = g_strsplit(buf, "\n", 0);
+	HLOG_DEBUG("g strv length:%d:", g_strv_length(sss));
+	struct snapshot tmp_ss;
+	memset(&tmp_ss, 0, sizeof(struct snapshot));
+	for (i = 0; i < g_strv_length(sss) - 1; i++) {
+		int flag = -1;
+		struct snapshot *ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
+		if (NULL == ss) {
+			HLOG_ERROR("Allocate error!");
+			g_hash_table_destroy(ss_hashtable);
+			ret = -4;
+			goto out2;
+		}
+		load_ss_from_text(ss, sss[i], &flag);
+		if (0 == g_strcmp0(sname, ss->sname)) {
+			memcpy(&tmp_ss, ss, sizeof(struct snapshot));
+		}
+		if (0 == g_strcmp0(ss->up_sname, tmp_ss.sname)) {
+			memset(ss->up_sname, HLFS_FILE_NAME_MAX, 0);
+			snprintf(ss->up_sname, HLFS_FILE_NAME_MAX, "%s", tmp_ss.up_sname);
+		}
+		if (flag == 0) {
+			g_hash_table_insert(ss_hashtable, ss->sname, ss);
+			HLOG_DEBUG("insert snapshot [%s]", ss->sname);
+		} else if (flag == 1) {
+			HLOG_DEBUG("remove snapshot [%s]", ss->sname);
+			if (TRUE != g_hash_table_remove(ss_hashtable, ss->sname)) {
+				HLOG_ERROR("snapshot [%s] remove from hash table error!", ss->sname);
+				g_free(ss);
+				g_hash_table_destroy(ss_hashtable);
+				ret = -5;
+				goto out2;
+			}
+			HLOG_DEBUG("remove snapshot [%s]", ss->sname);
+			g_free(ss);
+			continue;
+		} else {
+			HLOG_ERROR("error - flag");
+			g_free(ss);
+			g_hash_table_destroy(ss_hashtable);
+			ret = -6;
+			goto out2;
+		}
+	}
+	if (0 > rewrite_snapshot_file(storage, ss_hashtable)) {
+		HLOG_ERROR("rewrite snapshot file error!!!");
+		ret = -1;
+	}
+	g_hash_table_destroy(ss_hashtable);
+out2:
+	g_strfreev(sss);
+out:
+	g_free(buf);
+out1:
+	HLOG_DEBUG("leave func %s", __func__);
+	return ret;
+}
+
+#if 0
 static int
 renew_tree_snapshots(struct back_storage *storage,
 			const char *sname) {
@@ -81,6 +184,8 @@ renew_tree_snapshots(struct back_storage *storage,
 	return 0;
 }
 
+#endif
+
 int 
 hlfs_rm_snapshot(const char *uri,const char *ssname) {
     int ret = 0;
@@ -100,8 +205,8 @@ hlfs_rm_snapshot(const char *uri,const char *ssname) {
 		}
 		storage->bs_file_close(storage, file);
 #endif
-	ret = -1;
-	goto out;
+		ret = -1;
+		goto out;
 	}
 	if (1 == (ret = is_sname_exist(storage, ssname))) {
 		HLOG_DEBUG("snapshot %s is not exist, right???", ssname);

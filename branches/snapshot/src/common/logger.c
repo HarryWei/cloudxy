@@ -365,6 +365,7 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
     HLOG_DEBUG("ctrl last segno %d,offset:%d",ctrl->last_segno,ctrl->last_offset);
     const char segfile_name[SEGMENT_FILE_NAME_MAX];
     build_segfile_name(ctrl->last_segno,segfile_name);
+	HLOG_DEBUG("segfile is %s", segfile_name);
     //char *segfile_path = g_build_filename(path,segfile_name,NULL);
     if(ctrl->last_offset==0){
         if(ctrl->cur_write_file_handler!=NULL){
@@ -466,7 +467,7 @@ int append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint
     HLOG_DEBUG(" db_data_len:%d ib_data_len:%d BLOCKSIZE:%d",db_data_len,ib_data_len,BLOCKSIZE);
     for(db_cur_no = db_start,i=0; db_cur_no <= db_end; db_cur_no++,i++){
         char * cur_block_ptr = (char *) (db_buff + i * BLOCKSIZE);  
-        db_offset = LOG_HEADER_LENGTH + i*BLOCKSIZE;
+        db_offset = LOG_HEADER_LENGTH + i* BLOCKSIZE;
         char * cur_log_buff_ptr = log_buff + db_offset;
         HLOG_DEBUG(" db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
         if(is_db_in_level1_index_range(db_cur_no)){

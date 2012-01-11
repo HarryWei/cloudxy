@@ -214,10 +214,10 @@ test_hlfs_tree_snapshots(Fixture *fixture, const void *data) {
 	HLOG_DEBUG("Test callback and the tree fork >>>>>>");
 #if 1
 	hlfs_close(fixture->ctrl);
-	deinit_hlfs(fixture->ctrl);
-	fixture->ctrl = NULL;
-	fixture->ctrl = init_hlfs(fixture->uri);
-	g_assert(fixture->ctrl != NULL);
+//	deinit_hlfs(fixture->ctrl);
+//	fixture->ctrl = NULL;
+//	fixture->ctrl = init_hlfs(fixture->uri);
+//	g_assert(fixture->ctrl != NULL);
 	HLOG_DEBUG("last_segno is %u, last_offset is %u", fixture->ctrl->last_segno,
 													fixture->ctrl->last_offset);
 	int ret = hlfs_open(fixture->ctrl, 1);

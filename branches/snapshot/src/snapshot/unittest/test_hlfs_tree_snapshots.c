@@ -128,7 +128,7 @@ do_snapshot(Fixture *fixture, int i) {
 }
 
 static void 
-do_snapshot(Fixture *fixture, int i) {
+do_snapshot1(Fixture *fixture, int i) {
 	char buffer[128];
 	memset(buffer, 0, 128);
 	if (1 == i) {
@@ -213,6 +213,7 @@ test_hlfs_tree_snapshots(Fixture *fixture, const void *data) {
 	g_assert(ret >= 0);
 	memset(content, 0, REQ_SIZE);
 	i = 0;
+	offset = 0;
 	while (offset <= TOTAL_SIZE) {
 		int ret1 = hlfs_write(fixture->ctrl, content, REQ_SIZE, offset);
 		g_assert_cmpint(ret1, ==, REQ_SIZE);
@@ -229,12 +230,13 @@ hlfs_tree_snapshots_tear_down(Fixture *fixture, const void *data) {
 	g_print("clean dir path: %s\n", test_dir);
 	char *fs_dir = g_build_filename(test_dir, "testfs", NULL);
 	pid_t status;
+#if 0
 	const char cmd[256];
 	memset((char *) cmd, 0, 256);
 	sprintf((char *) cmd, "%s %s %s", "rm", "-r", fs_dir);
 	g_message("cmd is [%s]", cmd);
 	status = system(cmd);
-#if 0
+
 	struct back_storage *storage = init_storage_handler(fixture->uri);
 	g_assert(storage != NULL);
 	int nums = 0;

@@ -79,6 +79,7 @@ uint32_t get_segfile_no(const char * segfile)
 char *read_block(struct back_storage *storage ,uint64_t storage_address,uint32_t block_size)
 {
 	HLOG_DEBUG("enter func %s", __func__);
+	HLOG_DEBUG("%s -- storage_addr is %llu", __func__, storage_address);
     int ret = 0;
     uint32_t offset = get_offset(storage_address); 
     const char segfile_name[SEGMENT_FILE_NAME_MAX];
@@ -100,6 +101,8 @@ char *read_block(struct back_storage *storage ,uint64_t storage_address,uint32_t
 	    block = NULL;
 	    goto out;
     }
+	HLOG_DEBUG("%s -- offset is %u", __func__, offset);
+	HLOG_DEBUG("%s -- block_size is %u", __func__, block_size);
     if(block_size != storage->bs_file_pread(storage,file,block,block_size,offset)){
 	    HLOG_ERROR("bs_file_pread's size is not equal to block_size");
         g_free(block);

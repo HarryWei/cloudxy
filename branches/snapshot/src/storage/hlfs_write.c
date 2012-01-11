@@ -132,8 +132,8 @@ write_log:;
 	ctrl->inode.mtime  = cur_time;
 	ctrl->inode.ctime  = cur_time;
 	ctrl->inode.atime  = cur_time;
-	g_message("get_current_time is %llu", ctrl->inode.mtime);
-	g_message("length is %llu", ctrl->inode.length);
+	HLOG_DEBUG("get_current_time is %llu", ctrl->inode.mtime);
+	HLOG_DEBUG("length is %llu", ctrl->inode.length);
     int expand_size =  (db_end-db_start + 1)*BLOCKSIZE + 
     ib_amount(db_start,db_end) * BLOCKSIZE + 
     LOG_HEADER_LENGTH + 

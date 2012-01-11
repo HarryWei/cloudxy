@@ -24,14 +24,14 @@ typedef struct {
 static void 
 hlfs_tree_snapshots_setup(Fixture *fixture, const void *data) {
 	const char *test_dir = (const char *)data;
-	g_print("test env dir is %s\n", test_dir);
+	HLOG_DEBUG("test env dir is %s", test_dir);
 	char *fs_dir = g_build_filename(test_dir, "testfs", NULL);
 //	g_assert(g_mkdir(fs_dir, 0700) == 0);
 	char *uri = g_malloc0(128);
 	g_assert(uri != NULL);
 	snprintf(uri, 128, "%s%s", "local://", fs_dir);
 //	char *uri = g_build_path(tmp, fs_dir, NULL);
-	g_print("uri is %s\n", uri);
+	HLOG_DEBUG("uri is %s", uri);
 	pid_t status;
 	const char cmd[256];
 	memset((char *) cmd, 0, 256);
@@ -40,7 +40,7 @@ hlfs_tree_snapshots_setup(Fixture *fixture, const void *data) {
 								"-b", 8192,
 								"-s", 67108864,
 								"-m", 1024);
-	g_message("cmd is [%s]", cmd);
+	HLOG_DEBUG("cmd is [%s]", cmd);
 	status = system(cmd);
 #if 0
 	GKeyFile *sb_keyfile = g_key_file_new();
@@ -58,7 +58,7 @@ hlfs_tree_snapshots_setup(Fixture *fixture, const void *data) {
 	}
 #endif
 	fixture->uri = uri;
-	g_print("fixture->uri is %s\n", fixture->uri);
+	HLOG_DEBUG("fixture->uri is %s", fixture->uri);
 	fixture->ctrl = init_hlfs(fixture->uri);
 	g_assert(fixture->ctrl != NULL);
 	int ret = hlfs_open(fixture->ctrl, 1);
@@ -73,54 +73,65 @@ static void
 do_snapshot(Fixture *fixture, int i) {
 	char buffer[128];
 	memset(buffer, 0, 128);
-	if (1 == i) {
+	if (0 == i) {
 		sprintf(buffer, "%s", "T1");
-		g_message("%d buffer is [%s]", i, buffer);
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
+		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_assert(ret == 0);
+	} else if (1 == i) {
+		sprintf(buffer, "%s", "T2");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (2 == i) {
-		sprintf(buffer, "%s", "T2");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T3");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (3 == i) {
-		sprintf(buffer, "%s", "T3");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T4");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (4 == i) {
-		sprintf(buffer, "%s", "T4");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T5");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
+		HLOG_DEBUG("fixture->ctrl->imap_entry.inode_addr is %llu, inode_no is %llu, \
+				iblock is %llu, doubly_iblock is %llu, triply_iblock is %llu", 
+				fixture->ctrl->imap_entry.inode_addr, 
+				fixture->ctrl->imap_entry.inode_no, 
+				fixture->ctrl->inode.iblock, 
+				fixture->ctrl->inode.doubly_iblock, 
+				fixture->ctrl->inode.triply_iblock);
+		int j = 0;
+		for (j = 0; j < 12; j++) {
+			HLOG_DEBUG("fixture->ctrl->inode.blocks[%d] is %llu", j, fixture->ctrl->inode.blocks[j]);
+		}
 	} else if (5 == i) {
-		sprintf(buffer, "%s", "T5");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T6");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (6 == i) {
-		sprintf(buffer, "%s", "T6");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T7");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (7 == i) {
-		sprintf(buffer, "%s", "T7");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T8");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (8 == i) {
-		sprintf(buffer, "%s", "T8");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T9");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (9 == i) {
-		sprintf(buffer, "%s", "T9");
-		g_message("%d buffer is [%s]", i, buffer);
-		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
-		g_assert(ret == 0);
-	} else if (10 == i) {
 		sprintf(buffer, "%s", "T10");
-		g_message("%d buffer is [%s]", i, buffer);
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	}
@@ -131,54 +142,54 @@ static void
 do_snapshot1(Fixture *fixture, int i) {
 	char buffer[128];
 	memset(buffer, 0, 128);
-	if (1 == i) {
+	if (0 == i) {
 		sprintf(buffer, "%s", "T11");
-		g_message("%d buffer is [%s]", i, buffer);
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
+		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_assert(ret == 0);
+	} else if (1 == i) {
+		sprintf(buffer, "%s", "T12");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (2 == i) {
-		sprintf(buffer, "%s", "T12");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T13");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (3 == i) {
-		sprintf(buffer, "%s", "T13");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T14");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (4 == i) {
-		sprintf(buffer, "%s", "T14");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T15");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (5 == i) {
-		sprintf(buffer, "%s", "T15");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T16");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (6 == i) {
-		sprintf(buffer, "%s", "T16");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T17");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (7 == i) {
-		sprintf(buffer, "%s", "T17");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T18");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (8 == i) {
-		sprintf(buffer, "%s", "T18");
-		g_message("%d buffer is [%s]", i, buffer);
+		sprintf(buffer, "%s", "T19");
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (9 == i) {
-		sprintf(buffer, "%s", "T19");
-		g_message("%d buffer is [%s]", i, buffer);
-		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
-		g_assert(ret == 0);
-	} else if (10 == i) {
 		sprintf(buffer, "%s", "T20");
-		g_message("%d buffer is [%s]", i, buffer);
+		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	}
@@ -191,6 +202,7 @@ test_hlfs_tree_snapshots(Fixture *fixture, const void *data) {
 	int offset = 0;
 	int i = 0;
 
+	HLOG_DEBUG("Test the main tree snapshot >>>>>>");
 	memset(content, 0, REQ_SIZE);
 	while (offset <= TOTAL_SIZE) {
 		int ret1 = hlfs_write(fixture->ctrl, content, REQ_SIZE, offset);
@@ -199,35 +211,54 @@ test_hlfs_tree_snapshots(Fixture *fixture, const void *data) {
 		offset += REQ_SIZE;
 		i += 1;
 	}
+	HLOG_DEBUG("Test callback and the tree fork >>>>>>");
+#if 1
 	hlfs_close(fixture->ctrl);
 	deinit_hlfs(fixture->ctrl);
-
+	fixture->ctrl = NULL;
 	fixture->ctrl = init_hlfs(fixture->uri);
 	g_assert(fixture->ctrl != NULL);
+	HLOG_DEBUG("last_segno is %u, last_offset is %u", fixture->ctrl->last_segno,
+													fixture->ctrl->last_offset);
 	int ret = hlfs_open(fixture->ctrl, 1);
 	g_assert(ret == 0);
 	uint64_t inode_addr = 0;
 	ret = hlfs_find_inode_by_name(fixture->uri, "T5", &inode_addr);
+	HLOG_DEBUG("T5's inode_addr is %llu", inode_addr);
 	g_assert(ret >= 0);
 	ret = hlfs_open_by_inode(fixture->ctrl, inode_addr, 0);
 	g_assert(ret >= 0);
+	HLOG_DEBUG("fixture->ctrl->imap_entry.inode_addr is %llu, inode_no is %llu, \
+			iblock is %llu, doubly_iblock is %llu, triply_iblock is %llu", 
+				fixture->ctrl->imap_entry.inode_addr, 
+				fixture->ctrl->imap_entry.inode_no, 
+				fixture->ctrl->inode.iblock, 
+				fixture->ctrl->inode.doubly_iblock, 
+				fixture->ctrl->inode.triply_iblock);
+	int j = 0;
+	for (j = 0; j < 12; j++) {
+		HLOG_DEBUG("fixture->ctrl->inode.blocks[%d] is %llu", j, fixture->ctrl->inode.blocks[j]);
+	}
 	memset(content, 0, REQ_SIZE);
 	i = 0;
 	offset = 0;
 	while (offset <= TOTAL_SIZE) {
+#if 1
 		int ret1 = hlfs_write(fixture->ctrl, content, REQ_SIZE, offset);
 		g_assert_cmpint(ret1, ==, REQ_SIZE);
+#endif
 		do_snapshot1(fixture, i);
 		offset += REQ_SIZE;
 		i += 1;
 	}
+#endif
 	return ;
 }
 
 static void 
 hlfs_tree_snapshots_tear_down(Fixture *fixture, const void *data) {
 	const char *test_dir = (const char *) data;
-	g_print("clean dir path: %s\n", test_dir);
+	HLOG_DEBUG("clean dir path: %s", test_dir);
 	char *fs_dir = g_build_filename(test_dir, "testfs", NULL);
 	pid_t status;
 #if 0

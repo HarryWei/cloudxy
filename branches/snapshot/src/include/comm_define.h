@@ -9,6 +9,7 @@
 //#define SEGMENT_SIZE        (64*1024*1024UL)
 //#define SEGMENT_SIZE_MASK   (SEGMENT_SIZE-1)  
 //#define SEGMENT_SIZE_SHIFT  26 
+//#define HBLOCK_SIZE			(8*1024UL)
 extern uint64_t SEGMENT_SIZE;
 extern uint64_t SEGMENT_SIZE_MASK;
 extern uint64_t SEGMENT_SIZE_SHIFT;

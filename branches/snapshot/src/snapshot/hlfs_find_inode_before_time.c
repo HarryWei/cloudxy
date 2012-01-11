@@ -28,22 +28,22 @@ get_iaddr_bytime_in_seg(struct back_storage *storage,
 		ret = -1;
 		goto out;
 	}
-	uint32_t SEGMENT_SIZE = segment_size;
+	uint32_t _SEGMENT_SIZE = segment_size;
 	bs_file_t file = storage->bs_file_open(storage, segfile, BS_READONLY);
 	if (NULL == file) {
 		HLOG_ERROR("file open error");
 		ret = -1;
 		goto out;
 	}
-	HLOG_DEBUG("SEGMENT SIZE is %d", SEGMENT_SIZE);
-	char *tmp_buf = (char *)g_malloc0(SEGMENT_SIZE);
+	HLOG_DEBUG("SEGMENT SIZE is %d", _SEGMENT_SIZE);
+	char *tmp_buf = (char *)g_malloc0(_SEGMENT_SIZE);
 	if (NULL == tmp_buf) {
 		HLOG_ERROR("%s -- allocate error", __func__);
 		ret = -1;
 		goto out;
 	}
 //	g_mutex_lock(ctrl->hlfs_access_mutex);
-	int count = storage->bs_file_pread(storage, file, tmp_buf,SEGMENT_SIZE, 0);
+	int count = storage->bs_file_pread(storage, file, tmp_buf,_SEGMENT_SIZE, 0);
 //	g_mutex_unlock(ctrl->hlfs_access_mutex);
 	if (0 > count) {
 		HLOG_ERROR("read content error!");

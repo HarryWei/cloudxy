@@ -383,10 +383,12 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 	HLOG_DEBUG("leave func %s", __func__);
 	return cur_storage_addr;
 }
+#if 1
 uint64_t  SEGMENT_SIZE;
 uint64_t  SEGMENT_SIZE_MASK = 0;
 uint64_t  SEGMENT_SIZE_SHIFT = 0;
 uint32_t  HBLOCK_SIZE;
+#endif
 int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint32_t *max_fs_size)
 {
 	HLOG_DEBUG("enter func %s", __func__);
@@ -439,6 +441,7 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
         goto out;
     }
     g_free(_uri);
+#if 1
     SEGMENT_SIZE = _seg_size;
     SEGMENT_SIZE_MASK  = SEGMENT_SIZE - 1;
     SEGMENT_SIZE_SHIFT = 0;
@@ -447,6 +450,7 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
         SEGMENT_SIZE_SHIFT++;
     }
     HBLOCK_SIZE=_block_size;
+#endif
 out:
     g_key_file_free(sb_keyfile);
     storage->bs_file_close(storage,file);

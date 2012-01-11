@@ -148,19 +148,22 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
     uint64_t storage_address ;
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     uint32_t db_no = no;
+	HLOG_DEBUG("77777 -- dbg db_no is %u", db_no);
     uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
     if(is_db_in_level1_index_range(db_no)){
         int _idx = db_no % 12;
-        storage_address = ctrl->inode.blocks[_idx];
+		HLOG_DEBUG("_idx 77 dbg is %d", _idx);
+		HLOG_DEBUG("harry dbg addr is %lld", ctrl->inode.blocks[_idx]);
+        storage_address = (uint64_t) ctrl->inode.blocks[_idx];
     }else if (is_db_in_level2_index_range(db_no)){
         if(ctrl->inode.iblock == 0){
           return 1;
         }
         uint64_t *_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE);
         if(_ib==NULL) {
-		HLOG_ERROR("read_block_fast error");
-		return -1;
-	}
+			HLOG_ERROR("read_block_fast error");
+			return -1;
+		}
         int  _idx = (db_no-12)%IB_ENTRY_NUM;
         storage_address = *(_ib+_idx);
         g_free(_ib);
@@ -170,18 +173,18 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE);
         if(_ib==NULL) {
-		HLOG_ERROR("read_block_fast error");
-		return -1;
-	}
+			HLOG_ERROR("read_block_fast error");
+			return -1;
+		}
         int _idx   = ( db_no - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
         if(*(_ib+_idx) == 0 ){
             return 1;
         }
         uint64_t *_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE);
         if(_ib2==NULL) {
-		HLOG_ERROR("read_block_fast error");
-		return -1;
-	}
+			HLOG_ERROR("read_block_fast error");
+			return -1;
+		}
         int _idx2  = (db_no - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
         storage_address = *(_ib2 + _idx2);
         g_free(_ib);
@@ -192,27 +195,27 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib  = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE);
         if(_ib==NULL) {
-		HLOG_ERROR("read_block_fast error");
-		return -1;
-	}
+			HLOG_ERROR("read_block_fast error");
+			return -1;
+		}
         int _idx   = (db_no -12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM*IB_ENTRY_NUM);
         if(*(_ib + _idx) == 0){
             return 1;
         }
         uint64_t *_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib + _idx),BLOCKSIZE);
-        if(_ib2==NULL) {
-		HLOG_ERROR("read_block_fast error");
-		return -1;
-	}
+        	if(_ib2==NULL) {
+			HLOG_ERROR("read_block_fast error");
+			return -1;
+		}
         int _idx2  = (db_no-12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM)/IB_ENTRY_NUM % IB_ENTRY_NUM;
         if(*(_ib2 + _idx2) == 0){
             return 1;
         }
         uint64_t *_ib3 = (uint64_t *)read_block(ctrl->storage,*(_ib2 + _idx2),BLOCKSIZE);
         if(_ib3==NULL) {
-		HLOG_ERROR("read_block_fast error");
-		return -1;
-	}
+			HLOG_ERROR("read_block_fast error");
+			return -1;
+		}
         int _idx3  = (db_no-12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 
         storage_address = *(_ib3 + _idx3);
         g_free(_ib);
@@ -225,8 +228,8 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
     }
     *block = read_block(ctrl->storage,storage_address,BLOCKSIZE);
     if(*block ==NULL){
-	HLOG_ERROR("can not read block for storage address %llu", storage_address);
-       return -1;
+		HLOG_ERROR("can not read block for storage address %llu", storage_address);
+       	return -1;
     }
     HLOG_DEBUG("leave func %s", __func__);
     return 0;
@@ -332,7 +335,8 @@ int load_block_by_addr_fast(struct hlfs_ctrl *ctrl,uint64_t pos,char** block){
 int load_block_by_addr(struct hlfs_ctrl *ctrl,uint64_t pos,char** block){
     HLOG_DEBUG("enter func %s", __func__);
     guint32 BLOCKSIZE = ctrl->sb.block_size;
-    uint32_t db_no = pos /BLOCKSIZE;
+    uint64_t db_no = pos / (uint64_t) BLOCKSIZE;
+	HLOG_DEBUG("77777 dbg db_no is %llu", db_no);
     HLOG_DEBUG("leave func %s", __func__);
     return load_block_by_no(ctrl,db_no,block);
 }
@@ -470,11 +474,10 @@ int append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint
            /*  write db to log buff  */
            int _idx = db_cur_no % 12;
            HLOG_DEBUG(" idx:%u",_idx);
+		   //TODO If this is callback, so set_offset and set_offset will be bad
            set_segno (&ctrl->inode.blocks[_idx],ctrl->last_segno);
            set_offset(&ctrl->inode.blocks[_idx],ctrl->last_offset + db_offset);
            HLOG_DEBUG("inode.block[%d]'s storage addr:%llu",_idx,ctrl->inode.blocks[_idx]);
-           HLOG_DEBUG("log_buff:%p cur_log_buf:%p db_buff:%p cur_block_ptr:%p",
-			   		log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
            HLOG_DEBUG("log_buff:%p cur_log_buf:%p db_buff:%p cur_block_ptr:%p",
 			   		log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
            memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);

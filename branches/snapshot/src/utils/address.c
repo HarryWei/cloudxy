@@ -26,7 +26,9 @@ void set_segno(uint64_t *address, uint32_t segment_no)
 
 void set_offset(uint64_t *address, uint32_t offset)
 {
+	HLOG_DEBUG("harry dbg *address is %llu", *address);
     *address = (*address & ~SEGMENT_SIZE_MASK) | offset;
+	HLOG_DEBUG("harry dbg after set, *address is %llu", *address);
 } 
 
 gboolean is_db_in_level1_index_range(uint32_t db_no)

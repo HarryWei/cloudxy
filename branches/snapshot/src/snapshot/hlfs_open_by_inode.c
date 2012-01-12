@@ -47,6 +47,7 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 					int flag) {
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
+	ctrl->write_task_run = 1;
 	struct inode *inode = load_inode(ctrl->storage, inode_addr);
 	if (inode == NULL) {
 		HLOG_ERROR("load_inode error!");

@@ -362,7 +362,7 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
     HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
     //gchar * path = (gchar*)ctrl->storage_handler;
-    HLOG_DEBUG("ctrl last segno %d,offset:%d",ctrl->last_segno,ctrl->last_offset);
+    HLOG_DEBUG("ctrl last segno %u,offset:%u",ctrl->last_segno,ctrl->last_offset);
     const char segfile_name[SEGMENT_FILE_NAME_MAX];
     build_segfile_name(ctrl->last_segno,segfile_name);
 	HLOG_DEBUG("segfile is %s", segfile_name);

@@ -155,7 +155,8 @@ write_log:;
 		g_message("fail to append log\n");
 		return -1; 
 	}
-#else 
+#else
+	memset(&(ctrl->write_req), 0, sizeof(struct write_req));
 	struct write_req *w_req = &ctrl->write_req;
     //struct write_rsp *w_rsp = &ctrl->write_rsp;
     //struct write_req * w_req = (struct write_req*)g_malloc0(sizeof(struct write_req));
@@ -163,6 +164,10 @@ write_log:;
     w_req->db_start = db_start;
     w_req->db_end = db_end;
     g_async_queue_push(ctrl->write_req_aqueue,(gpointer)w_req);
+	if (NULL == w_req) {
+		HLOG_DEBUG("g_async_queue_push pushed null data");
+	}
+	HLOG_DEBUG("ctrl->write_task_run is %d", ctrl->write_task_run);
     HLOG_DEBUG("request pushed to aysn");
     struct write_rsp * w_rsp = (struct write_rsp*)g_async_queue_pop(ctrl->write_rsp_aqueue);
     ret = w_rsp->res;

@@ -27,6 +27,7 @@ int log_write_task(struct hlfs_ctrl * ctrl)
     struct write_rsp *w_rsp = &ctrl->write_rsp;
     GTimeVal expired;
     while(ctrl->write_task_run){
+		HLOG_DEBUG("This is log_write_task thread!!!");
         g_get_current_time(&expired);
         g_time_val_add(&expired,1000*1000);
         w_req = (struct write_req*)g_async_queue_timed_pop(ctrl->write_req_aqueue,&expired);
@@ -46,7 +47,7 @@ int log_write_task(struct hlfs_ctrl * ctrl)
             continue;
             /*  */
         }else{
-            //HLOG_DEBUG("no real write request for expired ,do copy for cleaning");
+            HLOG_DEBUG("no real write request for expired ,do copy for cleaning");
             if(g_atomic_int_get(&ctrl->ctrl_region->is_start_clean) == 1){
                 int ret = load_all_segment_usage(ctrl->storage,SEGMENTS_USAGE_FILE,SEGMENTS_DEL_FILE,seg_usage_hashtable);
                 g_assert(ret == 0);
@@ -89,5 +90,6 @@ int log_write_task(struct hlfs_ctrl * ctrl)
         g_list_free(seg_usage_list);
     g_hash_table_destroy(seg_usage_hashtable);
     HLOG_DEBUG("leave func %s", __func__);
+	HLOG_DEBUG("write_task_run is %d", ctrl->write_task_run);
     return 0;
 }

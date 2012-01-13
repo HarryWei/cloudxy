@@ -2,6 +2,7 @@
  *  hlfs/src/snapshot/unittest/test_hlfs_take_snapshot.c
  *  
  *  Harry Wei <harryxiyou@gmail.com> (C) 2011
+ *  Kelvin <kelvin.xupt@gmail.com> (C) 2012
  */
 
 #include <glib.h>
@@ -22,7 +23,8 @@ typedef struct {
 } Fixture;
 
 static void 
-hlfs_take_snapshot_setup(Fixture *fixture, const void *data) {
+hlfs_take_snapshot_setup(Fixture *fixture, const void *data) 
+{
 	const char *test_dir = (const char *)data;
 	g_print("test env dir is %s\n", test_dir);
 	char *fs_dir = g_build_filename(test_dir, "testfs", NULL);
@@ -35,7 +37,7 @@ hlfs_take_snapshot_setup(Fixture *fixture, const void *data) {
 	pid_t status;
 	const char cmd[256];
 	memset((char *) cmd, 0, 256);
-	sprintf((char *) cmd, "%s %s %s %s %d %s %d %s %d", "../mkfs.hlfs", 
+	sprintf((char *) cmd, "%s %s %s %s %d %s %d %s %d", "../../../../output/bin/mkfs.hlfs", 
 								"-u", uri,
 								"-b", 8192,
 								"-s", 67108864,
@@ -63,12 +65,14 @@ hlfs_take_snapshot_setup(Fixture *fixture, const void *data) {
 	g_assert(fixture->ctrl != NULL);
 	int ret = hlfs_open(fixture->ctrl, 1);
 	g_assert(ret == 0);
+	fixture->ctrl->alive_ss_name = (char *)g_malloc0(MAX_FILE_NAME_LEN); //delete after open finished
+	sprintf(fixture->ctrl->alive_ss_name, "Adam");
 //	g_key_file_free(sb_keyfile);
 //	g_free(sb_file_path);
 	g_free(fs_dir);
 	return ;
 }
-
+#if 0
 static void 
 do_snapshot(Fixture *fixture, int i) {
 	char buffer[128];
@@ -131,21 +135,28 @@ do_snapshot(Fixture *fixture, int i) {
 	}
 	return ;
 }
-
+#endif
 static void 
 test_hlfs_take_snapshot(Fixture *fixture, const void *data) {
 	char content[REQ_SIZE];
 	int offset = 0;
 	int i = 0;
-
+	int ret = 0;
+	char tmp[MAX_FILE_NAME_LEN];
 	memset(content, 0, REQ_SIZE);
 	while (offset <= TOTAL_SIZE) {
+		g_message("offset:%d", offset);
 		int ret1 = hlfs_write(fixture->ctrl, content, REQ_SIZE, offset);
 		g_assert_cmpint(ret1, ==, REQ_SIZE);
-		do_snapshot(fixture, i);
+		memset(tmp, 0, MAX_FILE_NAME_LEN);
+		sprintf(tmp, "ss%d", i);
+		hlfs_take_snapshot(fixture->ctrl, tmp);
 		offset += REQ_SIZE;
 		i += 1;
 	}
+	system("cat testfs/snapshot.txt");
+	ret = hlfs_take_snapshot(fixture->ctrl, "ss2");
+	g_assert_cmpint(ret, ==, -2);
 	return ;
 }
 

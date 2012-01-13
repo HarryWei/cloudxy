@@ -61,14 +61,14 @@ int main(int argc, char *argv[])
        g_message("max fs size <=0");
        return -1;
     }
-	g_message("777 dbg");
+//	g_message("777 dbg");
     struct back_storage *storage = init_storage_handler(uri);
     if(NULL ==storage){
        g_message("can not get storage handler for uri:%s",uri);
        g_option_context_free(context);
        return -1;
     }
-	g_message("777 dbg");
+//	g_message("777 dbg");
     if( 0!=storage->bs_file_mkdir(storage,NULL)){
         g_message("can not mkdir for our fs %s",uri);
         g_option_context_free(context);

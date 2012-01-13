@@ -15,4 +15,15 @@ extern uint64_t SEGMENT_SIZE_MASK;
 extern uint64_t SEGMENT_SIZE_SHIFT;
 extern uint32_t HBLOCK_SIZE;
 
+/*
+ * Following are some error numbers in hlfs, you can also add 
+ * the error number, which you think it is worthy. But when
+ * you add yours, please add the comments for this error number.
+ * You'd better send a mail to cloudxy@googlegroups.com for your
+ * error number before you do this, which can make sure your error 
+ * number is ok for all the developers, thanks.
+ */
+/* memory error in hlfs */
+#define EHLFS_MEM				(-1)
+
 #endif

@@ -10,17 +10,10 @@
 
 int is_sname_exist(struct back_storage *storage,
 				const char *sname) {
-#if 1
-	int mm = 0;
 	if (EHLFS_NOFILE == (mm = storage->bs_file_is_exist(storage, SNAPSHOT_FILE))) {
-		g_message("uri is %s, snapshot file is %s", storage->uri, SNAPSHOT_FILE);
-		g_message("EHLFS_NOFILE is %d", EHLFS_NOFILE);
-		g_message("777 dbg harry");
-		g_message("mm is %d", mm);
 		HLOG_DEBUG("There is no snapshot file!");
 		return 1;
 	}
-#endif
 	GHashTable *shash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	int ret = load_all_ss(storage, shash);
 	if (0 > ret) {

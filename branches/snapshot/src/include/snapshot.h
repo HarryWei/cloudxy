@@ -26,6 +26,7 @@ typedef struct {
 extern "C" {
 #endif
 
+int is_sname_exist(struct back_storage *, const char *);
 int create_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr);
 int snapshot2text(const struct snapshot *snapshot, char *textbuf);
 int dump_snapshot(struct back_storage *storage, const char* snapshot_file, struct snapshot *snapshot);

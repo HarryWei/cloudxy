@@ -13,6 +13,7 @@
 #include "storage_helper.h"
 #include "hlfs_log.h"
 #include "misc.h"
+#include "comm_define.h"
 
 int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname) 
 {
@@ -23,6 +24,16 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
     if (0 == is_sname_exist(ctrl->storage, ssname)) {
 		HLOG_ERROR("This snaoshot name has been used, please repick another one!");
 		return -2;
+	}
+	/* record the up snapshot name of a snapshot */
+	if (NULL == ctrl->alive_ss_name) {
+		ctrl->alive_ss_name = (char *)g_malloc0(MAX_FILE_NAME_LEN);
+		if (NULL == ctrl->alive_ss_name) {
+			HLOG_ERROR("allocate error!");
+			return EHLFS_MEM;
+		}
+		create_auto_snapshot(ctrl, ctrl->imap_entry.inode_addr);
+		snprintf(ctrl->alive_ss_name, MAX_FILE_NAME_LEN, "%llu", ctrl->imap_entry.inode_addr);
 	}
 	int ret = 0;
 	struct snapshot *cp = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
@@ -36,16 +47,6 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 		return -1;
 	}
 	g_strlcpy(cp->sname, ssname, strlen(ssname) + 1);
-	/* record the up snapshot name of a snapshot */
-	if (NULL == ctrl->alive_ss_name) {
-		ctrl->alive_ss_name = (char *)g_malloc0(MAX_FILE_NAME_LEN);
-		if (NULL == ctrl->alive_ss_name) {
-			HLOG_ERROR("allocate error!");
-			return -1;
-		}
-		create_auto_snapshot(ctrl, ctrl->imap_entry.inode_addr);
-		snprintf(ctrl->alive_ss_name, MAX_FILE_NAME_LEN, "%llu", ctrl->imap_entry.inode_addr);
-	}
 	g_strlcpy(cp->up_sname,ctrl->alive_ss_name,strlen(ctrl->alive_ss_name) + 1);
 	cp->inode_addr = ctrl->imap_entry.inode_addr;
 	memset(ctrl->alive_ss_name, 0, (strlen(ctrl->alive_ss_name) + 1));

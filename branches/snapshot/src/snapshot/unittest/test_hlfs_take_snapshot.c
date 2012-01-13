@@ -117,6 +117,7 @@ do_snapshot(Fixture *fixture, int i) {
 		sprintf(buffer, "%s", "T5");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_message("ret is %d", ret);
 		g_assert(ret == -2);
 	} else if (9 == i) {
 		sprintf(buffer, "%s", "T9");
@@ -149,13 +150,14 @@ hlfs_take_snapshot_tear_down(Fixture *fixture, const void *data) {
 	const char *test_dir = (const char *) data;
 	g_print("clean dir path: %s\n", test_dir);
 	char *fs_dir = g_build_filename(test_dir, "testfs", NULL);
+#if 0
 	pid_t status;
 	const char cmd[256];
 	memset((char *) cmd, 0, 256);
 	sprintf((char *) cmd, "%s %s %s", "rm", "-r", fs_dir);
 	g_message("cmd is [%s]", cmd);
 	status = system(cmd);
-#if 0
+
 	struct back_storage *storage = init_storage_handler(fixture->uri);
 	g_assert(storage != NULL);
 	int nums = 0;

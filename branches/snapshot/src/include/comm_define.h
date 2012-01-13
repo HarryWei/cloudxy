@@ -24,6 +24,7 @@ extern uint32_t HBLOCK_SIZE;
  * number is ok for all the developers, thanks.
  */
 /* memory error in hlfs */
-#define EHLFS_MEM				(-1)
-
+#define EHLFS_MEM				((int) (-1))
+/* no this file */
+#define EHLFS_NOFILE			((int) (-2))
 #endif

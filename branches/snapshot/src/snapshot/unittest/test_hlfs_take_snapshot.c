@@ -74,7 +74,7 @@ do_snapshot(Fixture *fixture, int i) {
 	char buffer[128];
 	memset(buffer, 0, 128);
 	if (0 == i) {
-		sprintf(buffer, "%s%d", "snapshot", i);
+		sprintf(buffer, "%s", "T0");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
@@ -114,17 +114,12 @@ do_snapshot(Fixture *fixture, int i) {
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (8 == i) {
-		sprintf(buffer, "%s", "T8");
+		sprintf(buffer, "%s", "T5");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
-		g_assert(ret == 0);
+		g_assert(ret == -2);
 	} else if (9 == i) {
 		sprintf(buffer, "%s", "T9");
-		g_message("%d buffer is [%s]", i, buffer);
-		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
-		g_assert(ret == 0);
-	} else if (10 == i) {
-		sprintf(buffer, "%s", "T10");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);

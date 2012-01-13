@@ -12,6 +12,7 @@
 #include "storage_helper.h"
 #include "hlfs_log.h"
 
+#if 0
 static int 
 is_sname_exist(struct back_storage *storage,
 				const char *sname) {
@@ -30,6 +31,7 @@ is_sname_exist(struct back_storage *storage,
 	g_hash_table_destroy(shash);
 	return 0;
 }
+#endif
 
 int renew_tree_snapshots(struct back_storage *storage, const char *sname)
 {

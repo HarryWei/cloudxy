@@ -17,9 +17,13 @@
 int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname) 
 {
     if(ctrl == NULL || ssname ==NULL){
+		HLOG_ERROR("parameter error!");
         return -1;
     }
-    
+    if (0 == is_sname_exist(ctrl->storage, ssname)) {
+		HLOG_ERROR("This snaoshot name has been used, please repick another one!");
+		return -2;
+	}
 	int ret = 0;
 	struct snapshot *cp = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
 	if (NULL == cp) {

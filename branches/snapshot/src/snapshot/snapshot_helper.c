@@ -7,6 +7,24 @@
 #include "snapshot.h"
 #include "misc.h"
 
+int is_sname_exist(struct back_storage *storage,
+				const char *sname) {
+	GHashTable *shash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	int ret = load_all_ss(storage, shash);
+	if (0 > ret) {
+		HLOG_ERROR("load all ss error!");
+		g_hash_table_destroy(shash);
+		return -1;
+	}
+	if (NULL == g_hash_table_lookup(shash, sname)) {
+		HLOG_DEBUG("we can not find %s in the hash table!", sname);
+		g_hash_table_destroy(shash);
+		return 1;
+	}
+	g_hash_table_destroy(shash);
+	return 0;
+}
+
 /* we can not find the inode_addr's snapshot name, also the up snapshot name*/
 int create_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr)
 {

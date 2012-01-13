@@ -2,7 +2,7 @@
  *  src/snapshot/hlfs_open_by_inode.c
  *
  *  Harry Wei <harryxiyou@gmail.com> (C) 2011
- *  Kelvin <kelvin.xupt@gmail.com>
+ *  Updated by Kelvin <kelvin.xupt@gmail.com>
  */
 #include <stdio.h>
 #include <stdint.h>

@@ -17,7 +17,9 @@ int create_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr)
 	sprintf(ss.up_sname, "%llu", inode_addr);
 	ss.inode_addr = inode_addr;
 	ss.timestamp = get_current_time();
+	g_mutex_lock(ctrl->hlfs_access_mutex);
 	dump_snapshot(ctrl->storage, SNAPSHOT_FILE, &ss);
+	g_mutex_unlock(ctrl->hlfs_access_mutex);
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }
@@ -183,7 +185,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	bs_file_info_t *file_info = storage->bs_file_info(storage, SNAPSHOT_FILE);
 	if (NULL == file_info) {
 		HLOG_ERROR("get snapshot info error!");
-		ret = -2;
+		ret = -1;
 		goto out1;
 	}
 	uint32_t file_size = file_info->size; 
@@ -192,7 +194,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	char *buf = (char *)g_malloc0(sizeof(char) * file_size);
 	if (NULL == buf) {
 		HLOG_ERROR("Allocate error!");
-		ret = -2;
+		ret = -1;
 		goto out1;
 	}
 	bs_file_t file = NULL;

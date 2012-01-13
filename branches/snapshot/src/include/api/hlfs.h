@@ -178,8 +178,7 @@ int hlfs_list_all_snapshots(const char *uri, char **ss_name_array);
  * hlfs_take_snapshot: take a snapshot given a snapshot name
  * @para ctrl: the hlfs global control construction
  * @para ssname: the snapshot's name
- * @return value: 0 on succeed, -1 parameter error, -2 snpshot name has been used, \
- * -3 take snapshot error.
+ * @return value: 0 is right, -1 is wrong
  */
 int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname);
 

@@ -50,7 +50,7 @@
   * hdfs 模式下格式化hlfs文件系统 (我们以伪分布模式执行）
        # hadoop fs -mkdir hdfs:///tmp/testenv
        # ./output/bin/mkfs.hlfs -u hdfs:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024
-  * 编译测试用例 - cd test;camke .;make 
+  * 编译测试用例 - mkdir hlfs/test/build && cd hlfs/test/build && cmake .. && make all  
   * 执行测试用例 - ./test -u hdfs:///tmp/testenv/testfs -r 4096 -a 409600
 {{{
   * 可见local模式和hdfs模式只是uri的head不同而已，其余用法类似

@@ -21,10 +21,6 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 		HLOG_ERROR("parameter error!");
         return -1;
     }
-    if (0 == is_sname_exist(ctrl->storage, ssname)) {
-		HLOG_ERROR("This snaoshot name has been used, please repick another one!");
-		return -2;
-	}
 	/* record the up snapshot name of a snapshot */
 	if (NULL == ctrl->alive_ss_name) {
 		ctrl->alive_ss_name = (char *)g_malloc0(MAX_FILE_NAME_LEN);
@@ -34,6 +30,10 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 		}
 		create_auto_snapshot(ctrl, ctrl->imap_entry.inode_addr);
 		snprintf(ctrl->alive_ss_name, MAX_FILE_NAME_LEN, "%llu", ctrl->imap_entry.inode_addr);
+	}
+    if (0 == is_sname_exist(ctrl->storage, ssname)) {
+		HLOG_ERROR("This snaoshot name has been used, please repick another one!");
+		return -2;
 	}
 	int ret = 0;
 	struct snapshot *cp = (struct snapshot *)g_malloc0(sizeof(struct snapshot));

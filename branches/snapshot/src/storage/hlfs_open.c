@@ -14,6 +14,7 @@
 #include "misc.h"
 #include "logger.h"
 
+#if 1
 /*
  * load_latest_inode: load the lastest inode structure for ctrl.
  * @param ctrl: the global control for our FS.
@@ -50,6 +51,7 @@ out2:
 	HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
+#endif
 
 /*
  * hlfs_open: open a file.
@@ -100,7 +102,14 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
     ctrl->last_offset += size;
 #endif
 	ctrl->usage_ref++;
-	ctrl->alive_ss_name = NULL;
+	if (NULL != ctrl->alive_ss_name) {
+		g_free(ctrl->alive_ss_name);
+		ctrl->alive_ss_name = NULL;
+	}
+	if (0 > find_ss_name_of_inode(ctrl, ctrl->imap_entry.inode_addr, &ctrl->alive_ss_name)) {
+		HLOG_ERROR("find snapshot of inode addr error!");
+		return -1;
+	}
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }

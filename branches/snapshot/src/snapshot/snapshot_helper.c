@@ -10,7 +10,7 @@
 
 int is_sname_exist(struct back_storage *storage,
 				const char *sname) {
-	if (EHLFS_NOFILE == (mm = storage->bs_file_is_exist(storage, SNAPSHOT_FILE))) {
+	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) {
 		HLOG_DEBUG("There is no snapshot file!");
 		return 1;
 	}
@@ -200,7 +200,7 @@ int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable)
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
 	int i = 0;
-	if (-1 == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) {
+	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage, SNAPSHOT_FILE)) {
 		HLOG_ERROR("snapshot.txt is not exist");
 		ret = -1;
 		goto out1;
@@ -442,6 +442,21 @@ int find_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char **ss
 //	inode_cup_t *inode_cup = (inode_cup_t *)g_malloc0(sizeof(inode_cup_t));
 //	inode_cup->cur_inode_addr = inode_addr;
 //	inode_cup->up_inode_addr = 0;
+	if (EHLFS_NOFILE == ctrl->storage->bs_file_is_exist(ctrl->storage, SNAPSHOT_FILE)) {
+		*ss_name = (char *)g_malloc0(sizeof(char) * MAX_FILE_NAME_LEN);
+		if (NULL == *ss_name) {
+			HLOG_ERROR("Allocate Error!");
+			return EHLFS_MEM;
+		}
+		HLOG_DEBUG("We can not find the inode_addr's snapshot, so use inode addr as up ss name");
+		if (0 > create_auto_snapshot(ctrl, inode_addr)) {
+			HLOG_ERROR("create auto snapshot error!");
+			g_free(*ss_name);
+			return EHLFS_FUNC;
+		}
+		sprintf(*ss_name, "%llu", inode_addr);
+		return ret;
+	}
 	GHashTable *ss_hashtable = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, NULL);
 	if (load_all_ss(ctrl->storage, ss_hashtable) < 0) {
 		HLOG_ERROR("load all ss error!");
@@ -485,6 +500,7 @@ int find_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char **ss
 		struct snapshot *ss = (struct snapshot *) g_list_nth_data(list, i);
 		if (NULL == ss) {
 			HLOG_ERROR("find the ss error!");
+			g_free(*ss_name);
 			ret = -1;
 			goto out;
 		}
@@ -496,6 +512,7 @@ int find_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char **ss
 	HLOG_DEBUG("We can not find the inode_addr's snapshot, so use inode addr as up ss name");
 	if (0 > create_auto_snapshot(ctrl, inode_addr)) {
 		HLOG_ERROR("create auto snapshot error!");
+		g_free(*ss_name);
 		ret = -1;
 		goto out;
 	}

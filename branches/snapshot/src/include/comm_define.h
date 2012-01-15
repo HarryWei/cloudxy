@@ -27,4 +27,6 @@ extern uint32_t HBLOCK_SIZE;
 #define EHLFS_MEM				((int) (-1))
 /* no this file */
 #define EHLFS_NOFILE			((int) (-2))
+/* revoke func error */
+#define EHLFS_FUNC				((int) (-3))
 #endif

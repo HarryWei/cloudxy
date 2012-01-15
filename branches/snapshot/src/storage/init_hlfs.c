@@ -86,10 +86,8 @@ init_hlfs(const char *uri)
     ctrl->ctrl_region = &CTRL_REGION;
     ctrl->hlfs_access_mutex = g_mutex_new();
 
-    HLOG_DEBUG(" 777 dbg segno %u,offset %u\n",segno,offset);
     ctrl->last_segno = segno;
     ctrl->last_offset = offset;
-    HLOG_DEBUG(" 777 dbg ctrl->segno %u, ctrl->offset %u\n",ctrl->last_segno,ctrl->last_offset);
     if(ctrl->last_segno != 0 || ctrl->last_offset != 0){
         if(0!=load_latest_inode_map_entry(ctrl->storage,ctrl->last_segno,ctrl->last_offset,&ctrl->imap_entry)){
             HLOG_ERROR("load inode map entry failed");

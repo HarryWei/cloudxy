@@ -61,7 +61,9 @@ hlfs_take_snapshot_setup(Fixture *fixture, const void *data) {
 	g_print("fixture->uri is %s\n", fixture->uri);
 	fixture->ctrl = init_hlfs(fixture->uri);
 	g_assert(fixture->ctrl != NULL);
-	int ret = hlfs_open(fixture->ctrl, 1);
+	int ret = 0;
+	ret = hlfs_open(fixture->ctrl, 1);
+	g_message("ret is %d", ret);
 	g_assert(ret == 0);
 //	g_key_file_free(sb_keyfile);
 //	g_free(sb_file_path);

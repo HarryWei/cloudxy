@@ -73,7 +73,7 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 		ctrl->alive_ss_name = NULL;
 	}
 	if (0 > find_ss_name_of_inode(ctrl, inode_addr, &ctrl->alive_ss_name)) {
-		HLOG_ERROR("find up ss name error!");
+		HLOG_ERROR("find snapshot of inode addr error!");
 		ret = -1;
 	}
 #if 0

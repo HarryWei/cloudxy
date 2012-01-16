@@ -47,6 +47,22 @@ int create_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr)
 	return 0;
 }
 
+int create_adam_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
+{
+	HLOG_DEBUG("enter func %s", __func__);
+	struct snapshot ss;
+	memset(&ss, 0, sizeof(struct snapshot));
+	sprintf(ss.sname, "%s", ssname);
+	sprintf(ss.up_sname, "%s", ssname);
+	ss.inode_addr = ctrl->imap_entry.inode_addr;
+	ss.timestamp = get_current_time();
+	g_mutex_lock(ctrl->hlfs_access_mutex);
+	dump_snapshot(ctrl->storage, SNAPSHOT_FILE, &ss);
+	g_mutex_unlock(ctrl->hlfs_access_mutex);
+	HLOG_DEBUG("leave func %s", __func__);
+	return 0;
+}
+
 int snapshot2text(const struct snapshot *snapshot, char *textbuf) 
 {
 	HLOG_DEBUG("enter func %s", __func__);
@@ -442,19 +458,22 @@ int find_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char **ss
 //	inode_cup_t *inode_cup = (inode_cup_t *)g_malloc0(sizeof(inode_cup_t));
 //	inode_cup->cur_inode_addr = inode_addr;
 //	inode_cup->up_inode_addr = 0;
-	if (EHLFS_NOFILE == ctrl->storage->bs_file_is_exist(ctrl->storage, SNAPSHOT_FILE)) {
+	if (EHLFS_NOFILE == (ret = ctrl->storage->bs_file_is_exist(ctrl->storage, SNAPSHOT_FILE))) {
+		HLOG_DEBUG("We can not find snapshot file, create adam snapshot");
+		if (0 > create_adam_snapshot(ctrl, "adam")) {
+			HLOG_ERROR("create auto snapshot error!");
+			g_free(*ss_name);
+			return EHLFS_FUNC;
+		}
 		*ss_name = (char *)g_malloc0(sizeof(char) * MAX_FILE_NAME_LEN);
 		if (NULL == *ss_name) {
 			HLOG_ERROR("Allocate Error!");
 			return EHLFS_MEM;
 		}
-		HLOG_DEBUG("We can not find the inode_addr's snapshot, so use inode addr as up ss name");
-		if (0 > create_auto_snapshot(ctrl, inode_addr)) {
-			HLOG_ERROR("create auto snapshot error!");
-			g_free(*ss_name);
-			return EHLFS_FUNC;
-		}
-		sprintf(*ss_name, "%llu", inode_addr);
+		sprintf(*ss_name, "%s", "adam");
+		return ret;
+	} else if (EHLFS_MEM == ret) {
+		HLOG_DEBUG("Invoke func error");
 		return ret;
 	}
 	GHashTable *ss_hashtable = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, NULL);
@@ -493,8 +512,13 @@ int find_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char **ss
 		return -1;
 	}
 	if (0 == len) {
-		HLOG_DEBUG("There is no snapshot yet, use inode addr as up snapshot name...");
-		sprintf(*ss_name, "%llu", inode_addr);
+		HLOG_DEBUG("There is no snapshot yet, create adam snapshot");
+		if (0 > create_adam_snapshot(ctrl, "adam")) {
+			HLOG_ERROR("create auto snapshot error!");
+			g_free(*ss_name);
+			goto out;
+		}
+		sprintf(*ss_name, "%s", "adam");
 	}
 	for (i = 0; i < g_list_length(list); i++) {
 		struct snapshot *ss = (struct snapshot *) g_list_nth_data(list, i);

@@ -131,6 +131,65 @@ do_snapshot(Fixture *fixture, int i) {
 }
 
 static void 
+do_snapshot1(Fixture *fixture, int i) {
+	char buffer[128];
+	memset(buffer, 0, 128);
+	if (0 == i) {
+		sprintf(buffer, "%s", "T10");
+		g_message("%d buffer is [%s]", i, buffer);
+		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_assert(ret == 0);
+	} else if (1 == i) {
+		sprintf(buffer, "%s", "T11");
+		g_message("%d buffer is [%s]", i, buffer);
+		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_assert(ret == 0);
+	} else if (2 == i) {
+		sprintf(buffer, "%s", "T12");
+		g_message("%d buffer is [%s]", i, buffer);
+		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_assert(ret == 0);
+	} else if (3 == i) {
+		sprintf(buffer, "%s", "T13");
+		g_message("%d buffer is [%s]", i, buffer);
+		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_assert(ret == 0);
+	} else if (4 == i) {
+		sprintf(buffer, "%s", "T14");
+		g_message("%d buffer is [%s]", i, buffer);
+		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_assert(ret == 0);
+	} else if (5 == i) {
+		sprintf(buffer, "%s", "T15");
+		g_message("%d buffer is [%s]", i, buffer);
+		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_assert(ret == 0);
+	} else if (6 == i) {
+		sprintf(buffer, "%s", "T16");
+		g_message("%d buffer is [%s]", i, buffer);
+		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_assert(ret == 0);
+	} else if (7 == i) {
+		sprintf(buffer, "%s", "T17");
+		g_message("%d buffer is [%s]", i, buffer);
+		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_assert(ret == 0);
+	} else if (8 == i) {
+		sprintf(buffer, "%s", "T15");
+		g_message("%d buffer is [%s]", i, buffer);
+		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_message("ret is %d", ret);
+		g_assert(ret == -2);
+	} else if (9 == i) {
+		sprintf(buffer, "%s", "T19");
+		g_message("%d buffer is [%s]", i, buffer);
+		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
+		g_assert(ret == 0);
+	}
+	return ;
+}
+
+static void 
 test_hlfs_take_snapshot(Fixture *fixture, const void *data) {
 	char content[REQ_SIZE];
 	int offset = 0;
@@ -144,6 +203,20 @@ test_hlfs_take_snapshot(Fixture *fixture, const void *data) {
 		offset += REQ_SIZE;
 		i += 1;
 	}
+	hlfs_close(fixture->ctrl);
+	hlfs_open(fixture->ctrl, 1);
+	offset = 0;
+	i = 0;
+
+	memset(content, 0, REQ_SIZE);
+	while (offset <= TOTAL_SIZE) {
+		int ret1 = hlfs_write(fixture->ctrl, content, REQ_SIZE, offset);
+		g_assert_cmpint(ret1, ==, REQ_SIZE);
+		do_snapshot1(fixture, i);
+		offset += REQ_SIZE;
+		i += 1;
+	}
+
 	return ;
 }
 

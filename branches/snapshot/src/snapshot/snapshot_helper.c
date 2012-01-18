@@ -520,9 +520,9 @@ int find_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char **ss
 		}
 		sprintf(*ss_name, "%s", "adam");
 	}
-	struct snapshot tmp_ss;
-	memset(&tmp_ss, 0, sizeof(struct snapshot));
-	uint64_t tmp_time = 0;
+//	struct snapshot tmp_ss;
+//	memset(&tmp_ss, 0, sizeof(struct snapshot));
+//	uint64_t tmp_time = 0;
 	for (i = 0; i < g_list_length(list); i++) {
 		struct snapshot *ss = (struct snapshot *) g_list_nth_data(list, i);
 		if (NULL == ss) {
@@ -531,17 +531,19 @@ int find_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char **ss
 			ret = -1;
 			goto out;
 		}
+#if 0
 		if (tmp_time < ss->timestamp) {
 			memcpy(&tmp_ss, ss, sizeof(struct snapshot));
 			tmp_time = ss->timestamp;
 		}
+#endif
 		if (inode_addr == ss->inode_addr) {
 			sprintf(*ss_name, "%s", ss->sname);
 			goto out;
 		}
 	}
 	HLOG_DEBUG("We can not find the inode_addr's snapshot, so use inode addr as up ss name");
-	if (0 > create_auto_snapshot(ctrl, inode_addr, tmp_ss.sname)) {
+	if (0 > create_auto_snapshot(ctrl, inode_addr, ctrl->alive_ss_name)) {
 		HLOG_ERROR("create auto snapshot error!");
 		g_free(*ss_name);
 		ret = -1;

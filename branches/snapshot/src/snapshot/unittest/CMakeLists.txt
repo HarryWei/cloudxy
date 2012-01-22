@@ -1,25 +1,30 @@
-#CMAKE by Zhang bo.
+# CMAKE by Zhang bo.
 # Time & Place: 2011, 3, 26, @ linux lab in xiyou.
-# Just for our LHDFS project.
+# Just for our HLFS project.
 
 # This *ON* can let cmake procedure output into console.
 # _So_that we can debug it.
+
 SET(CMAKE_BUILD_TYPE "Debug") 
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g")
 SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 SET(CMAKE_VERBOSE_MAKEFILE ON)
+
 PROJECT(HLFS)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+SET(WORK_HOME "$ENV{PWD}/../../../..")
+MESSAGE(STATUS "Root directory of project:" ${WORK_HOME})
+
 # include these files for building.
-SET(WORK_HOME $ENV{PWD}/../../../..)
-MESSAGE(STATUS "This is dir" ${WORK_HOME})
 INCLUDE_DIRECTORIES(
        /usr/include/glib-2.0 
        /usr/lib/glib-2.0/include 
+	   /usr/lib/i386-linux-gnu/glib-2.0/include
        ${WORK_HOME}/src/include
        ${WORK_HOME}/3part/log/include
 )
+
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 LINK_DIRECTORIES(
     ${WORK_HOME}/output/lib32

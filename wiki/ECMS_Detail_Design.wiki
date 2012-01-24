@@ -67,7 +67,7 @@
 || *返回值* || {ok,Hostname,CpuCount,IP,TotalMem,TotalDise,FreeMem,FreeDisk|{error,Reason} ||
 || *结果影响* ||  ||
 || *借助工具* || xm ||
-|| *实现描述* ||<code>1.通过xm工具获取宿主机上的虚拟机名字，并保存到vm_ids变量中；</code><code>2.通过xm工具获取宿主机的内存和cpu使用情况；</code><code>3.如果宿主机的内存和cpu资源还有剩余，则设置enable为true，否则设置为false；</code><code>5.如果以上所有操作成功，则返回获取到的信息，否则返回失败信息。</code>||
+|| *实现描述* ||<code></code>||
 
 
 ==== 2.vm_start.sh ====

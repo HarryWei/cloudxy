@@ -17,7 +17,30 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
    # 进入nodeController目录
    # erl -name node_controller1@127.0.0.1 -setcookie abc -boot start_sasl -pa ebin
 {{{ 
-注意：
-1.node 的cookie需要设置为一样，否则无法交流
-2.我们假设的部署方式是node controller一个宿主机只部署一个。
+注意:
+1. node 的cookie需要设置为一样,否则无法交流.
+2. 我们假设的部署方式是:node controller一个宿主机只部署一个.
+}}}
+
+==初始化CloudMaster==
+
+3.1 启动cloud_master 
+ * 在node_master上启动cloud_master
+   application:start(cloud_master).
+   系统启动自动初始化运行环境——包含各种元数据表等.如果启动后看到屏幕有输出
+   =PROGRESS REPORT==== 23-Jan-2012::14:51:45 ===
+         application: cloud_master
+          started_at: 'node1@127.0.0.1'
+   则表示启动成功。
+{{{ 
+注：
+1. 为保证数据安全，数据表将配置在多个node机器上，这些副本所在node将在sys.config配置（meta_nodes），测试期间未有sys.config文件情况下，将默认在本机node上建立数据表。
+2 tv:start().可观察到系统建立了我们建立了6张元数据表——其中sequence表用于产生序列号，其余表用于元数据存储。
+3. appmon:start(). 可观察系统各组件运行状况
+}}}
+ * 导入网络资源
+   meta_data_ops:add_netaddr_res（IPaddr）.
+   如(node1@127.0.0.1)3> meta_data_ops:add_netaddr_res("192.168.0.99").
+{{{
+注：网络ip地址资源用于分配给各虚拟机,为了简单和部署灵活起见,我们目前采用手动导入的方式初始化IP地址资源——mac等则自动产生.注意该动作只用做一次.
 }}}

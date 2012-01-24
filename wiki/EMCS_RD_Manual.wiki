@@ -24,8 +24,7 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
 
 ==初始化CloudMaster==
 
- # 启动cloud_master 
-   *在node shell 上启动cloud_master application :(node1@127.0.0.1)1>application:start(cloud_master).
+ * 启动cloud_master — 在node shell 上启动cloud_master application :(node1@127.0.0.1)1>application:start(cloud_master).
    
 {{{ 
 注：
@@ -36,10 +35,10 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
    则表示启动成功。
 2.为保证数据安全，数据表将配置在多个node机器上，这些副本所在node将在sys.config配置（meta_nodes），测试期间未有sys.config文件情况下，将默认在本机node上建立数据表。
 3.tv:start().可观察到系统建立了我们建立了6张元数据表——其中sequence表用于产生序列号，其余表用于元数据存储。
-3. appmon:start(). 可观察系统各组件运行状况
+4.appmon:start(). 可观察系统各组件运行状况
 }}}
- # 导入网络资源
-   *在node shell上执行meta_data_ops:add_netaddr_res（IPaddr） 如 meta_data_ops:add_netaddr_res("192.168.0.99").
+ * 导入网络资源 — 在node shell上执行meta_data_ops:add_netaddr_res（IPaddr） 如 meta_data_ops:add_netaddr_res("192.168.0.99").
 {{{
-注：网络ip地址资源用于分配给各虚拟机,为了简单和部署灵活起见,我们目前采用手动导入的方式初始化IP地址资源——mac等则自动产生.注意该动作只用做一次.
+注：
+网络ip地址资源用于分配给各虚拟机,为了简单和部署灵活起见,我们目前采用手动导入的方式初始化IP地址资源——mac等则自动产生.注意该动作只用做一次.
 }}}

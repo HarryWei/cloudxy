@@ -1,4 +1,4 @@
-#介绍EMCS开发调试介绍.
+#summary 介绍EMCS开发调试介绍.
 
 
 ==获取EMCS代码==

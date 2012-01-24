@@ -16,6 +16,8 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
  * 启动node 运行node controller
    # 进入nodeController目录
    # erl -name node_controller1@127.0.0.1 -setcookie abc -boot start_sasl -pa ebin
+{{{ 
 注意：
-1. node 的cookie需要设置为一样，否则无法交流
-2. 我们假设的部署方式是node controller一个宿主机只部署一个。
+1.node 的cookie需要设置为一样，否则无法交流
+2.我们假设的部署方式是node controller一个宿主机只部署一个。
+}}}

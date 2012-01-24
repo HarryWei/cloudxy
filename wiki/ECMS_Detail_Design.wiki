@@ -58,88 +58,56 @@
 
 ----
 === 脚本的设计 ===
-涉及到的脚本有：vm_start.sh,vm_stop,vm_destroy,disk_create.sh,disk_attach.sh,disk_detach.sh,disk_destroy.sh,get_node_status.h,get_vm_status.sh.
+涉及到的脚本有：
 
-==== 1.vm_start.sh ====
+==== 1.get_node_info.sh ====
+|| *脚本名称* || get_node_info.sh ||
+|| *作用* || 获取宿主机状态信息 ||
+|| *接受参数* || {node_name} ||
+|| *返回值* || {ok,Hostname,CpuCount,IP,TotalMem,TotalDise,FreeMem,FreeDisk|{error,Reason} ||
+|| *结果影响* ||  ||
+|| *借助工具* || xm ||
+|| *实现描述* ||<code>1.通过xm工具获取宿主机上的虚拟机名字，并保存到vm_ids变量中；</code><code>2.通过xm工具获取宿主机的内存和cpu使用情况；</code><code>3.如果宿主机的内存和cpu资源还有剩余，则设置enable为true，否则设置为false；</code><code>5.如果以上所有操作成功，则返回获取到的信息，否则返回失败信息。</code>||
+
+
+==== 2.vm_start.sh ====
 || *脚本名称* || vm_start.sh ||
 || *作用* || 创建并启动虚拟机 ||
 || *接受参数* ||<code> {vm_id,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_port,vnc_password,os_type} </code>||
-|| *返回值* || {errno,msg} ||
+|| *返回值* || ok|{error,Reason} ||
 || *结果影响* ||  ||
 || *借助工具* ||  ||
-|| *实现描述* || <code>1.创建工作目录并切入；</code><code>2.判断是否为第一次启动，is_first_start=false标识不是首次启动跳至第10步骤，is_first_start=true标识是首次启动继续第3步骤；</code><code>3.得到vm_password和vm_hostname参数，写入一个配置文件initialize，mkisofs将此文件制作成一个iso镜像，镜像名字使用vm_id+'.iso'(这里可以获取iso_path)；</code><code>4.如果是首次启动需要执行mkfs.hlfs -u hdfs://sysdisk_uri -b 8192 -s 67108864 -m 1024 (大小固定死)创建系统磁盘，然后根据sysdisk_uri，使用tap-ctl create + sysdisk_uri来连接hlfs和本地虚拟机块设备，截取返回值；</code><code>5.在工作目录创建磁盘挂载目录，挂载虚拟块设备使用mount挂载到此目录；</code><code>6.根据os_type,选择合适的母盘镜像，(如果是首次启动使用vhd-util snapshot在系统目录创建增量盘，增量盘name使用vm_id+'.img'），这里已经可以得到系统增量盘的绝对路  径os_path了；</code><code>7.根据vm_id,vcpu_cpunt,mem_size,ip_addr,mac_addr,vnc_password,os_path，iso_path(这里需要再次对is_first_start进行判读来决定是否需要iso_path)创建虚拟机的启动配置文件，存入工作目录；</code><code>8.xm create +配置文件 启动虚拟机，获取虚拟机的动态id；</code><code>9.使用xenstore-write /local/domain/<id>/key 1,初始化变量key的值为1,dom0中循环检测等待这个值的变化，（不能是无限循环，需要等待足够长的时间，如果值没有变化返回  错误信息），如果值发生变化，卸载并销毁iso文件，返回初始化正常；</code><code>10.如果以上操作成功，则返回启动成功信息，否则返回失败信息。</code> ||
+|| *实现描述* || <code>1.创建工作目录并切入；</code><code>2.判断是否为第一次启动(可根据系统增量盘是否被创建过为依据)，不是首次启动跳至第10步骤；如果是首次启动继续第3步骤；</code><code>3.得到vm_password和vm_hostname参数，写入一个配置文件initialize，mkisofs将此文件制作成一个iso镜像，镜像名字使用vm_id+'.iso'(这里可以获取iso_path)；</code><code>4.如果是首次启动需要执行mkfs.hlfs -u hdfs://sysdisk_uri -b 8192 -s 67108864 -m 1024 (大小固定死)创建系统磁盘，然后根据sysdisk_uri，使用tap-ctl create + sysdisk_uri来连接hlfs和本地虚拟机块设备，截取返回值；</code><code>5.在工作目录创建磁盘挂载目录，挂载虚拟块设备使用mount挂载到此目录；</code><code>6.根据os_type,选择合适的母盘镜像，(如果是首次启动使用vhd-util snapshot在系统目录创建增量盘，增量盘name使用vm_id+'.img'），这里已经可以得到系统增量盘的绝对路径os_path了；</code><code>7.根据vm_id,vcpu_cpunt,mem_size,ip_addr,mac_addr,vnc_password,os_path，iso_path创建虚拟机的启动配置文件，存入工作目录；</code><code>8.xm create +配置文件 启动虚拟机，获取虚拟机的动态id；</code><code>9.使用xenstore-write /local/domain/<id>/key 1,初始化变量key的值为1,dom0中循环检测等待这个值的变化，（不能是无限循环，需要等待足够长的时间，如果值没有变化返回  错误信息），如果值发生变化，卸载并销毁iso文件，返回初始化正常；</code><code>10.如果以上操作成功，则返回启动成功信息，否则返回失败信息。</code> ||
 
-==== 2.vm_stop.sh ====
+==== 3.vm_stop.sh ====
 || *脚本名称* || vm_stop.sh ||
 || *作用* || 关闭虚拟机 ||
 || *接受参数* || {vm_id} ||
-|| *返回值* || {errno,msg} ||
+|| *返回值* || ok|{error,Reason} ||
 || *结果影响* ||  ||
 || *借助工具* || xm ||
 || *实现描述* || <code>1.检查参数合法性；</code><code>2.使用xm工具进行虚拟机关闭；</code><code>3.等待一定时间，查看虚拟机状态，查看是否关闭，如果是，继续第4步骤，否则继续第3步骤；</code><code>4.如果以上操作成功，返回成功信息，否则返回失败信息。</code> ||
 
-==== 3.vm_destroy.sh ====
+==== 4.vm_destroy.sh ====
 || *脚本名称* || vm_destroy.sh ||
 || *作用* || 销毁虚拟机 ||
 || *接受参数* || {vm_id} ||
-|| *返回值* || {errno,msg} ||
+|| *返回值* || ok|{error,Reason} ||
 || *结果影响* ||  ||
 || *借助工具* ||  ||
-|| *实现描述* || <code>1.检查参数合法性；</code><code>2.使用xm工具进行虚拟机销毁；</code><code>3.等待一定时间，查看虚拟机状态，查看虚拟机是否销毁，如果是，继续第4步骤，否则继续第3步骤；</code><code>4.如果以上操作成功，返回成功信息，否则返回失败信息。</code> ||
+|| *实现描述* || <code></code> ||
 
-==== 4.disk_create.sh ====
-|| *脚本名称* || disk_create.sh ||
-|| *作用* || 第一次挂载虚拟磁盘之前，首先要创建磁盘 ||
-|| *接受参数* || {disk_uri,disk_size} ||
-|| *返回值* || {errno,msg} ||
-|| *结果影响* ||  ||
-|| *借助工具* || <code>1.c检查参数合法性；</code><code>2.运行mkfs.hdfs disk_uri disk_size；</code><code>3如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
-|| *实现描述* ||  ||
-
-==== 5.disk_attach.sh ====
-|| *脚本名称* || disk_attach.sh ||
-|| *作用* || 挂载虚拟磁盘到指定的虚拟机上 ||
-|| *接受参数* || {disk_uri,vm_id} ||
-|| *返回值* || {errno,msg} ||
-|| *结果影响* ||  ||
-|| *借助工具* ||  ||
-|| *实现描述* || <code>1.检查参数合法性；</code><code>2.tap-ctl + disk_uir创建虚拟块设备；</code><code>3.xm attach +vm_id+设备名称送入虚拟机；</code><code>如果以上操作成功，则返回成功信息，否则返回失败信息。</code> ||
-
-==== 6.disk_detach.sh ====
-|| *脚本名称* || disk_detach.sh ||
-|| *作用* || 从虚拟机上卸载指定磁盘 ||
-|| *接受参数* || {disk_id} ||
-|| *返回值* || {errno,msg} ||
-|| *结果影响* ||  ||
-|| *借助工具* || <code>1.检查参数的合法性；</code><code>2.xm dettach vmid 卸载虚拟机块设备；</code><code>3.tap-ctl卸载本地虚拟磁盘；</code><code>4.如果以上操作成功，则返成功信息，否则返回失败信息。</code> ||
-|| *实现描述* ||  ||
-
-==== 7.disk_destroy.sh ====
-|| *脚本名称* || disk_destroy.sh ||
-|| *作用* || 销毁指定磁盘 ||
-|| *接受参数* || {disk_id} ||
-|| *返回值* || {errno,msg} ||
-|| *结果影响* ||  ||
-|| *借助工具* ||  ||
-|| *实现描述* ||  ||
-
-==== 8.get_node_status.sh ====
-|| *脚本名称* || get_node_status.sh ||
-|| *作用* || 获取宿主机状态信息 ||
-|| *接受参数* || {node_name} ||
-|| *返回值* || {errno:msg,node_name,vm_ids,mem_used,cpu_used,enable} ||
-|| *结果影响* ||  ||
-|| *借助工具* || xm ||
-|| *实现描述* || <code>1.检查node_name参数是不是本宿主机的名字；</code><code>2.通过xm工具获取宿主机上的虚拟机名字，并保存到vm_ids变量中；</code><code>3.通过xm工具获取宿主机的内存和cpu使用情况；</code><code>4.如果宿主机的内存和cpu资源还有剩余，则设置enable为true，否则设置为false；</code><code>5.如果以上所有操作成功，则返回获取到的信息，否则返回失败信息。</code>||
-
-==== 9.get_vm_status.sh ====
-|| *脚本名称* || get_vm_status.sh ||
-|| *作用* || 获取虚拟机状态信息 ||
+==== 5.check_vm_statu.sh====
+|| *脚本名称* || check_vm_statu.sh ||
+|| *作用* || 检查vm状态 ||
 || *接受参数* || {vm_id} ||
-|| *返回值* || {errno:msg,vm_id,vm_mem_used,vm_cpu_used,vm_status} ||
+|| *返回值* || "RUNING"|"SUSPEND"|“NO_FIND"||
 || *结果影响* ||  ||
-|| *借助工具* || xm ||
-|| *实现描述* || <code>1.检查vm_id参数的合法性，判断vm_id虚拟机是否存在；</code><code>2.获取vm_id有关的内存、cpu资源和虚拟机状态信息；</code><code>3.如果以上操作成功，则返回所获取到的信息，否则返回失败信息。</code> ||
+|| *借助工具* ||  ||
+|| *实现描述* || <code></code> ||
+
+
+
 
 
 ----

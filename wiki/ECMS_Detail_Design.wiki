@@ -14,65 +14,46 @@
 || *字段名称* || *约束* || *类型* || *默认值* || *描述* ||
 || *host_name* || 主键 || 字符串 ||  || 唯一标识宿主机的名字 ||
 || *ip_addr* ||  || 字符串 ||  || 宿主机ip地址 ||
-|| *cpu_count* ||  || uint(32) ||  || 宿主机cpu数目 ||
-|| *vm_password* ||  || 字符串 ||  || 虚拟机的密码 ||
-|| *vm_hostname* ||  || 字符串 ||  || 虚拟机的主机名 ||
-|| *os_type* ||  || os_type ||  || 操作系统类型（暂只支持ubuntu和centos） ||
+|| *total_ssize* ||  || uint(32) ||  || 总磁盘大小 ||
+|| *total_msize* ||  || uint(32) ||  || 总内存大小 ||
+|| *free_ssize* ||  || uint(32) ||  || 空闲磁盘大小||
+|| *status* ||  || running|down|exception|unknown ||  || node状态||
+|| *create_time* ||  || timestamp ||  || 创建时间戳 ||
 || *update_time* ||  || timestamp ||  || 更新时间戳 ||
 
-==== 2.虚拟机配置表（VM_CONFIG） ====
+==== 3.虚拟机资源配置表（VM_RESOURCE_CONFIG） ====
 || *字段名称* || *约束* || *类型* || *默认值* || *描述* ||
 || *vm_id* || 主键 || 字符串 ||  || 唯一标识虚拟机的名字 ||
 || *vcpu_count* ||  || uint(32) ||  || 虚拟cpu个数 ||
 || *mem_size* ||  || uint(32) ||  || 虚拟内存大小 ||
-|| *vm_password* ||  || 字符串 ||  || 虚拟机的密码 ||
-|| *vm_hostname* ||  || 字符串 ||  || 虚拟机的主机名 ||
-|| *os_type* ||  || os_type ||  || 操作系统类型（暂只支持ubuntu和centos） ||
+|| *disk_size* ||  || uint(32) ||  || 系统盘大小（当前实现为固定大小） ||
+|| *user_password* ||  || 字符串 ||  || 虚拟机的密码 ||
+|| *user_hostname* ||  || 字符串 ||  || 虚拟机的主机名 ||
+|| *ip_address* ||  || 字符串 ||  || 虚拟机的ip地址 ||
+|| *mac_address* ||  || 字符串 ||  || 虚拟机的mac地址||
+|| *os_type* ||  || ubuntu|centos ||  || 操作系统类型（暂只支持ubuntu和centos） ||
 || *update_time* ||  || timestamp ||  || 更新时间戳 ||
 
 
-
-
-==== 3.虚拟机信息表（VM_INFO） ====
+==== 4.虚拟机运行环境信息表（VM_RUNENV_INFO） ====
 || *字段名称* || *约束* || *类型* || *默认值* || *描述* ||
 || *vm_id* || 主键 || 字符串 ||  || 唯一标识虚拟机的名字 ||
-|| *ip_addr* ||  || 字符串 ||  || ip地址 ||
-|| *mac_addr* ||  || 字符串 ||  || mac地址 ||
-|| *vnc_password* ||  || 字符串 ||  || vnc软件的密码 ||
-|| *sysdisk_uri* ||  || 字符串 ||  || 系统盘的uri ||
+|| *host_name* ||  || 字符串 ||  || 宿主机名称||
+|| *vnc_port* ||  || uint(32) ||  || vnc端口 ||
+|| *vnc_password* ||  || 字符串 ||  || vnc密码 ||
+|| *vm_status* ||  || running|stopped|suspend|unknown ||  || 虚拟机状态（该字段以后移到虚拟机状态表中 ||
 || *vm_vnc_port* ||  || uint ||  || vnc软件的端口号 ||
 
-==== 4.虚拟机状态表（VM_STATUS） ====
-|| *字段名称* || *约束* || *类型* || *默认值* || *描述* ||
-|| *vm_id* || 主键 || 字符串 ||  || 唯一标识虚拟机的名字 ||
-|| *vm_mem_used* ||  || uint ||  || 虚拟机所使用的内存大小 ||
-|| *vm_cpu_used* ||  || uint ||  || 虚拟机所使用的虚拟cpu个数 ||
-|| *vm_status* ||  || char ||  || 虚拟机状态 ||
-|| *node_name* ||  || 字符串 ||  || 唯一标识节点的名字 ||
 
-==== 5.磁盘信息表（DISK_INFO） ====
+==== 5.虚拟磁盘信息表（VDISK_INFO） ====
 || *字段名称* || *约束* || *类型* || *默认值* || *描述* ||
 || *disk_id* || 主键 || 字符串 ||  || 唯一标识磁盘的名字 ||
 || *disk_uri* ||  || 字符串 ||  || 虚拟磁盘的uri ||
 || *disk_size* ||  || 字符串 ||  || 虚拟磁盘的大小 ||
-|| *is_first_attach* ||  || 布尔 || true || 下一次挂载是否为第一次挂载 ||
-|| *vm_id* ||  || 字符串 ||  || 被挂载到的虚拟机名字 ||
+|| *attached_vm_id* ||  || 字符串 ||  || 被挂载到的虚拟机名字 ||
+|| *update_time* ||  || timestamp ||  || 更新时间戳 ||
 
-==== 6.节点信息表（NODE_INFO） ====
-|| *字段名称* || *约束* || *类型* || *默认值* || *描述* ||
-|| *node_name* || 主键 || 字符串 ||  || 唯一标识节点的名字 ||
-|| *node_mem_size* ||  || uint ||  || 宿主机内存大小 ||
-|| *node_cpu_count* ||  || uint ||  || 宿主机cpu个数 ||
-|| *node_ip_addr* ||  || 字符串 ||  || 宿主机ip地址 ||
-|| *node_mac_addr* ||  || 字符串 ||  || 宿主机mac地址 ||
 
-==== 7.节点状态表（NODE_STATUS） ====
-|| *字段名称* || *约束* || *类型* || *默认值* || *描述* ||
-|| *node_name* || 主键 || 字符串 ||  || 唯一标识节点的名字 ||
-|| *vm_ids* ||  || 字符串数组 ||  || 节点上所有的虚拟名字 ||
-|| *mem_used* ||  || uinit ||  || 所使用节点的内存大小 ||
-|| *cpu_used* ||  || uint ||  || 所使用节点的cpu个数 ||
-|| *enable* ||  || 布尔 || true || 当前节点是否可用 ||
 
 
 ----

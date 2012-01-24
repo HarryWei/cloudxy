@@ -60,7 +60,7 @@
 === 脚本的设计 ===
 涉及到的脚本有：
 
-==== 1.get_node_info.sh ====
+==== 1.get_node_resource.sh ====
 || *脚本名称* || get_node_info.sh ||
 || *作用* || 获取宿主机状态信息 ||
 || *接受参数* || {node_name} ||

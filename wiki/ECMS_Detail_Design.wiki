@@ -63,7 +63,7 @@
 ==== 1.vm_start.sh ====
 || *脚本名称* || vm_start.sh ||
 || *作用* || 创建并启动虚拟机 ||
-|| *接受参数* ||<code> {node_name,vm_id,is_first_start,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_password,os_type,sysdisk_uri} </code>||
+|| *接受参数* ||<code> {vm_id,vcpu_count,mem_size,vm_password,vm_hostname,ip_addr,mac_addr,vnc_port,vnc_password,os_type} </code>||
 || *返回值* || {errno,msg} ||
 || *结果影响* ||  ||
 || *借助工具* ||  ||

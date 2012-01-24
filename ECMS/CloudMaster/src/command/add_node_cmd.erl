@@ -39,9 +39,9 @@ request_process(Request,State) ->
             meta_data_ops:add_node_res(Request#add_node_2m_req.node_name,
 												 (Result#get_node_info_2s_res_content_t.net_addr)#net_addr_info_t.ip_addr,
 												 (Result#get_node_info_2s_res_content_t.node_resource)#machine_resoure_info_t.cpu_count,
- 												 0,
+ 												 (Result#get_node_info_2s_res_content_t.node_resource)#machine_resoure_info_t.disk_size,
 												 (Result#get_node_info_2s_res_content_t.node_resource)#machine_resoure_info_t.mem_size,
-												 0,
+												 (Result#get_node_info_2s_res_content_t.node_free_resource)#machine_resoure_info_t.disk_size,
 												 (Result#get_node_info_2s_res_content_t.node_free_resource)#machine_resoure_info_t.mem_size
 												 );
         {error,_Reason} -> 

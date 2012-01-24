@@ -137,12 +137,13 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -record(vm_start_2s_req,{
-		vm_id				::pos_integer(),
-		vm_resource_req = #machine_resoure_info_t{},
-    vm_custom_info  = #vm_custom_info_t{},
-		net_addr 		= #net_addr_info_t{},
-    vnc_info 		= #vnc_info_t{},
-		os_type			::centos|ubuntu}).
+		vm_id							::pos_integer(),
+		vm_resource_req 	= #machine_resoure_info_t{},
+    vm_custom_info  	= #vm_custom_info_t{},
+		net_addr 					= #net_addr_info_t{},
+    vnc_info 					= #vnc_info_t{},
+		os_type						::os_type(),
+		sys_disk_base_url ::string()}).
 %%
 -record(vm_stop_2s_req,{
         vm_id			  ::pos_integer()}).

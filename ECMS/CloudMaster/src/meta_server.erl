@@ -17,11 +17,6 @@
 -export([start_link/0]).
 %% gen_server callbacks
 -export([init/1, sub_process/4, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--record(state, {
-                self,                        %% self pid
-			    			nodeup_monitor_info_list,    %% mnesia table name
-								module                       %% self module name
-			   }).
 
 %% ====================================================================
 %% External functions
@@ -55,10 +50,13 @@ init([]) ->
   %sequence:init_sequence(vdisk_id,0),
 	%% read node info from resource table.
 	%% start all node.
+	Storage_Uri = get_storage_uri(),
+	io:format("----- Storage_Uri  ------- ~p ~n",[Storage_Uri]), 
   {ok, #state{
 				self=self(),
 				nodeup_monitor_info_list=[], %nodeup_monitor_dict = dict:new()
-        module = ?MODULE
+        module = ?MODULE,
+        storage_uri=Storage_Uri
 			  }}.
 
 %% --------------------------------------------------------------------
@@ -184,6 +182,17 @@ init_meta_tables(Nodes) ->
     meta_data_ops:init_table_vdisk_info(Nodes)    orelse throw({error,err_for_init_table}),
     ok = mnesia:wait_for_tables([netaddr_resource,node_resource,vm_resource_config,vm_runenv_info,vdisk_info], 2000).
 
+get_storage_uri()->
+	  DefaultStorageUri = "local:///testdir/storage",
+	  case application:get_env(cloud_master,storage_uri) of
+    	{ok,Value} -> 
+    		io:format("get storage ~p !! ~n",[Value]),
+    		Value;
+      undefined ->
+      	io:format("not define storage uri, use self!! ~n"),
+      	DefaultStorageUri
+     end.
+     
 ensure_schema() ->
 	  DefaultMetaNodes = [node()],
 	  Nodes = case application:get_env(cloud_master,meta_nodes) of

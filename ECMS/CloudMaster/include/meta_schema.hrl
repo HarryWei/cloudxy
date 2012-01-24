@@ -25,32 +25,32 @@
 		update_timestamp      ::erlang:timestamp()}).
 		
 -record(vm_resource_config, {
-		vm_id					  ::non_neg_integer(),
-		os_type					::os_type(),
+		vm_id					  	::non_neg_integer(),
+		os_type						::os_type(),
 		vcpu_count				::pos_integer(),
-		mem_size				::non_neg_integer(),
-		disk_size				::non_neg_integer(),
-		user_password           ::string(),
+		mem_size					::non_neg_integer(),
+		disk_size					::non_neg_integer(),
+		user_password     ::string(),
 		user_hostname			::string(),
 		ip_address				::pos_integer(),
 		mac_address				::pos_integer(),
 		update_timestamp		::erlang:timestamp()}).
 
 -record(vm_runenv_info, {
-		vm_id					::non_neg_integer(),
+		vm_id					  ::non_neg_integer(),
 		host_name				::string(),	
 		vnc_port				::pos_integer(),
-		vnc_password			::string(),
-		vm_status               ::vm_status(),
-		update_timestamp		::erlang:timestamp()}).
+		vnc_password		::string(),
+		vm_status       ::vm_status(),
+		update_timestamp ::erlang:timestamp()}).
 
 
 -record(vdisk_info,{
 		disk_id					::non_neg_integer(),
 		disk_uri				::string(),
 		disk_size				::non_neg_integer(),
-		attached_vm_id			::non_neg_integer(),
-    create_time				::erlang:timestamp()}).
+		attached_vm_id	::non_neg_integer(),
+    create_time			::erlang:timestamp()}).
 
 -endif.
 

@@ -50,7 +50,7 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
 2.如果你手头没有合适虚拟机环境，也可以进行调试。只需要将node controller/src/command的各命令中增加-define(MOCK_TEST,1)，则可进行模拟调试调度框架.
 }}}
 ==创建虚拟机==
- * 执行gen_server:call(meta_server, #vm_create_2m_req{vm_resource_info=#machine_resoure_info_t{mem_size=256,cpu_count=1,disk_size=0},vm_custom_info=#vm_custom_info_t{user_password=”xxx”,user_hostname=”yyy”},os_type=ubuntu},2000).
+ * 执行gen_server:call(meta_server,  #vm_create_2m_req{vm_resource_info=#machine_resoure_info_t{mem_size=256,cpu_count=1,disk_size=0},vm_custom_info=#vm_custom_info_t{user_password=”xxx”,user_hostname=”yyy”},os_type=ubuntu},2000)
 {{{
 注.
 1.上述命令返回一个VM_ID序列号表示创建的VM，以后对该VM操作都将传入该ID.
@@ -58,4 +58,4 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
 3.目前我们实现中系统盘的disk_size并未使用，系统盘创建大小目前固定给出。
 }}}
 ==启动虚拟机==
- * 执行gen_server:call(meta_server, #vm_start_2m_req{vm_id=1},2000).
+ * 执行gen_server:call(meta_server, #vm_start_2m_req{vm_id=1},2000)

@@ -17,7 +17,7 @@
 %% API Functions
 %%
 
-build_vm_start_req(NetAddr_Res,Vm_Phy_Res,Node_Name) when (is_record(Vm_Phy_Res,vm_resource_config))-> 
+build_vm_start_req(NetAddr_Res,Vm_Phy_Res,Node_Name,Storage_Base_Uri) when (is_record(Vm_Phy_Res,vm_resource_config))-> 
 	  {Ip_Addr,Mac_Addr} =  NetAddr_Res,
     Vm_Id           = Vm_Phy_Res#vm_resource_config.vm_id,
     OS_Type         = Vm_Phy_Res#vm_resource_config.os_type,
@@ -34,7 +34,13 @@ build_vm_start_req(NetAddr_Res,Vm_Phy_Res,Node_Name) when (is_record(Vm_Phy_Res,
     Custom_Info     = #vm_custom_info_t{user_password = Vm_UserPass,user_hostname = Vm_HostName},
     Net_Addr        = #net_addr_info_t{ip_addr = Ip_Addr,mac_addr = Mac_Addr},
     Vnc_Info        = #vnc_info_t{vnc_port = Vnc_Port,vnc_password = Vnc_Pass},
-    Vm_Start_Req    = #vm_start_2s_req{vm_id = Vm_Id,os_type = OS_Type,vm_resource_req = Machin_Resource,vm_custom_info = Custom_Info,net_addr = Net_Addr,vnc_info = Vnc_Info},
+    Vm_Start_Req    = #vm_start_2s_req{vm_id = Vm_Id,
+    																	 os_type = OS_Type,
+    																	 vm_resource_req = Machin_Resource,
+    																	 vm_custom_info = Custom_Info,
+    																	 net_addr = Net_Addr,
+    																	 vnc_info = Vnc_Info,
+    																	 sys_disk_base_url = Storage_Base_Uri},
     Vm_Start_Req.
     
 request_process(Request,State) ->
@@ -59,7 +65,7 @@ request_process(Request,State) ->
      							meta_data_ops:return_netaddr_res(Ip_Addr),
             			throw({false,err_for_notfree_noderes})
             end,
-    Vm_Start_Req = build_vm_start_req(Resp1,Vm_Phy_Res,Resp2),      			    
+    Vm_Start_Req = build_vm_start_req(Resp1,Vm_Phy_Res,Resp2,State#state.storage_uri),      			    
     io:format("Vm_Start_Req ~p ~n",[Vm_Start_Req]), %% debug info
 	  case gen_server:call({node_server,list_to_atom(Resp2)},#node_req{node_name =Resp2, content=Vm_Start_Req},1000) of 
        ok ->

@@ -19,7 +19,7 @@
 %% gen_server callbacks
 -export([init/1, sub_process/5, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
--record(state, {}).
+-record(node_state, {}).
 
 %% ====================================================================
 %% External functions
@@ -45,7 +45,7 @@ stop() ->
 %% --------------------------------------------------------------------
 init([]) ->
 	process_flag(trap_exit,true),  
-    {ok,#state{}}.
+    {ok,#node_state{}}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3

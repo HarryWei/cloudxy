@@ -41,9 +41,9 @@ start_vm(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,Vm_Hos
 
 
 -ifdef(MOCK_TEST).
--define(START_VM(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,Vm_HostName,Vm_Pass,Vm_Id),mock_start_vm(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,Vm_HostName,Vm_Pass,Vm_Id)).
+-define(START_VM(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,Vm_HostName,Vm_Pass,Vm_Id,Storage_Uri),mock_start_vm(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,Vm_HostName,Vm_Pass,Vm_Id)).
 -else.
--define(START_VM(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,Vm_HostName,Vm_Pass,Vm_Id),start_vm(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,Vm_HostName,Vm_Pass,Vm_Id)).
+-define(START_VM(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,Vm_HostName,Vm_Pass,Vm_Id,Storage_Uri),start_vm(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,Vm_HostName,Vm_Pass,Vm_Id)).
 -endif.
 
 
@@ -52,6 +52,7 @@ request_process(Request,State) ->
 	%%{VmId,VcpuCount,MemSize,DiskSize,IpAddr} = Content,
 	%%{VcpuCount,MemSize,DiskSize,IpAddr,MacAddr,VncPass,VncPort,VmUser,VmUserPass,VmId} = Content,
     Vm_Id = Request#vm_start_2s_req.vm_id,
+    Storage_Uri = Request#vm_start_2s_req.sys_disk_base_url,
     Mem_Size = (Request#vm_start_2s_req.vm_resource_req)#machine_resoure_info_t.mem_size,
     Vcpu_Count = (Request#vm_start_2s_req.vm_resource_req)#machine_resoure_info_t.cpu_count,
     Vm_Pass = (Request#vm_start_2s_req.vm_custom_info)#vm_custom_info_t.user_password,
@@ -62,7 +63,7 @@ request_process(Request,State) ->
     Vnc_Pass = (Request#vm_start_2s_req.vnc_info)#vnc_info_t.vnc_password,
 	  io:format("create vm request  ~p ~n", [Request]),
     Disk_Size = 0,
-	  Res = ?START_VM(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,Vm_HostName,Vm_Pass,Vm_Id),
+	  Res = ?START_VM(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,Vm_HostName,Vm_Pass,Vm_Id,Storage_Uri),
 %		D = os:cmd("bash create_vm.sh") -- "\r\n",
 		io:format("cmd result  ~p ~n", [Res]),
 		if 

@@ -9,5 +9,11 @@
 -type(node_status()  ::running|down|exception|unknown).
 -define(PASSWORD_SIZE,12).
 
-
+-record(state, {
+                self,                        %% self pid
+			    			nodeup_monitor_info_list,    %% mnesia table name
+								module,                      %% self module name
+								storage_uri
+			   }).
+			   
 -endif.

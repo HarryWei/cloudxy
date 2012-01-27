@@ -21,45 +21,37 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 		HLOG_ERROR("parameter error!");
         return -1;
     }
+    int ret = 0;
 	/* record the up snapshot name in ctrl */
 	if (NULL == ctrl->alive_ss_name) {
-		HLOG_ERROR("We must record the alive snapsot name in ctrl");
-		return -1;
-#if 0
-		ctrl->alive_ss_name = (char *)g_malloc0(MAX_FILE_NAME_LEN);
-		if (NULL == ctrl->alive_ss_name) {
-			HLOG_ERROR("allocate error!");
-			return EHLFS_MEM;
-		}
-		create_auto_snapshot(ctrl, ctrl->imap_entry.inode_addr);
-		snprintf(ctrl->alive_ss_name, MAX_FILE_NAME_LEN, "%llu", ctrl->imap_entry.inode_addr);
-#endif
+		HLOG_DEBUG("this is first time take snapshot");
 	}
-    if (0 == is_sname_exist(ctrl->storage, ssname)) {
-		HLOG_ERROR("This snaoshot name has been used, please repick another one!");
-		return -2;
-	}
-	int ret = 0;
-	struct snapshot *cp = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
-	if (NULL == cp) {
-		HLOG_ERROR("Allocate Error!");
+    struct snapshot *_ss = NULL;
+	if (0!=(ret=load_snapshot_by_name(ctrl->storage,SNAPSHOT_FILE,&_ss,ssname))){
+		HLOG_DEBUG("snapshot %s is not exist, right???", ssname);
 		return -1;
 	}
-	cp->timestamp = get_current_time();
+	struct snapshot ss;
+	ss.timestamp = get_current_time();
 	if ((strlen(ssname) + 1) > HLFS_FILE_NAME_MAX) {
 		HLOG_ERROR("error, snapshot name beyond max length!");
 		return -1;
 	}
-	g_strlcpy(cp->sname, ssname, strlen(ssname) + 1);
-	g_strlcpy(cp->up_sname,ctrl->alive_ss_name,strlen(ctrl->alive_ss_name) + 1);
-	cp->inode_addr = ctrl->imap_entry.inode_addr;
+	g_strlcpy(ss.sname, ssname, strlen(ssname) + 1);
+    g_mutex_lock(ctrl->hlfs_access_mutex);
+	g_strlcpy(ss.up_sname,ctrl->alive_ss_name,strlen(ctrl->alive_ss_name) + 1);
+	ss.inode_addr = ctrl->imap_entry.inode_addr;
 	memset(ctrl->alive_ss_name, 0, (strlen(ctrl->alive_ss_name) + 1));
-	sprintf(ctrl->alive_ss_name, "%s", cp->sname);
-
-    g_mutex_lock (ctrl->hlfs_access_mutex);
-	ret = dump_snapshot(ctrl->storage,SNAPSHOT_FILE,cp);
+	sprintf(ctrl->alive_ss_name, "%s", ss.sname);
     g_mutex_unlock (ctrl->hlfs_access_mutex);
 
-	g_free(cp);
+    ret = dump_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE,&ss);
+    if(ret!=0){
+      HLOG_ERROR("dump snapshot alive error!");
+    }
+	ret = dump_snapshot(ctrl->storage,SNAPSHOT_FILE,&ss);
+    if(ret!=0){
+      HLOG_ERROR("dump snapshot error!");
+    }
 	return ret;
 }

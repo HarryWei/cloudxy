@@ -39,77 +39,47 @@ void list_key(gpointer data, gpointer usr_data)
 }
 
 /*
- * hlfs_list_all_snapshots is one of snapshot module's APIs.It's function is 
- * loading all snapshot names to the memery.
  */
-int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
+struct snapshot* hlfs_get_all_snapshots(const char *uri,int *num_entries)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
-#if 0
-	if (NULL == *ss_name_array) { 
-		HLOG_ERROR("No buf available!");
-		ret = -1;
-		return ret;
+	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,g_free);
+    GList *snapshot_list = NULL;
+
+	struct back_storage *storage = init_storage_handler(uri);
+	if (NULL == storage) {
+		HLOG_ERROR("init storage handler error!");
+		g_hash_table_destroy(ss_hashtable);
+		return NULL;
 	}
-#endif
-	//TODO If size of snapshot.txt > MAX_BUFSIZE
-	*ss_name_array = (char *)g_malloc0(MAX_BUFSIZE);
-	if (NULL == *ss_name_array) {
+	ret = load_all_snapshot(storage, ss_hashtable);
+	if (ret < 0) {
+		HLOG_ERROR("load all ss error: %d", ret);
+		goto out;
+	}
+   
+    sort_all_snapshot(ss_hashtable,snapshot_list);
+	char* snapshots_buf = (char *)g_malloc0(g_list_length(snapshot_list)*sizeof(struct snapshot));
+	if (NULL == snapshots_buf){
 		g_message("Allocate error!");
 		ret = -1;
 		goto out;
 	}
-//	memset(*ss_name_array, 0, MAX_BUFSIZE);
-
-	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-	struct back_storage *storage = init_storage_handler(uri);
-	if (NULL == storage) {
-		HLOG_ERROR("init storage handler error!");
-		ret = -2;
-		g_hash_table_destroy(ss_hashtable);
-		return ret;
-	}
-	ret = load_all_ss(storage, ss_hashtable);
-	if (ret < 0) {
-		HLOG_ERROR("load all ss error: %d", ret);
-		ret = -3;
-		goto out;
-	}
-	if (0 == g_hash_table_size(ss_hashtable)) {
-		HLOG_DEBUG("We may have not taken snapshot yet!!!");
-		sprintf(*ss_name_array, "");
-		ret = 0;
-		goto out;
-	}
-	
-	GList *list = g_hash_table_get_keys(ss_hashtable);
-	if (list == NULL) {
-		HLOG_ERROR("Get hash keys error");
-		ret = -4;
-		goto out;
-	}
-
-	g_list_foreach(list, list_key, *ss_name_array);
-	HLOG_DEBUG("buf:%s", *ss_name_array);
-	if (strlen(*ss_name_array) == 0) {
-		HLOG_ERROR("list keys error");
-		ret = -5;
-		goto out;
-	}
-//	g_mutex_lock(ctrl->hlfs_access_mutex);
-	if (0 > rewrite_snapshot_file(storage, ss_hashtable)) {
-		HLOG_ERROR("rewrite snapshot.txt error");
-//		g_mutex_unlock(ctrl->hlfs_access_mutex);
-		ret = -6;
-		goto out;
-	}
-//	g_mutex_unlock(ctrl->hlfs_access_mutex);
-
-out: //TODO ret is out of control, we should fix it
+    int i=0;
+    int offset=0;
+    for(i = 0; i < g_list_length(snapshot_list); i++){
+        struct snapshot *ss = g_list_nth_data(snapshot_list,i);
+        memcpy(snapshots_buf+offset,ss,sizeof(struct snapshot));
+        offset +=sizeof(struct snapshot);
+    }
+    *num_entries = g_list_length(snapshot_list);
+out: 
 	g_free(storage);
 	g_hash_table_destroy(ss_hashtable);
+    if(snapshot_list!=NULL){
+        g_list_free(snapshot_list);
+    }
 	HLOG_DEBUG("leave func %s", __func__);
-	g_message("ret is %d", ret);
-	return ret;
+	return snapshots_buf;
 }

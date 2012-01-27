@@ -19,7 +19,8 @@ uint64_t get_last_inode_storage_addr_in_seg( struct back_storage * storage, uint
 int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,uint32_t *offset);
 uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,struct inode *inode, uint64_t db_no,uint32_t block_size);
 int load_latest_inode_map_entry(struct back_storage *storage,uint32_t segno,uint32_t last_offset,struct inode_map_entry *ime);
-
+int file_get_contents(struct back_storage *storage,const char* filename,const char**constents,uint32_t *size);
+int file_append_contents(struct back_storage *storage,const char* filename,const char* contents,uint32_t size);
 #ifdef __cplusplus 
 } 
 #endif 

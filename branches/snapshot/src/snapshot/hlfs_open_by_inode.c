@@ -14,52 +14,26 @@
 #include "comm_define.h"
 #include "hlfs_log.h"
 
-#if 0
-int creat_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr)
-{
-	HLOG_DEBUG("enter func %s", __func__);
-	char *up_ss_name = NULL;
-	struct snapshot *ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot)); 
-	sprintf(ss->sname, "%llu", inode_addr);
-	find_up_ss_name_of_inode(ctrl, inode_addr, &up_ss_name);
-	sprintf(ss->up_sname, "%s", up_ss_name);
-	ss->inode_addr = inode_addr;
-
-	struct inode* inode = load_inode(ctrl->storage, inode_addr);
-	if (inode == NULL) {
-		HLOG_ERROR("load inode error");
-		g_free(ss);
-		g_free(up_ss_name);
-		return -1;
-	}
-	ss->timestamp = inode->ctime;
-	dump_snapshot(ctrl->storage, SNAPSHOT_FILE, ss);
-	g_free(ss);
-	g_free(up_ss_name);
-	g_free(inode);
-	HLOG_DEBUG("leave func %s", __func__);
-	return 0;
-}
-#endif
-
 int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 					uint64_t inode_addr,
 					int flag) {
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
-	ctrl->write_task_run = 1;
+	if(ctrl->usage_ref > 0){
+		HLOG_DEBUG("This fs has opened by other,can not use it"); 
+        return -1;
+	}
 	struct inode *inode = load_inode(ctrl->storage, inode_addr);
 	if (inode == NULL) {
 		HLOG_ERROR("load_inode error!");
 		ret = -1;
 		goto out;
 	}
-	memcpy(&ctrl->inode, inode, sizeof(struct inode));
-	struct inode_map_entry imap = {
-		.inode_no = HLFS_INODE_NO,
-		.inode_addr = inode_addr,
-	};
-	memcpy(&ctrl->imap_entry, &imap, sizeof(struct inode_map_entry));
+
+    memcpy(&ctrl->inode,inode,sizeof(struct inode));
+    ctrl->imap_entry.inode_no = HLFS_INODE_NO;
+    ctrl->imap_entry.inode_addr = inode_addr;
+
 	if (0 == flag) {	//the common condition
 		ctrl->rw_inode_flag = 0;
 	} else if (1 == flag) {	//forbid hlfs_write
@@ -67,38 +41,29 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 	} else {
 		HLOG_ERROR("the bad flag for hlfs open by inode");
 		ret = -1;
+        goto out;
 	}
-	if (NULL != ctrl->alive_ss_name) {
-		g_free(ctrl->alive_ss_name);
-		ctrl->alive_ss_name = NULL;
-	}
-	if (0 > find_ss_name_of_inode(ctrl, inode_addr, &ctrl->alive_ss_name)) {
-		HLOG_ERROR("find snapshot of inode addr error!");
-		ret = -1;
-	}
-#if 0
-	ctrl->alive_ss_name = (char *)g_malloc0(MAX_FILE_NAME_LEN);
-	GHashTable *ss_hashtable = g_hash_table_new_full(g_direct_hash, g_direct_equal, \
-			NULL, NULL);
-	if (load_all_ss_use_inode_addr_keys(ctrl->storage, ss_hashtable) < 0) {
-		HLOG_ERROR("error - load_all_ss");
-		g_free(inode);
-		g_hash_table_destroy(ss_hashtable);
-		return -1;
-	}
+    
+    struct snapshot ss;
+   	sprintf(ss.sname, "%llu",inode_addr);
+	ss.inode_addr = inode_addr;
+	ss.timestamp = get_current_time();
 
-	struct snapshot *ss = NULL;
-	ss = g_hash_table_lookup(ss_hashtable, GINT_TO_POINTER(inode_addr));
-	if (ss != NULL) {
-		sprintf(ctrl->alive_ss_name, "%s", ss->sname);
-		HLOG_DEBUG("alive_ss_name:%s", ss->sname);
-	} else {
-		creat_auto_snapshot(ctrl, inode_addr);
-	}
-	g_hash_table_destroy(ss_hashtable);
-#endif
+    struct snapshot *_ss=NULL;
+    ret = find_latest_alive_snapshot_before_time(ctrl->storage,ALIVE_SNAPSHOT_FILE, &_ss,inode->ctime);
+    if(ret !=0){
+       return -1; 
+    }else{
+	   sprintf(ss.up_sname,"%s",_ss->sname);
+    }
+    g_free(_ss);
+    g_strlcpy(ctrl->alive_ss_name,ss.sname,strlen(ss.sname)+1);
+    ret = dump_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE,&ss);
 out:
-	g_free(inode);
-	return ret;
+    if(inode!=NULL){
+       g_free(inode);
+    }
 	HLOG_DEBUG("leave func %s", __func__);
+	return ret;
 }
+

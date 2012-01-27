@@ -7,6 +7,7 @@
 #include "storage.h"
 
 #define	SNAPSHOT_FILE "snapshot.txt"
+#define	ALIVE_SNAPSHOT_FILE "alive_snapshot.txt"
 
 struct snapshot {
 	uint64_t timestamp;
@@ -15,32 +16,8 @@ struct snapshot {
 	char up_sname[HLFS_FILE_NAME_MAX]; /* for tree style snapshot */
 } __attribute__((packed));
 
-#if 0
-typedef struct {
-	uint64_t cur_inode_addr;
-	uint64_t up_inode_addr;
-} inode_cup_t;
-#endif
+#define SS_ITEM_SEP @@##$$
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-int is_sname_exist(struct back_storage *, const char *);
-int create_auto_snapshot(struct hlfs_ctrl *ctrl, uint64_t inode_addr, const char *);
-int snapshot2text(const struct snapshot *snapshot, char *textbuf);
-int dump_snapshot(struct back_storage *storage, const char* snapshot_file, struct snapshot *snapshot);
-int load_ss_from_text(struct snapshot *ss, const char *buf, int *flag);
-int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable);
-int load_ss_by_name(struct back_storage *storage, struct snapshot *ss, const char *ss_name);
-int snapshot_delmark2text(const char *ss_name, char *textbuf);
-int dump_snapshot_delmark(struct back_storage *storage, const char *snapshot_file, const char *ssname);
-int find_up_ss_name_of_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, char **up_ss_name);
-int load_all_ss_use_inode_addr_keys(struct back_storage *storage, GHashTable *ss_hashtable_use_inode_addr_keys);
-int load_all_ss_use_up_sname_keys(struct back_storage *storage, GHashTable *ss_hashtable_use_up_sname_keys);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif 

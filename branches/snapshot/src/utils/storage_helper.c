@@ -463,7 +463,7 @@ int load_latest_inode_map_entry(struct back_storage *storage,
 			const uint32_t segno, const uint32_t last_offset,
 				struct inode_map_entry *ime)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+   HLOG_DEBUG("enter func %s", __func__);
    HLOG_DEBUG("777 dbg last offset is %u, seg no is %u", last_offset, segno);
    int ret = 0;
    const char segfile_name[SEGMENT_FILE_NAME_MAX];
@@ -498,3 +498,98 @@ out2:
 	HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
+
+
+int file_append_contents(struct back_storage *storage,const char* filename,const char* contents,uint32_t size){
+	HLOG_DEBUG("enter func %s", __func__);
+    if(storage == NULL || filename == NULL || contents == NULL) {
+		HLOG_ERROR("Parameter error!");
+        return -1;
+    }
+	int ret = 0;
+	bs_file_t file = NULL;
+	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage,filename)) {
+		HLOG_DEBUG("cp file not exist, create file");
+		file = storage->bs_file_create(storage,filename);
+		if (NULL == file) {
+            ret = -1;
+			HLOG_ERROR("can not create file %s",filename);
+			goto out;
+		}
+		storage->bs_file_close(storage,file);
+	}
+	file = storage->bs_file_open(storage,filename,BS_WRITEABLE);
+	if (NULL == file) {
+		HLOG_ERROR("can not open cp file %s", filename);
+        ret = -1;
+		goto out;
+	}
+	if (size !=  storage->bs_file_append(storage, file,contents,size)) {
+		HLOG_ERROR("write file error, write bytes %d", ret);
+		ret = -1;
+		goto out;
+	}
+out:
+	if (NULL != file) {
+		storage->bs_file_close(storage, file);
+	}
+	HLOG_DEBUG("leave func %s", __func__);
+	return ret;
+
+}
+
+int file_get_contents(struct back_storage *storage,const char* filename,const char**contents,uint32_t *size){
+	HLOG_DEBUG("enter func %s", __func__);
+     if(storage == NULL || filename == NULL) {
+		HLOG_ERROR("Parameter error!");
+        return -1;
+    }
+
+	int ret = 0;
+	int i = 0;
+	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage,filename)) {
+		HLOG_ERROR("snapshot.txt is not exist");
+		ret = -1;
+		goto out;
+	}
+	bs_file_info_t *file_info = storage->bs_file_info(storage,filename);
+	if (NULL == file_info) {
+		HLOG_ERROR("get snapshot info error!");
+		ret = -1;
+		goto out;
+	}
+	*size = file_info->size; 
+	g_free(file_info);
+	HLOG_DEBUG("file_size : %u", *size);
+	*contents = (char *)g_malloc0(*size);
+	if (NULL == contents) {
+		HLOG_ERROR("Allocate error!");
+		ret = -1;
+		goto out;
+	}
+	bs_file_t file = NULL;
+	file = storage->bs_file_open(storage,filename, BS_READONLY);
+	if (file == NULL) {
+		HLOG_ERROR("open snapshot.txt error");
+		ret = -1;
+		goto out;
+	}
+	if(*size != storage->bs_file_pread(storage,file,*contents,*size,0))
+	{
+		HLOG_ERROR("Read file snapshot.txt failed\n");
+		storage->bs_file_close(storage, file);
+        g_free(contents);
+		ret = -1;
+        goto out;
+	}
+	storage->bs_file_close(storage, file);
+out:
+    return ret;
+}
+
+
+
+
+
+
+

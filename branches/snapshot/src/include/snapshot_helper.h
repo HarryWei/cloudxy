@@ -7,13 +7,30 @@
 #include "hlfs_ctrl.h"
 
 // for basic snapshot
-int snapshot2text(const struct snapshot* snapshot, char*textbuf);
+//int snapshot2text(const struct snapshot* snapshot, char*textbuf);
 int dump_snapshot(struct back_storage *storage,const char* snapshot_file,struct snapshot * snapshot);
-int snapshot_delmark2text(const char* ssname, char*textbuf);
-int dump_snapshot_delmark(struct back_storage *storage,const char* snapshot_file,const char* ssnamea);
-int load_snapshot_from_text(struct back_storage *storage,const char* snapshot_file,const char* snapshot_textbuf);
-// for tree snapshot
-// find inode_addr's snapshot name
-int find_up_ss_name_of_inode(struct hlfs_ctrl *, uint64_t , char **);
-int create_auto_snapshot(struct hlfs_ctrl *, uint64_t, const char *);
+
+//int snapshot_delmark2text(const char* ssname, char*textbuf);
+int dump_snapshot_delmark(struct back_storage *storage,const char* snapshot_file,const char* ssname);
+
+
+int load_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHashTable *ss_hashtable);
+int sort_all_snapshot(GHashTable *ss_hashtable,GList *snapshot_list);
+
+int redump_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHashTable *ss_hashtable);
+
+int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_file struct snapshot **ss, const char *ss_name);
+
+
+/* get lateset alive snapshot before timestamp, it will be used when  hlfs open by inode*/
+int find_latest_alive_snapshot_before_time(struct back_storage *storage,const char* alive_snapshot_file, struct snapshot **ss,uint64_t timestamp);
+
+/* get lateset alive snapshot , it will be used when hlfs open */
+int find_latest_alive_snapshot(struct back_storage *storage,const char* alive_snapshot_file, const char* snapshot_file,struct snapshot **ss);
+
+//int snapshot_alive2text(const struct snapshot *snapshot,char *textbuf);
+/* dump current alive snapshot to alive_snapshot_file, it will be used when do hlfs_open&hlfs_open_by_inode and take snasphot ops*/
+int dump_alive_snapshot(struct back_storage* storage,const char *alive_snapshot_file,struct snapshot *snapshot); 
+
+
 #endif 

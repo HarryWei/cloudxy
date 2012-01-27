@@ -9,6 +9,7 @@
 #include <glib.h>
 #include "hlfs_ctrl.h"
 #include "hlfs_log.h"
+#include "snapshot.h"
 #include "comm_define.h"
 #include "misc.h"
 #include "logger.h"
@@ -66,6 +67,7 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 	}
 	if(ctrl->usage_ref > 0){
 		HLOG_DEBUG("This fs has opened by other,can not use it"); 
+        return -1;
 	}
     int ret;
     HLOG_DEBUG("inode no %llu , inode address %llu", ctrl->imap_entry.inode_no, ctrl->imap_entry.inode_addr);
@@ -89,6 +91,24 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 		}
 		HLOG_DEBUG("inode 's length:%llu",ctrl->inode.length);
 	}
+
+	if (0 == flag) {	//the common condition
+		ctrl->rw_inode_flag = 0;
+	} else if (1 == flag) {	//forbid hlfs_write
+		ctrl->rw_inode_flag = 1;
+	} else {
+		HLOG_ERROR("the bad flag for hlfs open by inode");
+        return -1;;
+	}
+  
+    struct snapshot *ss;
+    ret = find_latest_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE, &ss);
+    if(ret !=0){
+       return -1; 
+    }
+    g_strlcpy(ctrl->alive_ss_name,ss->sname,strlen(ss->sname)+1);
+    g_free(ss);
+
 #if 0
 	g_message("append log with only inode !\n");
     int size = append_inode(ctrl); /* append new log */

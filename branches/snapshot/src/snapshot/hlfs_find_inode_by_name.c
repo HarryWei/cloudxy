@@ -21,13 +21,7 @@ int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_
 		ret = -1;
 		goto out;
 	}
-	ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
-	if (NULL == ss) {
-		HLOG_ERROR("Allocate error!");
-		ret = -1;
-		goto out;
-	}
-	if (0 > (ret = load_ss_by_name(storage, ss, sname))) {
+	if (0 > (ret = load_snapshot_by_name(storage, ss, sname))) {
 		HLOG_ERROR("load ss by name error");
 		g_free(ss);
 		ret = -1;

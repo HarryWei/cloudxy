@@ -60,11 +60,18 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
     g_strlcpy(ctrl->alive_ss_name,ss.sname,strlen(ss.sname)+1);
 
     if(ctrl->rw_inode_flag == 1){
-      ret = dump_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE,&ss);
+        ret = dump_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE,&ss);
+        if(ret!=0){
+            HLOG_ERROR("dump snapshot alive error!");
+        }
+        ret = dump_snapshot(ctrl->storage,SNAPSHOT_FILE,&ss);
+        if(ret!=0){
+            HLOG_ERROR("dump snapshot error!");
+        }
     }
 out:
     if(inode!=NULL){
-       g_free(inode);
+        g_free(inode);
     }
 	HLOG_DEBUG("leave func %s", __func__);
 	return ret;

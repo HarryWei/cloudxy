@@ -15,29 +15,6 @@
 
 #define MAX_BUFSIZE (4 * 1024)
 
-/* 
- * list_key() will be the parameter of the function g_list_foreach() which will 
- * be invoked by hlfs_list_all_snapshots().
- */
-void list_key(gpointer data, gpointer usr_data)
-{
-	HLOG_DEBUG("enter func %s", __func__);
-	int size = 0;
-	if (data == NULL) {
-		HLOG_DEBUG("data is NULL");
-		return ;
-	}
-	char tmp[128];
-	memset(tmp, 0, 128);
-	sprintf(tmp, "%s\n", (char *)data);
-	size = g_strlcat(usr_data, tmp, MAX_BUFSIZE);
-	if (MAX_BUFSIZE < size) {
-		HLOG_ERROR("MAX_BUFSIZE is not enough");
-		return;
-	}
-	HLOG_DEBUG("leave func %s", __func__);
-}
-
 /*
  */
 struct snapshot* hlfs_get_all_snapshots(const char *uri,int *num_entries)

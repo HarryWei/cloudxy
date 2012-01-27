@@ -51,6 +51,6 @@ int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,
     g_strlcpy(ctrl->alive_ss_name,ss->sname,strlen(ss->sname)+1);
     g_free(ss);
 out:
-	return ret;
 	HLOG_DEBUG("leave func %s", __func__);
+	return ret;
 }

@@ -34,9 +34,9 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
     ctrl->imap_entry.inode_no = HLFS_INODE_NO;
     ctrl->imap_entry.inode_addr = inode_addr;
 
-	if (0 == flag) {	//the common condition
+	if (0 == flag) {
 		ctrl->rw_inode_flag = 0;
-	} else if (1 == flag) {	//forbid hlfs_write
+	} else if (1 == flag) {
 		ctrl->rw_inode_flag = 1;
 	} else {
 		HLOG_ERROR("the bad flag for hlfs open by inode");
@@ -58,7 +58,10 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
     }
     g_free(_ss);
     g_strlcpy(ctrl->alive_ss_name,ss.sname,strlen(ss.sname)+1);
-    ret = dump_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE,&ss);
+
+    if(ctrl->rw_inode_flag == 1){
+      ret = dump_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE,&ss);
+    }
 out:
     if(inode!=NULL){
        g_free(inode);

@@ -22,6 +22,14 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
         return -1;
     }
     int ret = 0;
+
+    g_mutex_lock(ctrl->hlfs_access_mutex);
+    if(ctrl->rw_inode_flag == 0){
+		HLOG_ERROR("error, snapshot can not take when readonly");
+        g_mutex_unlock (ctrl->hlfs_access_mutex);
+        return -1;
+    }
+    g_mutex_unlock (ctrl->hlfs_access_mutex);
 	/* record the up snapshot name in ctrl */
 	if (NULL == ctrl->alive_ss_name) {
 		HLOG_DEBUG("this is first time take snapshot");

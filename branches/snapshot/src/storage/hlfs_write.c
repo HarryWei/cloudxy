@@ -40,7 +40,13 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
 		HLOG_ERROR("hlfs_write error");
 		return -1;
     }
+
     g_mutex_lock (ctrl->hlfs_access_mutex);
+    if(ctrl->rw_inode_flag == 0){
+        HLOG_ERROR("only read!");
+        g_mutex_unlock (ctrl->hlfs_access_mutex);
+        return -1;
+    }
     int ret = 0;
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     uint64_t cur_time;

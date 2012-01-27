@@ -19,7 +19,6 @@ int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,
 					int flag) {
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
-	ctrl->write_task_run = 1;//?
 	struct snapshot *ss;
 	if (0 > (ret = load_snapshot_by_name(storage, ss, sname))) {
 		HLOG_ERROR("load ss by name error");
@@ -41,9 +40,9 @@ int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,
     ctrl->imap_entry.inode_no = HLFS_INODE_NO;
     ctrl->inode_addr = inode_addr;
 
-	if (0 == flag) {	//the common condition
+	if (0 == flag) {
 		ctrl->rw_inode_flag = 0;
-	} else if (1 == flag) {	//forbid hlfs_write
+	} else if (1 == flag) {
 		ctrl->rw_inode_flag = 1;
 	} else {
 		HLOG_ERROR("the bad flag for hlfs open by inode");

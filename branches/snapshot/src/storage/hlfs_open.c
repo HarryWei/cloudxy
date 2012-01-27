@@ -92,15 +92,15 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 		HLOG_DEBUG("inode 's length:%llu",ctrl->inode.length);
 	}
 
-	if (0 == flag) {	//the common condition
-		ctrl->rw_inode_flag = 0;
-	} else if (1 == flag) {	//forbid hlfs_write
+	if (1 == flag) {
 		ctrl->rw_inode_flag = 1;
+	} else if (0 == flag) {
+		ctrl->rw_inode_flag = 0;
+
 	} else {
 		HLOG_ERROR("the bad flag for hlfs open by inode");
         return -1;;
 	}
-  
     struct snapshot *ss;
     ret = find_latest_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE, &ss);
     if(ret !=0){

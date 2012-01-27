@@ -67,10 +67,12 @@ typdef struct snapshot{
  # 如果系统启动时未拉新分支(hlfs_open)，即基于最后一次log日志继续更新（如上图中沿着T34后某个log继续写），则只需要想办法获取前驱快照名称（T34)，即可维护起树状分支关系。
  # 如果系统启动时按照给定快照作为前驱(hlfs_open_by_snapshot)，则意味着拉了一条新的分支进行更新（如上图从T8开始引出的新分支等），则前驱关系由给定快照提供。
  # 如果系统启动时从一个非快照的log日志启动(hlfs_open_by_inode)，则意味着也要拉一个新分支进行更新(如T9 T10快照中某个log日志的inode做基点启动)，这时也要想办法获得前驱快照名称(T9)，同时创建一个新匿名快照（非用户给定名称，用inode地址做名称的快照)，从而维护树状分支关系。
- 1/3两个场景都存在如何获取前驱快照的问题。那么前驱快照如何维护呢？
+ 1和3两个场景都存在如何获取前驱快照的问题。那么前驱快照如何维护呢？
  我们知道前驱快照存在期对应上图中每一两个快照之间的运行期（期间会对应很多log日志），所以在运行上下文中称为alive snapshot更合适，只有再创建新快照或者回滚到某个新快照继续更新时，才会有新的alive snapshot出现。因此最朴素的做法是每次创建新alive snapshot都如快照一样记录到alive snapshot文件中（按时间需有序追加）。如此一来再1/3两个场景中寻找alive snapshot的操作就很自然的通过读取alive snapshot文件完成了。
 
-==API设计==
+------------------------------------------------
+
+== API设计==
  我们先实现最精简的快照接口
 {{{
  int take_snapshot(HLFS_CTRL *ctrl, const char *ss_name)
@@ -108,12 +110,20 @@ typdef struct snapshot{
   * inode: 指定的inode
   * flag: 0 只读模式， 1 可写模式
   * return value: 成功返回0，失败返回<0
- int list_all_snapshot(const char *uri，char **ss_name_array)
+  int hlfs_open_by_snapshot(HLFS_CTRL *ctrl,const char* snapshot,int flag)
+  加载指定的inode，以flag标识的模式启动回滚
+  * ctrl : 全局控制结构
+  * snapshot: 快照名称
+  * flag: 0 只读模式， 1 可写模式
+  * return value: 成功返回0，失败返回<0 
+  struct snapshot * get_all_snapshot(const char *uri，char *num_enteris)
   给用户列出所有已存在的快照名及时间信息
   * uri: 文件系统的位置 
-  * ss_name_arrary: 返回的快照名字列表
-  * return value: 成功返回0，失败返回<0
+  * num_enteris: 返回的snapshot数量。
+  * return snapshot:返回snapshot对象数组。
 }}}
+
+
 ==API使用指南==
   * 快照： 在线模式调用take_snapshot()函数
   * 获取快照清单：离线模式调用list_all_snapshot()

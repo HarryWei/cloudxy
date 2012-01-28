@@ -42,7 +42,7 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
 网络ip地址资源用于分配给各虚拟机,为了简单和部署灵活起见,我们目前采用手动导入的方式初始化IP地址资源——mac等则自动产生.注意该动作只用做一次
 }}}
 
-==加入node controller到集群中==
+==加入node到集群中==
  * 为了从master所在shell执行命令，需要加入对应的record(因为我们命令使用了record描述)—shell中执行 rr("include/*.hrl")
  * 动态增增加节点—  gen_server:call(meta_server,#add_node_2m_req{node_name="node_controller1@127.0.0.1"},2000).
 {{{

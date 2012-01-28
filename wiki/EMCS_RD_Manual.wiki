@@ -59,3 +59,6 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
 }}}
 ==启动虚拟机==
  * 执行gen_server:call(meta_server, #vm_start_2m_req{vm_id=1},2000)
+
+---------------------
+wroten by 康华

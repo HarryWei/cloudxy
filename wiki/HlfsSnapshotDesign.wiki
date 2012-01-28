@@ -128,5 +128,8 @@ typdef struct snapshot{
   * 快照： 在线模式调用take_snapshot()函数
   * 获取快照清单：离线模式调用list_all_snapshot()
   * 删除指定名字的快照：离线模式调用rm_snapshot()
-  * 回滚到检查点：调用find_inode_before_time获得inode结构体，然后调用get_inode_info()获取inode信息，根据该信息判断是否满足用户要求，则启动回滚——调用init_hlfs()获得全局控制结构，并以只读或者是可写模式调用hlfs_open_by_inode()
-  * 回滚到快照：调用find_inode_by_name获得inode结构体，启动回滚——调用init_hlfs()获得全局控制结构，并以只读或者是可写模式调用hlfs_open_by_inode()
+  * 回滚到检查点(只知道模糊时间点)：调用find_inode_before_time获得inode结构体，然后调用get_inode_info()获取inode信息，根据该信息判断是否满足用户要求，则启动回滚——调用init_hlfs()获得全局控制结构，并以只读或者是可写模式调用hlfs_open_by_inode()
+  * 回滚到快照：调用find_inode_by_snapshot.
+-------------------------------------------
+                                               康华
+ 

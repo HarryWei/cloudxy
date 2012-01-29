@@ -20,7 +20,7 @@ int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
 	struct snapshot *ss;
-	if (0 > (ret = load_snapshot_by_name(storage, ss, sname))) {
+	if (0 > (ret = load_snapshot_by_name(ctrl->storage, &ss, snapshot))) {
 		HLOG_ERROR("load ss by name error");
 		g_free(ss);
 		ret = -1;
@@ -36,9 +36,10 @@ int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,
 		goto out;
 	}
 
-    ctrl->inode = inode;
+    strncpy((char *) (&(ctrl->inode)), (const char *) inode, sizeof(struct inode));
+	g_free(inode);
     ctrl->imap_entry.inode_no = HLFS_INODE_NO;
-    ctrl->inode_addr = inode_addr;
+    ctrl->imap_entry.inode_addr = ss->inode_addr;
 
 	if (0 == flag) {
 		ctrl->rw_inode_flag = 0;

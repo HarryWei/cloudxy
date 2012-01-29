@@ -582,8 +582,10 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 		ret = -1;
         goto out;
 	}
-	storage->bs_file_close(storage, file);
 out:
+	if (NULL != file) {
+		storage->bs_file_close(storage, file);
+	}
     return ret;
 }
 

@@ -68,7 +68,7 @@ static gboolean predicate_same_upname_snapshot(gpointer key,gpointer value,gpoin
        char * ss_name = (char*)key;
        struct snapshot *ss = (struct snapshot*)value;
        char * del_ss_name = (char*)user_data;
-       if(g_strcmp0(ss_name,del_ss_name) == 0){
+       if(g_strcmp0(ss->up_sname,del_ss_name) == 0){
           return TRUE; 
        }
        return FALSE;
@@ -81,12 +81,11 @@ static void revise_snapshot_relation(GHashTable *ss_hashtable,GList *remove_list
 	    struct snapshot *ss = g_hash_table_lookup(ss_hashtable,ss_name);
         g_assert(ss!=NULL);
         char *up_ss_name = ss->up_sname;
-        struct snapshot *revise_ss = g_hash_table_find (ss_hashtable,predicate_same_upname_snapshot,ss_name);
+        struct snapshot *revise_ss = g_hash_table_find(ss_hashtable,predicate_same_upname_snapshot,ss_name);
         if(revise_ss !=NULL){
 		   snprintf(revise_ss->up_sname,HLFS_FILE_NAME_MAX,"%s",ss->up_sname);
         }
         g_hash_table_remove(ss_hashtable, ss->sname);
-        g_free(ss);
      }
      return ;
 }
@@ -133,7 +132,7 @@ int load_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHa
 	int ret = 0;
     char *contents = NULL;
     uint32_t size;
-    ret = file_get_contents(storage,snapshot_file,&contents,&size);
+    ret = file_get_contents(storage,snapshot_file, (const char **) &contents,&size);
     if(ret !=0){
 	   HLOG_ERROR("can not read snapshot content!");
        return -1; 
@@ -249,7 +248,11 @@ int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_fil
        memcpy(ss,_ss,sizeof(struct snapshot));
        ret = 0;
     }
-    (*ss) = (struct snapshot*)g_malloc0(sizeof(struct snapshot)); 
+    (*ss) = (struct snapshot*)g_malloc0(sizeof(struct snapshot));
+	if (NULL == (*ss)) {
+		HLOG_ERROR("Allocate error!");
+		return -1;
+	}
 	(*ss)->timestamp = _ss->timestamp;	
     sprintf((*ss)->sname, "%s", _ss->sname);
 	sprintf((*ss)->up_sname, "%s", _ss->up_sname);
@@ -266,7 +269,7 @@ static int load_all_alive_snapshot(struct back_storage *storage,const char* aliv
 	int ret = 0;
     char *contents = NULL;
     uint32_t size;
-    ret = file_get_contents(storage,alive_snapshot_file,&contents,&size);
+    ret = file_get_contents(storage,alive_snapshot_file, (const char **) &contents,&size);
     if(ret !=0){
 	   HLOG_ERROR("can not read snapshot content!");
        return -1; 

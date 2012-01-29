@@ -58,5 +58,5 @@ out:
         g_list_free(snapshot_list);
     }
 	HLOG_DEBUG("leave func %s", __func__);
-	return snapshots_buf;
+	return (struct snapshot *) snapshots_buf;
 }

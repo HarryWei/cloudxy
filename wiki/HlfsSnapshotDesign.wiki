@@ -116,7 +116,7 @@ typdef struct snapshot{
   * snapshot: 快照名称
   * flag: 0 只读模式， 1 可写模式
   * return value: 成功返回0，失败返回<0 
-  struct snapshot * hhlfs_get_all_snapshot(const char *uri，char *num_enteris)
+  struct snapshot * hlfs_get_all_snapshot(const char *uri，char *num_enteris)
   给用户列出所有已存在的快照名及时间信息
   * uri: 文件系统的位置 
   * num_enteris: 返回的snapshot数量。

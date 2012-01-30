@@ -547,6 +547,7 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 
 	int ret = 0;
 	int i = 0;
+	HLOG_DEBUG("filename is %s", filename);
 	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage,filename)) {
 		HLOG_ERROR("file is not exist");
 		ret = -1;
@@ -586,6 +587,7 @@ out:
 	if (NULL != file) {
 		storage->bs_file_close(storage, file);
 	}
+	HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
 

@@ -114,10 +114,12 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 		HLOG_ERROR("is first start error");
 		return EHLFS_UNKNOWN;
 	}
-    ret = find_latest_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE, &ss);
+	HLOG_DEBUG("9999 dbg");
+    ret = find_latest_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE, SNAPSHOT_FILE, &ss);
     if(ret !=0){
        return -1; 
     }
+	HLOG_DEBUG("9999 dbg");
 out:;
 	ctrl->alive_ss_name = (char *)g_malloc0(sizeof(char) * MAX_FILE_NAME_LEN);
 	if (NULL == ctrl->alive_ss_name) {
@@ -125,7 +127,7 @@ out:;
 		return -1;
 	}
     g_strlcpy(ctrl->alive_ss_name,ss->sname,strlen(ss->sname)+1);
-//    g_free(ss);
+	g_free(ss);
 
 #if 0
 	g_message("append log with only inode !\n");
@@ -137,6 +139,11 @@ out:;
     ctrl->last_offset += size;
 #endif
 	ctrl->usage_ref++;
+	HLOG_DEBUG("999 dbg");
+	HLOG_DEBUG("write_task_run is %d", ctrl->write_task_run);
+	ctrl->write_task_run = 1;
+	HLOG_DEBUG("999 dbg");
+	HLOG_DEBUG("write_task_run is %d", ctrl->write_task_run);
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }

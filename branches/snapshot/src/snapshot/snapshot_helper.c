@@ -297,6 +297,7 @@ static int load_all_alive_snapshot(struct back_storage *storage,const char* aliv
         }
         alive_ss_list = g_list_append(alive_ss_list,ss);
     }
+	HLOG_DEBUG("9999 leave func %s", __func__);
 	return ret;
 }
 
@@ -310,14 +311,18 @@ static void free_all_list(GList *list){
    g_list_free(list);
 }
 
-int find_latest_alive_snapshot_before_time(struct back_storage *storage,const char* alive_snapshot_file, const char* snapshot_file,struct snapshot **ss,uint64_t timestamp){
+int find_latest_alive_snapshot_before_time(struct back_storage *storage,
+										const char* alive_snapshot_file, 
+										const char* snapshot_file,
+										struct snapshot **ss,
+										uint64_t timestamp){
     HLOG_DEBUG("enter func %s", __func__);
     if(snapshot_file == NULL || alive_snapshot_file == NULL || storage == NULL) {
 		HLOG_ERROR("Parameter error!");
         return -1;
     }  
     int ret = 0;
-	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,g_free);
+	GHashTable *ss_hashtable = g_hash_table_new(g_str_hash, g_str_equal);
     GList * alive_snapshot_list = NULL;
     ret = load_all_alive_snapshot(storage,alive_snapshot_file,alive_snapshot_list);
     if(ret !=0){
@@ -348,7 +353,8 @@ out:
     if(alive_snapshot_list !=NULL){
        free_all_list(alive_snapshot_list);
     }
-    g_hash_table_destroy(ss_hashtable);
+//    g_hash_table_destroy(ss_hashtable);
+    HLOG_DEBUG("9999 leave func %s", __func__);
     return ret;
 }
 

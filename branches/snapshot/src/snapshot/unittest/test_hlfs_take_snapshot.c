@@ -204,8 +204,11 @@ test_hlfs_take_snapshot(Fixture *fixture, const void *data) {
 		i += 1;
 	}
 #if 0
+	g_message("99 dbg");
 	hlfs_close(fixture->ctrl);
+	g_message("99 dbg");
 	hlfs_open(fixture->ctrl, 1);
+	g_message("ctrl->write_run_task is %d", fixture->ctrl->write_task_run);
 	offset = 0;
 	i = 0;
 

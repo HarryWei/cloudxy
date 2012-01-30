@@ -1,5 +1,5 @@
 /*
- *  hlfs_open.c
+ *  hlfs_close.c
  *  Kanghua <kanghua151@msn.com> (C) 2011
  */
 #include <sys/types.h>

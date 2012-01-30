@@ -87,6 +87,7 @@ static void revise_snapshot_relation(GHashTable *ss_hashtable,GList *remove_list
         char *up_ss_name = ss->up_sname;
         g_hash_table_foreach (ss_hashtable,predicate_same_upname_snapshot,ss);
         g_hash_table_remove(ss_hashtable, ss->sname);
+		g_free(ss);
      }
      return ;
 }
@@ -104,7 +105,11 @@ static int load_snapshot_from_text(struct snapshot **ss, const char *buf, int *f
 		gchar *_ime_inode_addr = _v[1];
     	gchar *_up_ss_name = _v[2];
     	char *endptr = NULL;
-        *ss = (struct snapshot*)g_malloc0(sizeof(struct snapshot));
+        (*ss) = (struct snapshot*)g_malloc0(sizeof(struct snapshot));
+		if ((*ss) == NULL) {
+			HLOG_ERROR("Allocate error!");
+			return EHLFS_MEM;
+		}
 		(*ss)->timestamp = strtoull(_version, &endptr, 0); 
     	sprintf((*ss)->sname, "%s", _ss_name);
 		sprintf((*ss)->up_sname, "%s", _up_ss_name);
@@ -163,9 +168,9 @@ int load_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHa
             goto out;
 		}
 	}
-    
-    revise_snapshot_relation(ss_hashtable,to_remove_ss_list);
-    
+	if (NULL != to_remove_ss_list) {
+    	revise_snapshot_relation(ss_hashtable,to_remove_ss_list);
+	}
 out:
 	g_strfreev(lines);
     if(to_remove_ss_list!=NULL) g_list_free(to_remove_ss_list);
@@ -238,7 +243,7 @@ int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_fil
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
 	struct snapshot *_ss = NULL;
-	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,g_free);
+	GHashTable *ss_hashtable = g_hash_table_new(g_str_hash, g_str_equal);
 	ret = load_all_snapshot(storage,snapshot_file,ss_hashtable);
 	if (ret < 0) {
 		HLOG_ERROR("load all ss error");
@@ -251,6 +256,7 @@ int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_fil
 	   goto out;
     }
 	ret = EHLFS_SSEXIST;
+	HLOG_DEBUG("99 dbg");
     (*ss) = (struct snapshot*)g_malloc0(sizeof(struct snapshot));
 	if (NULL == (*ss)) {
 		HLOG_ERROR("Allocate error!");
@@ -260,8 +266,9 @@ int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_fil
     sprintf((*ss)->sname, "%s", _ss->sname);
 	sprintf((*ss)->up_sname, "%s", _ss->up_sname);
 	(*ss)->inode_addr = _ss->inode_addr;
-	g_hash_table_destroy(ss_hashtable);
 out:
+	g_hash_table_destroy(ss_hashtable);
+	HLOG_DEBUG("99 dbg");
 	HLOG_DEBUG("leave func %s", __func__);
 	return ret;
 }

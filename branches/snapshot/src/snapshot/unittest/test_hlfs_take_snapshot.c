@@ -116,11 +116,11 @@ do_snapshot(Fixture *fixture, int i) {
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (8 == i) {
-		sprintf(buffer, "%s", "T8");
+		sprintf(buffer, "%s", "T5");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_message("ret is %d", ret);
-		g_assert(ret == 0);
+		g_assert(ret == -1);
 	} else if (9 == i) {
 		sprintf(buffer, "%s", "T9");
 		g_message("%d buffer is [%s]", i, buffer);

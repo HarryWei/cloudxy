@@ -14,10 +14,13 @@
 static int snapshot2text(const struct snapshot *snapshot, char *textbuf) 
 {
 	HLOG_DEBUG("enter func %s", __func__);
+	const char *sep = SS_ITEM_SEP;
 	memset(textbuf, 0, strlen(textbuf));
-	int n = sprintf(textbuf, "+%sSS_ITEM_SEP%lluSS_ITEM_SEP%lluSS_ITEM_SEP%s\n", 
-					snapshot->sname,snapshot->timestamp, 
-					snapshot->inode_addr, snapshot->up_sname);
+	int n = sprintf(textbuf, "+%s%s%llu%s%llu%s%s\n", 
+					snapshot->sname, sep, 
+					snapshot->timestamp, sep,
+					snapshot->inode_addr, sep,
+					snapshot->up_sname);
 	HLOG_DEBUG("leave func %s", __func__);
 	return n;
 }
@@ -41,8 +44,9 @@ int dump_snapshot(struct back_storage *storage,
 
 static int snapshot_delmark2text(const char *ssname, char *textbuf) {
 	HLOG_DEBUG("enter func %s", __func__);
+	const char *sep = SS_ITEM_SEP;
 	memset(textbuf, 0, 128);
-	int n = sprintf(textbuf, "-%sSS_ITEM_SEP\n", ssname);
+	int n = sprintf(textbuf, "-%s%s\n", ssname, sep);
 	HLOG_DEBUG("leave func %s", __func__);
 	return n;
 }
@@ -65,16 +69,20 @@ int dump_snapshot_delmark(struct back_storage *storage,
 
 /* load all snapshot will remove del snapshot and revise relation upname */
 static gboolean predicate_same_upname_snapshot(gpointer key,gpointer value,gpointer user_data){
+	HLOG_DEBUG("enter func %s", __func__);
        char * ss_name = (char*)key;
        struct snapshot *ss = (struct snapshot*)value;
        char * del_ss_name = (char*)user_data;
        if(g_strcmp0(ss->up_sname,del_ss_name) == 0){
+			HLOG_DEBUG("leave func %s", __func__);
           return TRUE; 
        }
+	HLOG_DEBUG("leave func %s", __func__);
        return FALSE;
 }
 
 static void revise_snapshot_relation(GHashTable *ss_hashtable,GList *remove_list){
+	HLOG_DEBUG("enter func %s", __func__);
      int i;
      for(i = 0; i < g_list_length(remove_list); i++){
         char * ss_name = g_list_nth_data(remove_list,i);
@@ -87,16 +95,18 @@ static void revise_snapshot_relation(GHashTable *ss_hashtable,GList *remove_list
         }
         g_hash_table_remove(ss_hashtable, ss->sname);
      }
+	HLOG_DEBUG("leave func %s", __func__);
      return ;
 }
 
 static int load_snapshot_from_text(struct snapshot **ss, const char *buf, int *flag)
 {
 	HLOG_DEBUG("enter func %s", __func__);
-    gchar **v = g_strsplit(buf, "SS_ITEM_SEP", 2);
+	const char *sep = SS_ITEM_SEP;
+    gchar **v = g_strsplit(buf, sep, 2);
     if ('+' == v[0][0]) {
         *flag = 0;
-		gchar **_v = g_strsplit(v[1], "SS_ITEM_SEP", 3);
+		gchar **_v = g_strsplit(v[1], sep, 3);
     	gchar *_ss_name = v[0] + 1;
     	gchar *_version = _v[0];
 		gchar *_ime_inode_addr = _v[1];
@@ -237,6 +247,7 @@ int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_fil
 	int ret = 0;
 	struct snapshot *_ss = NULL;
 	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,g_free);
+	HLOG_DEBUG("99 dbg");
 	ret = load_all_snapshot(storage,snapshot_file,ss_hashtable);
 	if (ret < 0) {
 		HLOG_ERROR("load all ss error");
@@ -244,10 +255,13 @@ int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_fil
 		return -1;
 	}
 	_ss = g_hash_table_lookup(ss_hashtable, ss_name);
-    if(_ss!=NULL){
-       memcpy(ss,_ss,sizeof(struct snapshot));
-       ret = 0;
+    if(_ss == NULL){
+//       memcpy(ss,_ss,sizeof(struct snapshot));
+       ret = EHLFS_SSNOTEXIST;
+	   goto out;
     }
+	ret = EHLFS_SSEXIST;
+	HLOG_DEBUG("99 dbg");
     (*ss) = (struct snapshot*)g_malloc0(sizeof(struct snapshot));
 	if (NULL == (*ss)) {
 		HLOG_ERROR("Allocate error!");
@@ -258,6 +272,7 @@ int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_fil
 	sprintf((*ss)->up_sname, "%s", _ss->up_sname);
 	(*ss)->inode_addr = _ss->inode_addr;
 	g_hash_table_destroy(ss_hashtable);
+out:
 	HLOG_DEBUG("leave func %s", __func__);
 	return ret;
 }
@@ -270,8 +285,8 @@ static int load_all_alive_snapshot(struct back_storage *storage,const char* aliv
     char *contents = NULL;
     uint32_t size;
     ret = file_get_contents(storage,alive_snapshot_file, (const char **) &contents,&size);
-    if(ret !=0){
-	   HLOG_ERROR("can not read snapshot content!");
+    if(ret != 0){
+	   HLOG_ERROR("file get contents error!");
        return -1; 
     }
 	gchar **lines = g_strsplit(contents, "\n", 0);
@@ -286,6 +301,7 @@ static int load_all_alive_snapshot(struct back_storage *storage,const char* aliv
         }
         alive_ss_list = g_list_append(alive_ss_list,ss);
     }
+	return ret;
 }
 
 
@@ -340,7 +356,26 @@ out:
     return ret;
 }
 
-int find_latest_alive_snapshot(struct back_storage *storage,const char* alive_snapshot_file, const char* snapshot_file,struct snapshot **ss){
+int is_first_start(struct back_storage *storage, 
+				const char * snapshot_file, 
+				const char *alive_snapshot_file) {
+	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage,snapshot_file) &&
+			EHLFS_NOFILE == storage->bs_file_is_exist(storage,alive_snapshot_file)) {
+		HLOG_DEBUG("first start hlfs ...");
+		return HLFS_FS;
+	}
+	if (EHLFS_NOFILE != storage->bs_file_is_exist(storage,snapshot_file) &&
+			EHLFS_NOFILE == storage->bs_file_is_exist(storage,alive_snapshot_file)) {
+		HLOG_ERROR("Can not find alive snapshot file!");
+		return EHLFS_UNKNOWN;
+	}
+	return 0;
+}
+
+int find_latest_alive_snapshot(struct back_storage *storage,
+							const char* alive_snapshot_file, 
+							const char* snapshot_file,
+							struct snapshot **ss) {
     return find_latest_alive_snapshot_before_time(storage,alive_snapshot_file,snapshot_file,ss,G_MAXUINT64);
 }
 

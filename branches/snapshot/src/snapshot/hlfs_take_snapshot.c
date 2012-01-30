@@ -30,15 +30,19 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
         return -1;
     }
     g_mutex_unlock (ctrl->hlfs_access_mutex);
-	/* record the up snapshot name in ctrl */
-	if (NULL == ctrl->alive_ss_name) {
-		HLOG_DEBUG("this is first time take snapshot");
+    
+	if (HLFS_FS == (ret = is_first_start(ctrl->storage, SNAPSHOT_FILE, ALIVE_SNAPSHOT_FILE))) {
+			goto out;	
+	} else if (EHLFS_UNKNOWN == ret) {
+		HLOG_ERROR("is first start error");
+		return EHLFS_UNKNOWN;
 	}
-    struct snapshot *_ss = NULL;
-	if (0!=(ret=load_snapshot_by_name(ctrl->storage,SNAPSHOT_FILE,&_ss,ssname))){
-		HLOG_DEBUG("snapshot %s is not exist, right???", ssname);
+	struct snapshot *_ss = NULL;
+	if (EHLFS_SSEXIST==(ret=load_snapshot_by_name(ctrl->storage,SNAPSHOT_FILE,&_ss,ssname))){
+		HLOG_ERROR("snapshot %s is exist, use another snapshot name", ssname);
 		return -1;
 	}
+out:;
 	struct snapshot ss;
 	memset(&ss, 0, sizeof(struct snapshot));
 	ss.timestamp = get_current_time();
@@ -51,7 +55,7 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 	g_strlcpy(ss.up_sname,ctrl->alive_ss_name,strlen(ctrl->alive_ss_name) + 1);
 	ss.inode_addr = ctrl->imap_entry.inode_addr;
 	memset(ctrl->alive_ss_name, 0, (strlen(ctrl->alive_ss_name) + 1));
-	sprintf(ctrl->alive_ss_name, "%s", ss.sname);
+	g_strlcpy(ctrl->alive_ss_name,ss.sname, strlen(ss.sname) + 1);
     g_mutex_unlock (ctrl->hlfs_access_mutex);
 
     ret = dump_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE,&ss);

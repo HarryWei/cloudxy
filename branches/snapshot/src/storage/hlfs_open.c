@@ -69,7 +69,7 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 		HLOG_DEBUG("This fs has opened by other,can not use it"); 
         return -1;
 	}
-    int ret;
+    int ret = 0;
     HLOG_DEBUG("inode no %llu , inode address %llu", ctrl->imap_entry.inode_no, ctrl->imap_entry.inode_addr);
     if (ctrl->imap_entry.inode_no == 0 && 
 			ctrl->imap_entry.inode_addr == 0) { /* no inode condition */
@@ -102,12 +102,30 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
         return -1;;
 	}
     struct snapshot *ss;
+	if (HLFS_FS == (ret = is_first_start(ctrl->storage, SNAPSHOT_FILE, ALIVE_SNAPSHOT_FILE))) {
+		ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
+		if (NULL == ss) {
+			HLOG_ERROR("Allocate Error!");
+			return EHLFS_MEM;
+		}
+		sprintf(ss->sname, "%s", FIRST_UP_NAME);
+		goto out;
+	} else if (EHLFS_UNKNOWN == ret) {
+		HLOG_ERROR("is first start error");
+		return EHLFS_UNKNOWN;
+	}
     ret = find_latest_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE, &ss);
     if(ret !=0){
        return -1; 
     }
+out:;
+	ctrl->alive_ss_name = (char *)g_malloc0(sizeof(char) * MAX_FILE_NAME_LEN);
+	if (NULL == ctrl->alive_ss_name) {
+		HLOG_ERROR("Allocate error!");
+		return -1;
+	}
     g_strlcpy(ctrl->alive_ss_name,ss->sname,strlen(ss->sname)+1);
-    g_free(ss);
+//    g_free(ss);
 
 #if 0
 	g_message("append log with only inode !\n");

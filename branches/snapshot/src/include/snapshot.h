@@ -16,7 +16,8 @@ struct snapshot {
 	char up_sname[HLFS_FILE_NAME_MAX]; /* for tree style snapshot */
 } __attribute__((packed));
 
-#define SS_ITEM_SEP @@##$$
+#define SS_ITEM_SEP 			"@@##$$"
+#define FIRST_UP_NAME			"HLFS_ADAM"
 
 
 

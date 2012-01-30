@@ -15,6 +15,9 @@ extern uint64_t SEGMENT_SIZE_MASK;
 extern uint64_t SEGMENT_SIZE_SHIFT;
 extern uint32_t HBLOCK_SIZE;
 
+/* hlfs first start */
+#define		HLFS_FS			((int) (1))
+
 /*
  * Following are some error numbers in hlfs, you can also add 
  * the error number, which you think it is worthy. But when
@@ -29,4 +32,10 @@ extern uint32_t HBLOCK_SIZE;
 #define EHLFS_NOFILE			((int) (-2))
 /* invoke func error */
 #define EHLFS_FUNC				((int) (-3))
+/* snapshot name exist */
+#define EHLFS_SSEXIST				((int) (-4))
+/* snapshot name not exist */
+#define EHLFS_SSNOTEXIST				((int) (-5))
+/* unknown error */
+#define EHLFS_UNKNOWN				((int) (-99))
 #endif

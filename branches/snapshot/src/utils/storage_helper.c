@@ -548,7 +548,7 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 	int ret = 0;
 	int i = 0;
 	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage,filename)) {
-		HLOG_ERROR("snapshot.txt is not exist");
+		HLOG_ERROR("file is not exist");
 		ret = -1;
 		goto out;
 	}

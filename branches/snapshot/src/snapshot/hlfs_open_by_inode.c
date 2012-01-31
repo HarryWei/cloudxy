@@ -58,10 +58,8 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
     }
     g_free(_ss);
 
-    if(ctrl->alive_ss_name!=NULL){
-       g_free(ctrl->alive_ss_name); 
-    }
-    ctrl->alive_ss_name = g_strdup(ss.sname);
+	memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
+	sprintf(ctrl->alive_ss_name, "%s", ss.sname);
     if(ctrl->rw_inode_flag == 1){
         ret = dump_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE,&ss);
         if(ret!=0){

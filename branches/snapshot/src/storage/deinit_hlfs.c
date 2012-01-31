@@ -31,9 +31,6 @@ int deinit_hlfs(struct hlfs_ctrl * ctrl)
     g_mutex_free(ctrl->hlfs_access_mutex);
     /* fix it :we do not free ctrl_region now */
     g_free(ctrl->storage);
-	if (NULL != ctrl->alive_ss_name) {
-		g_free(ctrl->alive_ss_name);
-	}
     g_free(ctrl);
     HLOG_DEBUG("leave func:%s",__func__);
     return 0;

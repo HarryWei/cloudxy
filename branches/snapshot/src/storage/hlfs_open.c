@@ -109,8 +109,8 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 		    HLOG_DEBUG("can not read alive snapshot,there must be some error");
             return -1; 
         }
-        ctrl->alive_ss_name = g_strdup(ss->sname);
-	    g_free(ss);
+		memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
+		sprintf(ctrl->alive_ss_name, "%s", ss->sname);
     }else{
 		HLOG_DEBUG("do not need read alive snapshot file");
     }
@@ -118,5 +118,3 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }
-
-

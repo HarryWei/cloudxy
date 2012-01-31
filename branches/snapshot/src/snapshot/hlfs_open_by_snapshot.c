@@ -49,10 +49,8 @@ int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,
 		HLOG_ERROR("the bad flag for hlfs open by inode");
 		ret = -1;
 	}
-    if(ctrl->alive_ss_name!=NULL){
-       g_free(ctrl->alive_ss_name); 
-    }
-    ctrl->alive_ss_name = g_strdup(ss->sname);
+	memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
+	sprintf(ctrl->alive_ss_name, "%s", ss->sname);
     g_free(ss);
 out:
 	HLOG_DEBUG("leave func %s", __func__);

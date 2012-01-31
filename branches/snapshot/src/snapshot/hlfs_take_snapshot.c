@@ -48,12 +48,10 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
 	ss.timestamp = get_current_time();
 	g_strlcpy(ss.sname, ssname, strlen(ssname) + 1);
     g_mutex_lock(ctrl->hlfs_access_mutex);
-	g_strlcpy(ss.up_sname,ctrl->alive_ss_name,strlen(ctrl->alive_ss_name) + 1);
+	sprintf(ss.up_sname, "%s", ctrl->alive_ss_name);
 	ss.inode_addr = ctrl->imap_entry.inode_addr;
-    if(ctrl->alive_ss_name!=NULL){
-       g_free(ctrl->alive_ss_name);
-    }
-    ctrl->alive_ss_name = g_strdup(ss.sname);
+	memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
+	sprintf(ctrl->alive_ss_name, "%s", ss.sname);
     g_mutex_unlock (ctrl->hlfs_access_mutex);
 
     ret = dump_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE,&ss);

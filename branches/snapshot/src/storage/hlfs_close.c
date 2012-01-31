@@ -25,7 +25,6 @@ int hlfs_close(struct hlfs_ctrl *ctrl){
 	    return -1;
     }
     int ret =0;
-    //ctrl->write_task_run = 0;
     if(ctrl->cur_write_file_handler!=NULL){
        ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->cur_write_file_handler);
 	   ctrl->cur_write_file_handler = NULL;
@@ -34,11 +33,6 @@ int hlfs_close(struct hlfs_ctrl *ctrl){
        ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->cur_read_file_handler);
 	   ctrl->cur_read_file_handler = NULL;
     }
-#if 0
-	if (ctrl->alive_ss_name != NULL) {
-		g_free(ctrl->alive_ss_name);
-	}
-#endif
     ctrl->usage_ref--;
     HLOG_DEBUG("leave func:%s",__func__);
     return ret;

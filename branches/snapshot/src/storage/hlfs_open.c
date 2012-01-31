@@ -65,6 +65,16 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 		HLOG_ERROR("error params :falg %d",flag);
 		return -1;
 	}
+
+	if (1 == flag) {
+		ctrl->rw_inode_flag = 1;
+	} else if (0 == flag) {
+		ctrl->rw_inode_flag = 0;
+	} else {
+		HLOG_ERROR("the bad flag for hlfs open by inode");
+        return -1;
+    }
+
 	if(ctrl->usage_ref > 0){
 		HLOG_DEBUG("This fs has opened by other,can not use it"); 
         return -1;
@@ -91,59 +101,20 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 		}
 		HLOG_DEBUG("inode 's length:%llu",ctrl->inode.length);
 	}
-
-	if (1 == flag) {
-		ctrl->rw_inode_flag = 1;
-	} else if (0 == flag) {
-		ctrl->rw_inode_flag = 0;
-	} else {
-		HLOG_ERROR("the bad flag for hlfs open by inode");
-        return -1;;
-	}
 	HLOG_DEBUG("ctrl->rw_inode_flag:%d", ctrl->rw_inode_flag);
     struct snapshot *ss;
-	if (HLFS_FS == (ret = is_first_start(ctrl->storage, SNAPSHOT_FILE, ALIVE_SNAPSHOT_FILE))) {
-		ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));
-		if (NULL == ss) {
-			HLOG_ERROR("Allocate Error!");
-			return EHLFS_MEM;
-		}
-		sprintf(ss->sname, "%s", FIRST_UP_NAME);
-		goto out;
-	} else if (EHLFS_UNKNOWN == ret) {
-		HLOG_ERROR("is first start error");
-		return EHLFS_UNKNOWN;
-	}
-	HLOG_DEBUG("9999 dbg");
-    ret = find_latest_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE, SNAPSHOT_FILE, &ss);
-    if(ret !=0){
-       return -1; 
+	if (0 == ctrl->storage->bs_file_is_exist(ctrl->storage,SNAPSHOT_FILE)){
+        ret = find_latest_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE, SNAPSHOT_FILE, &ss);
+        if(ret !=0){
+		    HLOG_DEBUG("can not read alive snapshot,there must be some error");
+            return -1; 
+        }
+        ctrl->alive_ss_name = g_strdup(ss->sname);
+	    g_free(ss);
+    }else{
+		HLOG_DEBUG("do not need read alive snapshot file");
     }
-	HLOG_DEBUG("9999 dbg");
-out:;
-	ctrl->alive_ss_name = (char *)g_malloc0(sizeof(char) * MAX_FILE_NAME_LEN);
-	if (NULL == ctrl->alive_ss_name) {
-		HLOG_ERROR("Allocate error!");
-		return -1;
-	}
-    g_strlcpy(ctrl->alive_ss_name,ss->sname,strlen(ss->sname)+1);
-	g_free(ss);
-
-#if 0
-	g_message("append log with only inode !\n");
-    int size = append_inode(ctrl); /* append new log */
-    if (size < 0) {
-		g_message("fail to append log with inode ! %d\n",size);
-        return -1;
-	}
-    ctrl->last_offset += size;
-#endif
 	ctrl->usage_ref++;
-	HLOG_DEBUG("999 dbg");
-	HLOG_DEBUG("write_task_run is %d", ctrl->write_task_run);
-	ctrl->write_task_run = 1;
-	HLOG_DEBUG("999 dbg");
-	HLOG_DEBUG("write_task_run is %d", ctrl->write_task_run);
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }

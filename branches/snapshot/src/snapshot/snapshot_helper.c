@@ -357,7 +357,7 @@ out:
     HLOG_DEBUG("9999 leave func %s", __func__);
     return ret;
 }
-
+#if 0
 int is_first_start(struct back_storage *storage, 
 				const char * snapshot_file, 
 				const char *alive_snapshot_file) {
@@ -378,7 +378,7 @@ int is_first_start(struct back_storage *storage,
 	}
 	return 0;
 }
-
+#endif
 int find_latest_alive_snapshot(struct back_storage *storage,
 							const char* alive_snapshot_file, 
 							const char* snapshot_file,

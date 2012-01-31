@@ -25,7 +25,7 @@ int hlfs_close(struct hlfs_ctrl *ctrl){
 	    return -1;
     }
     int ret =0;
-    ctrl->write_task_run = 0;
+    //ctrl->write_task_run = 0;
     if(ctrl->cur_write_file_handler!=NULL){
        ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->cur_write_file_handler);
 	   ctrl->cur_write_file_handler = NULL;

@@ -17,6 +17,8 @@
 
 int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname) 
 {
+	HLOG_DEBUG("enter func %s", __func__);
+	HLOG_DEBUG("create ssname is %s", ssname);
     if(ctrl == NULL || ssname ==NULL){
 		HLOG_ERROR("parameter error!");
         return -1;

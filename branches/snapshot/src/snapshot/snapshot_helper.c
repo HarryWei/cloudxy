@@ -255,7 +255,7 @@ int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_fil
        ret = EHLFS_SSNOTEXIST;
 	   goto out;
     }
-	ret = EHLFS_SSEXIST;
+	ret = 0;
 	HLOG_DEBUG("99 dbg");
     (*ss) = (struct snapshot*)g_malloc0(sizeof(struct snapshot));
 	if (NULL == (*ss)) {

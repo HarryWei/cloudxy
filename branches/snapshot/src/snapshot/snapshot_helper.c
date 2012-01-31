@@ -141,7 +141,7 @@ int load_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHa
     uint32_t size;
     ret = file_get_contents(storage,snapshot_file, (const char **) &contents,&size);
     if(ret !=0){
-	   HLOG_ERROR("can not read snapshot content!");
+	   HLOG_ERROR("can not read snapshot content, but may be first start, not error, check it please");
        return -1; 
     }
 	gchar **lines = g_strsplit(contents, "\n", 0);
@@ -246,7 +246,7 @@ int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_fil
 	GHashTable *ss_hashtable = g_hash_table_new(g_str_hash, g_str_equal);
 	ret = load_all_snapshot(storage,snapshot_file,ss_hashtable);
 	if (ret < 0) {
-		HLOG_ERROR("load all ss error");
+		HLOG_ERROR("load all ss error, but may be first start, not error, check it please");
 		g_hash_table_destroy(ss_hashtable);
 		return -1;
 	}

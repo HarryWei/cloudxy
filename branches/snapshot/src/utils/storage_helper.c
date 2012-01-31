@@ -549,7 +549,7 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 	int i = 0;
 	HLOG_DEBUG("filename is %s", filename);
 	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage,filename)) {
-		HLOG_ERROR("file is not exist");
+		HLOG_ERROR("file is not exist, but may be first start, not error, check it please");
 		ret = -1;
 		goto out;
 	}

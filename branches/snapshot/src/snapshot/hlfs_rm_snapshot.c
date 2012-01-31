@@ -14,6 +14,7 @@
 
 int 
 hlfs_rm_snapshot(const char *uri,const char *ssname) {
+	HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
     struct snapshot *ss = NULL;
     bs_file_t file = NULL;
@@ -22,13 +23,15 @@ hlfs_rm_snapshot(const char *uri,const char *ssname) {
         HLOG_ERROR("storage init error!");
         return -1;
     }
-	if (0!=(ret=load_snapshot_by_name(storage,SNAPSHOT_FILE,ss,ssname))){
+	if (0!=(ret=load_snapshot_by_name(storage,SNAPSHOT_FILE,&ss,ssname))){
 		HLOG_DEBUG("snapshot %s is not exist, right???", ssname);
 		goto out;
 	}
-    if (0!= (ret=dump_snapshot_delmark(storage,SNAPSHOT_FILE,ss))){
+	HLOG_DEBUG("99 before dump ret is %d", ret);
+    if (0!= (ret=dump_snapshot_delmark(storage,SNAPSHOT_FILE,ss->sname))){
         goto out;
     }
+	HLOG_DEBUG("99 after dump ret is %d", ret);
     
 out:
 	if (NULL != file) {

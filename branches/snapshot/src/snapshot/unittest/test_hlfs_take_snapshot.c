@@ -203,7 +203,8 @@ test_hlfs_take_snapshot(Fixture *fixture, const void *data) {
 		offset += REQ_SIZE;
 		i += 1;
 	}
-#if 0
+//TODO restart hlfs
+#if 0 
 	g_message("99 dbg");
 	hlfs_close(fixture->ctrl);
 	g_message("99 dbg");

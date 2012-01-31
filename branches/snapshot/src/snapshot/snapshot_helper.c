@@ -60,11 +60,12 @@ int dump_snapshot_delmark(struct back_storage *storage,
         return -1;
     }
 	int ret = 0;
-    char snapshot_delmark_text[1024];
-    memset(snapshot_delmark_text, 0, 1024);
+    char snapshot_delmark_text[128];
+    memset(snapshot_delmark_text, 0, 128);
 	int len = snapshot_delmark2text(ssname, snapshot_delmark_text);
 	HLOG_DEBUG("cp text is %s", snapshot_delmark_text);
     ret = file_append_contents(storage,snapshot_file,snapshot_delmark_text,len);
+	return ret;
 }
 
 /* load all snapshot will remove del snapshot and revise relation upname */
@@ -121,6 +122,11 @@ static int load_snapshot_from_text(struct snapshot **ss, const char *buf, int *f
     } else if ('-' == v[0][0]) {
         *flag = 1;
     	gchar *_ss_name = v[0] + 1;
+        (*ss) = (struct snapshot*)g_malloc0(sizeof(struct snapshot));
+		if ((*ss) == NULL) {
+			HLOG_ERROR("Allocate error!");
+			return EHLFS_MEM;
+		}
     	sprintf((*ss)->sname, "%s", _ss_name);
     } else {
 		HLOG_ERROR("flag parse error");
@@ -255,6 +261,7 @@ int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_fil
        ret = EHLFS_SSNOTEXIST;
 	   goto out;
     }
+	HLOG_DEBUG("9999 ss_name is %s", ss_name);
 	ret = 0;
 	HLOG_DEBUG("99 dbg");
     (*ss) = (struct snapshot*)g_malloc0(sizeof(struct snapshot));
@@ -262,6 +269,7 @@ int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_fil
 		HLOG_ERROR("Allocate error!");
 		return -1;
 	}
+	HLOG_DEBUG("9999 dbg");
 	(*ss)->timestamp = _ss->timestamp;	
     sprintf((*ss)->sname, "%s", _ss->sname);
 	sprintf((*ss)->up_sname, "%s", _ss->up_sname);

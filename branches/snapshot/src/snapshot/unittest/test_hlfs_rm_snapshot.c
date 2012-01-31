@@ -27,37 +27,37 @@ do_snapshot(Fixture *fixture, int i) {
 	char buffer[128];
 	memset(buffer, 0, 128);
 	if (0 == i) {
-		sprintf(buffer, "%s%d", "snapshot", i);
+		sprintf(buffer, "%s", "T0");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (1 == i) {
-		sprintf(buffer, "%s", " ");
+		sprintf(buffer, "%s", "T1");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (2 == i) {
-		sprintf(buffer, "%s", "+");
+		sprintf(buffer, "%s", "T2");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (3 == i) {
-		sprintf(buffer, "%s", "##@");
+		sprintf(buffer, "%s", "T3");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (4 == i) {
-		sprintf(buffer, "%s", "..");
+		sprintf(buffer, "%s", "T4");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (5 == i) {
-		sprintf(buffer, "%s", " **");
+		sprintf(buffer, "%s", "T5");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (6 == i) {
-		sprintf(buffer, "%s", "1234");
+		sprintf(buffer, "%s", "T6");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
@@ -141,12 +141,12 @@ test_hlfs_rm_snapshot(Fixture *fixture, const void *data) {
 	const char *uri = fixture->uri;
 	g_message("uri is [%s]", uri);
 	int ret = 0;
-	ret = hlfs_rm_snapshot(uri, "snapshot0");
+	ret = hlfs_rm_snapshot(uri, "T0");
 	g_message("ret is %d", ret);
 	g_assert(ret == 0);
-	ret = hlfs_rm_snapshot(uri, "1234");
+	ret = hlfs_rm_snapshot(uri, "T3");
 	g_assert(ret == 0);
-#if 1
+#if 0
 	ret = hlfs_rm_snapshot(uri, " ");
 	g_assert(ret == 0);
 	ret = hlfs_rm_snapshot(uri, " **");

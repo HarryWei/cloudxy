@@ -53,7 +53,7 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
     if(ctrl->alive_ss_name!=NULL){
        g_free(ctrl->alive_ss_name);
     }
-    ctrl->alive_ss_name = g_strdup(ss.name);
+    ctrl->alive_ss_name = g_strdup(ss.sname);
     g_mutex_unlock (ctrl->hlfs_access_mutex);
 
     ret = dump_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE,&ss);

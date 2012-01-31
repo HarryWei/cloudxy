@@ -12,6 +12,7 @@
 #include "hlfs_log.h"
 #include "storage.h"
 #include "storage_helper.h"
+#include "comm_define.h"
 
 #define REQ_SIZE 4096
 #define TOTAL_SIZE 40960
@@ -146,9 +147,9 @@ test_hlfs_rm_snapshot(Fixture *fixture, const void *data) {
 	g_assert(ret == 0);
 	ret = hlfs_rm_snapshot(uri, "T3");
 	g_assert(ret == 0);
+	ret = hlfs_rm_snapshot(uri, "wrong");
+	g_assert(ret == EHLFS_SSNOTEXIST);
 #if 0
-	ret = hlfs_rm_snapshot(uri, " ");
-	g_assert(ret == 0);
 	ret = hlfs_rm_snapshot(uri, " **");
 	g_assert(ret == 0);
 	ret = hlfs_rm_snapshot(uri, "..");

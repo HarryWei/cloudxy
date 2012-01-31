@@ -24,7 +24,8 @@ hlfs_rm_snapshot(const char *uri,const char *ssname) {
         return -1;
     }
 	if (0!=(ret=load_snapshot_by_name(storage,SNAPSHOT_FILE,&ss,ssname))){
-		HLOG_DEBUG("snapshot %s is not exist, right???", ssname);
+		HLOG_ERROR("snapshot %s is not exist, right???", ssname);
+		ret = EHLFS_SSNOTEXIST;
 		goto out;
 	}
 	HLOG_DEBUG("99 before dump ret is %d", ret);

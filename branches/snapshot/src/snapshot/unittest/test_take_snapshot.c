@@ -49,13 +49,26 @@ void case1_setup()
 	}
 	
 	char *buf = (char *)g_malloc0(4096);
-	hlfs_write(case1_fixture.ctrl, buf, 4096, 0);
+	if (buf == NULL) {
+		g_message("allocate mem error");
+		g_free(buf);
+		exit(EXIT_FAILURE);
+	}
+	if (0 > hlfs_write(case1_fixture.ctrl, buf, 4096, 0)) {
+		g_message("write buf error");
+		g_free(buf);
+		exit(EXIT_FAILURE);
+	}
+	g_message("write buf successfully");
 	hlfs_close(case1_fixture.ctrl);
 
 	if (0 != (ret = hlfs_open(case1_fixture.ctrl, 0))) {
 		g_message("open hlfs error");
 		exit(EXIT_FAILURE);
 	}
+#if 1
+	g_message("seg fault test");
+#endif 
 }
 
 /*
@@ -83,12 +96,10 @@ void test_case1()
  */
 void case1_teardown()
 {
-	if (case1_fixture.ctrl != NULL)
-		g_free(case1_fixture.ctrl);
-	if (case1_fixture.uri != NULL)
-		g_free(case1_fixture.uri);
 	hlfs_close(case1_fixture.ctrl);
 	deinit_hlfs(case1_fixture.ctrl);
+	if (case1_fixture.uri != NULL)
+		g_free(case1_fixture.uri);
 	system("rm -rf /tmp/testenv");
 }
 

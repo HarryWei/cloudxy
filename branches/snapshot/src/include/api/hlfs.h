@@ -18,6 +18,7 @@
 #define _HDFS_LFS_H_
 #include "hlfs_ctrl.h"
 #include "ctrl_region.h"
+#include "comm_define.h"
 
 typedef struct hlfs_ctrl  HLFS_CTRL;
 

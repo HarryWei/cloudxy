@@ -96,11 +96,11 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 		ctrl->rw_inode_flag = 1;
 	} else if (0 == flag) {
 		ctrl->rw_inode_flag = 0;
-
 	} else {
 		HLOG_ERROR("the bad flag for hlfs open by inode");
         return -1;;
 	}
+	HLOG_DEBUG("ctrl->rw_inode_flag:%d", ctrl->rw_inode_flag);
     struct snapshot *ss;
 	if (HLFS_FS == (ret = is_first_start(ctrl->storage, SNAPSHOT_FILE, ALIVE_SNAPSHOT_FILE))) {
 		ss = (struct snapshot *)g_malloc0(sizeof(struct snapshot));

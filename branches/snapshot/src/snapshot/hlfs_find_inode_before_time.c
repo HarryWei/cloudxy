@@ -42,9 +42,7 @@ get_iaddr_bytime_in_seg(struct back_storage *storage,
 		ret = -1;
 		goto out;
 	}
-//	g_mutex_lock(ctrl->hlfs_access_mutex);
 	int count = storage->bs_file_pread(storage, file, tmp_buf,_SEGMENT_SIZE, 0);
-//	g_mutex_unlock(ctrl->hlfs_access_mutex);
 	if (0 > count) {
 		HLOG_ERROR("read content error!");
 		ret = -1;
@@ -52,15 +50,15 @@ get_iaddr_bytime_in_seg(struct back_storage *storage,
 	}
 	HLOG_DEBUG("count is %d", count);
 	int offset = 0;
-//	uint64_t tmp_time = 0;
+	uint64_t tmp_time = 0;
+	uint64_t tmp_inode_addr = 0;
 	struct log_header *lh = NULL;
 	struct inode_map_entry *imap = NULL;
 	struct inode *inode = NULL;
-#if 0
+#if 1
 	if (0 == timestamp) {
-		lh = (struct log_header *) (tmp_buf + offset);
-		imap = (struct inode_map_entry *) (tmp_buf + lh->log_size - sizeof(struct inode_map_entry));
-		*inode_addr = imap->inode_addr;
+		HLOG_ERROR("We can not find the inode addr before time 0");
+		ret = -1;
 		goto out;
 	}
 #endif
@@ -71,12 +69,21 @@ get_iaddr_bytime_in_seg(struct back_storage *storage,
 		//g_message("%s -- This inode addr is %llu", __func__, imap->inode_addr);
 		inode = (struct inode *) (tmp_buf + offset + lh->log_size - sizeof(struct inode_map_entry) - sizeof(struct inode));
 		//g_message("%s -- This inode's mtime is %llu", __func__, inode->mtime);
-	    *inode_addr = imap->inode_addr;
-		if ((timestamp <= inode->mtime)) {
+	    //*inode_addr = imap->inode_addr;
+		if ((timestamp < inode->mtime) && (timestamp >= tmp_time)) {
+			*inode_addr = tmp_inode_addr;
 			goto out;
-		}
+		}	
+		tmp_inode_addr = imap->inode_addr;
+		tmp_time = inode->mtime;
 		offset += lh->log_size;
 	}
+	if (timestamp > tmp_time) {
+		*inode_addr = tmp_inode_addr;
+		goto out;
+	}
+	HLOG_ERROR("We can not find the inode addr before the timestamp");
+	ret = -1;
 out:
 	if (NULL != file) {
 		storage->bs_file_close(storage, file);
@@ -118,7 +125,7 @@ hlfs_find_inode_before_time(const char *uri,
         HLOG_ERROR("get file list dir error!");
         return -1;
     }
-    HLOG_DEBUG("there re %d files", num_entries);
+    HLOG_DEBUG("there are %d files", num_entries);
     bs_file_info_t *info = infos;
     int i = 0;
     GList *info_list = NULL;

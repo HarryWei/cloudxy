@@ -20,6 +20,10 @@
 struct snapshot* hlfs_get_all_snapshots(const char *uri,int *num_entries)
 {
 	HLOG_DEBUG("enter func %s", __func__);
+	if (NULL == uri || NULL == num_entries) {
+		HLOG_ERROR("Parameter Error!");
+		return -1;
+	}
 	int ret = 0;
 	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,g_free);
     GList *snapshot_list = NULL;
@@ -30,13 +34,18 @@ struct snapshot* hlfs_get_all_snapshots(const char *uri,int *num_entries)
 		g_hash_table_destroy(ss_hashtable);
 		return NULL;
 	}
-	ret = load_all_snapshot(storage, ss_hashtable);
+	ret = load_all_snapshot(storage, SNAPSHOT_FILE, ss_hashtable);
 	if (ret < 0) {
 		HLOG_ERROR("load all ss error: %d", ret);
 		goto out;
 	}
    
-    sort_all_snapshot(ss_hashtable,snapshot_list);
+    sort_all_snapshot(ss_hashtable,&snapshot_list);
+	if (0 == g_list_length(snapshot_list)) {
+		HLOG_ERROR("the length of snapshot list is 0");
+		ret = -1;
+		goto out;
+	}
 	char* snapshots_buf = (char *)g_malloc0(g_list_length(snapshot_list)*sizeof(struct snapshot));
 	if (NULL == snapshots_buf){
 		g_message("Allocate error!");

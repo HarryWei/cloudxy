@@ -200,9 +200,9 @@ static int compare_snapshot(gconstpointer litem,
      return ret;
 }
 
-int sort_all_snapshot(GHashTable *ss_hashtable,GList *snapshot_list){
-    GList *ss_list = g_hash_table_get_values(ss_hashtable);
-    ss_list = g_list_sort(ss_list,compare_snapshot);
+int sort_all_snapshot(GHashTable *ss_hashtable,GList **ss_list){
+    (*ss_list) = g_hash_table_get_values(ss_hashtable);
+    (*ss_list) = g_list_sort((*ss_list),compare_snapshot);
     return 0;
 }
 

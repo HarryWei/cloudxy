@@ -1,5 +1,5 @@
 /*
- *  hlfs_open.c
+ *  hlfs_close.c
  *  Kanghua <kanghua151@msn.com> (C) 2011
  */
 #include <sys/types.h>
@@ -25,12 +25,13 @@ int hlfs_close(struct hlfs_ctrl *ctrl){
 	    return -1;
     }
     int ret =0;
-    ctrl->write_task_run = 0;
     if(ctrl->cur_write_file_handler!=NULL){
        ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->cur_write_file_handler);
+	   ctrl->cur_write_file_handler = NULL;
     }
     if(ctrl->cur_read_file_handler!=NULL){
        ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->cur_read_file_handler);
+	   ctrl->cur_read_file_handler = NULL;
     }
     ctrl->usage_ref--;
     HLOG_DEBUG("leave func:%s",__func__);

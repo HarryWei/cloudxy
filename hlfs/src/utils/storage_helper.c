@@ -20,7 +20,7 @@ struct back_storage* init_storage_handler(const char* uri)
 	HLOG_DEBUG("enter func %s", __func__);
     int ret =0;
     struct back_storage* storage = NULL;
-    gchar* back_storage_type;
+    gchar* back_storage_type = NULL;
     char *head=NULL;
     char *hostname=NULL;
     char *dir=NULL;
@@ -56,8 +56,8 @@ out:
     g_free(dir);
     if(ret !=0){
         free(storage);
-	HLOG_ERROR("ret is not 0, so error happened");
-       storage = NULL;
+		HLOG_ERROR("ret is not 0, so error happened");
+        storage = NULL;
     }
 	HLOG_DEBUG("leave func %s", __func__);
     return storage;
@@ -192,14 +192,15 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
     const char* latest_file = NULL;
     uint64_t latest_st_mtime = 0;
     bs_file_info_t * info = infos;
-    *offset = 0;
+	bs_file_info_t * __info = NULL;
     for(i=0;i<num_entries;i++){
-        HLOG_DEBUG("file:%s,size:%llu,time:%llu\n",info->name,info->size,info->lmtime);  
+        HLOG_DEBUG("7777 file:%s,size:%llu,time:%llu\n",info->name,info->size,info->lmtime);  
         if(g_str_has_suffix(info->name,"seg")){
              if(latest_st_mtime < info->lmtime){
                 latest_st_mtime = info->lmtime;
                 latest_file = info->name;
-                *offset = info->size;
+				__info = info;
+                //*offset = info->size;
 #if 0
                 if(info->size == 0){
                     HLOG_DEBUG("meta data .................. not update ?");
@@ -214,6 +215,7 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
         } 
         info++;
     }
+	HLOG_DEBUG("7777 file:%s,size:%llu,time:%llu\n",info->name,info->size,info->lmtime);  
 
     if(latest_file!=NULL){
         HLOG_DEBUG("latest file:%s",latest_file);
@@ -223,7 +225,7 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
         HLOG_DEBUG("segno :%d",*segno);
         g_strfreev(v);
 #if 1
-        if(*offset == 0){
+        if (__info->size == 0) {
            HLOG_DEBUG("meta data .................. not update ?");
            ret = restore_last_segno_file(storage->uri,latest_file); 
            g_assert(0==ret);
@@ -381,10 +383,12 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 	HLOG_DEBUG("leave func %s", __func__);
 	return cur_storage_addr;
 }
+#if 1
 uint64_t  SEGMENT_SIZE;
 uint64_t  SEGMENT_SIZE_MASK = 0;
 uint64_t  SEGMENT_SIZE_SHIFT = 0;
 uint32_t  HBLOCK_SIZE;
+#endif
 int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint32_t *max_fs_size)
 {
 	HLOG_DEBUG("enter func %s", __func__);
@@ -437,6 +441,7 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
         goto out;
     }
     g_free(_uri);
+#if 1
     SEGMENT_SIZE = _seg_size;
     SEGMENT_SIZE_MASK  = SEGMENT_SIZE - 1;
     SEGMENT_SIZE_SHIFT = 0;
@@ -445,6 +450,7 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
         SEGMENT_SIZE_SHIFT++;
     }
     HBLOCK_SIZE=_block_size;
+#endif
 out:
     g_key_file_free(sb_keyfile);
     storage->bs_file_close(storage,file);
@@ -454,22 +460,27 @@ out:
  
 
 int load_latest_inode_map_entry(struct back_storage *storage,
-			uint32_t segno, uint32_t last_offset,
+			const uint32_t segno, const uint32_t last_offset,
 				struct inode_map_entry *ime)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+   HLOG_DEBUG("enter func %s", __func__);
+   HLOG_DEBUG("777 dbg last offset is %u, seg no is %u", last_offset, segno);
    int ret = 0;
    const char segfile_name[SEGMENT_FILE_NAME_MAX];
-   build_segfile_name(segno,segfile_name);
+   memset((char *) segfile_name, SEGMENT_FILE_NAME_MAX, 0);
+   ret = build_segfile_name(segno,segfile_name);
+   if (-1 == ret) {
+	   HLOG_ERROR("build segfile name error!");
+	   return -1;
+   }
    bs_file_t file = storage->bs_file_open(storage,segfile_name,BS_READONLY); 
    if(file==NULL){
       HLOG_ERROR("can not open segment file %s",segfile_name);
       return -1; 
    }
-
-   uint64_t inode_map_entry_pos = last_offset - 
-                        sizeof(struct inode_map_entry);
-   HLOG_DEBUG("inode map entry pos %llu",inode_map_entry_pos);
+   HLOG_DEBUG("777 dbg last offset is %d", last_offset);
+   uint64_t inode_map_entry_pos = (uint64_t) last_offset - sizeof(struct inode_map_entry);
+   HLOG_DEBUG("777 dbg inode map entry pos %llu", inode_map_entry_pos);
    if(sizeof(struct inode_map_entry) != 
                  storage->bs_file_pread(storage,
                  file,(char*)ime,
@@ -487,3 +498,102 @@ out2:
 	HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
+
+
+int file_append_contents(struct back_storage *storage,const char* filename,const char* contents,uint32_t size){
+	HLOG_DEBUG("enter func %s", __func__);
+    if(storage == NULL || filename == NULL || contents == NULL) {
+		HLOG_ERROR("Parameter error!");
+        return -1;
+    }
+	int ret = 0;
+	bs_file_t file = NULL;
+	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage,filename)) {
+		HLOG_DEBUG("cp file not exist, create file");
+		file = storage->bs_file_create(storage,filename);
+		if (NULL == file) {
+            ret = -1;
+			HLOG_ERROR("can not create file %s",filename);
+			goto out;
+		}
+		storage->bs_file_close(storage,file);
+	}
+	file = storage->bs_file_open(storage,filename,BS_WRITEABLE);
+	if (NULL == file) {
+		HLOG_ERROR("can not open cp file %s", filename);
+        ret = -1;
+		goto out;
+	}
+	if (size !=  storage->bs_file_append(storage, file,contents,size)) {
+		HLOG_ERROR("write file error, write bytes %d", ret);
+		ret = -1;
+		goto out;
+	}
+out:
+	if (NULL != file) {
+		storage->bs_file_close(storage, file);
+	}
+	HLOG_DEBUG("leave func %s", __func__);
+	return ret;
+
+}
+
+int file_get_contents(struct back_storage *storage,const char* filename,const char**contents,uint32_t *size){
+	HLOG_DEBUG("enter func %s", __func__);
+     if(storage == NULL || filename == NULL) {
+		HLOG_ERROR("Parameter error!");
+        return -1;
+    }
+
+	int ret = 0;
+	int i = 0;
+	HLOG_DEBUG("filename is %s", filename);
+	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage,filename)) {
+		HLOG_ERROR("file is not exist, but may be first start, not error, check it please");
+		ret = -1;
+		goto out;
+	}
+	bs_file_info_t *file_info = storage->bs_file_info(storage,filename);
+	if (NULL == file_info) {
+		HLOG_ERROR("get snapshot info error!");
+		ret = -1;
+		goto out;
+	}
+	*size = file_info->size; 
+	g_free(file_info);
+	HLOG_DEBUG("file_size : %u", *size);
+	*contents = (char *)g_malloc0(*size);
+	if (NULL == contents) {
+		HLOG_ERROR("Allocate error!");
+		ret = -1;
+		goto out;
+	}
+	bs_file_t file = NULL;
+	file = storage->bs_file_open(storage,filename, BS_READONLY);
+	if (file == NULL) {
+		HLOG_ERROR("open snapshot.txt error");
+		ret = -1;
+		goto out;
+	}
+	if(*size != storage->bs_file_pread(storage,file,*contents,*size,0))
+	{
+		HLOG_ERROR("Read file snapshot.txt failed\n");
+		storage->bs_file_close(storage, file);
+        g_free(contents);
+		ret = -1;
+        goto out;
+	}
+out:
+	if (NULL != file) {
+		storage->bs_file_close(storage, file);
+	}
+	HLOG_DEBUG("leave func %s", __func__);
+    return ret;
+}
+
+
+
+
+
+
+

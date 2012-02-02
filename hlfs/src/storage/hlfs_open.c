@@ -1,7 +1,6 @@
 /*
  *  hlfs_open.c
  *  Kanghua <kanghua151@msn.com> (C) 2011
- *  Updated by Harry Wei <harryxiyou@gmail.com>
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -10,6 +9,7 @@
 #include <glib.h>
 #include "hlfs_ctrl.h"
 #include "hlfs_log.h"
+#include "snapshot.h"
 #include "comm_define.h"
 #include "misc.h"
 #include "logger.h"
@@ -65,10 +65,21 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 		HLOG_ERROR("error params :falg %d",flag);
 		return -1;
 	}
+
+	if (1 == flag) {
+		ctrl->rw_inode_flag = 1;
+	} else if (0 == flag) {
+		ctrl->rw_inode_flag = 0;
+	} else {
+		HLOG_ERROR("the bad flag for hlfs open by inode");
+        return -1;
+    }
+
 	if(ctrl->usage_ref > 0){
 		HLOG_DEBUG("This fs has opened by other,can not use it"); 
+        return -1;
 	}
-    int ret;
+    int ret = 0;
     HLOG_DEBUG("inode no %llu , inode address %llu", ctrl->imap_entry.inode_no, ctrl->imap_entry.inode_addr);
     if (ctrl->imap_entry.inode_no == 0 && 
 			ctrl->imap_entry.inode_addr == 0) { /* no inode condition */
@@ -90,18 +101,20 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 		}
 		HLOG_DEBUG("inode 's length:%llu",ctrl->inode.length);
 	}
-#if 0
-	g_message("append log with only inode !\n");
-    int size = append_inode(ctrl); /* append new log */
-    if (size < 0) {
-		g_message("fail to append log with inode ! %d\n",size);
-        return -1;
-	}
-    ctrl->last_offset += size;
-#endif
+	HLOG_DEBUG("ctrl->rw_inode_flag:%d", ctrl->rw_inode_flag);
+    struct snapshot *ss;
+	if (0 == ctrl->storage->bs_file_is_exist(ctrl->storage,SNAPSHOT_FILE)){
+        ret = find_latest_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE, SNAPSHOT_FILE, &ss);
+        if(ret !=0){
+		    HLOG_DEBUG("can not read alive snapshot,there must be some error");
+            return -1; 
+        }
+		memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
+		sprintf(ctrl->alive_ss_name, "%s", ss->sname);
+    }else{
+		HLOG_DEBUG("do not need read alive snapshot file");
+    }
 	ctrl->usage_ref++;
 	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }
-
-

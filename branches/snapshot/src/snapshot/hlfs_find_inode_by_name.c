@@ -21,12 +21,12 @@ int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_
 		ret = -1;
 		goto out;
 	}
-	if (0 > (ret = load_snapshot_by_name(storage, ss, sname))) {
+	if (0 > (ret = load_snapshot_by_name(storage, SNAPSHOT_FILE, &ss, sname))) {
 		HLOG_ERROR("load ss by name error");
 		g_free(ss);
 		ret = -1;
 		goto out;
-	} else if (1 == ret) {
+	} else if (EHLFS_SSNOTEXIST == ret) {
 		HLOG_ERROR("We can not find the snapshot name");
 		goto out;
 	}

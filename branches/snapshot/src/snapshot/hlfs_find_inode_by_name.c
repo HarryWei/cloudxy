@@ -26,9 +26,6 @@ int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_
 		g_free(ss);
 		ret = -1;
 		goto out;
-	} else if (EHLFS_SSNOTEXIST == ret) {
-		HLOG_ERROR("We can not find the snapshot name");
-		goto out;
 	}
 	*inode_addr = ss->inode_addr;
 out:

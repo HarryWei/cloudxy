@@ -6,32 +6,18 @@
 #include "comm_define.h"
 #include "storage.h"
 
-#define SNAPSHOT_FILE 	            	"snapshot.txt"
+#define	SNAPSHOT_FILE "snapshot.txt"
+#define	ALIVE_SNAPSHOT_FILE "alive_snapshot.txt"
 
 struct snapshot {
 	uint64_t timestamp;
 	uint64_t inode_addr;
 	char sname[HLFS_FILE_NAME_MAX];
-    char up_sname[HLFS_FILE_NAME_MAX]; /*  for tree style snapshot  */
+	char up_sname[HLFS_FILE_NAME_MAX]; /* for tree style snapshot */
 } __attribute__((packed));
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define SS_ITEM_SEP 			"@@##$$"
 
-int snapshot2text(const struct snapshot *snapshot, char *textbuf);
-int dump_snapshot(struct back_storage *storage, const char* snapshot_file, \
-		struct snapshot *snapshot);
-int load_ss_from_text(struct snapshot *ss, const char *buf, int *flag);
-int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable);
-int load_ss_by_name(struct back_storage *storage, struct snapshot *ss,\
-		const char *ss_name);
-int snapshot_delmark2text(const char *ss_name, char *textbuf);
-int dump_snapshot_delmark(struct back_storage *storage, const char *snapshot_file, \
-		const char *ssname);
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif 

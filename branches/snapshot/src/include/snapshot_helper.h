@@ -15,7 +15,7 @@ int redump_all_snapshot(struct back_storage *storage,const char* snapshot_file,G
 int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_file struct snapshot **ss, const char *ss_name);
 
 /* get lateset alive snapshot before timestamp, it will be used when  hlfs open by inode*/
-int find_latest_alive_snapshot_before_time(struct back_storage *storage,const char* alive_snapshot_file, struct snapshot **ss,uint64_t timestamp);
+int find_latest_alive_snapshot_before_time(struct back_storage *storage, const char *snapshot_file, const char* alive_snapshot_file, struct snapshot **ss,uint64_t timestamp);
 
 /* get lateset alive snapshot , it will be used when hlfs open */
 int find_latest_alive_snapshot(struct back_storage *storage,const char* alive_snapshot_file, const char* snapshot_file,struct snapshot **ss);

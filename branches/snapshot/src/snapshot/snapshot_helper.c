@@ -282,7 +282,7 @@ out:
 }
 
 
-static int load_all_alive_snapshot(struct back_storage *storage,const char* alive_snapshot_file,GList *alive_ss_list)
+static int load_all_alive_snapshot(struct back_storage *storage,const char* alive_snapshot_file,GList **alive_ss_list)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
@@ -295,15 +295,16 @@ static int load_all_alive_snapshot(struct back_storage *storage,const char* aliv
     }
 	gchar **lines = g_strsplit(contents, "\n", 0);
     g_free(contents);
-    int i;
+    int i = 0;
+	HLOG_DEBUG("999 lines length is %d", g_strv_length(lines));
 	for (i = 0; i < g_strv_length(lines) - 1; i++) {
-        struct snapshot *ss;
+        struct snapshot *ss = NULL;
         int flag=0;
         ret = load_snapshot_from_text(&ss,lines[i], &flag);
         if(ret!=0){
             return -1;
         }
-        alive_ss_list = g_list_append(alive_ss_list,ss);
+        (*alive_ss_list) = g_list_append((*alive_ss_list),ss);
     }
 	HLOG_DEBUG("9999 leave func %s", __func__);
 	return ret;
@@ -320,8 +321,8 @@ static void free_all_list(GList *list){
 }
 
 int find_latest_alive_snapshot_before_time(struct back_storage *storage,
-										const char* alive_snapshot_file, 
 										const char* snapshot_file,
+										const char* alive_snapshot_file, 
 										struct snapshot **ss,
 										uint64_t timestamp){
     HLOG_DEBUG("enter func %s", __func__);
@@ -332,7 +333,7 @@ int find_latest_alive_snapshot_before_time(struct back_storage *storage,
     int ret = 0;
 	GHashTable *ss_hashtable = g_hash_table_new(g_str_hash, g_str_equal);
     GList * alive_snapshot_list = NULL;
-    ret = load_all_alive_snapshot(storage,alive_snapshot_file,alive_snapshot_list);
+    ret = load_all_alive_snapshot(storage,alive_snapshot_file,&alive_snapshot_list);
     if(ret !=0){
         goto out;
     }
@@ -343,17 +344,31 @@ int find_latest_alive_snapshot_before_time(struct back_storage *storage,
     }
     gboolean flag = FALSE;
     int i;
-    for(i = g_list_length(alive_snapshot_list);i=0;i--){
+	HLOG_DEBUG("99 timestamp is %llu", timestamp);
+	HLOG_DEBUG("99 list length is %d", g_list_length(alive_snapshot_list));
+	if (0 == g_list_length(alive_snapshot_list)) {
+		HLOG_ERROR("alive snapshot list is nil");
+		ret = -1;
+		goto out;
+	}
+    for(i = g_list_length(alive_snapshot_list) - 1; i >= 0; i--){
         struct snapshot *_ss = g_list_nth_data(alive_snapshot_list,i);
+		HLOG_DEBUG("99 i _ss->timestamp is %llu, _ss->sname is %s", _ss->timestamp, _ss->sname);
         if(_ss->timestamp <= timestamp){
            if(NULL != g_hash_table_lookup(ss_hashtable,_ss->sname)){
-             *ss = (struct snapshot*)g_malloc0(sizeof(struct snapshot));
-             memcpy(*ss,_ss,sizeof(struct snapshot));
+             (*ss) = (struct snapshot*)g_malloc0(sizeof(struct snapshot));
+			 if ((*ss) == NULL) {
+				 HLOG_ERROR("Allocate Error!");
+				 ret = -1;
+				 goto out;
+			 }
+             memcpy((*ss),_ss,sizeof(struct snapshot));
              flag = TRUE;
              break;
             }
         }
     }
+	HLOG_DEBUG("99 *ss addr %p", (*ss));
     if(flag==FALSE){
        ret = -1;
     }

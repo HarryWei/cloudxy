@@ -50,13 +50,22 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 	ss.timestamp = get_current_time();
 
     struct snapshot *_ss=NULL;
-    ret = find_latest_alive_snapshot_before_time(ctrl->storage,ALIVE_SNAPSHOT_FILE, &_ss,inode->ctime);
-    if(ret !=0){
-       return -1; 
-    }else{
-	   sprintf(ss.up_sname,"%s",_ss->sname);
-    }
-    g_free(_ss);
+	if (0 == ctrl->storage->bs_file_is_exist(ctrl->storage, SNAPSHOT_FILE)) {
+    	ret = find_latest_alive_snapshot_before_time(ctrl->storage, 
+													SNAPSHOT_FILE, 
+													ALIVE_SNAPSHOT_FILE, 
+													&_ss,inode->ctime);
+    	if(ret !=0){
+       		ret = -1;
+			goto out;
+    	}else{
+	   		sprintf(ss.up_sname,"%s",_ss->sname);
+    	}
+    	g_free(_ss);
+	} else {
+		HLOG_DEBUG("do not need read alive snapshot file");
+		memset(ss.up_sname, 0, MAX_FILE_NAME_LEN);
+	}
 
 	memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
 	sprintf(ctrl->alive_ss_name, "%s", ss.sname);
@@ -64,12 +73,17 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
         ret = dump_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE,&ss);
         if(ret!=0){
             HLOG_ERROR("dump snapshot alive error!");
+			ret = -1;
+			goto out;
         }
         ret = dump_snapshot(ctrl->storage,SNAPSHOT_FILE,&ss);
         if(ret!=0){
             HLOG_ERROR("dump snapshot error!");
+			ret = -1;
+			goto out;
         }
     }
+	ctrl->usage_ref += 1;
 out:
     if(inode!=NULL){
         g_free(inode);

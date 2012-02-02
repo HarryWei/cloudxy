@@ -17,7 +17,6 @@ struct snapshot {
 } __attribute__((packed));
 
 #define SS_ITEM_SEP 			"@@##$$"
-#define FIRST_UP_NAME			"HLFS_ADAM"
 
 
 

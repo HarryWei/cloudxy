@@ -94,7 +94,7 @@ test_hlfs_find_inode_before_time(Fixture *fixture, const void *data) {
 	g_message("enter func %s", __func__);
 	const char *uri = fixture->uri;
 	int ret = 0;
-	uint64_t cur_time = 0;
+	uint64_t cur_time = get_current_time() - 300;
 	uint64_t inode_addr = 0;
 	ret = hlfs_find_inode_before_time(uri, cur_time, &inode_addr);
 	g_assert(ret == 0);
@@ -171,18 +171,22 @@ static void
 test_hlfs_open_by_inode(Fixture *fixture, const void *data) {
 	g_message("enter func %s", __func__);
 	//const char *uri = (const char *)data;
+	hlfs_close(fixture->ctrl);
 	int ret = hlfs_open_by_inode(fixture->ctrl, fixture->inode_addr1, 0);
+	g_message("ret is %d", ret);
 	g_assert(ret == 0);
 	g_message("inode_addr [%llu], inode mtime [%llu], rw_inode_flag [%d]",
 				fixture->ctrl->imap_entry.inode_addr,
 				fixture->ctrl->inode.mtime,
 				fixture->ctrl->rw_inode_flag);
+	hlfs_close(fixture->ctrl);
 	ret = hlfs_open_by_inode(fixture->ctrl, fixture->inode_addr2, 1);
 	g_assert(ret == 0);
 	g_message("inode_addr [%llu], inode mtime [%llu], rw_inode_flag [%d]",
 				fixture->ctrl->imap_entry.inode_addr,
 				fixture->ctrl->inode.mtime,
 				fixture->ctrl->rw_inode_flag);
+	hlfs_close(fixture->ctrl);
 	ret = hlfs_open_by_inode(fixture->ctrl, fixture->inode_addr3, 1);
 	g_assert(ret == 0);
 	g_message("inode_addr [%llu], inode mtime [%llu], rw_inode_flag [%d]",

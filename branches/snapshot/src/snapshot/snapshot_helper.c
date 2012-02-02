@@ -244,7 +244,10 @@ uint32_t pos=0;
 }
 
 
-int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_file,struct snapshot **ss, const char *ss_name)
+int load_snapshot_by_name(struct back_storage *storage, 
+						const char* snapshot_file,
+						struct snapshot **ss, 
+						const char *ss_name)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
@@ -258,6 +261,7 @@ int load_snapshot_by_name(struct back_storage *storage, const char* snapshot_fil
 	}
 	_ss = g_hash_table_lookup(ss_hashtable, ss_name);
     if(_ss == NULL){
+		HLOG_DEBUG("Can not find this snapshot name");
        ret = EHLFS_SSNOTEXIST;
 	   goto out;
     }

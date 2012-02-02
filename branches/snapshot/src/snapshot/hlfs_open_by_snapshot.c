@@ -18,15 +18,26 @@ int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,
 					const char* snapshot,
 					int flag) {
 	HLOG_DEBUG("enter func %s", __func__);
+	if (NULL == ctrl || NULL == snapshot) {
+		HLOG_ERROR("Parameter Error!");
+		return -1;
+	}
+	if ((strlen(snapshot) + 1) > HLFS_FILE_NAME_MAX) {
+		HLOG_ERROR("snapshot name beyond max length");
+		return -1;
+	}
 	int ret = 0;
-	struct snapshot *ss;
-	if (0 > (ret = load_snapshot_by_name(ctrl->storage, &ss, snapshot))) {
-		HLOG_ERROR("load ss by name error");
-		g_free(ss);
+	struct snapshot *ss = NULL;
+	if (0 == ctrl->storage->bs_file_is_exist(ctrl->storage, SNAPSHOT_FILE)) {
+		if (0 > (ret = load_snapshot_by_name(ctrl->storage, SNAPSHOT_FILE, &ss, snapshot))) {
+			HLOG_ERROR("load ss by name error");
+			g_free(ss);
+			ret = -1;
+			goto out;
+		}
+	} else {
+		HLOG_ERROR("We have no snapshot at the moment");
 		ret = -1;
-		goto out;
-	} else if (1 == ret) {
-		HLOG_ERROR("We can not find the snapshot name");
 		goto out;
 	}
 	struct inode *inode = load_inode(ctrl->storage,ss->inode_addr);
@@ -36,7 +47,7 @@ int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,
 		goto out;
 	}
 
-    strncpy((char *) (&(ctrl->inode)), (const char *) inode, sizeof(struct inode));
+    memcpy(&(ctrl->inode), inode, sizeof(struct inode));
 	g_free(inode);
     ctrl->imap_entry.inode_no = HLFS_INODE_NO;
     ctrl->imap_entry.inode_addr = ss->inode_addr;
@@ -52,6 +63,7 @@ int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,
 	memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
 	sprintf(ctrl->alive_ss_name, "%s", ss->sname);
     g_free(ss);
+	ctrl->usage_ref += 1;
 out:
 	HLOG_DEBUG("leave func %s", __func__);
 	return ret;

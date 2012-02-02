@@ -81,6 +81,7 @@ struct hlfs_ctrl {
     GThread *log_write_thread;
     int usage_ref;
 	int rw_inode_flag;
+	char alive_ss_name[MAX_FILE_NAME_LEN];
 };
 
 typedef struct hlfs_stat{

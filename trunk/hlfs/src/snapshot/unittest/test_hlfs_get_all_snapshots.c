@@ -1,5 +1,5 @@
 /*
- *  hlfs/src/snapshot/unittest/test_hlfs_rm_snapshot.c
+ *  hlfs/src/snapshot/unittest/test_hlfs_get_all_snapshots.c
  *  
  *  Harry Wei <harryxiyou@gmail.com> (C) 2011
  */
@@ -10,15 +10,19 @@
 #include <string.h> 
 #include "api/hlfs.h"
 #include "hlfs_log.h"
+#include "misc.h"
 #include "storage.h"
 #include "storage_helper.h"
-#include "comm_define.h"
+#include "snapshot.h"
 
 #define REQ_SIZE 4096
 #define TOTAL_SIZE 40960
 
 typedef struct {
 	struct hlfs_ctrl *ctrl;
+	uint64_t inode_addr1;
+	uint64_t inode_addr2;
+	uint64_t inode_addr3;
 	char *uri;
 } Fixture;
 
@@ -76,7 +80,6 @@ take_snapshot(Fixture *fixture, const void *data) {
 
 	memset(content, 0, REQ_SIZE);
 	while (offset < TOTAL_SIZE) {
-		g_message("77 dbg i is %d", i);
 		int ret1 = hlfs_write(fixture->ctrl, content, REQ_SIZE, offset);
 		g_assert_cmpint(ret1, ==, REQ_SIZE);
 		do_snapshot(fixture, i);
@@ -87,8 +90,36 @@ take_snapshot(Fixture *fixture, const void *data) {
 	return;
 }
 
+static void
+test_hlfs_find_inode_before_time(Fixture *fixture, const void *data) {
+	g_message("enter func %s", __func__);
+	const char *uri = fixture->uri;
+	int ret = 0;
+	uint64_t cur_time = get_current_time() - 300;
+	uint64_t inode_addr = 0;
+	ret = hlfs_find_inode_before_time(uri, cur_time, &inode_addr);
+	g_assert(ret == 0);
+	fixture->inode_addr1 = inode_addr;
+	g_message("current time [%llu], inode addr is [%llu]", cur_time, inode_addr);
+	cur_time = get_current_time();
+	cur_time -= 400;
+	inode_addr = 0;
+	ret = hlfs_find_inode_before_time(uri, cur_time, &inode_addr);
+	g_assert(ret == 0);
+	fixture->inode_addr2 = inode_addr;
+	g_message("current time [%llu], inode addr is [%llu]", cur_time, inode_addr);
+	cur_time = get_current_time();
+	inode_addr = 0;
+	ret = hlfs_find_inode_before_time(uri, cur_time, &inode_addr);
+	g_assert(ret == 0);
+	fixture->inode_addr3 = inode_addr;
+	g_message("current time [%llu], inode addr is [%llu]", cur_time, inode_addr);
+	g_message("leave func %s", __func__);
+	return ;
+}
+
 static void 
-hlfs_rm_snapshot_setup(Fixture *fixture, const void *data) {
+hlfs_get_all_snapshots_setup(Fixture *fixture, const void *data) {
 	const char *test_dir = (const char *)data;
 	g_print("test env dir is %s\n", test_dir);
 	char *fs_dir = g_build_filename(test_dir, "testfs", NULL);
@@ -130,55 +161,33 @@ hlfs_rm_snapshot_setup(Fixture *fixture, const void *data) {
 	int ret = hlfs_open(fixture->ctrl, 1);
 	g_assert(ret == 0);
 	take_snapshot(fixture, data);
+//	test_hlfs_find_inode_before_time(fixture, data);
 //	g_key_file_free(sb_keyfile);
 //	g_free(sb_file_path);
 	g_free(fs_dir);
 	return ;
 }
 
-static void
-test_hlfs_rm_snapshot(Fixture *fixture, const void *data) {
+static void 
+test_hlfs_get_all_snapshots(Fixture *fixture, const void *data) {
 	g_message("enter func %s", __func__);
 	const char *uri = fixture->uri;
-	g_message("uri is [%s]", uri);
-	int ret = 0;
-	ret = hlfs_rm_snapshot(uri, "T0");
-	g_message("ret is %d", ret);
-	g_assert(ret == 0);
-	ret = hlfs_rm_snapshot(uri, "T3");
-	g_assert(ret == 0);
-	ret = hlfs_rm_snapshot(uri, "wrong");
-	g_assert(ret == EHLFS_SSNOTEXIST);
-#if 0
-	ret = hlfs_rm_snapshot(uri, " **");
-	g_assert(ret == 0);
-	ret = hlfs_rm_snapshot(uri, "..");
-	g_assert(ret == 0);
-	ret = hlfs_rm_snapshot(uri, "+");
-	g_assert(ret == 0);
-	ret = hlfs_rm_snapshot(uri, "##@");
-	g_assert(ret == 0);
-	ret = hlfs_rm_snapshot(uri, "snapshot0");
-	g_assert(ret == 1);
-	ret = hlfs_rm_snapshot(uri, "bug here");
-	g_assert(ret == 1);
-	ret = hlfs_rm_snapshot(uri, "##@");
-	g_assert(ret == 1);
-	ret = hlfs_rm_snapshot(uri, "..");
-	g_assert(ret == 1);
-	ret = hlfs_rm_snapshot(uri, " **");
-	g_assert(ret == 1);
-	ret = hlfs_rm_snapshot(uri, " ");
-	g_assert(ret == 1);
-	ret = hlfs_rm_snapshot(uri, "1234");
-	g_assert(ret == 1);
-#endif
+	int num = 0;
+	struct snapshot *ss_buf = hlfs_get_all_snapshots(fixture->uri, &num);
+	g_assert(ss_buf != NULL);
+	int i = 0;
+	for (i = 0; i < num; i++) {
+		struct snapshot *ss = ss_buf;
+		g_message("timestamp is %llu, inode_addr is %llu, sname is %s, up_sname is %s", 
+				ss->timestamp, ss->inode_addr,
+				ss->sname, ss->up_sname);
+		ss_buf += 1;
+	}
 	g_message("leave func %s", __func__);
-	return ;
 }
 
 static void 
-hlfs_rm_snapshot_tear_down(Fixture *fixture, const void *data) {
+hlfs_get_all_snapshots_tear_down(Fixture *fixture, const void *data) {
 	const char *test_dir = (const char *) data;
 	g_print("clean dir path: %s\n", test_dir);
 	char *fs_dir = g_build_filename(test_dir, "testfs", NULL);
@@ -220,7 +229,6 @@ hlfs_rm_snapshot_tear_down(Fixture *fixture, const void *data) {
 	hlfs_close(fixture->ctrl);
 	deinit_hlfs(fixture->ctrl);
 	return;
-	return;
 }
 
 int main(int argc, char **argv) {
@@ -229,12 +237,12 @@ int main(int argc, char **argv) {
 		g_message("log4c init error!");
 	}
 	g_test_init(&argc, &argv, NULL);
-	g_test_add("/misc/hlfs_rm_snapshot", 
+	g_test_add("/misc/hlfs_find_inode_before_time", 
 				Fixture, 
 				g_get_current_dir(),
-				hlfs_rm_snapshot_setup, 
-				test_hlfs_rm_snapshot, 
-				hlfs_rm_snapshot_tear_down);
+				hlfs_get_all_snapshots_setup, 
+				test_hlfs_get_all_snapshots, 
+				hlfs_get_all_snapshots_tear_down);
 	g_message("leave func %s", __func__);
 	return g_test_run();
 }

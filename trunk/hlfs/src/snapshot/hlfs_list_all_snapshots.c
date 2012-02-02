@@ -15,99 +15,58 @@
 
 #define MAX_BUFSIZE (4 * 1024)
 
-/* 
- * list_key() will be the parameter of the function g_list_foreach() which will 
- * be invoked by hlfs_list_all_snapshots().
- */
-void list_key(gpointer data, gpointer usr_data)
-{
-	HLOG_DEBUG("enter func %s", __func__);
-	int size = 0;
-	if (data == NULL) {
-		HLOG_DEBUG("data is NULL");
-		return ;
-	}
-	char tmp[128];
-	memset(tmp, 0, 128);
-	sprintf(tmp, "%s\n", (char *)data);
-	size = g_strlcat(usr_data, tmp, MAX_BUFSIZE);
-	if (MAX_BUFSIZE < size) {
-		HLOG_ERROR("MAX_BUFSIZE is not enough");
-		return;
-	}
-	HLOG_DEBUG("leave func %s", __func__);
-}
-
 /*
- * hlfs_list_all_snapshots is one of snapshot module's APIs.It's function is 
- * loading all snapshot names to the memery.
  */
-int hlfs_list_all_snapshots(const char *uri, char **ss_name_array)
+struct snapshot *hlfs_get_all_snapshots(const char *uri,int *num_entries)
 {
 	HLOG_DEBUG("enter func %s", __func__);
+	if (NULL == uri || NULL == num_entries) {
+		HLOG_ERROR("Parameter Error!");
+		return NULL;
+	}
+	char *snapshots_buf = NULL;
 	int ret = 0;
-#if 0
-	if (NULL == *ss_name_array) { 
-		HLOG_ERROR("No buf available!");
-		ret = -1;
-		return ret;
-	}
-#endif
-	//TODO If size of snapshot.txt > MAX_BUFSIZE
-	*ss_name_array = (char *)g_malloc0(MAX_BUFSIZE);
-	if (NULL == *ss_name_array) {
-		g_message("Allocate error!");
-		ret = -1;
-		goto out;
-	}
-//	memset(*ss_name_array, 0, MAX_BUFSIZE);
+	GHashTable *ss_hashtable = g_hash_table_new(g_str_hash, g_str_equal);
+    GList *snapshot_list = NULL;
 
-	GHashTable *ss_hashtable = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	struct back_storage *storage = init_storage_handler(uri);
 	if (NULL == storage) {
 		HLOG_ERROR("init storage handler error!");
-		ret = -2;
 		g_hash_table_destroy(ss_hashtable);
-		return ret;
+		return NULL;
 	}
-	ret = load_all_ss(storage, ss_hashtable);
+	ret = load_all_snapshot(storage, SNAPSHOT_FILE, ss_hashtable);
 	if (ret < 0) {
 		HLOG_ERROR("load all ss error: %d", ret);
-		ret = -3;
 		goto out;
 	}
-	if (0 == g_hash_table_size(ss_hashtable)) {
-		HLOG_DEBUG("We may have not taken snapshot yet!!!");
-		sprintf(*ss_name_array, "");
-		ret = 0;
+   
+    sort_all_snapshot(ss_hashtable,&snapshot_list);
+	if (0 == g_list_length(snapshot_list)) {
+		HLOG_ERROR("the length of snapshot list is 0");
 		goto out;
 	}
-	
-	GList *list = g_hash_table_get_keys(ss_hashtable);
-	if (list == NULL) {
-		HLOG_ERROR("Get hash keys error");
-		ret = -4;
+	snapshots_buf = (char *)g_malloc0(g_list_length(snapshot_list)*sizeof(struct snapshot));
+	if (NULL == snapshots_buf){
+		g_message("Allocate error!");
 		goto out;
 	}
-
-	g_list_foreach(list, list_key, *ss_name_array);
-	HLOG_DEBUG("buf:%s", *ss_name_array);
-	if (strlen(*ss_name_array) == 0) {
-		HLOG_ERROR("list keys error");
-		ret = -5;
-		goto out;
-	}
-
-	if (0 > rewrite_snapshot_file(storage, ss_hashtable)) {
-		HLOG_ERROR("rewrite snapshot.txt error");
-		ret = -6;
-		goto out;
-	}
-
-out: //TODO ret is out of control, we should fix it
+    int i=0;
+    int offset=0;
+    for(i = 0; i < g_list_length(snapshot_list); i++){
+        struct snapshot *ss = g_list_nth_data(snapshot_list,i);
+		HLOG_DEBUG("999 ss->timestamp is %llu, ss->inode_addr is %llu, ss->sname is %s, ss->up_sname is %s",
+							ss->timestamp, ss->inode_addr, ss->sname, ss->up_sname);
+        memcpy(snapshots_buf+offset,ss,sizeof(struct snapshot));
+        offset +=sizeof(struct snapshot);
+    }
+    *num_entries = g_list_length(snapshot_list);
+out: 
 	g_free(storage);
-	g_hash_table_destroy(ss_hashtable);
+//	g_hash_table_destroy(ss_hashtable);
+    if(snapshot_list!=NULL){
+        g_list_free(snapshot_list);
+    }
 	HLOG_DEBUG("leave func %s", __func__);
-	g_message("ret is %d", ret);
-	return ret;
+	return (struct snapshot *) snapshots_buf;
 }

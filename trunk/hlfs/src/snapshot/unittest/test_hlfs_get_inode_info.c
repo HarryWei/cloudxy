@@ -31,37 +31,37 @@ do_snapshot(Fixture *fixture, int i) {
 	char buffer[128];
 	memset(buffer, 0, 128);
 	if (0 == i) {
-		sprintf(buffer, "%s%d", "snapshot", i);
+		sprintf(buffer, "%s", "T0");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (1 == i) {
-		sprintf(buffer, "%s", " ");
+		sprintf(buffer, "%s", "T1");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (2 == i) {
-		sprintf(buffer, "%s", "+");
+		sprintf(buffer, "%s", "T2");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (3 == i) {
-		sprintf(buffer, "%s", "##@");
+		sprintf(buffer, "%s", "T3");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (4 == i) {
-		sprintf(buffer, "%s", "..");
+		sprintf(buffer, "%s", "T4");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (5 == i) {
-		sprintf(buffer, "%s", " **");
+		sprintf(buffer, "%s", "T5");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
 	} else if (6 == i) {
-		sprintf(buffer, "%s", "1234");
+		sprintf(buffer, "%s", "T6");
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
@@ -94,7 +94,7 @@ test_hlfs_find_inode_before_time(Fixture *fixture, const void *data) {
 	g_message("enter func %s", __func__);
 	const char *uri = fixture->uri;
 	int ret = 0;
-	uint64_t cur_time = 0;
+	uint64_t cur_time = get_current_time() - 300;
 	uint64_t inode_addr = 0;
 	ret = hlfs_find_inode_before_time(uri, cur_time, &inode_addr);
 	g_assert(ret == 0);
@@ -194,13 +194,14 @@ hlfs_get_inode_info_tear_down(Fixture *fixture, const void *data) {
 	const char *test_dir = (const char *) data;
 	g_print("clean dir path: %s\n", test_dir);
 	char *fs_dir = g_build_filename(test_dir, "testfs", NULL);
+#if 0
 	pid_t status;
 	const char cmd[256];
 	memset((char *) cmd, 0, 256);
 	sprintf((char *) cmd, "%s %s %s", "rm", "-r", fs_dir);
 	g_message("cmd is [%s]", cmd);
 	status = system(cmd);
-#if 0
+
 	struct back_storage *storage = init_storage_handler(fixture->uri);
 	g_assert(storage != NULL);
 	int nums = 0;

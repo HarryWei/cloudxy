@@ -40,7 +40,13 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
 		HLOG_ERROR("hlfs_write error");
 		return -1;
     }
+
     g_mutex_lock (ctrl->hlfs_access_mutex);
+    if(ctrl->rw_inode_flag == 0){
+        HLOG_ERROR("only read!");
+        g_mutex_unlock (ctrl->hlfs_access_mutex);
+        return -1;
+    }
     int ret = 0;
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     uint64_t cur_time;
@@ -132,6 +138,8 @@ write_log:;
 	ctrl->inode.mtime  = cur_time;
 	ctrl->inode.ctime  = cur_time;
 	ctrl->inode.atime  = cur_time;
+	HLOG_DEBUG("get_current_time is %llu", ctrl->inode.mtime);
+	HLOG_DEBUG("length is %llu", ctrl->inode.length);
     int expand_size =  (db_end-db_start + 1)*BLOCKSIZE + 
     ib_amount(db_start,db_end) * BLOCKSIZE + 
     LOG_HEADER_LENGTH + 
@@ -153,7 +161,8 @@ write_log:;
 		g_message("fail to append log\n");
 		return -1; 
 	}
-#else 
+#else
+	memset(&(ctrl->write_req), 0, sizeof(struct write_req));
 	struct write_req *w_req = &ctrl->write_req;
     //struct write_rsp *w_rsp = &ctrl->write_rsp;
     //struct write_req * w_req = (struct write_req*)g_malloc0(sizeof(struct write_req));
@@ -161,6 +170,10 @@ write_log:;
     w_req->db_start = db_start;
     w_req->db_end = db_end;
     g_async_queue_push(ctrl->write_req_aqueue,(gpointer)w_req);
+	if (NULL == w_req) {
+		HLOG_DEBUG("g_async_queue_push pushed null data");
+	}
+	HLOG_DEBUG("ctrl->write_task_run is %d", ctrl->write_task_run);
     HLOG_DEBUG("request pushed to aysn");
     struct write_rsp * w_rsp = (struct write_rsp*)g_async_queue_pop(ctrl->write_rsp_aqueue);
     ret = w_rsp->res;

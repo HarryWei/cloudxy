@@ -95,9 +95,9 @@ int local_file_close(struct back_storage *storage,bs_file_t file){
 	HLOG_DEBUG("local -- enter func %s", __func__);
     //int fd = *(int*)file;
     int fd = GPOINTER_TO_INT((gpointer)file);
-    close(fd);
+//    close(fd);
 	HLOG_DEBUG("local -- leave func %s", __func__);
-    return 0;
+    return close(fd);
 }
 
 int local_file_is_exist(struct back_storage * storage,const char *path){

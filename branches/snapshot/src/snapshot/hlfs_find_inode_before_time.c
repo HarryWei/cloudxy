@@ -50,12 +50,13 @@ get_iaddr_bytime_in_seg(struct back_storage *storage,
 	}
 	HLOG_DEBUG("count is %d", count);
 	int offset = 0;
-	uint64_t tmp_time = 0;
-	uint64_t tmp_inode_addr = 0;
+	int first_inode_flag = 0;
+//	uint64_t tmp_time = 0;
+//	uint64_t tmp_inode_addr = 0;
 	struct log_header *lh = NULL;
 	struct inode_map_entry *imap = NULL;
 	struct inode *inode = NULL;
-#if 1
+#if 0
 	if (0 == timestamp) {
 		HLOG_ERROR("We can not find the inode addr before time 0");
 		ret = -1;
@@ -70,16 +71,27 @@ get_iaddr_bytime_in_seg(struct back_storage *storage,
 		inode = (struct inode *) (tmp_buf + offset + lh->log_size - sizeof(struct inode_map_entry) - sizeof(struct inode));
 		//g_message("%s -- This inode's mtime is %llu", __func__, inode->mtime);
 	    //*inode_addr = imap->inode_addr;
-		if ((timestamp < inode->mtime) && (timestamp >= tmp_time)) {
-			*inode_addr = tmp_inode_addr;
+		if ((0 == first_inode_flag) && (timestamp < inode->mtime)) {
+			HLOG_ERROR("We can not find the inode addr before the timestamp");
+			ret = -1;
+			goto out;
+		}
+		if (timestamp == inode->mtime) {
+			*inode_addr = imap->inode_addr;
 			goto out;
 		}	
-		tmp_inode_addr = imap->inode_addr;
-		tmp_time = inode->mtime;
+		if (timestamp < inode->mtime) {
+			struct inode_map_entry *pre_imap = (struct inode_map_entry *) (tmp_buf + offset - sizeof(struct inode_map_entry));
+			*inode_addr = pre_imap->inode_addr;
+			goto out;
+		}	
+//		tmp_inode_addr = imap->inode_addr;
+//		tmp_time = inode->mtime;
+		first_inode_flag = 1;
 		offset += lh->log_size;
 	}
-	if (timestamp > tmp_time) {
-		*inode_addr = tmp_inode_addr;
+	if (timestamp > inode->mtime) {
+		*inode_addr = imap->inode_addr;
 		goto out;
 	}
 	HLOG_ERROR("We can not find the inode addr before the timestamp");

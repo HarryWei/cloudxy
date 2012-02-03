@@ -22,4 +22,5 @@
 这两种测试才有可能被合并到主线。我们的测试框架采用glib测试框架。具体实现可以参见
 glib手册或者http://cloudxy.googlecode.com/svn/trunk/hlfs/src/snapshot/unittest/
 
+
 -- write by 贾威威  2012 2 3

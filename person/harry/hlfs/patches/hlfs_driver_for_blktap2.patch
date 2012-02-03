@@ -1,0 +1,174 @@
+Index: python/xen/xend/server/BlktapController.py
+===================================================================
+--- python/xen/xend/server/BlktapController.py	(revision 327)
++++ python/xen/xend/server/BlktapController.py	(working copy)
+@@ -24,6 +24,7 @@
+     'qcow',
+     'vhd',
+     'remus',
++    'hlfs',
+     ]
+ 
+ blktap_disk_types = blktap1_disk_types + blktap2_disk_types
+Index: blktap2/drivers/tapdisk-disktype.h
+===================================================================
+--- blktap2/drivers/tapdisk-disktype.h	(revision 327)
++++ blktap2/drivers/tapdisk-disktype.h	(working copy)
+@@ -39,7 +39,8 @@
+ #define DISK_TYPE_BLOCK_CACHE 7
+ #define DISK_TYPE_LOG         8
+ #define DISK_TYPE_REMUS       9
+-#define DISK_TYPE_VINDEX      10
++//#define DISK_TYPE_VINDEX      10
++#define DISK_TYPE_HLFS        10
+ 
+ #define DISK_TYPE_NAME_MAX    32
+ 
+Index: blktap2/drivers/Makefile
+===================================================================
+--- blktap2/drivers/Makefile	(revision 327)
++++ blktap2/drivers/Makefile	(working copy)
+@@ -2,6 +2,13 @@
+ BLKTAP_ROOT= ..
+ include $(XEN_ROOT)/tools/Rules.mk
+ 
++GLIB_DIR1=/usr/lib/glib-2.0/include
++GLIB_DIR2=/usr/include/glib-2.0
++HLFS_DIR=/home/kanghua/workshop/trunk/hlfs
++LOG4C_DIR=$(HLFS_DIR)/3part/log
++
++
++
+ LIBVHDDIR  = $(BLKTAP_ROOT)/vhd/lib
+ 
+ IBIN       = tapdisk2 td-util tapdisk-client tapdisk-stream tapdisk-diff
+@@ -16,14 +23,18 @@
+ CFLAGS    += $(CFLAGS_libxenctrl)
+ CFLAGS    += -I $(LIBAIO_DIR)
+ CFLAGS    += -I $(MEMSHR_DIR)
++CFLAGS    += -I $(GLIB_DIR1)
++CFLAGS    += -I $(GLIB_DIR2)
++CFLAGS    += -I $(HLFS_DIR)/src/include
++CFLAGS    += -I $(LOG4C_DIR)/include
+ CFLAGS    += -D_GNU_SOURCE
+ CFLAGS    += -DUSE_NFS_LOCKS
+ 
+ ifeq ($(CONFIG_X86_64),y)
+-CFLAGS            += -fPIC
++CFLAGS    += -fPIC
+ endif
+ 
+-LIBS      += -lrt -lz
++LIBS      += -lrt -lz 
+ 
+ LBLIBS_img := $(LDLIBS_libxenctrl) $(CRYPT_LIB) -lpthread -lz -lm
+ 
+@@ -32,6 +43,13 @@
+ ifeq ($(CONFIG_Linux),y)
+ LIBS += -luuid
+ endif
++ifeq ($(CONFIG_X86_64),y)
++LIBS += -L$(HLFS_DIR)/output/lib64 -lhlfs
++LIBS += -L$(LOG4C_DIR)/lib64 -llog4c
++else
++LIBS += -L$(HLFS_DIR)/output/lib32 -lhlfs
++LIBS += -L$(LOG4C_DIR)/lib32 -llog4c
++endif
+ 
+ REMUS-OBJS  := block-remus.o
+ REMUS-OBJS  += hashtable.o
+@@ -80,6 +98,7 @@
+ 
+ BLK-OBJS-y  := block-aio.o
+ BLK-OBJS-y  += block-ram.o
++BLK-OBJS-y  += block-hlfs.o
+ BLK-OBJS-y  += block-cache.o
+ BLK-OBJS-y  += block-vhd.o
+ BLK-OBJS-y  += block-log.o
+Index: blktap2/drivers/tapdisk2.c
+===================================================================
+--- blktap2/drivers/tapdisk2.c	(revision 327)
++++ blktap2/drivers/tapdisk2.c	(working copy)
+@@ -38,7 +38,6 @@
+ #include "tapdisk-utils.h"
+ #include "tapdisk-server.h"
+ #include "tapdisk-control.h"
+-
+ static void
+ usage(const char *app, int err)
+ {
+@@ -81,7 +80,6 @@
+ 
+ 	chdir("/");
+ 	tapdisk_start_logging("tapdisk2");
+-
+ 	err = tapdisk_server_init();
+ 	if (err) {
+ 		DPRINTF("failed to initialize server: %d\n", err);
+Index: blktap2/drivers/tapdisk-disktype.c
+===================================================================
+--- blktap2/drivers/tapdisk-disktype.c	(revision 327)
++++ blktap2/drivers/tapdisk-disktype.c	(working copy)
+@@ -82,11 +82,13 @@
+        1,
+ };
+ 
++/*
+ static const disk_info_t vhd_index_disk = {
+        "vhdi",
+        "vhd index image (vhdi)",
+        1,
+ };
++*/
+ 
+ static const disk_info_t log_disk = {
+ 	"log",
+@@ -100,6 +102,13 @@
+        0,
+ };
+ 
++static const disk_info_t hlfs_disk = {
++       "hlfs",
++       "hlfs disk replicator (hlfs)",
++       0,
++};
++
++
+ const disk_info_t *tapdisk_disk_types[] = {
+ 	[DISK_TYPE_AIO]	= &aio_disk,
+ 	[DISK_TYPE_SYNC]	= &sync_disk,
+@@ -110,8 +119,9 @@
+ 	[DISK_TYPE_QCOW]	= &qcow_disk,
+ 	[DISK_TYPE_BLOCK_CACHE] = &block_cache_disk,
+ 	[DISK_TYPE_LOG]	= &log_disk,
+-	[DISK_TYPE_VINDEX]	= &vhd_index_disk,
++//	[DISK_TYPE_VINDEX]	= &vhd_index_disk,
+ 	[DISK_TYPE_REMUS]	= &remus_disk,
++	[DISK_TYPE_HLFS]	= &hlfs_disk,
+ 	0,
+ };
+ 
+@@ -123,9 +133,10 @@
+ extern struct tap_disk tapdisk_ram;
+ extern struct tap_disk tapdisk_qcow;
+ extern struct tap_disk tapdisk_block_cache;
+-extern struct tap_disk tapdisk_vhd_index;
++//extern struct tap_disk tapdisk_vhd_index;
+ extern struct tap_disk tapdisk_log;
+ extern struct tap_disk tapdisk_remus;
++extern struct tap_disk tapdisk_hlfs;
+ 
+ const struct tap_disk *tapdisk_disk_drivers[] = {
+ 	[DISK_TYPE_AIO]         = &tapdisk_aio,
+@@ -137,9 +148,10 @@
+ 	[DISK_TYPE_RAM]         = &tapdisk_ram,
+ 	[DISK_TYPE_QCOW]        = &tapdisk_qcow,
+ 	[DISK_TYPE_BLOCK_CACHE] = &tapdisk_block_cache,
+-	[DISK_TYPE_VINDEX]      = &tapdisk_vhd_index,
++//	[DISK_TYPE_VINDEX]      = &tapdisk_vhd_index,
+ 	[DISK_TYPE_LOG]         = &tapdisk_log,
+ 	[DISK_TYPE_REMUS]       = &tapdisk_remus,
++	[DISK_TYPE_HLFS]        = &tapdisk_hlfs,
+ 	0,
+ };
+ 

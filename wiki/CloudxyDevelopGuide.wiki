@@ -1,4 +1,4 @@
-#summary cloudxy 代码开发规则.
+#summary Cloudxy 代码开发规则.
 =Cloudxy 代码开发规则=                                     
 
 ==代码具体开发规则说明==
@@ -21,5 +21,5 @@
 严格来讲，当你在自己的分支上实现一个功能，必须进行单元测试和集成测试，只有进行了
 这两种测试才有可能被合并到主线。我们的测试框架采用glib测试框架。具体实现可以参见
 glib手册或者http://cloudxy.googlecode.com/svn/trunk/hlfs/src/snapshot/unittest/
--------------------------------------------------------------------------------
-written by 贾威威  2012 2 3  
+
+-- write by 贾威威  2012 2 3

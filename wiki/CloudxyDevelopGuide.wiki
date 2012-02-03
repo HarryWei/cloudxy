@@ -1,5 +1,5 @@
-# cloudxy代码开发规则.
-=Cloudxy代码开发规则=
+#summary HLFS快照设计.
+=HLFS snapshot design=                                     
 
 ==具体规则代码开发规则说明==
  # 编码风格这里不做硬性规定，但是建议遵守linux内核的编码风格，原则上是清晰明了，可读性高。

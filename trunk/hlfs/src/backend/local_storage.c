@@ -213,13 +213,14 @@ local_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num
     while((filename = g_dir_read_name(dir)) != NULL) {
         gchar *file_path = g_build_filename(full_path,filename,NULL);
         int res=lstat(file_path,&buf);
-	if (0 != res) {
-		g_free(full_path);
-		g_free(file_path);
-		g_dir_close(dir);
-		HLOG_ERROR("lstat error");
-		return NULL;
-	}
+		if (0 != res) {
+			g_free(full_path);
+			g_free(file_path);
+			g_free(infos);
+			g_dir_close(dir);
+			HLOG_ERROR("lstat error");
+			return NULL;
+		}
         strcpy((char *) info->name,filename);
         info->is_dir = g_file_test(file_path, G_FILE_TEST_IS_DIR);
         info->size = buf.st_size;

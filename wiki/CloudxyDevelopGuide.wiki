@@ -1,4 +1,4 @@
-#cloudxy 代码开发规则.
+#summary cloudxy 代码开发规则.
 =Cloudxy 代码开发规则=                                     
 
 ==具体规则代码开发规则说明==

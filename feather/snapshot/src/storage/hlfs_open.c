@@ -81,7 +81,7 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 	}
     int ret = 0;
     HLOG_DEBUG("inode no %llu , inode address %llu", ctrl->imap_entry.inode_no, ctrl->imap_entry.inode_addr);
-    if (ctrl->imap_entry.inode_no == 0 && 
+    if (ctrl->imap_entry.inode_no == HLFS_INODE_NO && 
 			ctrl->imap_entry.inode_addr == 0) { /* no inode condition */
 		HLOG_DEBUG("empty filesystem %s", ctrl->sb.fsname);
         if (flag == 0) {

@@ -42,7 +42,6 @@ init_hlfs(const char *uri)
 	HLOG_ERROR("uri is null");
       return NULL;  
     }
-    int ret;
     g_thread_init(NULL);
 
     struct hlfs_ctrl *ctrl = (struct hlfs_ctrl*)g_malloc0(sizeof(struct hlfs_ctrl));
@@ -92,7 +91,8 @@ init_hlfs(const char *uri)
     if(ctrl->last_segno != 0 || ctrl->last_offset != 0){
         if(0!=load_latest_inode_map_entry(ctrl->storage,ctrl->last_segno,ctrl->last_offset,&ctrl->imap_entry)){
             HLOG_ERROR("load inode map entry failed");
-            ret = -1;
+			g_free(ctrl);
+            ctrl = NULL;
             goto out;
         }
     }

@@ -488,13 +488,8 @@ int load_latest_inode_map_entry(struct back_storage *storage,
                  inode_map_entry_pos)){
        HLOG_ERROR("can not read inode map entry ");
        ret = -1;
-       goto out1;
     }
-out1:
     storage->bs_file_close(storage,file);
-out2:
-    //g_free(segfile_name);
-    //g_free(segfile_path);
 	HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
@@ -590,10 +585,3 @@ out:
 	HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
-
-
-
-
-
-
-

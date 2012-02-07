@@ -32,7 +32,7 @@ static int load_latest_inode(struct hlfs_ctrl *ctrl)
     bs_file_t file = ctrl->storage->bs_file_open(ctrl->storage,segfile_name,BS_READONLY); 
     if(file==NULL){
         HLOG_ERROR("can not open segment file %s",segfile_name);
-        goto out2; 
+        goto out; 
     }
     uint64_t inode_pos = ctrl->last_offset - 
         sizeof(struct inode_map_entry) -
@@ -42,11 +42,9 @@ static int load_latest_inode(struct hlfs_ctrl *ctrl)
 				file,(char*)&ctrl->inode, sizeof(struct inode), inode_pos)){
        HLOG_ERROR("can not read inode from %s",segfile_name);
        ret = -1;
-       goto out1;
     }
-out1:
     ctrl->storage->bs_file_close(ctrl->storage,file);
-out2:
+out:
 	HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
@@ -62,7 +60,7 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	if (ctrl==NULL ||(flag != 0 && flag != 1)) { /* check the parameters */
-		HLOG_ERROR("error params :falg %d",flag);
+		HLOG_ERROR("error params :flag %d",flag);
 		return -1;
 	}
 

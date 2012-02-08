@@ -12,27 +12,6 @@
 #include "misc.h"
 #include "logger.h"
 
-#if 1 /* 0*/ 
-static int create_new_segfile(void *storage_handler, uint32_t segno) 
-{
-	HLOG_DEBUG("enter func %s", __func__);
-    int ret = 0;
-    gchar * path = (gchar*)storage_handler;
-    const char segfile_name[SEGMENT_FILE_NAME_MAX];
-    build_segfile_name(segno,segfile_name);
-    char *segfile_path = g_build_filename(path, segfile_name, NULL);
-    if (-1 == g_creat(segfile_path,0700)) {
-	    HLOG_ERROR("create segfile error");
-        ret = -1;
-        goto out;
-    }
-out:
-    g_free(segfile_path);
-	HLOG_DEBUG("leave func %s", __func__);
-    return ret;
-}
-#endif 
-
 int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint64_t pos)
 {
     HLOG_DEBUG("enter func %s", __func__);

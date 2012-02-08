@@ -4,10 +4,10 @@
 ==获取EMCS代码==
 svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
 
-==编译==
+== 编译 ==
  # 首先需要下载erlang —— 建议使用最新OTP R15B的版本
- # 进入CloudMaster目录;执行erl -make — 编译cloudMaster Application
- # 进入NodeController目录;执行erl -make — 编译NodeController Application
+ # 进入CloudMaster 目录;执行erl -make — 编译cloudMaster Application
+ # 进入NodeController 目录;执行erl -make — 编译NodeController Application
 
 ==启动node==
   * 启动node 运行cloud master

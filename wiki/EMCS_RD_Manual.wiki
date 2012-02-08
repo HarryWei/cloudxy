@@ -23,7 +23,7 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
 }}}
 
 ==初始化CloudMaster==
- * 启动cloud_master — 在node shell 上启动cloud_master application :(node1@127.0.0.1)1>application:start(cloud_master).
+ * 启动cloud_master — 在node shell 上启动cloud_master application :(node1@127.0.0.1)1>application:start(cloud_master) .
    
 {{{ 
 注：
@@ -36,15 +36,15 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
 3.tv:start().可观察到系统建立了我们建立了6张元数据表——其中sequence表用于产生序列号，其余表用于元数据存储。
 4.appmon:start(). 可观察系统各组件运行状况
 }}}
- * 导入网络资源 — 在node shell上执行meta_data_ops:add_netaddr_res（IPaddr） 如 meta_data_ops:add_netaddr_res("192.168.0.99").
+ * 导入网络资源 — 在node shell上执行meta_data_ops:add_netaddr_res（IPaddr） 如 meta_data_ops:add_netaddr_res("192.168.0.99") .
 {{{
 注
 网络ip地址资源用于分配给各虚拟机,为了简单和部署灵活起见,我们目前采用手动导入的方式初始化IP地址资源——mac等则自动产生.注意该动作只用做一次
 }}}
 
 ==加入node到集群中==
- * 为了从master所在shell执行命令，需要加入对应的record(因为我们命令使用了record描述)—shell中执行 rr("include/*.hrl")
- * 动态增增加节点—  gen_server:call(meta_server,#add_node_2m_req{node_name="node_controller1@127.0.0.1"},2000).
+ * 为了从master所在shell执行命令，需要加入对应的record(因为我们命令使用了record描述)—shell中执行 rr("include/ * .hrl") .
+ * 动态增增加节点—  gen_server:call(meta_server,#add_node_2m_req{node_name="node_controller1@127.0.0.1"},2000) .
 {{{
 注：
 1.注意是从master所在shell执行。
@@ -52,7 +52,7 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
 }}}
 
 ==创建虚拟机==
- * 执行gen_server:call(meta_server,  #vm_create_2m_req{vm_resource_info=#machine_resoure_info_t{mem_size=256,cpu_count=1,disk_size=0},vm_custom_info=#vm_custom_info_t{user_password="xxx",user_hostname="yyy"},os_type=ubuntu},2000)
+ * 执行gen_server:call(meta_server,  #vm_create_2m_req{vm_resource_info=#machine_resoure_info_t{mem_size=256,cpu_count=1,disk_size=0},vm_custom_info=#vm_custom_info_t{user_password="xxx",user_hostname="yyy"},os_type=ubuntu},2000) .
 {{{
 注.
 1.上述命令返回一个VM_ID序列号表示创建的VM，以后对该VM操作都将传入该ID.
@@ -61,7 +61,9 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
 }}}
 
 ==启动虚拟机==
- * 执行gen_server:call(meta_server, #vm_start_2m_req{vm_id=1},2000)
+ * 执行 gen_server:call(meta_server, #vm_start_2m_req{vm_id=1},2000) .
+
+注意：以上所有在shell中执行的命令，最后都有一个 '.'号， 不要忘记了 ;-)
 
 ---------------------
 wroten by 康华

@@ -5,7 +5,7 @@
 === 目的 ===
 制作一个编译大家测试使用的pv domU(很多朋友没有支持vt的处理器，所以我们主要使用pv domU）
 ----
-# 感谢我们的镜像提供者——ttylinux ：这是一个广泛应用于嵌入系统的小linux镜像，我们衷心感谢 Douglas Jerome（douglas@ttylinux.org）的无私奉献。
+# 感谢我们的镜像提供者——ttylinux ：这是一个广泛应用于嵌入系统的小linux镜像，我们衷心感谢 Douglas Jerome（douglas@ttylinux.org）的无私奉献<br>
 # 感谢stacklet提供Paravirtualized Kernel for Xen : 
 ----
 === 制作方法 ===

@@ -70,7 +70,8 @@
    sudo xm cr pygrub.con
  * login虚拟机
   sudo xm console ttylinux (或者vmid)
-  {{{注：
+  {{{
+    注：
     1.登陆名root,登陆密码password
     2.如果登陆失败，请查看/var/log/syslog 日志和 /var/log/xen/xend.log 分析原因
   }}}

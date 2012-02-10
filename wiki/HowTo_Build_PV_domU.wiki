@@ -31,15 +31,12 @@
   写入domUdisk/boot/grub.conf
  # 修改/etc/fstab
  {{{
-     /dev/xvda1  /   ext3  defaults,errors=remount-ro 0 0
- }}} 
- 写入domUdisk/etc/fstab第一行。为了pv domU和dom0通讯，我们还需要加入  xenfs.最后fstab如下
- {{{ 
      /dev/xvda1   /           ext3     defaults,errors=remount-ro 0 0
      tmpfs        /dev        tmpfs    noauto                     0 0
      proc         /proc       proc     noauto                     0 0
-     none 	  /proc/xen   xenfs defaults                      0 0 
- }}}
+     none 	  /proc/xen   xenfs defaults                      0 0
+ }}} 
+ 写入domUdisk/etc/fstab。
  # 修改/etc/inittab 
  {{{
      hvc0:2345:respawn:/sbin/38400 hvc0 （可去掉tty相关记录了）

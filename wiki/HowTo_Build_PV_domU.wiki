@@ -27,8 +27,8 @@
      title vmlinuz-2.6.35.4
      root (hd0,0)
      kernel /boot/vmlinuz-2.6.35.4 console=hvc0 root=/dev/xvda1 ro 
+     写入domUdisk/boot/grub.conf
    }}}
-   写入domUdisk/boot/grub.conf
    # 修改/etc/fstab
      {{{
      /dev/xvda1   /           ext3     defaults,errors=remount-ro 0 0

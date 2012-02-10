@@ -11,7 +11,7 @@
 === 制作方法 ===
  * 制作一个32M的镜像系统
    dd if=/dev/zero of=domU-32bit-FS.img bs=1M count=32
- * 制作文件系统 —— 我们使用ttylinux-i486-8.0.img作为base文件系统。
+ * 制作文件系统 —— 我们使用ttylinux-i486-8.0.img作为base文件系统
    # sudo mount -o loop /mnt ttylinux-i486-8.0.img 
    # mkdir domUdisk
    # sudo mount -o loop domU-32bit-FS.img domUdisk
@@ -24,22 +24,22 @@
   # mkdir domUdisk/boot
   # 将
   {{{
-  title vmlinuz-2.6.35.4
-  root (hd0,0)
-  kernel /boot/vmlinuz-2.6.35.4 console=hvc0 root=/dev/xvda1 ro 
+     title vmlinuz-2.6.35.4
+     root (hd0,0)
+     kernel /boot/vmlinuz-2.6.35.4 console=hvc0 root=/dev/xvda1 ro 
   }}}
   写入domUdisk/boot/grub.conf
   # 将
   {{{
-  /dev/xvda1        /             ext3     defaults,errors=remount-ro 0 0
+    /dev/xvda1  /   ext3  defaults,errors=remount-ro 0 0
   }}}
   写入domUdisk/etc/fstab第一行。
   为了pv domU和dom0通讯，我们还需要加入xenfs.最后fstab如下
   {{{ 
-  /dev/xvda1    /          ext3     defaults,errors=remount-ro 0 0
-  tmpfs         /dev      tmpfs      noauto                 0 0
-  proc          /proc      proc     noauto                      0 0
-  none 	      /proc/xen xenfs defaults 0 0 
+     /dev/xvda1   /           ext3     defaults,errors=remount-ro 0 0
+     tmpfs        /dev        tmpfs    noauto                     0 0
+     proc         /proc       proc     noauto                     0 0
+     none 	  /proc/xen   xenfs defaults                      0 0 
   }}}
   # 将 
   {{{ hvc0:2345:respawn:/sbin/38400 hvc0 （可去掉tty相关记录了）}}}
@@ -48,36 +48,38 @@
   {{{hvc0}}}
   写入/etc/securetty最后 （可去掉tty相关记录）
  * 保存镜像
-  umount domUdisk
+   umount domUdisk
  * 创建虚拟机启动配置 - pygrub.conf
   将
   {{{
-  memory = 512
-  name = "ttylinux"
-  bootloader = "/usr/bin/pygrub"
-  disk = ['tap2:aio:/home/kanghua/xen/domU-32bit-FS.img,xvda1,w']  
+     memory = 512
+     name = "ttylinux"
+     bootloader = "/usr/bin/pygrub"
+     disk = ['tap2:aio:/home/kanghua/xen/domU-32bit-FS.img,xvda1,w']  
   }}}
   写入 pygrub.conf
   {{{ 
      注意：
-     /home/kanghua/xen/ 轻替换为domU-32bit-FS.img的存储路径
-     网络，cpu等信息非必要信息，需要时自己补充。 
+     1./home/kanghua/xen/ 轻替换为domU-32bit-FS.img的存储路径
+     3.网络，cpu等信息非必要信息，需要时自己补充。 
   }}}
-7 启动虚拟机
-  sudo xm cr pygrub.con
-8 login虚拟机
+ * 启动虚拟机
+   sudo xm cr pygrub.con
+ * login虚拟机
   sudo xm console ttylinux (或者vmid)
-  {{{注：登陆名root,登陆密码password}}}
+  {{{注：
+    1.登陆名root,登陆密码password
+    2.如果登陆失败，请查看/var/log/syslog 日志和 /var/log/xen/xend.log 分析原因
+  }}}
 ---------------------------------------------
 上述需要文件，都已经上传到 http://code.google.com/p/cloudxy/downloads/
 ---------------------------------------------
 
 ===问题===
-#. ttylinux 为了减少体积，使用busybox代替很多执行命令。但busybox有些地方和我们常用的执行命令有区别，请大家使用时注意（尤其写shell脚本时注意）。
-#. 你会发现hwclock执行错误，具体原因大概内核支持问题，有兴趣你可调查并解决之。
-#. 已经支持xenbus等，可操作/proc/xen/xenbus
-#. 该img主要目的是便于大家实验，因此功能难免有所不足。
-#. 抛砖引玉，制作pv domU方法很多，请理解为主，不要拘泥。
-#. 我们使用blktap2驱动vxda1,最好使用xen4.0以上的版本啦。 
-
-
+ # ttylinux 为了减少体积，使用busybox代替很多执行命令。但busybox有些地方和我们常用的执行命令有区别，请大家使用时注意（尤其写shell脚本时注意）。
+ # 你会发现hwclock执行错误，具体原因大概内核支持问题，有兴趣你可调查并解决之。
+ # 已经支持xenbus等，可操作/proc/xen/xenbus
+ # 该img主要目的是便于大家实验，因此功能难免有所不足。
+ # 抛砖引玉，制作pv domU方法很多，请理解为主，不要拘泥。
+ # 我们使用blktap2驱动vxda1,最好使用xen4.0以上的版本啦。
+ 

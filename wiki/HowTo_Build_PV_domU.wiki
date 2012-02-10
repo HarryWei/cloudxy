@@ -22,14 +22,14 @@
    # cp lib/*  domUdisk/ -rf
  * 修改文件系统的相关配置 —— 见 http://stacklet.com/doc/kernel/howto-deploy-xen-domu-kernel （稍有修改）
  # mkdir domUdisk/boot
- # 将
+ # 修改grub.conf
  {{{
      title vmlinuz-2.6.35.4
      root (hd0,0)
      kernel /boot/vmlinuz-2.6.35.4 console=hvc0 root=/dev/xvda1 ro 
  }}}
   写入domUdisk/boot/grub.conf
- # 将
+ # 修改/etc/fstab
  {{{
      /dev/xvda1  /   ext3  defaults,errors=remount-ro 0 0
  }}} 
@@ -40,12 +40,12 @@
      proc         /proc       proc     noauto                     0 0
      none 	  /proc/xen   xenfs defaults                      0 0 
  }}}
- # 将 
+ # 修改/etc/inittab 
  {{{
      hvc0:2345:respawn:/sbin/38400 hvc0 （可去掉tty相关记录了）
  }}}
   写入domUdisk/etc/inittab
- # 将
+ # 修改/etc/securetty
  {{{
    hvc0
  }}}

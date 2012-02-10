@@ -22,20 +22,15 @@
    # cp lib/*  domUdisk/ -rf
  * 修改文件系统的相关配置 —— 见 http://stacklet.com/doc/kernel/howto-deploy-xen-domu-kernel （稍有修改）
   # mkdir domUdisk/boot
-  # 将
-  {{{
+  # 将{{{
      title vmlinuz-2.6.35.4
      root (hd0,0)
      kernel /boot/vmlinuz-2.6.35.4 console=hvc0 root=/dev/xvda1 ro 
-  }}}
-  写入domUdisk/boot/grub.conf
-  # 将
-  {{{
+  }}} 写入domUdisk/boot/grub.conf
+  # 将{{{
     /dev/xvda1  /   ext3  defaults,errors=remount-ro 0 0
-  }}}
-  写入domUdisk/etc/fstab第一行。
-  为了pv domU和dom0通讯，我们还需要加入xenfs.最后fstab如下
-  {{{ 
+  }}} 写入domUdisk/etc/fstab第一行。
+  为了pv domU和dom0通讯，我们还需要加入xenfs.最后fstab如下{{{ 
      /dev/xvda1   /           ext3     defaults,errors=remount-ro 0 0
      tmpfs        /dev        tmpfs    noauto                     0 0
      proc         /proc       proc     noauto                     0 0
@@ -71,9 +66,10 @@
     1.登陆名root,登陆密码password
     2.如果登陆失败，请查看/var/log/syslog 日志和 /var/log/xen/xend.log 分析原因
   }}}
----------------------------------------------
+
+----
 上述需要文件，都已经上传到 http://code.google.com/p/cloudxy/downloads/
----------------------------------------------
+----
 
 ===问题===
  # ttylinux 为了减少体积，使用busybox代替很多执行命令。但busybox有些地方和我们常用的执行命令有区别，请大家使用时注意（尤其写shell脚本时注意）。

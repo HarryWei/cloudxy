@@ -75,9 +75,9 @@
     2.如果登陆失败，请查看/var/log/syslog 日志和 /var/log/xen/xend.log 分析原因
   }}}
 
-----
+
 上述需要文件，都已经上传到 http://code.google.com/p/cloudxy/downloads/
-----
+
 
 ===问题===
  # ttylinux 为了减少体积，使用busybox代替很多执行命令。但busybox有些地方和我们常用的执行命令有区别，请大家使用时注意（尤其写shell脚本时注意）。

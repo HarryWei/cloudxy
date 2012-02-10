@@ -30,39 +30,37 @@
    }}}
    写入domUdisk/boot/grub.conf
    # 修改/etc/fstab
-   {{{
+     {{{
      /dev/xvda1   /           ext3     defaults,errors=remount-ro 0 0
      tmpfs        /dev        tmpfs    noauto                     0 0
      proc         /proc       proc     noauto                     0 0
      none 	  /proc/xen   xenfs   defaults                    0 0
-   }}} 
-   写入domUdisk/etc/fstab
+     写入domUdisk/etc/fstab
+     }}} 
    # 修改/etc/inittab 
-   {{{
+     {{{
      hvc0:2345:respawn:/sbin/38400 hvc0 （可去掉tty相关记录了）
-   }}}
-   写入domUdisk/etc/inittab
+     写入domUdisk/etc/inittab
+     }}}
    # 修改/etc/securetty
-   {{{
+     {{{
      hvc0
-   }}}
-   写入/etc/securetty最后 （可去掉tty相关记录）
+     写入/etc/securetty最后 （可去掉tty相关记录）
+     }}}
  * 保存镜像
-   umount domUdisk
+    umount domUdisk
  * 创建虚拟机启动配置 - pygrub.conf
-  将
-  {{{
+   {{{
      memory = 512
      name = "ttylinux"
      bootloader = "/usr/bin/pygrub"
-     disk = ['tap2:aio:/home/kanghua/xen/domU-32bit-FS.img,xvda1,w']  
-  }}}
-  写入 pygrub.conf
-  {{{ 
-     注意：
-     1./home/kanghua/xen/ 轻替换为domU-32bit-FS.img的存储路径
-     3.网络，cpu等信息非必要信息，需要时自己补充。 
-  }}}
+     disk = ['tap2:aio:/home/kanghua/xen/domU-32bit-FS.img,xvda1,w'] 
+     写入 pygrub.conf 
+   }}}
+   注意：
+   # /home/kanghua/xen/ 请替换为domU-32bit-FS.img的存储路径
+   # 网络，cpu等信息非必要信息，需要时自己补充。 
+
  * 启动虚拟机
    sudo xm cr pygrub.con
  * login虚拟机

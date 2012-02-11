@@ -11,6 +11,7 @@
 === 制作方法 ===
  * 制作一个32M的镜像系统
    dd if=/dev/zero of=domU-32bit-FS.img bs=1M count=32
+   mkfs.ext3 domU-32bit-FS.img
  * 制作文件系统 —— 我们使用ttylinux-i486-8.0.img作为base文件系统
    # sudo mount -o loop /mnt ttylinux-i486-8.0.img 
    # mkdir domUdisk

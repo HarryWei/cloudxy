@@ -21,7 +21,7 @@
  * 制作最小文件系统和最小linux镜像
    # make dload
    # 根据你的需要修改ttylinux主目录下的ttylinux-config.sh文件，可参考我的(想要生成x86_64平台下的最小文件系统和linux启动镜像可以在http://code.google.com/p/cloudxy/downloads/list 中找到并下载)
-   # make dist
+   # make dist (通过这一步可以生成ttylinux的所有目标，当然你也可以只生成部分目标，具体可以查看命令'make help'或者How_To_Build_ttylinux.txt文件)
  * 修改文件系统的相关配置 —— 见 http://stacklet.com/doc/kernel/howto-deploy-xen-domu-kernel （稍有修改）
    # mkdir domUdisk/boot
    # 最后你就可以在ttylinux主目录下的img目录找到最小文件系统和linux启动镜像。

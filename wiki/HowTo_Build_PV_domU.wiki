@@ -1,6 +1,6 @@
 #summary 制作最小pv domU
 
-= 基于ttylinux制作pv domU制作 =
+= 基于ttylinux制作pv domU =
 
 === 目的 ===
 制作一个编译大家测试使用的pv domU(很多朋友没有支持vt的处理器，所以我们主要使用pv domU）

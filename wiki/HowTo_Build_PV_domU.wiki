@@ -18,7 +18,7 @@
    # sudo mount -o loop domU-32bit-FS.img domUdisk
    # cp -a mnt/* domUdisk/ -rf
  * 加入pv kernel 到domU-32bit-FS.img —— 我们使用 linux-2.6.35.8-xenU.x86.tar.bz2 版本的pv kernel
-   # tar xf linux-2.6.35.8-xenU.x86.tar.bz2  （从http://stacklet.com/download/kernel/list?architecture=x86下载，可能需要先注册）
+   # tar xf linux-2.6.35.8-xenU.x86.tar.bz2  （从http://stacklet.com/download/kernel/list?architecture=x86下载,可能需要先注册）
    # cp boot/* domUdisk/ -rf
    # cp lib/*  domUdisk/ -rf
  * 修改文件系统的相关配置 —— 见 http://stacklet.com/doc/kernel/howto-deploy-xen-domu-kernel （稍有修改）
@@ -40,7 +40,7 @@
      }}} 
    # 修改/etc/inittab 
      {{{
-     hvc0:2345:respawn:/sbin/38400 hvc0 （可去掉tty相关记录了）
+     hvc0:2345:respawn:/sbin/getty 38400 hvc0 （可去掉tty相关记录了）
      写入domUdisk/etc/inittab
      }}}
    # 修改/etc/securetty
@@ -83,4 +83,7 @@
  # 该img主要目的是便于大家实验，因此功能难免有所不足。
  # 抛砖引玉，制作pv domU方法很多，请理解为主，不要拘泥。
  # 我们使用blktap2驱动vxda1,最好使用xen4.0以上的版本啦。
+
+---
+wroten by 康华
  

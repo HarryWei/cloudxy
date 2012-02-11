@@ -1,0 +1,37 @@
+#summary 制作ttylinux详细步骤
+
+= 基于ttylinux项目制作最小文件系统以及最小linux启动镜像 =
+
+=== 目的 ===
+制作一个最小文件系统和最小linux启动镜像
+----
+ # 感谢我们的源码提供者——ttylinux （http://ttylinux.net/） ：这是一个旨在给各种平台提供小的linux镜像的开源项目。
+ # 我们衷心感谢 Douglas Jerome（douglas@ttylinux.org）的无私奉献，如果没有他的帮助，我可能无法顺利的探索出正确的制作方法。
+----
+=== 制作方法 ===
+ * 下载ttylinux源码包
+   # 登陆ttylinux官网，http://ttylinux.net/
+   # 手动下载或者在命令行下(Unix-like)输入 wget http://ttylinux.net/Download/ttylinux-src-mp9.tar.bz2 
+ * 制作交叉编译工具链
+   # tar xvf ttylinux-src-mp9.tar.bz2
+   # cd xbuildtool-0.2 
+   # make setup
+   # make dload
+   # make x86_64-2.13-gnu (通过make help 可以查看你想要的平台名称，我这里是64位平台的交叉工具名称)
+ * 制作最小文件系统和最小linux镜像
+   # make dload
+   # 根据你的需要修改ttylinux主目录下的ttylinux-config.sh文件，可参考我的(想要生成x86_64平台下的最小文件系统和linux启动镜像可以在http://code.google.com/p/cloudxy/downloads/list 中找到并下载)
+   # make dist
+ * 修改文件系统的相关配置 —— 见 http://stacklet.com/doc/kernel/howto-deploy-xen-domu-kernel （稍有修改）
+   # mkdir domUdisk/boot
+   # 最后你就可以在ttylinux主目录下的img目录找到最小文件系统和linux启动镜像。
+
+===注意事项===
+ # 制作交叉编译工具链时可以参考主目录下的x86_64-2.13-gnu文件，制作最小文件系统和最小linux镜像时也可以参照主目录下的How_To_Build_ttylinux.txt文件。
+ # 制作最小文件系统和最小linux镜像的过程中，如果发现问题，可以主目录下的var/log下的相关日志文件，这样可能快速找到问题并解决。
+ # 编译之前请确保你的/bin/sh 指向 bash 而非其他(dash等等)。
+ # 如果制作过程中遇到任何问题，都欢迎发邮件到ttylinux@googlegroups.com或者cloudxy@googlegroups.com邮件列表。
+ # ttylinux 的制作途径可能不仅局限于上述的方法，当然由于本人能力有限，以上的步骤也可能还存在漏洞，如果实践过程中发现问题，请及时指正，谢谢。
+
+---
+wroten by 贾威威 2012 2 12

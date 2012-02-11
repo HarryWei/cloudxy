@@ -6,7 +6,7 @@
 制作一个最小文件系统和linux启动镜像
 ----
  # 感谢我们的源码提供者——ttylinux （http://ttylinux.net/） ：这是一个旨在给各种平台提供小的linux镜像的开源项目。
- # 我们衷心感谢 Douglas Jerome（douglas@ttylinux.org）的无私奉献，如果没有他的帮助，我可能无法顺利的探索出正确的制作方法。
+ # 衷心的感谢 Douglas Jerome（douglas@ttylinux.org）和康华师哥（kanghua151@gmail.com）的帮助，如果没有他们的帮助，我可能无法顺利的探索出正确的制作方法。
 ----
 === 制作方法 ===
  * 下载ttylinux源码包

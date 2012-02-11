@@ -33,5 +33,5 @@
  # 如果制作过程中遇到任何问题，都欢迎发邮件到ttylinux@googlegroups.com或者cloudxy@googlegroups.com邮件列表。
  # ttylinux 的制作途径可能不仅局限于上述的方法，当然由于本人能力有限，以上的步骤也可能还存在漏洞，如果实践过程中发现问题，请及时指正，谢谢。
 
----
+----
 wroten by 贾威威 2012 2 12

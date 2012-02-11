@@ -23,7 +23,7 @@
    # 根据你的需要修改ttylinux主目录下的ttylinux-config.sh文件，可参考我的(想要生成x86_64平台下的最小文件系统和linux启动镜像可以在http://code.google.com/p/cloudxy/downloads/list 中找到并下载)
    # make dist (通过这一步可以生成ttylinux的所有目标，当然你也可以只生成部分目标，具体可以查看命令'make help'或者How_To_Build_ttylinux.txt文件)
    # 最后你就可以在ttylinux主目录下的img目录找到最小文件系统和linux启动镜像。
- * 我把自己制作的64位的最小文件系统和linux启动镜像都共享到了download列表，可以在http://code.google.com/p/cloudxy/downloads/list找到，并下载
+ * 我把自己制作的64位的最小文件系统和linux启动镜像都共享到了download列表，可以在 http://code.google.com/p/cloudxy/downloads/list 找到，并下载
 
 ===注意事项===
  # 制作交叉编译工具链时可以参考主目录下的x86_64-2.13-gnu文件，制作最小文件系统和最小linux镜像时也可以参照主目录下的How_To_Build_ttylinux.txt文件。

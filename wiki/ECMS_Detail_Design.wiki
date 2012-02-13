@@ -165,4 +165,7 @@
 || *请求包* ||见vm_start_2s_req in cloudMaster/include/cmd_schema.hrl ||
 || *应用场景* || 当master请求node启动虚拟机时 ||
 || *步骤* || <code>调用vm_start.sh脚本</code> ||
-|| *异常处理* ||||
+|| *异常处理* ||||\
+
+---------------
+wroten by 孙建刚

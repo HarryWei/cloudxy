@@ -23,7 +23,8 @@
    # cp lib/*  domUdisk/ -rf
  * 修改文件系统的相关配置 —— 见 http://stacklet.com/doc/kernel/howto-deploy-xen-domu-kernel （稍有修改）
    # mkdir domUdisk/boot
-   # 修改grub.conf
+   # mkdir domUdisk/boot/grub
+   # 修改/boot/grub/grub.conf
    {{{
      title vmlinuz-2.6.35.4
      root (hd0,0)

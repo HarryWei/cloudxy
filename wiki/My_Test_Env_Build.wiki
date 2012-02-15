@@ -27,7 +27,7 @@
 先可下载我们download中的 pv domU ——　见http://code.google.com/p/cloudxy/wiki/HowTo_Build_PV_domU。然后尝试本地镜像方式启动domU。
 
 ===第五步.编译hlfs等===
-若要是尝试hlfs，则需要按照http://code.google.com/p/cloudxy/wiki/HlfsUserManual所说执行。你应可先尝试一下“HLFS 存储虚拟机镜像”中的local模式；然后再是hdfs模式。
+若要是尝试hlfs，则需要按照http://code.google.com/p/cloudxy/wiki/HlfsUserManual  所说执行。你应可先尝试一下“HLFS 存储虚拟机镜像”中的local模式；然后再是hdfs模式。
 
 ===第六步.安装elrang===
 若要是尝试EMCS，则需要按照http://code.google.com/p/cloudxy/wiki/EMCS_RD_Manual所说执行。注意erlang要下载OTP R15B版本，因为默认erlang版本可能有些地方不支持。

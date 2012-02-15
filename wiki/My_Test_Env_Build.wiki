@@ -17,7 +17,7 @@
 不过，即便你机器没有VT也不要紧，因为安装32位的宿主机我们的系统一样运行。
 
 ===第二步.安装宿主机===
-下载ubuntu server iso(我用的是Ubuntu 10.10 ，即Maverick Meerkat)，然后在vmware中安装。当然，你要记得安装后续需要的包，如apt-get install build-essential等，总之碰到缺少的就安装好了。
+下载ubuntu server iso(我用的是Ubuntu 10.10 ，即Maverick Meerkat)，然后在vmware中安装。当然，你要记得安装后续需要的包，如apt-get install build-essential等，总之碰到缺少的就安装好了。 另外说明一下，我给vmware的宿主机中分配了2G内存，如果你要跑hadoop等就最少要给1G以上。
 
 ===第三步.安装Xen===
 安装xen！对于ubuntu 而言，你只需简单执行sudo apt-get install xen-hypervisor-4.0 即可（将安装Linux 2.6.32-5-xen-amd64 and XEN 4.1.1在你系统里）重启grub中选择对应项就可进入xen环境啦 —— 我们最终是在vmware中的宿主机上再启动虚拟机，即所谓的virtualization stack

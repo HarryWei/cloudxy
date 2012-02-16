@@ -43,7 +43,7 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
 }}}
 
 ==加入node到集群中==
- * 为了从master所在shell执行命令，需要加入对应的record(因为我们命令使用了record描述)—shell中执行 rr("include/ ** .hrl") .
+ * 为了从master所在shell执行命令，需要加入对应的record(因为我们命令使用了record描述)—shell中执行 rr("include/**.hrl") .
  * 动态增增加节点—  gen_server:call(meta_server,#add_node_2m_req{node_name="node_controller1@127.0.0.1"},2000) .
 {{{
 注：

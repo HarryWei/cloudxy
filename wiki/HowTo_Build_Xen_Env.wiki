@@ -15,17 +15,19 @@
 == 具体步骤 ==
 
 === 第一步.安装Centos 5.4 x86_86 发行版 ===
-你可以在裸机上安装，也可以在vmware station上安装。具体的安装步骤，大家应该都会。如果不是很清楚，可以在网上找找，按照步骤安装即可。选择安装包时，记住选上虚拟化。
+你可以在裸机上安装，也可以在vmware station上安装。具体的安装步骤，大家应该都会。如果不是很清楚，可以在网上找找，按照步骤安装即可。选择安装包时，记住选上虚拟化相关软件包。
 
 ===第二步.安装Xen所依赖的开发包===
-yum groupinstall "Development Libraries"
-yum groupinstall "Development Tools"
-yum install transfig wget texi2html libaio-devel dev86 glibc-devel e2fsprogs-devel gitk mkinitrd iasl xz-devel bzip2-devel pciutils-libs pciutils-devel SDL-devel libX11-devel gtk2-devel bridge-utils PyXML qemu-common qemu-img mercurial libidn-devel
-yum install glibc-devel.i686
+ * yum groupinstall "Development Libraries"
+ * yum groupinstall "Development Tools"
+ * yum install transfig wget texi2html libaio-devel dev86 glibc-devel e2fsprogs-devel gitk mkinitrd iasl xz-devel bzip2-devel pciutils-libs pciutils-devel SDL-devel libX11-devel gtk2-devel bridge-utils PyXML qemu-common qemu-img mercurial libidn-devel
+ * yum install glibc-devel.i686
 
 
 ===第三步.下载Xen源码和打过补丁的内核源码以及编译内核所需的config文件===
-这里我们的Xen源码选择xen-4.1.2.tar.gz(http://bits.xensource.com/oss-xen/release/4.1.2/xen-4.1.2.tar.gz), 内核源码使用打过xen补丁的linux-2.6.32.39(http://cloudxy.googlecode.com/files/kernel-xen.tar.gz)，config文件是编译以上内核所需的配置文件。
+ * 下载Xen源码xen-4.1.2.tar.gz(http://bits.xensource.com/oss-xen/release/4.1.2/xen-4.1.2.tar.gz)
+ * 下载打过xen补丁的内核源码linux-2.6.32.39(http://cloudxy.googlecode.com/files/kernel-xen.tar.gz)
+ * 下载编译内核时所需的config文件(http://cloudxy.googlecode.com/files/config.txt)
 
 ===第四步.编译xen源码===
  * make xen

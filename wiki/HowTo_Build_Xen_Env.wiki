@@ -45,6 +45,7 @@ make install
 
 ===第六步.配置grub启动项===
 需要在/boot/grub/grub.conf中添加以下内容
+{{{
 title jiawei-xen-4.1.2
 	root (hd0,0)
 	kernel /xen-4.1.2.gz
@@ -52,10 +53,12 @@ title jiawei-xen-4.1.2
 	module /initrd-2.6.32.39.img
 在/etc/fstab中添加以下内容
 none /proc/xen xenfs defaults 0 0
+}}}
 重新启动机器，再顺序启动xencommons和xend
 /etc/init.d/xencommons restart
 /etc/init.d/xend restart
 成功启动后，运行 xm info 可以看到：
+{{{
 host                   : local00212201021a.zte.com.cn
 release                : 2.6.32.39
 version                : #1 SMP Thu Feb 16 18:05:02 CST 2012
@@ -84,13 +87,18 @@ cc_compile_by          : root
 cc_compile_domain      : zte.com.cn
 cc_compile_date        : Thu Feb 16 17:14:21 CST 2012
 xend_config_format     : 4
+}}}
 
 ===第七布. 创建domu===
  * 下载domu的内核镜像(http://cloudxy.googlecode.com/files/domU-x86_64-FS.img2.zip)。
  * 解压内核镜像文件并创建虚拟机启动配置 - pygrub.conf 
+{{{
 memory = 512
 name = "ttylinux"
 bootloader = "/usr/bin/pygrub"
 disk = ['tap2:aio:/home/jiawei/workshop1/test/domU-x86_64-FS.img,xvda1,w']
+}}}
  * 启动domu虚拟机, 输入 xm cr pygrub.conf
  * 登陆domu虚拟机，输入 xm console ttylinux (用户名:root, 密码:password) 
+---
+written by 贾威威 2012 2 17

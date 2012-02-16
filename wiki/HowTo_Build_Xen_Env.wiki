@@ -28,23 +28,23 @@ yum install glibc-devel.i686
 这里我们的Xen源码选择xen-4.1.2.tar.gz(http://bits.xensource.com/oss-xen/release/4.1.2/xen-4.1.2.tar.gz), 内核源码使用打过xen补丁的linux-2.6.32.39(http://cloudxy.googlecode.com/files/kernel-xen.tar.gz)，config文件是编译以上内核所需的配置文件。
 
 ===第四步.编译xen源码===
-make xen
-make tools
-make stubdom
-make install-xen
-make install-tools
-make install-stubdom
+ * make xen
+ * make tools
+ * make stubdom
+ * make install-xen
+ * make install-tools
+ * make install-stubdom
 
 ===第五步.编译内核源码===
-make menuconfig (生成config文件)
-需要用第三步下载到的config文件覆盖这个config文件 (注意config文件名是'.config')
-make
-make modules
-make modules_install
-make install
+ * make menuconfig (生成config文件)
+ * 需要用第三步下载到的config文件覆盖这个config文件 (注意config文件名是'.config')
+ * make
+ * make modules
+ * make modules_install
+ * make install
 
 ===第六步.配置grub启动项===
- # 需要在/boot/grub/grub.conf中添加以下内容
+ * 需要在/boot/grub/grub.conf中添加以下内容
 {{{
 title jiawei-xen-4.1.2
 	root (hd0,0)
@@ -52,13 +52,13 @@ title jiawei-xen-4.1.2
 	module /vmlinuz-2.6.32.39 ro root=LABEL=/ rhgb quiet
 	module /initrd-2.6.32.39.img
 }}}
- # 在/etc/fstab中添加以下内容
+ * 在/etc/fstab中添加以下内容
 none /proc/xen xenfs defaults 0 0
 
- # 重新启动机器，再顺序启动xencommons和xend
+ * 重新启动机器，再顺序启动xencommons和xend
 /etc/init.d/xencommons restart
 /etc/init.d/xend restart
-成功启动后，运行 xm info 可以看到：
+ * 成功启动后，运行 xm info 可以看到：
 {{{
 host                   : local00212201021a.zte.com.cn
 release                : 2.6.32.39
@@ -90,17 +90,17 @@ cc_compile_date        : Thu Feb 16 17:14:21 CST 2012
 xend_config_format     : 4
 }}}
 
-===第七布. 创建domu===
- # 下载domu的内核镜像(http://cloudxy.googlecode.com/files/domU-x86_64-FS.img2.zip)。
- # 解压内核镜像文件并创建虚拟机启动配置 - pygrub.conf 
+===第七步. 创建domu===
+ * 下载domu的内核镜像(http://cloudxy.googlecode.com/files/domU-x86_64-FS.img2.zip)。
+ * 解压内核镜像文件并创建虚拟机启动配置 - pygrub.conf 
 {{{
 memory = 512
 name = "ttylinux"
 bootloader = "/usr/bin/pygrub"
 disk = ['tap2:aio:/home/jiawei/workshop1/test/domU-x86_64-FS.img,xvda1,w']
 }}}
- # 启动domu虚拟机, 输入 xm cr pygrub.conf
- # 登陆domu虚拟机，输入 xm console ttylinux (用户名:root, 密码:password) 
+ * 启动domu虚拟机, 输入 xm cr pygrub.conf
+ * 登陆domu虚拟机，输入 xm console ttylinux (用户名:root, 密码:password) 
 
----
+----
 written by 贾威威 2012 2 17

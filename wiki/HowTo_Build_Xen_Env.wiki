@@ -1,7 +1,7 @@
 #summary 介绍如何搭建Xen开发环境
 
 = 介绍 =
-在参与开发Cloudxy项目之前，需要搭建一些环境，很多想要参与的朋友可能会花费一些时间在这上面，为了让他们把精力放在项目的核心开发上，我专门推出系列文章来说明如何快速的搭建环境。
+ * 在参与开发Cloudxy项目之前，需要搭建一些环境，很多想要参与的朋友可能会花费一些时间在这上面，为了让他们把精力放在项目的核心开发上，我专门推出系列文章来说明如何快速的搭建环境。
  * HowTo_Build_Xen_Evn -- 如何搭建Xen开发环境，也是本文要详细说明的部分。
  * HlfsUserManual -- 如何搭建Hlfs开发环境，这个可以参考http://code.google.com/p/cloudxy/wiki/HlfsUserManual
  * ECMS_RD_Manual -- 如何搭建ECMS开发环境，这个可以参考http://code.google.com/p/cloudxy/wiki/EMCS_RD_Manual
@@ -94,7 +94,7 @@ cc_compile_date        : Thu Feb 16 17:14:21 CST 2012
 xend_config_format     : 4
 }}}
 
-===第七步. 创建domu===
+===第七步. 创建domu虚拟机===
  * 下载domu的内核镜像(http://cloudxy.googlecode.com/files/domU-x86_64-FS.img2.zip)。
  * 解压内核镜像文件并创建虚拟机启动配置 - pygrub.conf 
 {{{
@@ -106,12 +106,13 @@ disk = ['tap2:aio:/home/jiawei/workshop1/test/domU-x86_64-FS.img,xvda1,w']
  * 启动domu虚拟机, 输入 xm cr pygrub.conf
  * 登陆domu虚拟机，输入 xm console ttylinux (用户名:root, 密码:password) 
 
-===注意事项===
+=注意事项=
  # 如果选择使用vmware station搭建环境，最好使用vmware station 7.0或以上版本， 具体原因见 http://code.google.com/p/cloudxy/wiki/My_Test_Env_Build
- # 搭建此环境我一直在root用户下，如果你在普通用户下，某些步骤可能需要在root用户的权限下完成
- # 本文所使用的xen源码包和打过补丁的内核源码以及其他依赖包的版本都不是固定的，但是不能保证其他版本在搭建过程中可能会出现一些问题，最好使用本文所使用的版本进行实验
+ # 搭建此环境我一直在root用户下，如果你在普通用户下，某些步骤可能需要在root用户的权限下完成。
+ # 本文所使用的xen源码包和打过补丁的内核源码以及其他依赖包的版本都不是固定的，但是不能保证其他版本在搭建过程中可能会出现一些问题，最好使用本文所使用的版本进行实验。
  # 第四步在编译xen源码的过程中，需要保持网络畅通，因为编译过程中还需要下载一些依赖包。
  # 第七步配置pygrub.conf文件时，需使用你机器上domU-x86_64-FS.img的绝对路径。
+ # 如果在第七步在创建domu虚拟机过程中出现问题，请查看/var/log/xen/xend.log分析原因。
  # 抛砖引玉，搭建xen环境的方法很多，请理解为主，不要拘泥。
 
 ----

@@ -109,7 +109,7 @@ disk = ['tap2:aio:/home/jiawei/workshop1/test/domU-x86_64-FS.img,xvda1,w']
 =注意事项=
  # 如果选择使用vmware station搭建环境，最好使用vmware station 7.0或以上版本， 具体原因见 http://code.google.com/p/cloudxy/wiki/My_Test_Env_Build
  # 搭建此环境我一直在root用户下，如果你在普通用户下，某些步骤可能需要在root用户的权限下完成。
- # 本文所使用的xen源码包和打过补丁的内核源码以及其他依赖包的版本都不是固定的，但是不能保证其他版本在搭建过程中可能会出现一些问题，最好使用本文所使用的版本进行实验。
+ # 本文所使用的linux发行版，xen源码包和打过补丁的内核源码以及其他依赖包的版本都不是固定的，但是不能保证其他版本在搭建过程中可能会出现一些问题，最好使用本文所使用的版本进行实验。
  # 第四步在编译xen源码的过程中，需要保持网络畅通，因为编译过程中还需要下载一些依赖包。
  # 第七步配置pygrub.conf文件时，需使用你机器上domU-x86_64-FS.img的绝对路径。
  # 如果在第七步在创建domu虚拟机过程中出现问题，请查看/var/log/xen/xend.log分析原因。

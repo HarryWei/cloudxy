@@ -10,7 +10,7 @@
 == 目的 ==
 
  * 在Centos 5.4 x86_64发行版上搭建Xen虚拟机环境
- * 下载X86_64母盘镜像(http://cloudxy.googlecode.com/files/domU-x86_64-FS.img2.zip)，并使用搭建的Xen虚拟机环境创建一个domu虚拟机。
+ * 下载X86_64内核镜像，并在搭建的Xen虚拟机环境下用这个内核镜像创建一个domu虚拟机。
 
 == 具体步骤 ==
 
@@ -36,6 +36,7 @@
  * make install-xen
  * make install-tools
  * make install-stubdom
+ * 本步骤完成后就会在/boot目录下生成xen-4.1.2.gz等文件
 
 ===第五步.编译内核源码===
  * make menuconfig (生成config文件)
@@ -44,6 +45,7 @@
  * make modules
  * make modules_install
  * make install
+ * 本步骤完成后，就会在/boot目录下生成vmlinuz-2.6.32.39和initrd-2.6.32.39.img等文件
 
 ===第六步.配置grub启动项===
  * 需要在/boot/grub/grub.conf中添加以下内容
@@ -103,6 +105,14 @@ disk = ['tap2:aio:/home/jiawei/workshop1/test/domU-x86_64-FS.img,xvda1,w']
 }}}
  * 启动domu虚拟机, 输入 xm cr pygrub.conf
  * 登陆domu虚拟机，输入 xm console ttylinux (用户名:root, 密码:password) 
+
+===注意事项===
+ # 如果选择使用vmware station搭建环境，最好使用vmware station 7.0或以上版本， 具体原因见 http://code.google.com/p/cloudxy/wiki/My_Test_Env_Build
+ # 搭建此环境我一直在root用户下，如果你在普通用户下，某些步骤可能需要在root用户的权限下完成
+ # 本文所使用的xen源码包和打过补丁的内核源码以及其他依赖包的版本都不是固定的，但是不能保证其他版本在搭建过程中可能会出现一些问题，最好使用本文所使用的版本进行实验
+ # 第四步在编译xen源码的过程中，需要保持网络畅通，因为编译过程中还需要下载一些依赖包。
+ # 第七步配置pygrub.conf文件时，需使用你机器上domU-x86_64-FS.img的绝对路径。
+ # 抛砖引玉，搭建xen环境的方法很多，请理解为主，不要拘泥。
 
 ----
 written by 贾威威 2012 2 17

@@ -1,7 +1,7 @@
 #summary 介绍如何搭建Xen开发环境
 
 = 介绍 =
- * 在参与开发Cloudxy项目之前，需要搭建一些环境，很多想要参与的朋友可能会花费一些时间在这上面，为了让他们把精力放在项目的核心开发上，我专门推出系列文章来说明如何快速的搭建环境。
+ * 在参与开发Cloudxy项目之前，需要搭建一些环境，很多想要参与的朋友可能会花费一些时间在这上面，为了让他们把精力放在项目的核心开发上，我们专门推出系列文章来说明如何快速的搭建环境。
  * HowTo_Build_Xen_Evn -- 如何搭建Xen开发环境，也是本文要详细说明的部分。
  * HlfsUserManual -- 如何搭建Hlfs开发环境，这个可以参考 http://code.google.com/p/cloudxy/wiki/HlfsUserManual
  * ECMS_RD_Manual -- 如何搭建ECMS开发环境，这个可以参考 http://code.google.com/p/cloudxy/wiki/EMCS_RD_Manual

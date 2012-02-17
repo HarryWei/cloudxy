@@ -21,6 +21,13 @@
 
 ===第三步.安装Xen===
 安装xen！对于ubuntu 而言，你只需简单执行sudo apt-get install xen-hypervisor-4.0 即可（将安装Linux 2.6.32-5-xen-amd64 and XEN 4.1.1在你系统里）重启grub中选择对应项就可进入xen环境啦 —— 我们最终是在vmware中的宿主机上再启动虚拟机，即所谓的virtualization stack
+{{{
+   1.如果刚安装完server版本，要先sudo apt-get update一下，已更新仓库。 
+   2.如果你用Maverick 版本。那么仓库里的xen-hypervisor是3x版本，所以还需要手动添加一个源：
+    sudo add-apt-repository ppa:ukplc-team/xen-stable
+    sudo apt-get update
+    sudo apt-get install ubuntu-xen-server
+}}}
 
 ===第四步.创建domU===
 启动虚拟机看看

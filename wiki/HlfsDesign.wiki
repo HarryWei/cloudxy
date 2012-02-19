@@ -97,5 +97,5 @@ LOG的内容显然必须包含被写入的数据块，还需要包含对应的�
 
 关于log structure filesystem 最初论文，请参看download中资料
 ----------------------------
-wroten by 康华
+written by 康华
           

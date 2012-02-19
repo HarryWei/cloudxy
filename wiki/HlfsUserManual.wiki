@@ -154,5 +154,5 @@ hlfs支持log4c日志系统，但作为库，日志系统的初始化工作并�
 如果您有兴趣试试，发现bug,欢迎提给kanghua151@msn.com 或者 cloudxy@googlegroups.com(我们的邮件列表），更欢迎直接修改ci。 
 谢谢
 ------------------------------
-wroten by 康华
+written by 康华
                    

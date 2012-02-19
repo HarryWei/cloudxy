@@ -8,9 +8,12 @@
 
 FILEPATH="$PWD/vm_start.sh"
 LOGFILE=/tmp/vm_ops.log
+
+#This function print error logs to the file $LOGFILE
 error_log() {
 	echo "[`date "+%Y/%m/%d %H:%M:%S"` $FILEPATH] "$*"" >> $LOGFILE
 }
+
 #This function just prints the script's usage
 usage() {
 	echo "Usage: $0 -i <vm_id> -c <vm_cpu_count> -s <vm_mem_size> -p <vm_passwd> -h <vm_hostname> -a <vm_ip_addr> -m <vm_mac_addr> -o <vnc_port> -w <vnc_passwd> -t <vm_os_type>"

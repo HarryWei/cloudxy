@@ -56,4 +56,20 @@ do
 done
 
 debug;
+
+#Step 1. Check if the dir exists, if so delete it and 
+#recreate it, if not create it directly.
+work_dir="$HOME/$vm_id"
+if [ -d $work_dir ]; then
+	echo "Run exist branch";
+	rm -rf $work_dir;
+	cd $HOME;
+	mkdir $vm_id;
+	cd $vm_id;
+else
+	echo "Run not exist branch";
+	mkdir $work_dir;
+	cd $work_dir;
+fi
+
 exit 0;

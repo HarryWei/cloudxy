@@ -61,19 +61,19 @@ debug;
 #recreate it. if not, create it directly.
 work_dir="$HOME/$vm_id"
 if [ -d $work_dir ]; then
-		if rm -rf $work_dir
+		if rm -rf $work_dir		1>/dev/null 2>&1
 		then 
 			echo "Remove dir successfully";
-			cd $HOME;
-			mkdir $vm_id;
-			cd $vm_id;
+			cd $HOME;		1>/dev/null 2>&1
+			mkdir $vm_id;	1>/dev/null 2>&1
+			cd $vm_id;		1>/dev/null 2>&1
 		else
 			echo "Fail to remove dir, check your dir's permission!";
 			log "Fail to remove dir, check your dir's permission!";
 		fi
 else
-	mkdir $work_dir;
-	cd $work_dir;
+	mkdir $work_dir;	1>/dev/null 2>&1
+	cd $work_dir;		1>/dev/null 2>&1
 fi
 
 #Step 2. Check if first start (Judge if sys_disk exist).
@@ -89,9 +89,14 @@ fi
 #Step 3. Make iso image for vm_passwd and vm_hostname
 scene_file="/tmp/initialize"
 scene_iso_file="$HOME/$vm_id/$vm_id.iso"
-echo "hostname: $vm_hostname" > $scene_file
-echo "password: $vm_passwd" >> $scene_file
-mkisofs -o $scene_iso_file $scene_file
+echo "hostname: $vm_hostname" > $scene_file		1>/dev/null 2>&1
+echo "password: $vm_passwd" >> $scene_file		1>/dev/null 2>&1
+mkisofs -o $scene_iso_file $scene_file			1>/dev/null	2>&1
+if [ $? != 0 ]; then
+	echo "mkisofs error";
+	log "mkisofs error";
+	exit 1;
+fi
 
 #Step 4. Create system disk. TODO support *hdfs* pattern
 tools_dir="$HOME/tools"
@@ -99,11 +104,11 @@ mkfs_hlfs="$tools_dir/mkfs.hlfs"
 if [ -d $sysdisk_dir ]; then
 		echo "$sysdisk_dir exist"
 else
-	mkdir $sysdisk_dir
+	mkdir $sysdisk_dir		1>/dev/null 2>&1
 fi
 if [ -f $mkfs_hlfs ]; then
 	if [ -d $sysdisk_dir/$vm_id ]; then
-		if rm -rf $sysdisk_dir/$vm_id
+		if rm -rf $sysdisk_dir/$vm_id		1>/dev/null 2>&1
 		then
 			echo "remove $sysdisk_dir/$vm_id successfully";
 			log "remove $sysdisk_dir/$vm_id successfully";
@@ -112,10 +117,15 @@ if [ -f $mkfs_hlfs ]; then
 			log "fail to remove $sysdisk_dir/$vm_id, check permission";
 		fi	
 	fi
-	$mkfs_hlfs -u local:///$sysdisk_dir/$vm_id -b 8192 -s 67108864 -m 1024
-	tap-ctl create -a hlfs:local:///$sysdisk_dir/$vm_id
+	$mkfs_hlfs -u local:///$sysdisk_dir/$vm_id -b 8192 -s 67108864 -m 1024	1>/dev/null 2>&1
+	if [ $? != 0 ]; then
+		echo "Format block device error";
+		log "Format block device error";
+		exit 1;
+	fi
+	tap-ctl create -a hlfs:local:///$sysdisk_dir/$vm_id		1>/dev/null 2>&1
 	tap_ctl_ret=$?
-	if [ $tap_ctl_ret != 0 ]; then
+	if [ $tap_ctl_ret == -1 ]; then
 		echo "Tap-ctl execute error";
 		log "Tap-ctl excute error";
 		exit 1;
@@ -123,6 +133,22 @@ if [ -f $mkfs_hlfs ]; then
 else
 	echo "We have no $mkfs_hlfs tool";
 	log "We have no $mkfs_hlfs tool";
+	exit 1;
+fi
+
+#Step 5. Format block device and mount it
+bd_dir="/dev/xen/blktap-2/tapdev$tap_ctl_ret"
+mount_dir="$sysdisk_dir/$vm_id.disk"
+mkfs.ext3 $bd_dir			1>/dev/null 2>&1
+if [ $? != 0 ]; then
+	echo "Format block device error";
+	log "Format block device error";
+	exit 1;
+fi
+mount $bd_dir $mount_dir	1>/dev/null 2>&1
+if [ $? != 0 ]; then
+	echo "Format block device error";
+	log "Format block device error";
 	exit 1;
 fi
 

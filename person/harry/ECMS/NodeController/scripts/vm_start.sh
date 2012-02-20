@@ -61,10 +61,16 @@ debug;
 #recreate it. if not, create it directly.
 work_dir="$HOME/$vm_id"
 if [ -d $work_dir ]; then
-	rm -rf $work_dir;
-	cd $HOME;
-	mkdir $vm_id;
-	cd $vm_id;
+		if rm -rf $work_dir
+		then 
+			echo "Remove dir successfully";
+			cd $HOME;
+			mkdir $vm_id;
+			cd $vm_id;
+		else
+			echo "Fail to remove dir, check your dir's permission!";
+			error_log "Fail to remove dir, check your dir's permission!";
+		fi
 else
 	mkdir $work_dir;
 	cd $work_dir;

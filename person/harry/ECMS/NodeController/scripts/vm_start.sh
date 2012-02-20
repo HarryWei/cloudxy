@@ -10,7 +10,7 @@ FILEPATH="$PWD/vm_start.sh"
 LOGFILE=/tmp/vm_ops.log
 
 #This function print error logs to the file $LOGFILE
-error_log() {
+log() {
 	echo "[`date "+%Y/%m/%d %H:%M:%S"` $FILEPATH] "$*"" >> $LOGFILE
 }
 
@@ -34,7 +34,7 @@ debug() {
 
 if [ $# != 20 ]; then
 	usage;
-	error_log "Parameters Error";
+	log "Parameters Error";
 	exit 1;
 fi
 
@@ -51,7 +51,7 @@ do
 		o) vnc_port=$OPTARG;;
 		w) vnc_passwd=$OPTARG;;
 		t) vm_os_type=$OPTARG;;
-		?) usage; error_log "Parameters Error"; exit 1;;
+		?) usage; log "Parameters Error"; exit 1;;
 	esac
 done
 
@@ -69,7 +69,7 @@ if [ -d $work_dir ]; then
 			cd $vm_id;
 		else
 			echo "Fail to remove dir, check your dir's permission!";
-			error_log "Fail to remove dir, check your dir's permission!";
+			log "Fail to remove dir, check your dir's permission!";
 		fi
 else
 	mkdir $work_dir;
@@ -96,18 +96,33 @@ mkisofs -o $scene_iso_file $scene_file
 #Step 4. Create system disk. TODO support *hdfs* pattern
 tools_dir="$HOME/tools"
 mkfs_hlfs="$tools_dir/mkfs.hlfs"
+if [ -d $sysdisk_dir ]; then
+		echo "$sysdisk_dir exist"
+else
+	mkdir $sysdisk_dir
+fi
 if [ -f $mkfs_hlfs ]; then
+	if [ -d $sysdisk_dir/$vm_id ]; then
+		if rm -rf $sysdisk_dir/$vm_id
+		then
+			echo "remove $sysdisk_dir/$vm_id successfully";
+			log "remove $sysdisk_dir/$vm_id successfully";
+		else
+			echo "fail to remove $sysdisk_dir/$vm_id, check permission";
+			log "fail to remove $sysdisk_dir/$vm_id, check permission";
+		fi	
+	fi
 	$mkfs_hlfs -u local:///$sysdisk_dir/$vm_id -b 8192 -s 67108864 -m 1024
 	tap-ctl create -a hlfs:local:///$sysdisk_dir/$vm_id
 	tap_ctl_ret=$?
 	if [ $tap_ctl_ret != 0 ]; then
 		echo "Tap-ctl execute error";
-		error_log "Tap-ctl excute error";
+		log "Tap-ctl excute error";
 		exit 1;
 	fi
 else
 	echo "We have no $mkfs_hlfs tool";
-	error_log "We have no $mkfs_hlfs tool";
+	log "We have no $mkfs_hlfs tool";
 	exit 1;
 fi
 

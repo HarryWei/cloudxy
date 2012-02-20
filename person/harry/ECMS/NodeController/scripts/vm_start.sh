@@ -76,4 +76,39 @@ else
 	cd $work_dir;
 fi
 
+#Step 2. Check if first start (Judge if sys_disk exist).
+#If so, do step 3 in sequnce. If not, jump to step 7.
+#Hlfs local URI pattern "local:///$HOME/sysdisk"
+#Hlfs hdfs URI pattern "hdfs:///$HOME/sysdisk"
+sysdisk_dir="$HOME/sysdisk"
+sysname="$vm_id.sys.img"
+if [ -f $sysdisk_dir/$sysname ]; then 
+	echo "Jump to Step 7";
+fi
+
+#Step 3. Make iso image for vm_passwd and vm_hostname
+scene_file="/tmp/initialize"
+scene_iso_file="$HOME/$vm_id/$vm_id.iso"
+echo "hostname: $vm_hostname" > $scene_file
+echo "password: $vm_passwd" >> $scene_file
+mkisofs -o $scene_iso_file $scene_file
+
+#Step 4. Create system disk. TODO support *hdfs* pattern
+tools_dir="$HOME/tools"
+mkfs_hlfs="$tools_dir/mkfs.hlfs"
+if [ -f $mkfs_hlfs ]; then
+	$mkfs_hlfs -u local:///$sysdisk_dir/$vm_id -b 8192 -s 67108864 -m 1024
+	tap-ctl create -a hlfs:local:///$sysdisk_dir/$vm_id
+	tap_ctl_ret=$?
+	if [ $tap_ctl_ret != 0 ]; then
+		echo "Tap-ctl execute error";
+		error_log "Tap-ctl excute error";
+		exit 1;
+	fi
+else
+	echo "We have no $mkfs_hlfs tool";
+	error_log "We have no $mkfs_hlfs tool";
+	exit 1;
+fi
+
 exit 0;

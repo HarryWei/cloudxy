@@ -137,19 +137,80 @@ else
 fi
 
 #Step 5. Format block device and mount it
-bd_dir="/dev/xen/blktap-2/tapdev$tap_ctl_ret"
+bd_node="/dev/xen/blktap-2/tapdev$tap_ctl_ret"
 mount_dir="$sysdisk_dir/$vm_id.disk"
-mkfs.ext3 $bd_dir			1>/dev/null 2>&1
+mkfs.ext3 $bd_node			1>/dev/null 2>&1
 if [ $? != 0 ]; then
 	echo "Format block device error";
 	log "Format block device error";
 	exit 1;
 fi
-mount $bd_dir $mount_dir	1>/dev/null 2>&1
+mount $bd_node $mount_dir	1>/dev/null 2>&1
 if [ $? != 0 ]; then
 	echo "Format block device error";
 	log "Format block device error";
 	exit 1;
 fi
 
+#Step 6. Make system increment disk
+os_type_dir="$sysdisk_dir/os_type"
+sys_disk="$mount_dir/$vm_id.sys.img"
+if [ -d $os_type_dir ]; then
+	if [ -f $os_type_dir/$vm_os_type.img ]; then
+		vhd-util snapshot -n $sys_disk -p $os_type_dir/$vm_os_type.img -m		1>/dev/null 2>&1
+		if [ $? != 0 ]; then
+			echo "Make system imcrement disk error";
+			log "Make system imcrement disk error";
+		fi
+	fi
+else
+	echo "Error, no os type dir";
+	log "Error, no os type dir";
+fi
+
+#Step 7. Make the configure file
+xm_crfile=$work_dir/$vm_id.cfg
+echo "vcpus = $vm_cpu_count" > $vm_crfile					1>/dev/null 2>&1
+echo "name = $vm_os_type.$vm_id" >> $vm_crfile				1>/dev/null 2>&1
+echo "memory = $vm_mem_size" >> $vm_crfile					1>/dev/null 2>&1
+echo "vif = [ 'mac=$vm_mac_addr' ]" >> $vm_crfile			1>/dev/null 2>&1
+echo "ip = $vm_ip_addr" >> $vm_crfile						1>/dev/null	2>&1
+echo "netmask = 255.255.255.0" >> $vm_crfile				1>/dev/null	2>&1
+echo "vncpasswd = '$vnc_passwd'" >> $vm_crfile				1>/dev/null	2>&1
+echo "bootloader = "/usr/bin/pygrub"" >> $vm_crfile			1>/dev/null 2>&1
+echo "disk = [ "tap2:vhd:$sys_disk,xvda,w","tap2:aio:$os_type_dir/$vm_os_type.img,xvdb,r" ]" >> $vm_crfile		1>/dev/null 2>&1
+
+#Step 8. Create vm and get the dynamic id
+xm create $xm_crfile 1>/dev/null 2>&1
+sleep 15s
+if [ $? != 0 ]; then
+	echo "Create vm error";
+	log "Create vm error";
+fi
+id=`xm list | grep "$vm_os_type.$vm_id" | awk '{print $2}'`
+
+#Step 9. Check the rest stuffs
+xenstore-write /local/domain/$id/key 1 					1>/dev/null 2>&1
+xm block-attach $id file:/$scene_iso_file xvdf r 		1>/dev/null 2>&1
+while [ 1 ]
+do
+	sleep 1
+	N=`xenstore-read /local/domain/$id/key 1>/dev/null 2>&1`
+	if [ $N==0 ]; then
+		break
+	else
+		continue
+	fi
+done
+xenstore-rm /local/domain/$id/key 1>/dev/null 2>&1
+VBD=`xm block-list $id | grep -n '3p' | gawk '{print $1}'`		1>/dev/null 2>&1
+echo "output vhd value VBD = $VBD"		1>/dev/null 2>&1
+rm -rf $scene_iso_file
+
+#Step 10. Check if start xen vm well
+if [ $? -eq 0 ]; then
+	echo "Start xen vm successfully"
+else
+	echo "Fail to start xen vm, check your stuffs :-/"
+fi
 exit 0;

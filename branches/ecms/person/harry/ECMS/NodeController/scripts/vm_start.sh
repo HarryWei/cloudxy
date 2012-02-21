@@ -90,10 +90,7 @@ mount_dir="$sysdisk_dir/$vm_id.disk"
 os_type_dir="$sysdisk_dir/os_type"
 sys_disk="$mount_dir/$vm_id.sys.img"
 #Step 7
-xm_crfile=$work_dir/$vm_id.cfg
-#Step 8
-#Step 9
-#Step 10
+vm_crfile=$work_dir/$vm_id.cfg
 
 rest() { #For the step 2's jump usage
 #Step 7. Make the configure file

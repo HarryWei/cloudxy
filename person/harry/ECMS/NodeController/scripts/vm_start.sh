@@ -33,8 +33,20 @@ debug() {
 }
 
 if [ $# != 20 ]; then
-	usage;
+	echo "Parameters Error";
 	log "Parameters Error";
+	usage;
+	exit 1;
+fi
+
+if [ "$1" != "-i" ] || [ "$3" != "-c" ] ||
+	[ "$5" != "-s" ] || [ "$7" != "-p" ] ||
+	[ "$9" != "-h" ] || [ "${11}" != "-a" ] ||
+	[ "$9" != "-m" ] || [ "${11}" != "-o" ] ||
+	[ "$9" != "-w" ] || [ "${11}" != "-t" ]; then
+	echo "Parameters error";
+	log "Parameters error";
+	usage;
 	exit 1;
 fi
 
@@ -70,6 +82,7 @@ if [ -d $work_dir ]; then
 		else
 			echo "Fail to remove dir, check your dir's permission!";
 			log "Fail to remove dir, check your dir's permission!";
+			exit 1;
 		fi
 else
 	mkdir $work_dir;	1>/dev/null 2>&1
@@ -83,7 +96,8 @@ fi
 sysdisk_dir="$HOME/sysdisk"
 sysname="$vm_id.sys.img"
 if [ -f $sysdisk_dir/$sysname ]; then 
-	echo "Jump to Step 7";
+	echo "$sysname exists, jump to Step 7";
+	log "$sysname exists, jump to Step 7";
 fi
 
 #Step 3. Make iso image for vm_passwd and vm_hostname
@@ -112,9 +126,11 @@ if [ -f $mkfs_hlfs ]; then
 		then
 			echo "remove $sysdisk_dir/$vm_id successfully";
 			log "remove $sysdisk_dir/$vm_id successfully";
+			exit 1;
 		else
 			echo "fail to remove $sysdisk_dir/$vm_id, check permission";
 			log "fail to remove $sysdisk_dir/$vm_id, check permission";
+			exit 1;
 		fi	
 	fi
 	$mkfs_hlfs -u local:///$sysdisk_dir/$vm_id -b 8192 -s 67108864 -m 1024	1>/dev/null 2>&1
@@ -161,11 +177,13 @@ if [ -d $os_type_dir ]; then
 		if [ $? != 0 ]; then
 			echo "Make system imcrement disk error";
 			log "Make system imcrement disk error";
+			exit 1;
 		fi
 	fi
 else
 	echo "Error, no os type dir";
 	log "Error, no os type dir";
+	exit 1;
 fi
 
 #Step 7. Make the configure file
@@ -186,6 +204,7 @@ sleep 15s
 if [ $? != 0 ]; then
 	echo "Create vm error";
 	log "Create vm error";
+	exit 1;
 fi
 id=`xm list | grep "$vm_os_type.$vm_id" | awk '{print $2}'`
 
@@ -204,13 +223,16 @@ do
 done
 xenstore-rm /local/domain/$id/key 1>/dev/null 2>&1
 VBD=`xm block-list $id | grep -n '3p' | gawk '{print $1}'`		1>/dev/null 2>&1
-echo "output vhd value VBD = $VBD"		1>/dev/null 2>&1
+echo "output vhd value VBD = $VBD"								1>/dev/null 2>&1
 rm -rf $scene_iso_file
 
 #Step 10. Check if start xen vm well
 if [ $? -eq 0 ]; then
 	echo "Start xen vm successfully"
+	log "Start xen vm successfully"
 else
 	echo "Fail to start xen vm, check your stuffs :-/"
+	log "Fail to start xen vm, check your stuffs :-/"
+	exit 1;
 fi
 exit 0;

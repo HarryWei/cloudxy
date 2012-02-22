@@ -1,21 +1,20 @@
 #!/bin/bash
 
-#Get the Parameters
+#Get the vm_start Parameters
 if [ $# != 20 ]; then
 	echo "Parameters Error";
-	log "Parameters Error";
-	usage;
+	source ./log.sh "Parameters Error";
 	exit 1;
 fi
 
 if [ "$1" != "-i" ] || [ "$3" != "-c" ] ||
 	[ "$5" != "-s" ] || [ "$7" != "-p" ] ||
 	[ "$9" != "-h" ] || [ "${11}" != "-a" ] ||
-	[ "$13" != "-m" ] || [ "${15}" != "-o" ] ||
-	[ "$17" != "-w" ] || [ "${19}" != "-t" ]; then
+	[ "${13}" != "-m" ] || [ "${15}" != "-o" ] ||
+	[ "${17}" != "-w" ] || [ "${19}" != "-t" ]; then
 	echo "Parameters error";
-	log "Parameters error";
-	usage;
+	source ./log.sh "Parameters error";
+	source ./vm_start_usage.sh;
 	exit 1;
 fi
 
@@ -32,7 +31,7 @@ do
 		o) vnc_port=$OPTARG;;
 		w) vnc_passwd=$OPTARG;;
 		t) vm_os_type=$OPTARG;;
-		?) usage; log "Parameters Error"; exit 1;;
+		?) source ./vm_start_usage.sh; source ./log.sh "Parameters Error"; exit 1;;
 	esac
 done
 

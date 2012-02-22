@@ -1,5 +1,6 @@
 #!/bin/bash
 
+vm_id=$1
 work_dir="$HOME/$vm_id"
 
 #Step 1. Check if the dir exists. if so, delete it and 
@@ -9,11 +10,11 @@ if [ -d $work_dir ]; then
 		then 
 			echo "Remove dir successfully";
 			cd $HOME;		1>/dev/null 2>&1
-			mkdir $vm_id;	1>/dev/null 2>&1
+			mkdir $vm_id;		1>/dev/null 2>&1
 			cd $vm_id;		1>/dev/null 2>&1
 		else
 			echo "Fail to remove dir, check your dir's permission!";
-			log "Fail to remove dir, check your dir's permission!";
+			./log.sh "Fail to remove dir, check your dir's permission!";
 			exit 1;
 		fi
 else

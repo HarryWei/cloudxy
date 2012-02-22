@@ -54,3 +54,8 @@ echo "vm_mac_addr is $vm_mac_addr"
 echo "vnc_port is $vnc_port"
 echo "vnc_passwd is $vnc_passwd"
 echo "vm_os_type is $vm_os_type"
+
+#Step 1
+source ./vm_start_check_workdir.sh $vm_id;
+
+

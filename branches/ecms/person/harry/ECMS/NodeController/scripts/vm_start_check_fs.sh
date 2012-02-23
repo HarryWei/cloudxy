@@ -1,5 +1,6 @@
 #!/bin/bash
 
+vm_id=$1
 sysdisk_dir="$HOME/sysdisk"
 sysname="$vm_id.sys.img"
 
@@ -9,6 +10,9 @@ sysname="$vm_id.sys.img"
 #Hlfs hdfs URI pattern "hdfs:///$HOME/sysdisk"
 if [ -f $sysdisk_dir/$sysname ]; then 
 	echo "$sysname exists, jump to Step 7";
-	log "$sysname exists, jump to Step 7";
-	rest;
+	./log.sh "$sysname exists, jump to Step 7";
+#TODO add junp to Step 7 stuffs
+else
+	echo "This is first start vm";
+	./log.sh "This is first start vm";
 fi

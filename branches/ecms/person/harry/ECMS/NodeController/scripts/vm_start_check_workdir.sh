@@ -9,15 +9,12 @@ if [ -d $work_dir ]; then
 		if rm -rf $work_dir		1>/dev/null 2>&1
 		then 
 			echo "Remove dir successfully";
-			cd $HOME;		1>/dev/null 2>&1
-			mkdir $vm_id;		1>/dev/null 2>&1
-			cd $vm_id;		1>/dev/null 2>&1
+			mkdir $work_dir;	1>/dev/null 2>&1
 		else
 			echo "Fail to remove dir, check your dir's permission!";
 			./log.sh "Fail to remove dir, check your dir's permission!";
 			exit 1;
 		fi
 else
-	mkdir $work_dir;	1>/dev/null 2>&1
-	cd $work_dir;		1>/dev/null 2>&1
+	mkdir $work_dir;			1>/dev/null 2>&1
 fi

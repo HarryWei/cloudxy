@@ -58,4 +58,11 @@ echo "vm_os_type is $vm_os_type"
 #Step 1
 source ./vm_start_check_workdir.sh $vm_id;
 
+#Step 2
+source ./vm_start_check_fs.sh $vm_id;
+
+#Step 3
+source ./vm_start_make_iso.sh $vm_id $vm_hostname $vm_passwd;
+
+#Step 4
 

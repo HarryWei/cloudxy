@@ -40,7 +40,7 @@
 若要是尝试EMCS，则需要按照http://code.google.com/p/cloudxy/wiki/EMCS_RD_Manual 所说执行。注意erlang要下载OTP R15B版本，因为默认erlang版本可能有些地方不支持。
 
 
-===第七布.===
+===第七步.===
 利用hlfs启动虚拟机 -- 先买个关子，留给大家思考
 
 ------------

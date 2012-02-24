@@ -27,19 +27,20 @@ if [ -f $mkfs_hlfs ]; then
 	else
 		mkdir $sysdisk_dir/$vm_id;
 	fi
-	$mkfs_hlfs -u local://$sysdisk_dir/$vm_id -b 8192 -s 67108864 -m 1024
+	$mkfs_hlfs -u local://$sysdisk_dir/$vm_id -b 8192 -s 67108864 -m 1024	1>/dev/null 2>&1
 	if [ $? == -1 ]; then
 		echo "Format hlfs error";
 		source ./log.sh "Format hlfs error";
 		exit 1;
 	fi
 	tap-ctl create -a hlfs:local://$sysdisk_dir/$vm_id		1>/dev/null 2>&1
-	tap_ctl_ret=$?
-	if [ $tap_ctl_ret == -1 ]; then
+	if [ $? == -1 ]; then
 		echo "Tap-ctl execute error";
 		source ./log.sh "Tap-ctl excute error";
 		exit 1;
 	fi
+	tap_ctl_ret=`tap-ctl list | grep "$sysdisk_dir/$vm_id" | awk '{print $2}'`
+	tap_ctl_ret=`echo "$tap_ctl_ret" | sed -e 's/minor=//g'`
 	echo "tap-ctl device number is $tap_ctl_ret";
 	source ./log.sh "tap-ctl device number is $tap_ctl_ret";
 else
@@ -47,3 +48,4 @@ else
 	source ./log.sh "We have no $mkfs_hlfs tool";
 	exit 1;
 fi
+	return $tap_ctl_ret;

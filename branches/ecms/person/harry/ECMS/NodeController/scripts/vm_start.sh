@@ -65,4 +65,5 @@ source ./vm_start_check_fs.sh $vm_id;
 source ./vm_start_make_iso.sh $vm_id $vm_hostname $vm_passwd;
 
 #Step 4
+source ./vm_start_cr_sysdisk.sh $vm_id;
 

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "This is Step 5, format sysdisk.enter vm_start_fmt_sysdisk.sh file."
 tap_num=$1;
 vm_id=$2;
 bd_node="/dev/xen/blktap-2/tapdev$tap_num"
@@ -26,3 +27,4 @@ if [ $? == -1 ]; then
 	log "Format block device error";
 	exit 1;
 fi
+echo "leave vm_start_fmt_sysdisk.sh file----------->"

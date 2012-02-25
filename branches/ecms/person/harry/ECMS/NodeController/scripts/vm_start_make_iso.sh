@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "This is Step 3, make iso for hostname and passwd.enter vm_start_make_iso.sh file."
 vm_id=$1
 vm_hostname=$2
 vm_passwd=$3
@@ -16,3 +17,4 @@ if [ $? != 0 ]; then
 	./log.sh "mkisofs error";
 	exit 1;
 fi
+echo "leave vm_start_make_iso.sh file------------->"

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "This is Step 1, check work directory.enter vm_start_check_workdir.sh file."
 vm_id=$1
 work_dir="$HOME/$vm_id"
 
@@ -18,3 +19,4 @@ if [ -d $work_dir ]; then
 else
 	mkdir $work_dir;			1>/dev/null 2>&1
 fi
+echo "leave vm_start_check_workdir.sh file ---------------->"

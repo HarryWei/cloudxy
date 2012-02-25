@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "This is Step 4, create sysdisk.enter vm_start_cr_sysdisk.sh file."
 vm_id=$1
 #Step 4
 tools_dir="$HOME/tools"
@@ -27,7 +28,7 @@ if [ -f $mkfs_hlfs ]; then
 	else
 		mkdir $sysdisk_dir/$vm_id;
 	fi
-	$mkfs_hlfs -u local://$sysdisk_dir/$vm_id -b 8192 -s 67108864 -m 1024	1>/dev/null 2>&1
+	$mkfs_hlfs -u local://$sysdisk_dir/$vm_id -b 8192 -s 67108864 -m 30	1>/dev/null 2>&1
 	if [ $? == -1 ]; then
 		echo "Format hlfs error";
 		source ./log.sh "Format hlfs error";
@@ -48,4 +49,5 @@ else
 	source ./log.sh "We have no $mkfs_hlfs tool";
 	exit 1;
 fi
+echo "leave vm_start_cr_sysdisk.sh file-------------------->"
 	return $tap_ctl_ret;

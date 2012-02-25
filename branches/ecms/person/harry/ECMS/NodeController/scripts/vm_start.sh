@@ -73,3 +73,6 @@ source ./vm_start_fmt_sysdisk.sh $tap_num $vm_id;
 
 #Stpe 6
 source ./vm_start_cr_sys_incre_disk.sh $vm_id $vm_os_type;
+
+#Step 7
+source ./vm_start_make_crfile.sh $vm_id $vm_cpu_count $vm_mem_size $vm_ip_addr $vm_mac_addr $vnc_port $vnc_passwd $vm_os_type;

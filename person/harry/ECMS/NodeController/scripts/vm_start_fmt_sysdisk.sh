@@ -15,8 +15,8 @@ if [ $? == -1 ]; then
 	exit 1;
 fi
 if [ -d $mount_dir ]; then
-	echo "mount dir exists";
-	./log.sh "mount dir exists";
+	echo "mount dir exists, we need not mkdir it";
+	./log.sh "mount dir exists, we need not mkdir it";
 else
 	mkdir $mount_dir;
 fi

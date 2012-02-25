@@ -70,3 +70,6 @@ source ./vm_start_cr_sysdisk.sh $vm_id;
 #Step 5
 tap_num=$?;
 source ./vm_start_fmt_sysdisk.sh $tap_num $vm_id;
+
+#Stpe 6
+source ./vm_start_cr_sys_incre_disk.sh $vm_id $vm_os_type;

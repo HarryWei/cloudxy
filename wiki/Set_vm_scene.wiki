@@ -110,4 +110,6 @@ root @ 147 ~ 18: xenstore-read /local/domain/19/key
 }}}
 
 ----
-田康奇(kangqi1988@gmail.com ), 贾威威 (harryxiyou@gmail.com) 2012, 2, 25
+Written by 田康奇(kangqi1988@gmail.com ) 
+Reviewed by 贾威威 (harryxiyou@gmail.com) 
+2012, 2, 25

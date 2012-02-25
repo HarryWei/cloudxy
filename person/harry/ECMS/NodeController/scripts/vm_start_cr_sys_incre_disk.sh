@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "This is Step 6, create increment disk.enter vm_start_cr_sys_incre_disk.sh file."
 #Step 6
 vm_id=$1
 vm_os_type=$2
@@ -25,3 +26,4 @@ else
 	log "Error, no os type dir";
 	exit 1;
 fi
+echo "leave vm_start_cr_sys_incre_disk.sh file--------------------->"

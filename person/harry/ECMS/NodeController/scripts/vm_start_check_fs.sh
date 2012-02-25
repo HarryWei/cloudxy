@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "This is Step 2, check if first start.enter vm_start_check_fs.sh file."
 vm_id=$1
 sysdisk_dir="$HOME/sysdisk"
 sysname="$vm_id.sys.img"
@@ -16,3 +17,4 @@ else
 	echo "This is first start vm";
 	./log.sh "This is first start vm";
 fi
+echo "leave vm_start_check_fs.sh file--------------------->"

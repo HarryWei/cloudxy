@@ -33,7 +33,7 @@
  * dom0等VM配置完成后，卸载该iso盘,并销毁该iso。
 
 
-===注意的问题===
+==注意的问题==
  * 动态挂载和卸载ISO —— 这个不难，掌握block-attach等命令即可完成。
  * 场景化脚本执行触发—— 这个脚本在只做母盘是置入系统即可，要能自启动，比如至于rc.local下。
 
@@ -60,7 +60,7 @@ echo -e "\n\tName  is $1\n"
 xm block-attach 1.iso xvdd r > /dev/null 2>/dev/null
 }}}
 
- ==xenstore，虚拟机的通信==
+==xenstore，虚拟机的通信==
  * 什么是xenstore？
 Xenstore 是主要的用来控制建立来自客户机的共享内存区域的事件通道、管理客户机的通知，收集客户机状态数据的工具。
 说白了就是主要的作用就是虚拟机之间的通信。
@@ -108,3 +108,6 @@ root @ 147 ~ 18: xenstore-read /local/domain/19/key
 3
 我们可以发现在虚拟机内部修改的一个变量key的值，在虚拟机的外部（host）中可以看到修改后的key的值。
 }}}
+
+----
+田康奇(kangqi1988@gmail.com ), 贾威威 (harryxiyou@gmail.com) 2012, 2, 25

@@ -1,7 +1,7 @@
 #summary English brief Introduction
 
 = Cloudxy Project =
-Cloudxy Project now is made up of HLFS sub probject and EMCS sub project.
+Cloudxy Project now is made up of HLFS sub probject and EMCS sub project<br>
  
 The first part of Cloudxy is HLFS sub project,which is a distributed vm image storage system for XEN.HLFS(Hadoop Log Structure Filesystem，acturally named Hadoop Log Structure Block System is more proper) provides highly available block level 
 storage volumes that can be attached to XEN virtual machines by its tapdisk driver —— Similar projects in KVM region is sheepdog，however in different architecture.

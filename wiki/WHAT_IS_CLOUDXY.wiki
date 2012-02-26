@@ -13,6 +13,4 @@ The main idea of HLFS is: take advantage of "Log Structure FileSystem"  ideology
 The Second part of Cloudxy is ECMS sub project,which is a virtual machine managament system used in hlfs storage environment.
 The current work for ECMS is to smart shedule and life-cycle manage virtual machine
 
-The further goal for ECMS is to build Virtual IDC, which will include develop virutal resource define language and virtual resource visualization management
-
-we wish user can define their own virtual resource (for example,a single instance mysql service,or a master-slave mysql service,or else anything,they are all belong to virtual resource),and can instantiate、reuse、deploy virtual resource.
+The further goal for ECMS is to build Virtual IDC, which will include develop virutal resource define language and virtual resource visualization management.we wish user can define their own virtual resource (for example,a single instance mysql service,or a master-slave mysql service,or else anything,they are all belong to virtual resource),and can instantiate、reuse、deploy virtual resource.

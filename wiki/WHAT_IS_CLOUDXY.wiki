@@ -11,6 +11,8 @@ Compared to sheepdog, HLFS has more scalability and reliability than sheepdog by
 The main idea of HLFS is: take advantage of "Log Structure FileSystem"  ideology to build an online image storage system on hdfs. hdfs guarantee reliability and scalability for our storage system; in addition ,mechanism of "Log Structure FileSystem" ideology make our storage system support random access for online image service.
 == HLFS == 
 The Second part of Cloudxy is ECMS sub project,which is a virtual machine managament system used in hlfs storage environment.
-The current work for ECMS is to smart shedule and life-cycle manage virtual machine<br>
-The further goal for ECMS is to build Virtual IDC, which will include develop virutal resource define language and virtual resource visualization management<br>
+The current work for ECMS is to smart shedule and life-cycle manage virtual machine
+
+The further goal for ECMS is to build Virtual IDC, which will include develop virutal resource define language and virtual resource visualization management
+
 we wish user can define their own virtual resource (for example,a single instance mysql service,or a master-slave mysql service,or else anything,they are all belong to virtual resource),and can instantiate、reuse、deploy virtual resource.

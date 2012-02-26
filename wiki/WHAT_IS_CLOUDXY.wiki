@@ -1,12 +1,13 @@
 #summary English brief Introduction
 
 = Cloudxy Project =
-Cloudxy Project now is made up of HLFS sub probject and EMCS sub project<br>.
- 
+Cloudxy Project now is made up of HLFS sub probject and EMCS sub project<br>
+== HLFS == 
 The first part of Cloudxy is HLFS sub project,which is a distributed vm image storage system for XEN.HLFS(Hadoop Log Structure Filesystem，acturally named Hadoop Log Structure Block System is more proper) provides highly available block level 
 storage volumes that can be attached to XEN virtual machines by its tapdisk driver —— Similar projects in KVM region is sheepdog，however in different architecture.
 Compared to sheepdog, HLFS has more scalability and reliability than sheepdog by now,for we are on the shoulder of hadoop distrubute file system (hdfs). at the same time ,HLFS also supports advanced volume management features such as snapshot(we can support snapshot tree), cloning, and thin provisioning.
 The main idea of HLFS is: take advantage of "Log Structure FileSystem"  ideology to build an online image storage system on hdfs. hdfs guarantee reliability and scalability for our storage system; in addition ,mechanism of "Log Structure FileSystem" ideology make our storage system support random access for online image service.
+== HLFS == 
 The Second part of Cloudxy is ECMS sub project,which is a virtual machine managament system used in hlfs storage environment.
 The current work for ECMS is to smart shedule and life-cycle manage virtual machine；
 The further goal for ECMS is to build Virtual IDC, which will include develop virutal resource define language and virtual resource visualization management.

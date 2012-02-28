@@ -75,10 +75,15 @@ Xenstore 的目录是层次似的key-data 值对。每个域都有一个目录�
  # /local/domain：本节点上存储的信息；
  # /tool：包含不同用户模态下的工具。
 
+{{{
+1.注意Xenstore工具的底层通讯机制需要pv支持，如果你是的DOMU是半虚拟化的，那么直接有了；但如果是HVM/SVM全虚拟化的，则需要安装pv driver。
+2.Xenstore是个工具，如果你有pv支持啦，那么只需安装该工具即可xen/tools/xenstore 编译安装即可。
+3.再交给大家一个偷懒的办法! -- 待续
+}}}
 
 ==相关命令==
 你可以使用这些信息来开发一个定制的管理接口或者进行Xen 环境下简单的查询。下面几个命令是和此有关的：
- * xenstore-chmod：准许管理员和开发人员手工改变Xenstore 中任意位置的权限；
+ * xenstore-chmod：准许管理员和开发人员手工改变Xenstore 中任意位置的权限—— w(write only)/r(read only)/b(both read and write)/n(no access)；
  * xenstore-list：列出存放于目录中存放的key，或者类别。
  * xenstore-read：输出和一个特定key 有关的值。
  * xenstore-write：改变key 中存放的值。

@@ -78,7 +78,7 @@ Xenstore 的目录是层次似的key-data 值对。每个域都有一个目录�
 {{{
 1.注意Xenstore工具的底层通讯机制需要pv支持，如果你是的DOMU是半虚拟化的，那么直接有了；但如果是HVM/SVM全虚拟化的，则需要安装pv driver。
 2.Xenstore是个工具，如果你有pv支持啦，那么只需安装该工具即可xen/tools/xenstore 编译安装即可。
-3.再交给大家一个偷懒的办法! -- 待续
+3.如果还嫌自己编译费劲，再交给大家一个偷懒的办法! 直接将dom0中的/usr/lib/xenstore* 文件和ldd /usr/lib/xenstore看到的库加到domU镜像就可以了。
 }}}
 
 ==相关命令==
@@ -112,6 +112,10 @@ root @ 147 ~ 18: ##下面查看这个值
 root @ 147 ~ 18: xenstore-read /local/domain/19/key   
 3
 我们可以发现在虚拟机内部修改的一个变量key的值，在虚拟机的外部（host）中可以看到修改后的key的值。
+}}}
+
+{{{
+这里要补充一点。 domU中设置key前，需要在dom0中先修改key权限为b - xenstore-chmod /local/domain/19/key b
 }}}
 
 ----

@@ -92,6 +92,6 @@ In the realization of the HLFS, period of recovery process into row:
 
 关于log structure filesystem 最初论文，请参看download中资料
 ----------------------------
-Translated by Zhang Jingpeng, Feng siyu, Dai Jinwei.
+Translated by Zhang Jingpeng, Feng siyu, Dai Jinwei.<br>
 Reviewed By Harry Wei <harryxiyou@gmail.com>, Dai Jinwei <daijiwei41@gmail.com>
           

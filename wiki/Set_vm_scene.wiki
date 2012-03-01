@@ -115,10 +115,10 @@ root @ 147 ~ 18: xenstore-read /local/domain/19/key
 }}}
 
 {{{
-这里要补充一点。 domU中设置key前，需要在dom0中先修改key权限为b - xenstore-chmod /local/domain/19/key b
+1. 这里要补充一点。 domU中设置key前，需要在dom0中先修改key权限为b - xenstore-chmod /local/domain/19/key b
+2. 需要的话可以从download中下载domU-64bit-withxenstore-FS.img.tar.gz  
 }}}
 
 ----
-Written by 田康奇(kangqi1988@gmail.com ) <br>
-Reviewed by 贾威威 (harryxiyou@gmail.com) <br>
+Written by 田康奇(kangqi1988@gmail.com ) 贾威威 (harryxiyou@gmail.com）<br>
 2012, 2, 25

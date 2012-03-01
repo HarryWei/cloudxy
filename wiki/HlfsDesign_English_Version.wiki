@@ -1,0 +1,97 @@
+#summary HLFS Frame Design (In English).
+=hadoop dfs log structure filesystem design =
+                                            -- Kang Hua
+
+==Background information==
+   HLFS is used to provide virtual disk for elastic cloud    platform (just like EBS for amazon) and to provide backend storage service. It needs to satisfy characteristics including usability, high-performance, random reading and writing, fast fault recovery, data snapshot, rollback.
+
+==Realization description==
+     hadoop dfs can be looked as a dependable, extensible disk. While it cannot do random block write, it can just do additional writing. Therefore, it cannot be looked as mirror storage system. So we need to use log structure file system to realize  random reading and writing upon hdfs with additional way.
+
+==Characteristics description==
+ * User mode file system ------- different to standard kernel mode posix interface file system. HLFS is realized at user mode and implanted into client-side as lib. It is unnecessary to realize posix interface standard, realizing pread/pwrite is ok.
+ * Supporting random reading and writing ------- file supports random reading and writing (according to offset  location ).
+ * Supporting large files storage ------- single file needs to support over T data storage (the file means the disk of virtual machine).
+ * Only supporting single file ------ every virtual disk corresponds an HLFS case, so the easiest design only supports one file (corresponding a disk in a virtual machine).
+ * Client  - orient ------ virtual machine disk can only be attached to one virtual machine mirror, so we need to keep the data same of virtual machine client.
+ * Supporting snapshot and rollback ------ we can do snapshot and rollback on a file (to host service virtual machine, snapshot and rollback is the most effective way to protect data from pollution and damage).
+ * Supporting multidata and multicopy  -------  more than one storage can ensure data safety and  nearly visit (hadoop helps us realize this).
+ * Cluster system can do dynamic expansion  ------- storage nodes (PC servers ) can do dynamic expansion without affecting  normal service of cluster (hadoop helps us realize this). 
+ * Cluster system can do fault switch limpidly  -------- fault of storage nodes does not affect service, and it is limpid to clients (hadoop helps us realize this).
+
+
+==Design summary== 
+      Disk data format of HLFS is almost the same with normal file system
+(FFS-fast file system ), they both have the aid of structures like indirect block,  inode, directory. The difference is that LFS separates disk into segment to manage them, and there is only one active segment. These segments is connected head to tail and make up a linear log. Any file updating will be added to the tail of log. The advantage of this action is ensuring order mobile of disk head and enhancing the throughput. The trouble is we need to recover old data or the disk will be full sooner or later. To sum up, the basic ideas of our design is that realizing LFS on the reliable and distributed medium provided by hadoop dfs.
+
+
+===HLFS LOG 创建和检索===
+     LOG 是我们数据持久化的一个基本写入单位,对于写透需求来说，实际上每次写入动作都会产生一个新的LOG，而每次的LOG大小不尽相同。
+LOG的内容显然必须包含被写入的数据块，还需要包含对应的元数据（索引块等）信息，以及元数据的元信息（inode)，这样才能完成对一个信息的索引。
+
+====LOG创建====
+    任何文件或者目录的修改LFS都需要向log中写入如下几部分信息，而且要求严格“按照顺序写入（in-order semantics）”—— 其目的是为了崩溃时能尽可能恢复数据一致性。
+ # 任何修改或者新数据块  （数据块是数据实际操作的最小粒度；可配置；大小为8196字节或者更大）
+ # Indirect block 更新   （也叫做meta-data block ，是inode中的2/3/4级索引块数据）
+ # Inode          更新   （每个inode对应一个文件，如果只支持单一文件，则只用一个inode)
+ # Inode map      更新    ( 单一文件则只有一个映射项）
+ LOG 的布局为 ： *A (data）| B (meta-data block log) | C (inode log) | D(inode_map log)*。
+====数据检索====
+  读取文件最新数据时：需要通过找到最新的inode map位置，再进而找到所需文件对应inode，再进而找到文件逻辑地址对应的数据块的物理地址（段号+offset)，再进而读取数据。
+  最新Inode map位置按理应记录在checkpoint文件中（见错误恢复部分），HDFS初始化加载时读入；如果运行中则该inode map 驻留于内存数据结构中。
+  * 注意，文件块大小是可变的（可配置），比如8k。对于不足一个块的修改，一定会伴随先读出完整块再修改，再追加这一过程。
+
+===Space management===
+ * In order to control space management and the purpose of the recovery, we have to storage space for segmentation, each segment size does not need fixed, and specific size and no hard and fast rules;
+  ** Each section of the HLFS mapping a Hadoop Dfs documents, such as size for 64 M (configurable); Segment file name format for segno. Seg, of which segno increasing starting from 0;
+  ** Data block storage address (storage address) for 64, a front for the file number segment, the rear segment for file within offset-such as a period of size is 64 M, the tail need 26 ;
+
+ * Period of recovery-(segment clean) file system log structure order additional behavior will bring lots of old data, and therefore must be something old data recovery mechanism. Recovery mechanism for general need to traverse section of the document data block, check the current inode index blocks of the address is a pointer to it, if not show is this block is old data can give up, if a segment of the data block is all old pieces of data is the period of file can be recycled (from HDFS removed). Another when paragraph data block rarely available, may also take the copy and remove way--will the old data data block the initiative to log form new auxiliary wrote paragraph, so that the original segment of the data block all become will block, then delete it again.
+In the realization of the HLFS, period of recovery process into row:
+ # The first step for calculation of the use of statistical (statistics section of the current and how much data blocks active);
+ # The second part to the active piece of less than horizon of the section (horizontal line can set) executive delete or copy and remove actions to recovery space.
+ * "Period of the use of statistical" by external tools program realization, produce the period of use of the count stored in segment_usage. TXT. We can HLFS from client's machine to "pull mode" (will read to local for the period of statistical task; Also can use "push mode" (map/reduce calculation way near) and implement period of statistical task.
+ * "Period of recovery" work is the only written by HLFS threads to execute, thus to avoid metadata (inode) and modification of the problems, and recycling as a low priority task, will first make way for normal written to the task, and only when the current no writing task will begin to carry out the period of recovery task.
+ 
+===Snapshot realize===
+  In the log structure filesystem snapshot is implemented on the characteristics of congenital have. 
+  Every time we write log (anyone without being recycled log) can serve as a snapshot point, also can restore that at the time of data, and the specific way is very simple, need to be loaded in the moment that the snapshot log inode can. So in principle of data can be rolled back we to any a written to the moment. However, we generally will not retain all the data, because this proposal for their users consider important data state do a mark so that you can get a permanent snapshot, the permanent snapshot will be written to cheakpoint. TXT file (record time inode address the snapshot, time, name can). This is the inode snapshot information was not recycling.
+
+
+===The API of achieving has three features=== 
+ # C-style api; 
+ # thread-safe (because every visitors maintain own HLFS_CTRL context)
+ # the port like the file system (but it hasn't the concept of multi-file, so does not exist the concept of file names and)
+
+ * HLFS_CTRL*init_hlfs(const char*uri)
+ * int deinit_hlfs(HLFS_CTRL*ctrl)
+ * int hlfs_stat (HLFS_CTRL*ctrl,HLFS_STAT_T*stat)
+ * int hlfs_open (HLFS_CTRL*ctrl,int flag)
+ * int hlfs_close (HLFS_CTRL*ctrl)
+ * int hlfs_read (HLFS_CTRL*ctrl,char*read_buf,uint32_t read_len,uint64_t pos)
+ * int hlfs_write (HLFS_CTRL*ctrl,char*write_buf,uint32_t write_len,uint64_t pos)     
+
+==Some shortages about our project==
+ # the code in the memory usage without refinement, many places is wasted (and possibly even a small amount of memory leak). So as far as possible loose     the memory.when running in the dom(),please keep the memory 1G at least.(512M is so small)
+ # The link management doesn't been pooled.It exist the problem that open repeatedly.The connection is that link to the back-end storage (the connection handle of hdfs).This action that open and close repeatedly will waste many time on the network.So we will inprove the action in the future.
+ # For the clean segment operations, it exist that the segment you want to delete  what is being accessed.Now we should have use reference technology to protect,but we use the simple locking:locking when read or write , and delete file when neither opening operating or writing operating.We will improve this.
+ # If you don't call close when you close file ,you can't find the file in others connection context.The bug will bring a problem(note:you don't although see the file in namespace but you can see in hadoop fs -tail.Becouse the date what read from inputstream is not been submitted to the name node,it store in the date node).
+
+{{{
+    特别感谢
+    hlfs开发起源不能不提到淘宝的杨志峰和其团队几位未曾谋面的朋友，他们在阿里云曾借鉴log-structured file system公开论文开发过一个标准的log structrue filesystem （轩辕系统）原来设想用于虚拟机存储，但很可惜由于种种原因项目最终夭折，没有被最后采纳。
+    我有幸当时看过他们的文档和代码，虽然当时我对log structure filesystem理解和虚拟机镜像存储需求理解都尚且幼稚，可隐约也觉得log structure filesytem 结合 hdfs这种只能追加的分布存储系统是虚拟机镜像存储的一个不错选择（因此我还多次请教志丰，向其学习log structure filesystem 实现，其精湛技术和专业素质让人敬佩）。
+    随着我对log structure filesytem 和虚拟机镜像IO的进一步研究和领域，更重要的是有志丰等人的先期工作证明了这种方案的可行，让我相信针对虚拟机镜像存储特点实现一个log structrue block 镜像存储系统确实是值得一试的。因此针对虚拟机镜像访问特点，我开始着手实现一个针对块（block）的log structure block系统，也就是现在的hlfs —— 它相比标准log structure filesystem 而言会实现的更加简练（因为没有file层次结构），其上的快照、merge 方案等都应更简练和高效，优化余地更大。
+    很抱歉，hlfs发布初期没有提及志丰他们。直到今天在征得了志峰和其团队同意后，特别感谢他们当年的开创性尝试。如果没有他们前瞻性工作，hlfs肯定会走很多弯路。
+    刚向志丰要来了那几位素未平生的朋友的名字（如下），再次感谢他们，也希望他们能对cloudxy多提建议，多施与援手—— 他们是：
+    * 杨志丰 ： yangzhifeng83@gmail.com
+    * 董超   ： dongchao51@hotmail.com
+    * 郑文静 ： zhengwenjingster@gmail.com
+    * 邓岩   ： dengyan@act.buaa.edu.cn
+}}}
+
+关于log structure filesystem 最初论文，请参看download中资料
+----------------------------
+Translated by Zhang Jingpeng, Feng siyu, Dai Jinwei.
+Reviewed By Harry Wei <harryxiyou@gmail.com>, Dai Jinwei <daijiwei41@gmail.com>
+          

@@ -9,15 +9,15 @@
      Hadoop DFS can be regarded as a reliable, extensible 'disk' at any time. However, it cannot be writtern randomly but append sequentially. So we cannot take it as our mirror storage system directly. Thus we should realize randomly W/R operations by appending logs with the help of thoughts about 'log structure filesystem'. 
 
 ==Descriptions Of Characteristics==
- * User mode file system ------- different to standard kernel mode posix interface file system. HLFS is realized at user mode and implanted into client-side as lib. It is unnecessary to realize posix interface standard, realizing pread/pwrite is ok.
- * Supporting random reading and writing ------- file supports random reading and writing (according to offset  location ).
- * Supporting large files storage ------- single file needs to support over T data storage (the file means the disk of virtual machine).
- * Only supporting single file ------ every virtual disk corresponds an HLFS case, so the easiest design only supports one file (corresponding a disk in a virtual machine).
- * Client  - orient ------ virtual machine disk can only be attached to one virtual machine mirror, so we need to keep the data same of virtual machine client.
- * Supporting snapshot and rollback ------ we can do snapshot and rollback on a file (to host service virtual machine, snapshot and rollback is the most effective way to protect data from pollution and damage).
- * Supporting multidata and multicopy  -------  more than one storage can ensure data safety and  nearly visit (hadoop helps us realize this).
- * Cluster system can do dynamic expansion  ------- storage nodes (PC servers ) can do dynamic expansion without affecting  normal service of cluster (hadoop helps us realize this). 
- * Cluster system can do fault switch limpidly  -------- fault of storage nodes does not affect service, and it is limpid to clients (hadoop helps us realize this).
+ * User mode file system -- Be different from the file-systems of standard kernel mode posix interfaces. HLFS is realized at user mode space and inserted into client-side as lib mode. It is unnecessary to achieve posix interface regulations, just some main semantics like pread/pwrite, etc.
+ * Support randomly reading and writing -- File should support randomly reading and writing (according to file offset's location).
+ * Support large file storage -- Single file needs to support over Tera Bits storage (The file here means the size disk of virtual machine).
+ * Only support single file -- Under our usage condition, every virtual disk is an HLFS case, so the easiest design is we only provide one file (a disk in the virtual machine).
+ * Client-orient consistency -- Virtual machine disk can only be attached to one virtual machine mirror at the moment, so we only need provide data consistency of virtual machine client.
+ * Support snapshots and rollback -- Files can be taken snapshots freely and rollbacked in need(To host service virtual machine, snapshot and rollback is the most effective way to protect datas from pollution and damage).
+ * Support multidata and multicopy -- More than one storage can ensure data safety and nearby access (Hadoop DFS helps us realize this).
+ * Cluster system can be dynamically expanded  -- Storage nodes (PC servers) can be dynamically added without affecting normal service of cluster (Hadoop DFS helps us realize this). 
+ * Cluster system can do fault switch implicitly  -- Faults of storage nodes do not affect service, and it is implicit to clients (Hadoop  DFS helps us realize this).
 
 
 ==Design summary=

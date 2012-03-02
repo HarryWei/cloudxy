@@ -29,16 +29,17 @@ HLFS disk data format is almost the same as normal file system (FFS-fast file sy
     The contents of log include data block, metadata(indirect block,etc) information, and metadata's meta-information(inode). In this way, we can finish indexing one information correctly.
 
 ===LOG create===
-    Any change of files or directories should write into a log with following portions. And they must write in-order semantics -- The aim is to recovery datas consistently if has any crashes.   
- # Any chaneg or new data block (Data-block is smallest operation unit; configurable; size is 8KB or bigger)
+ * Any change of files or directories should write into a log with following portions. And they must write in-order semantics -- The aim is to recovery datas consistently if has any crashes.   
+ # Any change or new data block (Data-block is smallest operation unit; configurable; size is 8KB or bigger)
  # Indirect block update (Also named as meta-data block, is inode's 2/3/4 inodex data blocks)
  # Inode update (Each inode is corresponding a file. If we only afford one file, we need only one inode)
  # Inode map update (Sinal file has only one Inode map entry) 
- Log's constructure: *A (data）| B (meta-data block log) | C (inode log) | D(inode_map log)*
-====数据检索====
-  读取文件最新数据时：需要通过找到最新的inode map位置，再进而找到所需文件对应inode，再进而找到文件逻辑地址对应的数据块的物理地址（段号+offset)，再进而读取数据。
-  最新Inode map位置按理应记录在checkpoint文件中（见错误恢复部分），HDFS初始化加载时读入；如果运行中则该inode map 驻留于内存数据结构中。
-  * 注意，文件块大小是可变的（可配置），比如8k。对于不足一个块的修改，一定会伴随先读出完整块再修改，再追加这一过程。
+ * Log's constructure: *A (data）| B (meta-data block log) | C (inode log) | D(inode_map log)*
+
+===Data Index===
+  Read file's lastest datas: Firstly, find the lastest inode map entry. Secondly, find the corresponding inode. Thirdly, find file's logic address's physical address of the datablock(segment number and segment offset). At last, read datas.
+  The latest Inode map entry's location should write into checkpoint file(see fault recovery for details). HLFS read them when it is initial; If it is running, Inode map entry structure should stay in RAM.
+ * NOTE: Data block is changable, like 8KB. If change size less than DB size, it will read a DB and change DB and take append opration at last.
 
 ===Space management===
  * In order to control space management and the purpose of the recovery, we have to storage space for segmentation, each segment size does not need fixed, and specific size and no hard and fast rules;

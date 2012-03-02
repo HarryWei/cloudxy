@@ -1,6 +1,6 @@
 #summary HLFS Architectural Design
 =Hadoop DFS log structure filesystem design=
-                                            -- Written by Kang Hua, Translated by Harry Wei, etc. 
+                                            -- Written by Kang Hua <kanghua151@gmail.com>, Translated by Harry Wei <harryxiyou@gmail.com>. 
 
 ==Background introduction==
    HLFS(Hadoop DFS Log FileSystem) is used to provide virtual disk for elastic cloud platform (The same as Amazon's EBS) and backend storage service. It needs to satisfy some characters including usability, high-performance, random reading and writing, fast fault recovery, data snapshots, rollback and so on.
@@ -20,21 +20,21 @@
  * Cluster system can do fault switch implicitly  -- Faults of storage nodes do not affect service, and it is implicit to clients (Hadoop  DFS helps us realize this).
 
 
-==Architectural Design=
+==Architectural Design==
 HLFS disk data format is almost the same as normal file system (FFS-fast file system ), both are with the structures like indirect block, inode, directory ,etc. The differences are HLFS can separate disk(Here is Hadoop DFS's storage pool) into segments to manage, and current time has only one active segment(That is our segment at the logic end). These segments is connected with head to tail and make up a linear log. And any file's updating(data block, indirect block, inode, etc) will add a log to the tail of current segment. Obviously，the advantage of this action ensure the magnetic head's orderly movement and enhance the throughputs. The trouble is we have to recycle old datas(have been changed).If not, the disk will be full sooner or later. In summary, our basic ideas of architectural design are that provide dependable and distributed storage image with the help of Hadoop DFS and finish LFS(Log Structured FileSystem) stuffs based on Hadoop DFS.
 
 
-===HLFS LOG 创建和检索===
-     LOG 是我们数据持久化的一个基本写入单位,对于写透需求来说，实际上每次写入动作都会产生一个新的LOG，而每次的LOG大小不尽相同。
-LOG的内容显然必须包含被写入的数据块，还需要包含对应的元数据（索引块等）信息，以及元数据的元信息（inode)，这样才能完成对一个信息的索引。
+==HLFS log's create and index==
+    Log is the basic unit for our datas' persistence. In fact, to the need of synchro writing, we make a new log by each writing action, which has different size each time. 
+    The contents of log include data block, metadata(indirect block,etc) information, and metadata's meta-information(inode). In this way, we can finish indexing one information correctly.
 
-====LOG创建====
-    任何文件或者目录的修改LFS都需要向log中写入如下几部分信息，而且要求严格“按照顺序写入（in-order semantics）”—— 其目的是为了崩溃时能尽可能恢复数据一致性。
- # 任何修改或者新数据块  （数据块是数据实际操作的最小粒度；可配置；大小为8196字节或者更大）
- # Indirect block 更新   （也叫做meta-data block ，是inode中的2/3/4级索引块数据）
- # Inode          更新   （每个inode对应一个文件，如果只支持单一文件，则只用一个inode)
- # Inode map      更新    ( 单一文件则只有一个映射项）
- LOG 的布局为 ： *A (data）| B (meta-data block log) | C (inode log) | D(inode_map log)*。
+===LOG create===
+    Any change of files or directories should write into a log with following portions. And they must write in-order semantics -- The aim is to recovery datas consistently if has any crashes.   
+ # Any chaneg or new data block (Data-block is smallest operation unit; configurable; size is 8KB or bigger)
+ # Indirect block update (Also named as meta-data block, is inode's 2/3/4 inodex data blocks)
+ # Inode update (Each inode is corresponding a file. If we only afford one file, we need only one inode)
+ # Inode map update (Sinal file has only one Inode map entry) 
+ Log's constructure: *A (data）| B (meta-data block log) | C (inode log) | D(inode_map log)*
 ====数据检索====
   读取文件最新数据时：需要通过找到最新的inode map位置，再进而找到所需文件对应inode，再进而找到文件逻辑地址对应的数据块的物理地址（段号+offset)，再进而读取数据。
   最新Inode map位置按理应记录在checkpoint文件中（见错误恢复部分），HDFS初始化加载时读入；如果运行中则该inode map 驻留于内存数据结构中。

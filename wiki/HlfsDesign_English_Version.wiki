@@ -1,4 +1,4 @@
-#summary HLFS Frame Design
+#summary HLFS Architectural Design
 =Hadoop DFS log structure filesystem design=
                                             -- Written by Kang Hua, Translated by Harry Wei, etc. 
 
@@ -20,9 +20,8 @@
  * Cluster system can do fault switch implicitly  -- Faults of storage nodes do not affect service, and it is implicit to clients (Hadoop  DFS helps us realize this).
 
 
-==Design summary=
-      Disk data format of HLFS is almost the same with normal file system
-(FFS-fast file system ), they both have the aid of structures like indirect block,  inode, directory. The difference is that LFS separates disk into segment to manage them, and there is only one active segment. These segments is connected head to tail and make up a linear log. Any file updating will be added to the tail of log. The advantage of this action is ensuring order mobile of disk head and enhancing the throughput. The trouble is we need to recover old data or the disk will be full sooner or later. To sum up, the basic ideas of our design is that realizing LFS on the reliable and distributed medium provided by hadoop dfs.
+==Architectural Design=
+HLFS disk data format is almost the same as normal file system (FFS-fast file system ), both are with the structures like indirect block, inode, directory ,etc. The differences are HLFS can separate disk(Here is Hadoop DFS's storage pool) into segments to manage, and current time has only one active segment(That is our segment at the logic end). These segments is connected with head to tail and make up a linear log. And any file's updating(data block, indirect block, inode, etc) will add a log to the tail of current segment. Obviously，the advantage of this action ensure the magnetic head's orderly movement and enhance the throughputs. The trouble is we have to recycle old datas(have been changed).If not, the disk will be full sooner or later. In summary, our basic ideas of architectural design are that provide dependable and distributed storage image with the help of Hadoop DFS and finish LFS(Log Structured FileSystem) stuffs based on Hadoop DFS.
 
 
 ===HLFS LOG 创建和检索===

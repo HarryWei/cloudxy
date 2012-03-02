@@ -107,7 +107,6 @@ they are:
     * DengYan       ： dengyan@act.buaa.edu.cn
 }}}
 
-关于log structure filesystem 最初论文，请参看download中资料
+You can also refer to the initial paper about 'log structure filesystem' in the Downloads list in the top of this page.
 ----------------------------
-Translated by Zhang Jingpeng, Feng siyu, Dai Jinwei.<br>
-Reviewed By Harry Wei <harryxiyou@gmail.com>, Dai Jinwei <daijiwei41@gmail.com>
+Translated By Harry Wei <harryxiyou@gmail.com>, Dai Jinwei <daijiwei41@gmail.com>，Zhang Jingpeng, Feng siyu, Dai Jinwei. 2012，3,2

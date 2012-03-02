@@ -39,7 +39,7 @@ HLFS disk data format is almost the same as normal file system (FFS-fast file sy
 ===Data Index===
   Read file's lastest datas: Firstly, find the lastest inode map entry. Secondly, find the corresponding inode. Thirdly, find file's logic address's physical address of the datablock(segment number and segment offset). At last, read datas.
   The latest Inode map entry's location should write into checkpoint file(see fault recovery for details). HLFS read them when it is initial; If it is running, Inode map entry structure should stay in RAM.
- * NOTE: Data block is changable, like 8KB. If change size less than DB size, it will read a DB and change DB and take append opration at last.
+ * NOTE: Data block(Can be configured) is changable, like 8KB. If change size less than DB size, it will read a DB and change DB and take append opration at last.
 
 ===Space management===
  * In order to control space management and the purpose of the recovery, we have to storage space for segmentation, each segment size does not need fixed, and specific size and no hard and fast rules;

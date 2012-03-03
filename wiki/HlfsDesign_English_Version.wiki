@@ -52,7 +52,7 @@ We can divide the recycle to two steps:
   # Calculate the usage ones in a segment (Get the active data blocks in one segment);
   # Do the remove or 'copy and remove' action if the counts of active data blocks less than horizon(Configurable).
   * "Calculate segment usage" can be realized by a tool, which storage the special usage datas into file segment_usage.txt. We can take the way 'Pull mode'(Get the segment to local) from the pc of hlfs client to execute the task calculate segment usage stuffs; Also take another one 'Push mode'(map/reduce way for nearby calculations) to execute segment usage conditions in parallel.
-  * "Segment Recycle" stuffs can be done by the only thread for hlfs so it can avoid change inode datas in parallel. Another main point is recycle is a low level task so writing task will be done at first. When there is no writing tasks we will carry out recycle actions.  
+  * "Segment Recycle" stuffs can be done by the only thread for hlfs so it can avoid change inode datas in parallel. Recycle is a low level task so writing jobs will be done at first. When there is no writing tasks we will carry out recycle actions.  
  
 ===Snapshot realize===
   In the log structure filesystem snapshot is implemented on the characteristics of congenital have. 

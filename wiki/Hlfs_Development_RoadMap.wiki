@@ -5,4 +5,5 @@
 = RoadMap =
 
 || *Version* || * Feather * || *Duration (month)* || *Status* ||
-|| 0.1       || 实现写透模式         || 3 month            ||  完成    ||
+|| 0.1       || 原型实现—1.透写透读实现；2.垃圾回收实现  || 3 month            ||  完成    ||
+|| 0.2       || *线性快照实现 *树形快照实现   || 2 month  ||  完成    ||

@@ -41,17 +41,18 @@ HLFS disk data format is almost the same as normal file system (FFS-fast file sy
   The latest Inode map entry's location should write into checkpoint file(see fault recovery for details). HLFS read them when it is initial; If it is running, Inode map entry structure should stay in RAM.
  * NOTE: Data block(Can be configured) is changable, like 8KB. If change size less than DB size, it will read a DB and change DB and take append opration at last.
 
-===Space management===
- * In order to control space management and the purpose of the recovery, we have to storage space for segmentation, each segment size does not need fixed, and specific size and no hard and fast rules;
-  ** Each section of the HLFS mapping a Hadoop Dfs documents, such as size for 64 M (configurable); Segment file name format for segno. Seg, of which segno increasing starting from 0;
-  ** Data block storage address (storage address) for 64, a front for the file number segment, the rear segment for file within offset-such as a period of size is 64 M, the tail need 26 ;
+===Space management - Segment===
+ * Split into Segments -- In order to manage and recycle space, we have to split space into segments; Each segment size should not be stationary, and it has no hard regulations for the segment size.
+  ** Each segment is mapped as a Hadoop DFS file, 64 M (configurable); The name of a segment file should be segno.seg, which the 'segno' increases by 0;
+  ** Data block storage address (storage address) is 64 bits. Front parts are segment numbers and left parts are offset of a segment.(If segment size is 64MB, that is to say front parts are 26 bits).
 
- * Period of recovery-(segment clean) file system log structure order additional behavior will bring lots of old data, and therefore must be something old data recovery mechanism. Recovery mechanism for general need to traverse section of the document data block, check the current inode index blocks of the address is a pointer to it, if not show is this block is old data can give up, if a segment of the data block is all old pieces of data is the period of file can be recycled (from HDFS removed). Another when paragraph data block rarely available, may also take the copy and remove way--will the old data data block the initiative to log form new auxiliary wrote paragraph, so that the original segment of the data block all become will block, then delete it again.
-In the realization of the HLFS, period of recovery process into row:
- # The first step for calculation of the use of statistical (statistics section of the current and how much data blocks active);
- # The second part to the active piece of less than horizon of the section (horizontal line can set) executive delete or copy and remove actions to recovery space.
- * "Period of the use of statistical" by external tools program realization, produce the period of use of the count stored in segment_usage. TXT. We can HLFS from client's machine to "pull mode" (will read to local for the period of statistical task; Also can use "push mode" (map/reduce calculation way near) and implement period of statistical task.
- * "Period of recovery" work is the only written by HLFS threads to execute, thus to avoid metadata (inode) and modification of the problems, and recycling as a low priority task, will first make way for normal written to the task, and only when the current no writing task will begin to carry out the period of recovery task.
+  * Segment recycle -- (Segment Clean)It will bring much old datas when we append logs in sequence. So we have to design a recycle mechanism for old ones. In general, the recycle thoughts are all the data blocks' traversal in a segment, which will find the if the current inode index blocks directed to it. If not we we will remove this one. If one segment has a little usage data blocks, we will take the way, 'copy and remove' -- append a new log with the usage datas and remove that segment. 
+
+We can divide the recycle to two steps:
+  # Calculate the usage ones in a segment (Get the active data blocks in one segment);
+  # Do the remove or 'copy and remove' action if the counts of active data blocks less than horizon(Configurable).
+  * "Calculate segment usage" can be realized by a tool, which storage the special usage datas into file segment_usage.txt. We can take the way 'Pull mode'(Get the segment to local) from the pc of hlfs client to execute the task calculate segment usage stuffs; Also take another one 'Push mode'(map/reduce way for nearby calculations) to execute segment usage conditions in parallel.
+  * "Segment Recycle" stuffs can be done by the only thread for hlfs so it can avoid change inode datas in parallel. Another main point is recycle is a low level task so writing task will be done at first. When there is no writing tasks we will carry out recycle actions.  
  
 ===Snapshot realize===
   In the log structure filesystem snapshot is implemented on the characteristics of congenital have. 

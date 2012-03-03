@@ -5,4 +5,4 @@
 = RoadMap =
 
 || *Version* || * Feather * || *Duration (month)* || *Status* ||
-|| 0.1       || -10         || 25                 ||  完成    ||
+|| 0.1       || 实现写透模式         || 3 month            ||  完成    ||

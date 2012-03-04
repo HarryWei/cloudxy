@@ -65,17 +65,18 @@ Log structure filesystem is born with snapshot function. Each log(Not recycled) 
  * File snapshot.txt -- Record snapshots information, which are different time's log records. 
  * File alive_snapshot.txt -- Record the current time's active snapshot, it is useful for our tree snapshots usage. See http://code.google.com/p/cloudxy/wiki/HlfsSnapshotDesign for details.
 
-===The API of achieving has three features=== 
- # C-style api; 
- # thread-safe (because every visitors maintain own HLFS_CTRL context)
- # the port like the file system (but it hasn't the concept of multi-file, so does not exist the concept of file names and)
+===The key APIS=== 
+The key APIS have following characters:
+ # C-Style APIS; 
+ # Thread-Safe (Because each accessor maintain his own HLFS_CTRL context)
+ # The File-System of interfaces (HLFS has only one file, so no any concepts about file name)
 
  * HLFS_CTRL*init_hlfs(const char*uri)
  * int deinit_hlfs(HLFS_CTRL*ctrl)
- * int hlfs_stat (HLFS_CTRL*ctrl,HLFS_STAT_T*stat)
- * int hlfs_open (HLFS_CTRL*ctrl,int flag)
+ * int hlfs_stat  (HLFS_CTRL*ctrl,HLFS_STAT_T*stat)
+ * int hlfs_open  (HLFS_CTRL*ctrl,int flag)
  * int hlfs_close (HLFS_CTRL*ctrl)
- * int hlfs_read (HLFS_CTRL*ctrl,char*read_buf,uint32_t read_len,uint64_t pos)
+ * int hlfs_read  (HLFS_CTRL*ctrl,char*read_buf,uint32_t read_len,uint64_t pos)
  * int hlfs_write (HLFS_CTRL*ctrl,char*write_buf,uint32_t write_len,uint64_t pos)     
 
 ==Some shortages about our project==

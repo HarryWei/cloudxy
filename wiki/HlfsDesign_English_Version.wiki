@@ -55,8 +55,7 @@ We can divide the recycle to two steps:
   * "Segment Recycle" stuffs can be done by the only thread for hlfs so it can avoid change inode datas in parallel. Recycle is a low level task so writing jobs will be done at first. When there is no writing tasks we will carry out recycle actions.  
  
 ===Snapshot realize===
-  In the log structure filesystem snapshot is implemented on the characteristics of congenital have. 
-  Every time we write log (anyone without being recycled log) can serve as a snapshot point, also can restore that at the time of data, and the specific way is very simple, need to be loaded in the moment that the snapshot log inode can. So in principle of data can be rolled back we to any a written to the moment. However, we generally will not retain all the data, because this proposal for their users consider important data state do a mark so that you can get a permanent snapshot, the permanent snapshot will be written to cheakpoint. TXT file (record time inode address the snapshot, time, name can). This is the inode snapshot information was not recycling.
+Log structure filesystem is born with snapshot function. Each log(Not recycled) we write can be a nature snaposhot. That is to say, we can recover that time's datas, which should only load the snapshot's inode. So it can rollback to any time's. But we will not keep all the datas. We suggest users need give a checkpoint for their key datas, which will get a permanent snapshot(involve inode address, take snapshot time, snapshot name) that is recorded into the file named checkpoint.txt. The inode has a snapshot will not be recycled.  
 
 
 ===The API of achieving has three features=== 

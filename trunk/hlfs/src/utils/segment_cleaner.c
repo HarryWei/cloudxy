@@ -217,9 +217,9 @@ int load_all_segment_usage(struct back_storage *storage,
     memset(textbuf,0,8192*10);
     count = storage->bs_file_pread(storage,file,textbuf,8192*10,0);
     HLOG_DEBUG("===read count %d ,%s",count,textbuf);
+    storage->bs_file_close(storage,file);
     if(count < 0){
         HLOG_ERROR(" read seg del mark file failed ");
-        storage->bs_file_close(storage,file);
         return -1;
     }else if(count == 0){
         return 0;

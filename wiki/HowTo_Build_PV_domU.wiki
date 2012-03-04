@@ -12,8 +12,8 @@
  * 制作一个32M的镜像系统
    # dd if=/dev/zero of=domU-32bit-FS.img bs=1M count=32
    # mkfs.ext3 domU-32bit-FS.img
- * 制作文件系统 —— 我们使用ttylinux-i486-8.0.img作为base文件系统(在download中有，直接去用就是了）
-   # sudo mount -o loop /mnt ttylinux-i486-8.0.img 
+ * 制作文件系统 —— 我们使用ttylinux-i486-8.0.img作为base文件系统(在download中有，直接去用就是了 - 之所以没直接用该镜像，是因为ttylinux-i486-8.0.img太小了，所以我们自己做了个32M的新文件系统，并且要把tty的东西导入到其中）
+   # sudo mount -o loop ttylinux-i486-8.0.img /mnt
    # mkdir domUdisk
    # sudo mount -o loop domU-32bit-FS.img domUdisk
    # cp -a mnt/* domUdisk/ -rf

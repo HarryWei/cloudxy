@@ -57,12 +57,13 @@ We can divide the recycle to two steps:
 ===Snapshot realize===
 Log structure filesystem is born with snapshot function. Each log(Not recycled) we write can be a nature snaposhot. That is to say, we can recover that time's datas, which need only load the snapshot's inode. So it can rollback to any time's. But we will not keep all the datas. We suggest users should give a checkpoint for their key datas, which will get a permanent snapshot(contains inode address, take snapshot time, snapshot name) that is recorded into the file named checkpoint.txt. The inode has a snapshot will not be recycled. 
 
-==The files HLFS need(All created by append)== 
+==The files HLFS need(All created by appending)== 
  * File SEGMENT -- The main data is storaged here, see 'Space management - Segment' for details. 
  * File Superblock -- Record HLFS's configure datas, like data block size, segment size, etc. If it is set, it will be unchangeable. See sources of tool mkfs.hlfs for details.
  * File Segments_usage.txt -- Record each segment's usage condition. Every line is only for one segment.
  * File Segments_delmark.txt -- Record removed segments information. Once a segment is removed, it will write down in this file.
  * File snapshot.txt -- Record snapshots information, which are different time's log records. 
+ * File alive_snapshot.txt -- Record the current time's active snapshot, it is useful for our tree snapshots usage. See http://code.google.com/p/cloudxy/wiki/HlfsSnapshotDesign for details.
 
 ===The API of achieving has three features=== 
  # C-style api; 

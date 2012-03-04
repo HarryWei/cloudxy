@@ -117,4 +117,4 @@ they are:
 
 You can also refer to the initial paper about 'log structure filesystem' in the Downloads list in the top of this page.
 ----------------------------
-Translated By Harry Wei <harryxiyou@gmail.com>, Dai Jinwei <daijiwei41@gmail.com>，Zhang Jingpeng, Feng siyu, Dai Jinwei. 2012，3,2
+Translated By Harry Wei <harryxiyou@gmail.com>, Dai Jinwei <daijiwei41@gmail.com>，Zhang Jingpeng, Feng Siyu. 2012，3,2

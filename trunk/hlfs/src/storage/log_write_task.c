@@ -26,6 +26,7 @@ int log_write_task(struct hlfs_ctrl * ctrl)
     struct write_req *w_req = &ctrl->write_req;
     struct write_rsp *w_rsp = &ctrl->write_rsp;
     GTimeVal expired;
+	seg_idx = 0;
     while(ctrl->write_task_run){
         g_get_current_time(&expired);
         g_time_val_add(&expired,1000*1000);
@@ -50,7 +51,6 @@ int log_write_task(struct hlfs_ctrl * ctrl)
             if(g_atomic_int_get(&ctrl->ctrl_region->is_start_clean) == 1){
                 int ret = load_all_segment_usage(ctrl->storage,SEGMENTS_USAGE_FILE,SEGMENTS_DEL_FILE,seg_usage_hashtable);
                 g_assert(ret == 0);
-                seg_idx = 0;
                 if(seg_usage_list!=NULL)
                    g_list_free(seg_usage_list);
                 if(g_hash_table_size(seg_usage_hashtable) == 0)
@@ -58,14 +58,17 @@ int log_write_task(struct hlfs_ctrl * ctrl)
                 seg_usage_hashtable = g_hash_table_new_full(g_direct_hash,g_direct_equal,NULL,NULL);//TODO
             }else{
                 //HLOG_DEBUG("no not need to do clean");
+				seg_idx = 0;
                 continue;
             }
             if(g_list_length(seg_usage_list) == 0){
                 //HLOG_DEBUG("no seg usage");
+				seg_idx = 0;
                 continue;
             }
             if(seg_idx == g_list_length(seg_usage_list)){
                 HLOG_DEBUG("check over !!!");
+				seg_idx = 0;
                 continue;
             }
             seg_usage_list = g_hash_table_get_values(seg_usage_hashtable);

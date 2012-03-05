@@ -80,7 +80,8 @@ The key APIS have following characters:
  * int hlfs_write (HLFS_CTRL*ctrl,char*write_buf,uint32_t write_len,uint64_t pos)     
 
 ==Some shortages about our project==
- # the code in the memory usage without refinement, many places is wasted (and possibly even a small amount of memory leak). So as far as possible loose     the memory.when running in the dom(),please keep the memory 1G at least.(512M is so small)
+ # 内存管理粗犷式-目前代码中内存使用没有精细化，很多地方用的比较浪费（甚至可能有少量内存泄露)。所以运行时，尽量内存宽松点。如果是dom0中运行可别把dom0配置512M这么小，最少给个1G吧。
+ # It is rugged for memory management -- We have not optimized memory usage so it has something wastes (Even some memory leak somewhere). For this reason, you should give a loose memory size as you can. If you run a dom0 VM, the memory size is better for 1GB.(512MB may be less). 
  # The link management doesn't been pooled.It exist the problem that open repeatedly.The connection is that link to the back-end storage (the connection handle of hdfs).This action that open and close repeatedly will waste many time on the network.So we will inprove the action in the future.
  # For the clean segment operations, it exist that the segment you want to delete  what is being accessed.Now we should have use reference technology to protect,but we use the simple locking:locking when read or write , and delete file when neither opening operating or writing operating.We will improve this.
  # If you don't call close when you close file ,you can't find the file in others connection context.The bug will bring a problem(note:you don't although see the file in namespace but you can see in hadoop fs -tail.Becouse the date what read from inputstream is not been submitted to the name node,it store in the date node).

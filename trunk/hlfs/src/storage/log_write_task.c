@@ -69,7 +69,8 @@ int log_write_task(struct hlfs_ctrl * ctrl)
                 continue;
             }
             seg_usage_list = g_hash_table_get_values(seg_usage_hashtable);
-            struct segment_usage *seg_usage = (struct segment_usage*)g_list_nth_data(seg_usage_list,seg_idx); 
+            struct segment_usage *seg_usage = (struct segment_usage*)g_list_nth_data(seg_usage_list,seg_idx);
+			seg_idx += 1;
             if(seg_usage->alive_blocks > g_atomic_int_get(&ctrl->ctrl_region->copy_waterlevel)){
                 continue;
             }

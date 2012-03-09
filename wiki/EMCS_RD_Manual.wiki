@@ -11,7 +11,7 @@ svn co http://cloudxy.googlecode.com/svn/trunk/ECMS
 
 ==启动node==
   * 启动node 运行cloud master
-   # 进入Cloudmaster目录
+   # 进入CloudMaster目录
    # erl -name node_master@127.0.0.1 -setcookie abc -boot start_sasl -pa ebin
   * 启动node 运行node controller
    # 进入nodeController目录

@@ -81,40 +81,8 @@ The key APIS have following characters:
 
 ==Some shortages about our project==
  # It is rugged for memory management -- We have not optimized memory usage so it has something wastes (Even some memory leak somewhere). For this reason, you should give a loose memory size as you can. If you run a dom0 VM, the memory size is better for 1GB.(512MB may be less). 
- # The link management doesn't been pooled.It exist the problem that open repeatedly.The connection is that link to the back-end storage (the connection handle of hdfs).This action that open and close repeatedly will waste many time on the network.So we will inprove the action in the future.
- # For the clean segment operations, it exist that the segment you want to delete  what is being accessed.Now we should have use reference technology to protect,but we use the simple locking:locking when read or write , and delete file when neither opening operating or writing operating.We will improve this.
- # If you don't call close when you close file ,you can't find the file in others connection context.The bug will bring a problem(note:you don't although see the file in namespace but you can see in hadoop fs -tail.Becouse the date what read from inputstream is not been submitted to the name node,it store in the date node).
-
-{{{
-Particularly Thanks 
-Speaking of the origin of HLFS 's development，
-we have to mention of the Taobaocom一YangZhiFeng and his a few friends whom we have never met.
-In Ali Cloud they have referred to public paper of log-structured file system to development a standard log structrue filesystem (XuanYuan System),
-the original idea for virtual machine storage,but unfortunately for a variety of reasons final project premature death, and not be finally adopted. 
-I was lucky enough to have seen their documents and code, although at that time my 
-comprehension to log structure filesystem and virtual machine mirror storage requirements seemed to look shallow,
-but I also thought that it's a good choice to combined log structure filesytem  with HDFS一一 this  additional 
-distributed storage system for the virtual machine mirror of the storage (so I had consult to ZhiFeng 
-for many times and learned its realization .His superb technology and professional quality achieved people' admiration).
-As for my further research for log structure filesytem and virtual machine mirror IO ,certainly more important is that the 
-first abundant work of ZhiFeng proved this scheme is feasible,so let me believe in the virtual machine mirror storage characteristics 
-aiming a log structrue block mirror storage system is really worth to try. 
-So in the virtual machine mirror access features,I began to implement a log structure block systemt that aim at block, what is now HLFS.
-The log structure block systemt ,compared with standard will be achieved more succinct (because no file structure),
-its snapshots, merge scheme should be more succinct and efficient, optimize the room more.
-But meanwhile I must say sorry to them for that HLFS' early release took no mention of ZhiFeng and his team.
-Until today I get their agreement,so一一 special thanks to them for the years of groundbreaking to try.
-If without their prospective jobs, HLFS would have gone a lot of curved road.
-I just now asked ZhiFeng for the names of his friends (as follows) which I have never seen .
-Thank them sinserely again, and hope they can  make more suggestions and help to cloudxy ,
-they are:
-      Name             Mailbox
-    * YangZhiFeng   ： yangzhifeng83@gmail.com
-    * DongChao      ： dongchao51@hotmail.com
-    * ZhengWenJing  ： zhengwenjingster@gmail.com
-    * DengYan       ： dengyan@act.buaa.edu.cn
-}}}
-
-You can also refer to the initial paper about 'log structure filesystem' in the Downloads list in the top of this page.
+ # The connections management have not been pooled.It exists the problem that open repeatedly.The connection means its connected to back-end storage (the connection handle of hdfs).This kind of repeatedly open and close action  will waste much time on the network. So we will reduce this work.
+ # For the segment clean operations, it is possible to access the removed segment, which we take the way 'Reference Technique Protect'.Now, we take the simple way 'lock technique', which we add lock when read and write. While there is no I/O requests, we will do clean operations. We will improve our realization ways later on.
+ # If you don't call close API when you close a hlfs file(hdfs way) ,you can't find the file in other connection contexts.This bug will bring a problem(note:you don't although see the file in namespace but you can see the file by executing command 'hadoop fs -tail'.Becouse the data, it read from inputstream, is not been submitted to the name node). Libhdfs has no a convenient API for reading datas from inputstream, so we use a common way, which execute command 'hadoop fs cp' to recovery uncommitted datas.
 ----------------------------
 Translated By Harry Wei <harryxiyou@gmail.com>, Dai Jinwei <daijiwei41@gmail.com>，Zhang Jingpeng, Feng Siyu. 2012，3,2

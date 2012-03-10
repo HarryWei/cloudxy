@@ -76,7 +76,12 @@ int main(int argc, char *argv[])
        g_option_context_free(context);
        return -1;
     }
-
+    
+    if((0==storage->bs_file_is_exist(storage,NULL)) && (0==storage->bs_file_is_exist(storage,"superblock"))){
+        g_message("hlfs with uri:%s has exist",uri);
+        g_option_context_free(context);
+        return 1;
+    }
     if( 0!=storage->bs_file_mkdir(storage,NULL)){
         g_message("can not mkdir for our fs %s",uri);
         g_option_context_free(context);

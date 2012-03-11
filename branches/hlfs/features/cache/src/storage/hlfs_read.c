@@ -25,6 +25,14 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
 	HLOG_ERROR("hlfs_read error");
            return -1;
     }
+	if (ctrl->hlfs_cache_flag == 1) 
+		HLOG_DEBUG("Data to cache");
+	else if (ctrl->hlfs_cache_flag == 0) 
+		HLOG_DEBUG("Data to user");
+	else {
+		HLOG_ERROR("hlfs_cache_flag error");
+		return -1;
+	}
     g_mutex_lock (ctrl->hlfs_access_mutex);
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     HLOG_DEBUG("read offset:%llu,read len:%d", pos,read_len);

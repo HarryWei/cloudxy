@@ -8,7 +8,8 @@ typedef struct cache_entity {
 } cache_ent_t;
 
 typedef struct cache_ops {
-
+	int (*find_block_num)(uint64_t pos, uint32_t len, uint32_t start_blk_num, \
+			uint32_t end_blk_num);
 } cache_ops_t;
 
 int find_block_num(uint64_t pos, uint32_t len, uint32_t start_blk_num, \

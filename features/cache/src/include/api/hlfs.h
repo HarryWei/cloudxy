@@ -11,7 +11,7 @@
  * Kelvin <kelvin.xupt@gmail.com>
  * Zhangbo <0311zhangbo@gmail.com>
  * 
- * Mail List : cloudxy@googlegroups.com
+ * Mailing List : cloudxy@googlegroups.com
  */
 
 #ifndef _HDFS_LFS_H_
@@ -79,7 +79,7 @@ int hlfs_close (HLFS_CTRL *ctrl);
  * @param pos: The address of the data in the virtual disk.
  * @return value: Return the number of bytes read on success,else reutrn -1.
  */
-int hlfs_read  (HLFS_CTRL* ctrl,char* read_buf,uint32_t read_len,uint64_t pos);
+int hlfs_read(HLFS_CTRL* ctrl,char* read_buf,uint32_t read_len,uint64_t pos);
 
 /*
  * hlfs_write: Write data to the virtual disk.
@@ -148,8 +148,8 @@ int hlfs_get_inode_info(const char *uri, uint64_t inode_addr, uint64_t *ctime, u
  * @para flag: 0 is common style, 1 is readonly
  * @return value: 0 is right, -1 is wrong
  */
-int hlfs_open_by_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, int flag);
-int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,const char* snapshot,int flag);
+int hlfs_open_by_inode(HLFS_CTRL *ctrl, uint64_t inode_addr, int flag);
+int hlfs_open_by_snapshot(HLFS_CTRL *ctrl,const char* snapshot,int flag);
 
 /*
  * hlfs_find_inode_by_name: find a inode in light of sname
@@ -176,9 +176,26 @@ struct snapshot* hlfs_get_all_snapshots(const char *uri,int *num_entries);
  * @para ssname: the snapshot's name
  * @return value: 0 is right, -1 is wrong
  */
-int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname);
+int hlfs_take_snapshot(HLFS_CTRL *ctrl, const char *ssname);
 
+/*HLFS Cache APIs*/
 
+/*Init Cache*/
+int hlfs_cache_init(HLFS_CTRL *ctrl, uint32_t cache_num, uint32_t cache_level);
+
+/*deinit Cache*/
+int hlfs_cache_deinit(HLFS_CTRL *ctrl);
+
+/*Read operation under cache machanism*/
+int hlfs_cache_read(HLFS_CTRL* ctrl, char* read_buf, uint32_t read_len, \
+		uint64_t pos);
+
+/*Write operation under cache machanism*/
+int hlfs_cache_write(HLFS_CTRL* ctrl, char* write_buf, uint32_t write_len, \
+		uint64_t pos);
+
+/*Flush operation under cache machanism*/
+int hlfs_cache_flush(HLFS_CTRL *ctrl);
 
 #ifdef __cplusplus 
 } 

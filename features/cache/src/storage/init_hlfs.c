@@ -96,6 +96,13 @@ init_hlfs(const char *uri)
             goto out;
         }
     }
+/*Cache init*/
+	ctrl->hlfs_cache_flag = 0;
+	ctrl->r_cache = NULL;
+	ctrl->w_cache = NULL:
+	ctrl->lru_cache_list = NULL;
+	ctrl->lru_cache_level = 0;
+	ctrl->flush_run_flag = 0;
 out:
 	HLOG_DEBUG("leave func %s", __func__);
     return ctrl;

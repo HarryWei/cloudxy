@@ -82,6 +82,13 @@ struct hlfs_ctrl {
     int usage_ref;
 	int rw_inode_flag;
 	char alive_ss_name[MAX_FILE_NAME_LEN];
+	int hlfs_cache_flag;
+	GHashTable *r_cache;
+	GHashTable *w_cache;
+	GList *lru_cache_list;
+	uint32_t cache_water_level;
+	uint32_t cache_num;
+	uint32_t flush_run_flag;
 };
 
 typedef struct hlfs_stat{

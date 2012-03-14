@@ -6,7 +6,7 @@
 -module(meta_server).
 -author(kanghua).  
 -email(kanghua151@msn.com).  
- -behaviour(gen_server).
+-behaviour(gen_server).
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------

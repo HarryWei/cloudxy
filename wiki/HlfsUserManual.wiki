@@ -82,7 +82,7 @@
      # local模式测试- mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024；tap-ctl create -a hlfs:local:///tmp/testenv/testfs；
      # hdfs模式测试-  mkfs.hlfs -u hdfs:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024；tap-ctl create -a hlfs:hdfs:///tmp/testenv/testfs
    * 作为DomU的数据盘使用-EBS用法。
-     # 可以使用动态挂载 如 xm block-attach <domain> tap2:hlfs:local///tmp/testenv/testfs xvdb w 
+     # 可以使用动态挂载 如 xm block-attach <domain> tap2:hlfs:local:///tmp/testenv/testfs xvdb w 
      # 通过配置文件配置 如 disk = ['tap2:aio:root/tapdisk-test/centos-mother.img,xvda,w','tap2:hlfs:local:///tmp/testenv/testfs,xvdb,w']
    * 作为DomU的系统盘使用
      # 直接使用生成的tapdev设备（如/dev/xen/blktap-2/tapdev0），做类似phy磁盘的使用。

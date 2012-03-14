@@ -199,40 +199,42 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
              if(latest_st_mtime < info->lmtime){
                 latest_st_mtime = info->lmtime;
                 latest_file = info->name;
-				__info = info;
+		__info = info;
                 //*offset = info->size;
 #if 0
                 if(info->size == 0){
-                    HLOG_DEBUG("meta data .................. not update ?");
-                    ret = restore_last_segno_file(storage->uri,info->name); 
-                    g_assert(0==ret);
-                    bs_file_info_t * _info = storage->bs_file_info(storage,info->name);
-                    *offset = _info->size;
-                    free(_info);
-                }
+			HLOG_DEBUG("meta data .................. not update ?");
+			ret = restore_last_segno_file(storage->uri,info->name); 
+			g_assert(0==ret);
+			bs_file_info_t * _info = storage->bs_file_info(storage,info->name);
+			*offset = _info->size;
+			free(_info);
+		}
 #endif
-            }
-        } 
-        info++;
+	     }
+	} 
+	info++;
     }
-	HLOG_DEBUG("7777 file:%s,size:%llu,time:%llu\n",info->name,info->size,info->lmtime);  
+    HLOG_DEBUG("7777 file:%s,size:%llu,time:%llu\n",info->name,info->size,info->lmtime);  
 
     if(latest_file!=NULL){
-        HLOG_DEBUG("latest file:%s",latest_file);
-        const gchar *basename = g_basename(latest_file);
-        gchar **v = g_strsplit(basename,".",2);
-        *segno = atol(v[0]);
-        HLOG_DEBUG("segno :%d",*segno);
-        g_strfreev(v);
+	    HLOG_DEBUG("latest file:%s",latest_file);
+	    const gchar *basename = g_basename(latest_file);
+	    gchar **v = g_strsplit(basename,".",2);
+	    *segno = atol(v[0]);
+	    HLOG_DEBUG("segno :%d",*segno);
+	    g_strfreev(v);
 #if 1
-        if (__info->size == 0) {
-           HLOG_DEBUG("meta data .................. not update ?");
-           ret = restore_last_segno_file(storage->uri,latest_file); 
-           g_assert(0==ret);
-           bs_file_info_t * _info = storage->bs_file_info(storage,latest_file);
-           *offset = _info->size;
-           free(_info);
-        }
+	    if (__info->size == 0) {
+		    HLOG_DEBUG("meta data .................. not update ?");
+		    ret = restore_last_segno_file(storage->uri,latest_file); 
+		    g_assert(0==ret);
+		    bs_file_info_t * _info = storage->bs_file_info(storage,latest_file);
+		    *offset = _info->size;
+		    free(_info);
+	    }else{
+              *offset = __info->size;
+	    }
 #endif
     }
 out:

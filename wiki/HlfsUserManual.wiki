@@ -16,7 +16,7 @@
 
 == HLFS START UP ==
  === 获取hlfs代码和相关依赖库 ===
-   在终端键入'svn checkout http://cloudxy.googlecode.com/svn/trunk/hlfs/ hlfs' （因为需要包含了第三方库缘故，因此肯恩checkout时间比较长。如果想修改则请用https co）
+   在终端键入'svn checkout https://cloudxy.googlecode.com/svn/trunk/hlfs/ hlfs' （因为需要包含了第三方库缘故，因此肯恩checkout时间比较长。如果想修改则请用https co）
  === 编译hlfs ===
    # 安装cmake;安装glib库;安装java。
 {{{

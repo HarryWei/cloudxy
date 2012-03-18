@@ -25,6 +25,10 @@
   sudo add-apt-repository ppa:sun-java-community-team/sun-java6
   sudo apt-get update
   sudo apt-get install sun-java6-jdk
+  或者
+  sudo add-apt-repository ppa:ferramroberto/java 
+  sudo apt-get update
+  sudo apt-get install sun-java6-jdk
 }}}
    # 修改在hlfs/src/CMakeLists.txt中配置你正确的java目录 ‘如 SET(JAVA_HOME   /usr/lib/jvm/java-6-sun)'。
    # 生成makefile:cd hlfs/build；cmake ../src（生成makefile)

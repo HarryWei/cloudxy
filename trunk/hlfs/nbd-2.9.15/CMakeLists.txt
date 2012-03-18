@@ -22,6 +22,7 @@ SET(JAVA_HOME   /usr/lib/jvm/java-6-sun)
 INCLUDE_DIRECTORIES(
        /usr/include/glib-2.0 
        /usr/lib/glib-2.0/include 
+       /usr/lib/i386-linux-gnu/glib-2.0/include
        ${LOG_HOME}/include
        ${JAVA_HOME}/include/
        ${JAVA_HOME}/include/linux
@@ -37,18 +38,21 @@ IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 LINK_DIRECTORIES(
 	${LOG_HOME}/lib32
     	${HADOOP_HOME}/lib32
-        ${WORK_HOME}/output/lib32)
+        ${WORK_HOME}/output/lib32
+        ${JAVA_HOME}/jre/lib/i386/server)
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 LINK_DIRECTORIES(
 	${LOG_HOME}/lib64
     	${HADOOP_HOME}/lib64
-        ${WORK_HOME}/output/lib64)
+        ${WORK_HOME}/output/lib64
+        ${JAVA_HOME}/jre/lib/amd64/server)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(NBDSLIBS glib-2.0
              hlfs
 	     log4c
-	         hdfs)
+	     hdfs
+             jvm)
 
 SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
 SET(NBDSSRCS nbd-server.c)
@@ -74,7 +78,8 @@ ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 SET(NBDSLIBS glib-2.0
              hlfs
 	     log4c
-	         hdfs)
+	     hdfs
+             )
 
 SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
 SET(NBDCSRCS nbd-client.c)

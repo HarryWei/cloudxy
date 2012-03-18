@@ -10,8 +10,6 @@ xm des vm-$VM_ID >/dev/null 2>&1
 sleep 2
 LOG_MSG "unbind hlfs from nbd if need"
 unbind_nbd_from_hlfs $HLFS_URI
-LOG_MSG "destroy hlfs space if need"
-destroy_hlfs $HLFS_URI
 }
 
 LOG_MSG "start vm ops begin..."

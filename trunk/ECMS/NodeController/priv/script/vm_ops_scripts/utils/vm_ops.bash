@@ -58,9 +58,6 @@ cat <<EOF >$SYSDISK/vm-$VMID.cfg
 name = "vm-$VMID"
 memory = $VMMEM
 vcpu = 1
-on_poweroff = "restart"
-on_reboot = "restart"
-on_crash = "restart"
 bootloader="/usr/bin/pygrub"
 disk = [ "tap2:vhd:$DIFFIMAGE_PATH,xvda1,w" ]
 vif  = [ "bridge=xenbr0,script=vif-bridge,ip=$VMIP"]

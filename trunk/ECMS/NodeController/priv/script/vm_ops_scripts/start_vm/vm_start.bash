@@ -16,7 +16,7 @@ destroy_hlfs $HLFS_URI
 
 LOG_MSG "start vm ops begin..."
 
-if [ $# != 8 ]; then
+if [ $# != 9 ]; then
     LOG_MSG  "$* parameter error";
     return 255
 fi  
@@ -29,6 +29,7 @@ VNC_PORT=$5
 VM_HOSTNAME=$6
 VM_PASSWD=$7
 VM_IPADDR=$8
+VM_OS_TYPE=$9
 VM_NAME=vm-$VM_ID
 VM_DIR=VM-$VM_ID
 ISO_FILE_PATH=$VMS_WORK_DIR/$VM_DIR/vm-$VM_ID-scene.iso
@@ -105,7 +106,7 @@ fi
 lock_release /tmp/nbd-use-lock
 
 LOG_MSG "step.6 create snapshot image for sysdisk"
-create_snapshot_image $SYSDISK
+create_snapshot_image $SYSDISK $VM_OS_TYPE
 if [ $? -ne 0 ];then
    LOG_MSG " create snapshot image failed"
    clean_all_ops $VM_ID $HLFS_URI

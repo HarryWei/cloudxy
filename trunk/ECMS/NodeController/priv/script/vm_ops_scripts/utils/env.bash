@@ -2,9 +2,20 @@
 VMS_WORK_DIR="/opt/vms_work_dir"
 VM_OPS_LOG_DIR="/var/log/vm"
 VM_OPS_SCRIPTS_DIR="/opt/vm_ops_scripts"
-HLFS_TOOLS_DIR="/opt/hlfs_tools"
+
+if [ `getconf LONG_BIT` == "64" ];then
+HLFS_TOOLS_DIR="/opt/hlfs_tools/bin64"
+export LD_LIBRARY_PATH=/opt/hlfs_tools/lib64
+fi
+
+if [ `getconf LONG_BIT` == "32" ];then
+HLFS_TOOLS_DIR="/opt/hlfs_tools/bin32"
+export LD_LIBRARY_PATH=/opt/hlfs_tools/lib32
+fi
+
 BASE_IMAGE_PATH="/opt/baseimage"
 NBD_LISTION_PORT=20000
+
 init_env(){
 if [ ! -d $VMS_WORK_DIR ];then
   mkdir -p $VMS_WORK_DIR >/dev/null 2>&1;
@@ -28,6 +39,7 @@ fi
 if netstat -nlpt|grep nbd-server >/dev/null 2>&1
 then
    LOG_MSG "ndb server has launch"
+   modprobe nbd > /dev/null 2>&1
 else
    LOG_MSG  "nbd server has not lauch"
    modprobe nbd

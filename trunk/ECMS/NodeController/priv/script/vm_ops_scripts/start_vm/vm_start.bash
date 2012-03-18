@@ -153,7 +153,9 @@ if [ $? -ne 0 ];then
    exit 255
 fi
 
+
 wait_vm_scene_over $VM_NAME 
+read
 if [ $? -ne 0 ];then
    LOG_MSG "wait vm scene over failed"
    clean_all_ops $VM_ID $HLFS_URI

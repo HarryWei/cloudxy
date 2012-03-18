@@ -5,12 +5,22 @@ VM_OPS_SCRIPTS_DIR="/opt/vm_ops_scripts"
 
 if [ `getconf LONG_BIT` == "64" ];then
 HLFS_TOOLS_DIR="/opt/hlfs_tools/bin64"
-export LD_LIBRARY_PATH=/opt/hlfs_tools/lib64
+#export LD_LIBRARY_PATH=/opt/hlfs_tools/lib64
+#mkdir -p /usr/lib/hlfs
+ldconfig -p |grep /opt/hlfs_tools/lib64
+if [ $? -ne 0 ];then
+echo "/opt/hlfs_tools/lib64" >> /etc/ld.so.conf
+ldconfig
 fi
-
+fi
 if [ `getconf LONG_BIT` == "32" ];then
 HLFS_TOOLS_DIR="/opt/hlfs_tools/bin32"
-export LD_LIBRARY_PATH=/opt/hlfs_tools/lib32
+#export LD_LIBRARY_PATH=/opt/hlfs_tools/lib32
+ldconfig -p |grep /opt/hlfs_tools/lib32
+if [ $? -ne 0 ];then
+echo "/opt/hlfs_tools/lib32" >> /etc/ld.so.conf
+ldconfig
+fi
 fi
 
 BASE_IMAGE_PATH="/opt/baseimage"

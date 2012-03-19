@@ -44,8 +44,9 @@ cd /opt/vm_ops_scripts
 }}}
 
 {{{
-执行成功后在dom0上执行xm console vm-77 登陆，此时root密码是vmpass,且hostname是hostname,ip是127.0.0.1 - 场景化执行完毕
-虚拟机已经在网盘上启动。
+说明：
+ 1.执行成功后在dom0上执行xm console vm-77 登陆，此时root密码是vmpass,且 hostname是hostname,ip是127.0.0.1 - 场景化执行完毕,虚拟机已经在网盘NBDX上启动——你可到/tmp/testfs目录下看到hlfs产生的段文件。
+ 2.我们系统盘使用的改造后的NBD方式运行的网盘做增量文件的宿主块设备。ps -aux|grep nbd 可看到对应的nbd-server和nbd-client.
 }}}
 
  * 关闭vmid=77的虚拟机
@@ -54,4 +55,8 @@ cd /opt/vm_ops_scripts
    * bash -x restart_vm/vm_restart.bash 77 local:///tmp/testfs
  * 为vmid=77的虚拟机加入虚拟磁盘local:///tmp/datafs --- 这步需要给xen打patch后才能支持
    *bash -x add_vdisk/vdisk_add.bash 77 local:///tmp/datafs 64
-{{{ 注意，此刻我们网盘是在本地文件系统模拟，如果安装hadoop后，则可在hadoop上实现,也就是说将local标识换成hdfs即可}}}
+{{{ 
+   注意
+   1.虚拟数据盘实现是通过在tapdisk2中增加了一个hlfs-block的驱动实现的，和NBD实现的网盘有类似之处，但IO流上来讲直接从tapdisk2的用户态走了，而NBD则IO经tapdisk2后还要再转到内核态nbd device，然后再转化到nbd-server用户态才能走,所以更精炼。
+   2.此刻我们网盘是在本地文件系统模拟，如果安装hadoop后，则可在hadoop上实现,也就是说将local标识换成hdfs即可
+}}}

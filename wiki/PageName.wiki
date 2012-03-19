@@ -30,17 +30,19 @@
 cd /opt/vm_ops_scripts
  * 启动vmid=77的虚拟机
    * bash -x start_vm/vm_start.bash 77 local:///tmp/testfs 64 vncpass 5900 hostname vmpass 127.0.0.1 32bit
-{{{ 参数：
-77：是一个全局虚拟机id号，不是xm list看到的虚拟机id
-local:///tmp/testfs 是系统盘的地址uri
-64：是待给虚拟机分配的内存大小
-vncpass:是vnc访问密码
-5900:是vnc端口号（注意，同一机器上该端口号不能重复）
-hostname：是待启动虚拟机指定的主机名，将在场景化过程中设置给虚拟机。
-vmpass:是待启动虚拟机指定的root密码，将在场景化过程中设置给虚拟机。
-127.0.0.1:是待启动虚拟机指定的IP地址，将在场景化过程中设置给虚拟机。
-32bit:是待启动虚拟机镜像类型。目前还支持64bit。
+{{{
+ 参数：
+ 77：是一个全局虚拟机id号，不是xm list看到的虚拟机id
+ local:///tmp/testfs 是系统盘的地址uri
+ 64：是待给虚拟机分配的内存大小
+ vncpass:是vnc访问密码
+ 5900:是vnc端口号（注意，同一机器上该端口号不能重复）
+ hostname：是待启动虚拟机指定的主机名，将在场景化过程中设置给虚拟机。
+ vmpass:是待启动虚拟机指定的root密码，将在场景化过程中设置给虚拟机。
+ 127.0.0.1:是待启动虚拟机指定的IP地址，将在场景化过程中设置给虚拟机。
+ 32bit:是待启动虚拟机镜像类型。目前还支持64bit。
 }}}
+
 {{{
 执行成功后在dom0上执行xm console vm-77 登陆，此时root密码是vmpass,且hostname是hostname,ip是127.0.0.1 - 场景化执行完毕
 虚拟机已经在网盘上启动。

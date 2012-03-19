@@ -10,3 +10,18 @@
    * 虚拟机关闭 
    * 虚拟机重启 —— 根据给定系统所在母盘的HLFS URI地址，重新挂载母盘和启动虚拟。
    * 虚拟网盘动态挂载 ——  生成空的虚拟数据网盘，并挂载到给定虚拟机上。
+
+= 演示步骤 =
+前提：你已经安装了xen4.1之上的代码(建议你从源码安装），且tap-ctl vhd-util等工具都已经具备，而且在$PATH路径下。
+=== 环境部署 ===
+ # 安装虚拟机控制脚本
+ * su root #我们暂时都使用root操作,如果你没打开root帐号，则sudo -i使用临时root权限
+ * svn co https://cloudxy.googlecode.com/svn/trunk/ECMS/NodeController/priv /opt/priv
+ * 部署母盘baseimg
+   * mkdir /opt/baseimage
+   * tar zvxf /opt/priv/domU-64bit-FS.img.tgz -C /opt/baseimage
+   * tar zvxf /opt/priv/domU-32bit-FS.img.tgz -C /opt/baseimage
+ * 部署虚拟机操作脚本
+   * cp /opt/priv/script/vm_ops_scripts /opt -rf #opt目录是目前脚本配置设定的
+ * 部署hlfs工具
+   * cp /opt/priv/hlfs_tools /opt -rf 

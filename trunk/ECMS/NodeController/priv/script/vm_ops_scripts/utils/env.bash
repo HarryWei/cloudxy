@@ -40,6 +40,8 @@ fi
 if [ ! -d $HLFS_TOOLS_DIR ];then
   LOG_MSG "not find hlfs tools"
   return 255
+  else
+  chmod +x $HLFS_TOOLS_DIR/*
 fi
 if [ ! -d $BASE_IMAGE_PATH ];then
   LOG_MSG "not find base iamge path"

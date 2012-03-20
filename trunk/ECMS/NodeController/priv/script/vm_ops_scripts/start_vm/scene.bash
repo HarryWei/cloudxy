@@ -18,7 +18,7 @@ if [ $? -ne 0 ];then
    return 255
 fi
 
-xm block-attach $VMNAME file:$ISO_FILE_PATH hdd:cdrom r >/dev/null 2>&1
+xm block-attach $VMNAME file:$ISO_FILE_PATH xvdd:cdrom r >/dev/null 2>&1
 if [ $? -eq 0 ];then
    return 0;
 else
@@ -70,7 +70,7 @@ if [ $? -ne 0 ];then
    return 255
 fi
 
-xm block-detach $VMNAME /dev/hdd -f >/dev/null 2>&1
+xm block-detach $VMNAME /dev/xvdd -f >/dev/null 2>&1
 if [ $? -eq 0 ];then
    return 0;
 else

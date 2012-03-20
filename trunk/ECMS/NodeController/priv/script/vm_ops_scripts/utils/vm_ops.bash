@@ -60,7 +60,7 @@ memory = $VMMEM
 vcpu = 1
 bootloader="/usr/bin/pygrub"
 disk = [ "tap2:vhd:$DIFFIMAGE_PATH,xvda1,w" ]
-vif  = [ "bridge=xenbr0,script=vif-bridge,ip=$VMIP"]
+vif  = [ "ip=$VMIP"]
 vfb  = [ "type=vnc,vncunused=$((VNCPORT-5900)),vncpasswd=$VNCPASSWD" ]
 EOF
 }

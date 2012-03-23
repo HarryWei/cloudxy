@@ -16,7 +16,7 @@
 === 环境部署 ===
  # 安装虚拟机控制脚本
  * su root #我们暂时都使用root操作,如果你没打开root帐号，则sudo -i使用临时root权限
- * svn co https://cloudxy.googlecode.com/svn/trunk/ECMS/NodeController/priv /opt/priv
+ * svn co http://cloudxy.googlecode.com/svn/trunk/ECMS/NodeController/priv /opt/priv
  * 部署母盘baseimg
    * mkdir /opt/baseimage
    * tar zvxf /opt/priv/domU-64bit-FS.img.tgz -C /opt/baseimage

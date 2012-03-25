@@ -6,8 +6,7 @@
 == 背景分析 ==
  * Cache分为写Cache和读Cache。
  * 就虚拟机应用而言，vm的page cache其实已经做了类似客户端cache了，所以hlfs层面不大需要再进行读cache了；另外，由于hdfs有已经预读，因此hlfs层面预读也可暂时省了。所以hlfs的读cache我们暂缓实现。
- * 我们当前的重点是实现写Cache——聚集分散的写IO请求，类似于kernel中的flush那样刷新page cache到磁盘。和写透相比与page cache的问题一样，系统宕机会丢失最后未写下去的脏，对于多数应用场合而言这是可以接受的（如果不接受
-那只能牺牲性能，采用写透方式执行）。
+ * 我们当前的重点是实现写Cache——聚集分散的写IO请求，类似于kernel中的flush那样刷新page cache到磁盘。和写透相比与page cache的问题一样，系统宕机会丢失最后未写下去的脏，对于多数应用场合而言这是可以接受的——如果不接受，那只能牺牲性能，采用写透方式执行。
 
 == 机制描述（HLFS cache采用类似kernel 中page cache机制）==
  * 如果当cache未达脏页刷新阀值时，直接写入cache中，然后返回

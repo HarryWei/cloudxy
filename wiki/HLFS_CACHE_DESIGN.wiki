@@ -37,7 +37,7 @@ struct cache_ctrl{
 GMutex         *cache_lock；
 GTrashStack    *block_cache；//块cache结构，目前使用glib的GTrashStack容器
 GQueue     *dirty_block;     //脏块有序队列
-Ghash     *block_map; //块存储地址到块区内存地址映射表，目前使用glib的hash容器实现。
+Ghash     *block_map; //块号到块区内存地址映射表，目前使用glib的hash容器实现。
 Gthread   *flush_worker; //刷新线程句柄
 Gcond     *flush_waken_cond;   //刷新线程用于被写入线程唤醒的条件变量。
 Gcond     *writer_waken_cond;  //写入线程用于被flush线程唤醒的条件变量。
@@ -72,10 +72,10 @@ int cache_set_write_cb(cache_ctrl* ctrl,void* cb_func,void* cb_param);
 int cache_destroy（struct cache_ctrl* ctrl;
 该函数负责终止后台线程、销毁容器、销毁ctrl结构。
 
-int cache_insert（struct cache_ctrl* ctrl,uint64_t block_storage_addr,char* block）;
+int cache_insert（struct cache_ctrl* ctrl,uint64_t block_no,char* block）;
 该函数负责将数据写入cache中
 。
-int cache_query（struct cache_ctrl* ctrl,uint64_t block_storage,char**block）;
+int cache_query（struct cache_ctrl* ctrl,uint64_t block_no,char**block）;
 该函数负责将从cache中读取数据
 
 暂不实现....

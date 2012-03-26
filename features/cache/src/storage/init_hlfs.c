@@ -92,17 +92,10 @@ init_hlfs(const char *uri)
         if(0!=load_latest_inode_map_entry(ctrl->storage,ctrl->last_segno,ctrl->last_offset,&ctrl->imap_entry)){
             HLOG_ERROR("load inode map entry failed");
 			g_free(ctrl);
-            ctrl = NULL;
+			ctrl = NULL;
             goto out;
         }
     }
-/*Cache init*/
-	ctrl->hlfs_cache_flag = 0;
-	ctrl->r_cache = NULL;
-	ctrl->w_cache = NULL:
-	ctrl->lru_cache_list = NULL;
-	ctrl->lru_cache_level = 0;
-	ctrl->flush_run_flag = 0;
 out:
 	HLOG_DEBUG("leave func %s", __func__);
     return ctrl;

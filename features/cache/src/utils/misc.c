@@ -42,51 +42,50 @@ char *build_segfile_name_by_address(uint64_t storage_address)
 #endif 
 int  build_segfile_name(uint32_t segno, const char *segfile_name)
 {
-	HLOG_DEBUG("enter func %s", __func__);
-        if(segfile_name==NULL){
-		HLOG_ERROR("segfile_name is null");
-           return -1;
-        }
-       snprintf((char *) segfile_name,SEGMENT_FILE_NAME_MAX,"%u%s%s",segno,".","seg");
-	HLOG_DEBUG("leave func %s", __func__);
-       return 0;
+    HLOG_DEBUG("enter func %s", __func__);
+    if(segfile_name==NULL){
+        HLOG_ERROR("segfile_name is null");
+        return -1;
+    }
+    snprintf((char *) segfile_name,SEGMENT_FILE_NAME_MAX,"%u%s%s",segno,".","seg");
+    HLOG_DEBUG("leave func %s", __func__);
+    return 0;
 }
 
 int  build_segfile_name_by_address(uint64_t storage_address, const char*segfile_name)
 {
-	HLOG_DEBUG("enter func %s", __func__);
-        if(segfile_name==NULL){
-           return -1;
-        }
-	    uint32_t segno  = get_segno(storage_address);
-        snprintf((char *) segfile_name,SEGMENT_FILE_NAME_MAX,"%u%s%s",segno,".","seg");
-	HLOG_DEBUG("leave func %s", __func__);
-        return 0;
+    HLOG_DEBUG("enter func %s", __func__);
+    if(segfile_name==NULL){
+        return -1;
+    }
+    uint32_t segno  = get_segno(storage_address);
+    snprintf((char *) segfile_name,SEGMENT_FILE_NAME_MAX,"%u%s%s",segno,".","seg");
+    HLOG_DEBUG("leave func %s", __func__);
+    return 0;
 }
 
 uint32_t get_segfile_no(const char * segfile)
 {
-	HLOG_DEBUG("enter func %s", __func__);
-        const gchar *basename = g_basename(segfile);
-        gchar **v = g_strsplit(basename,".",2);
-        uint32_t segno = atol(v[0]);
-        g_strfreev(v);
-	HLOG_DEBUG("leave func %s", __func__);
-        return segno;
+    HLOG_DEBUG("enter func %s", __func__);
+    const gchar *basename = g_basename(segfile);
+    gchar **v = g_strsplit(basename,".",2);
+    uint32_t segno = atol(v[0]);
+    g_strfreev(v);
+    HLOG_DEBUG("leave func %s", __func__);
+    return segno;
 }
 
 
 char *read_block(struct back_storage *storage ,uint64_t storage_address,uint32_t block_size)
 {
-	HLOG_DEBUG("enter func %s", __func__);
-	HLOG_DEBUG("%s -- storage_addr is %llu", __func__, storage_address);
+    HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
     uint32_t offset = get_offset(storage_address); 
     const char segfile_name[SEGMENT_FILE_NAME_MAX];
     ret = build_segfile_name(get_segno(storage_address), (char *) segfile_name);
     if (-1 == ret) {
-	    HLOG_ERROR("build_segfile_name error");
-	    return NULL;
+        HLOG_ERROR("build_segfile_name error");
+        return NULL;
     }
 
     bs_file_t file = storage->bs_file_open(storage,segfile_name,BS_READONLY); 
@@ -97,12 +96,10 @@ char *read_block(struct back_storage *storage ,uint64_t storage_address,uint32_t
 
     char * block = (char*)g_malloc0(block_size);
     if (NULL == block) {
-	    HLOG_ERROR("Allocate Error!");
-	    block = NULL;
+        HLOG_ERROR("Allocate Error!");
+        block = NULL;
 	    goto out;
     }
-	HLOG_DEBUG("%s -- offset is %u", __func__, offset);
-	HLOG_DEBUG("%s -- block_size is %u", __func__, block_size);
     if(block_size != storage->bs_file_pread(storage,file,block,block_size,offset)){
 	    HLOG_ERROR("bs_file_pread's size is not equal to block_size");
         g_free(block);
@@ -133,6 +130,7 @@ int parse_from_uri(const char *uri, char ** head, char** hostname ,char** dir,ch
     char *pre_uri = g_dirname(uri);
     *fs_name = (char *) g_basename (uri);
     v = g_strsplit(pre_uri,"://",2);
+	g_free(pre_uri); 
     if(g_strv_length(v)!=2){
        g_strfreev(v);
        return -1; 

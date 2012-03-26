@@ -179,7 +179,7 @@ do_snapshot1(Fixture *fixture, int i) {
 		g_message("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_message("ret is %d", ret);
-		g_assert(ret == -1);
+		g_assert(ret == -2);
 	} else if (9 == i) {
 		sprintf(buffer, "%s", "T19");
 		g_message("%d buffer is [%s]", i, buffer);
@@ -203,7 +203,8 @@ test_hlfs_take_snapshot(Fixture *fixture, const void *data) {
 		offset += REQ_SIZE;
 		i += 1;
 	}
-#if 1 
+//TODO restart hlfs
+#if 0 
 	g_message("99 dbg");
 	hlfs_close(fixture->ctrl);
 	g_message("99 dbg");

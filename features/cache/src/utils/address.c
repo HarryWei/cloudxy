@@ -16,19 +16,14 @@ uint32_t get_offset(uint64_t address)
 
 void set_segno(uint64_t *address, uint32_t segment_no)
 {
-	HLOG_DEBUG("harry dbg *address is %llu", *address);
-	HLOG_DEBUG("harry dbg segno is %u", segment_no);
     uint64_t tmp = segment_no;
     tmp <<= SEGMENT_SIZE_SHIFT;
     *address = (*address & SEGMENT_SIZE_MASK) | tmp;
-	HLOG_DEBUG("harry dbg after set segno *address is %llu", *address);
 }
 
 void set_offset(uint64_t *address, uint32_t offset)
 {
-	HLOG_DEBUG("harry dbg *address is %llu", *address);
     *address = (*address & ~SEGMENT_SIZE_MASK) | offset;
-	HLOG_DEBUG("harry dbg after set, *address is %llu", *address);
 } 
 
 gboolean is_db_in_level1_index_range(uint32_t db_no)

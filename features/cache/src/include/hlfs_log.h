@@ -7,7 +7,6 @@
 #include <stdlib.h>
 
 #define LOG_LEN				(1024)
-//#define LOG_CONFIG_FILE_PATH		"/home/jiawei/workshop15/snapshot/src/snapshot/unittest/build/log4crc"
 
 #define HLOG_NOTICE(msg, args...) { 															\
 	if (0 == __is_init_log_path) {																\

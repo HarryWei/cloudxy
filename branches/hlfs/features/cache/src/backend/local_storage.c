@@ -7,7 +7,6 @@
 #include "storage.h"
 #include "misc.h"
 #include "hlfs_log.h"
-#include "comm_define.h"
 
 static gchar *build_local_path(const char *uri,const char *path){
 	HLOG_DEBUG("local -- enter func %s", __func__);
@@ -29,6 +28,7 @@ static gchar *build_local_path(const char *uri,const char *path){
 	HLOG_DEBUG("local -- leave func %s", __func__);
      return full_path;
 }
+
 
 int local_connect(struct back_storage *storage,const char* uri){
 	HLOG_DEBUG("local -- enter func %s", __func__);
@@ -94,9 +94,9 @@ int local_file_close(struct back_storage *storage,bs_file_t file){
 	HLOG_DEBUG("local -- enter func %s", __func__);
     //int fd = *(int*)file;
     int fd = GPOINTER_TO_INT((gpointer)file);
-//    close(fd);
+    close(fd);
 	HLOG_DEBUG("local -- leave func %s", __func__);
-    return close(fd);
+    return 0;
 }
 
 int local_file_is_exist(struct back_storage * storage,const char *path){
@@ -104,12 +104,12 @@ int local_file_is_exist(struct back_storage * storage,const char *path){
     gchar * full_path = build_local_path(storage->uri,path);
     if (NULL == full_path) {
 	    HLOG_ERROR("build local path error!");
-	    return EHLFS_MEM;
+	    return -1;
     }
     HLOG_DEBUG("full path %s",full_path);
     if (!g_file_test(full_path,G_FILE_TEST_EXISTS)){
         g_free(full_path);
-        return EHLFS_NOFILE;
+        return -1;
     }
     g_free(full_path);
 	HLOG_DEBUG("local -- leave func %s", __func__);
@@ -216,8 +216,8 @@ local_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num
 		if (0 != res) {
 			g_free(full_path);
 			g_free(file_path);
-			g_dir_close(dir);
 			g_free(infos);
+			g_dir_close(dir);
 			HLOG_ERROR("lstat error");
 			return NULL;
 		}

@@ -23,7 +23,8 @@ mock_start_vm(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,V
 	Res.
 
 start_vm(Vcpu_Count,Mem_Size,Disk_Size,Ip_Addr,Mac_Addr,Vnc_Pass,Vnc_Port,Vm_HostName,Vm_Pass,Vm_Id)->
-	 Params = lists:concat(["bash ./priv/script/create_vm.sh ",
+%	 Params = lists:concat(["bash ./priv/script/create_vm.sh ",
+	 Params = lists:concat(["bash ../../priv/script/vm_ops_scripts/start_vm/vm_start.bash ",
 									integer_to_list(Vcpu_Count)," ",
 									integer_to_list(Mem_Size), " ",
 									integer_to_list(Disk_Size)," ",

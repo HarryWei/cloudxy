@@ -56,7 +56,8 @@ else
    LOG_MSG  "nbd server has not lauch"
    modprobe nbd
    rm -rf /tmp/nbd* > /dev/null 2>&1 
-   $HLFS_TOOLS_DIR/nbd-server $NBD_LISTION_PORT >/dev/null 2>&1 &
+#  $HLFS_TOOLS_DIR/nbd-server $NBD_LISTION_PORT >/dev/null 2>&1 &
+   $HLFS_TOOLS_DIR/nbd-server $NBD_LISTION_PORT >/dev/null 2>&1
    if [ $? -eq 0 ];then
    	LOG_MSG  "nbd server has been lauched"
    else

@@ -64,11 +64,11 @@ fi
 local LOGDIR=$1
 rm -rf $LOGDIR
 }
-LOGFILE=$VM_OPS_LOG_DIR/vm_ops.log
-function LOG_MSG()
-{
-echo "[`date "+%Y/%m/%d %H:%M:%S"`] $*" >> $LOGFILE
-}
+#LOGFILE=$VM_OPS_LOG_DIR/vm_ops.log
+#function LOG_MSG()
+#{
+#echo "[`date "+%Y/%m/%d %H:%M:%S"`] $*" >> $LOGFILE
+#}
 
 #lock_req /tmp/locktest
 #lock_release /tmp/locktest

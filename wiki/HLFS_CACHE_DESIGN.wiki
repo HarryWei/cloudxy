@@ -38,15 +38,15 @@ GTrashStack    *block_cache；//块cache结构，目前使用glib的GTrashStack�
 GQueue     *dirty_block;     //脏块有序队列
 Ghash     *block_map; //块号到块区内存地址映射表，目前使用glib的hash容器实现。
 Gthread   *flush_worker; //刷新线程句柄
-Gcond     *flush_waken_cond;   //刷新线程用于被写入线程唤醒的条件变量。
-Gcond     *writer_waken_cond;  //写入线程用于被flush线程唤醒的条件变量。
+Gcond     *flush_waken_cond;   //刷新线程被写入线程唤醒的条件变量。
+Gcond     *writer_waken_cond;  //写入线程被flush线程唤醒的条件变量。
 void      *write_callback_func;   //用户传入的实际写cb函数.flush线程最终调用该cb写入数据。cb函数固定接受void*(存储句柄）,buff,len 三个参数，第一个由用户给定，后两个由flush线程提供。
 void      *write_callback_user_param; //void*(存储句柄）由用户传入。
 uint64_t  cache_size;    //缓存大小，单位块。
 uint64_t  block_size;    //块大小，单位字节。
 uint64_t  flush_interval; //刷新线程执行间隔
-uint64_t  flush_trigger_level;//唤醒刷新线程执行的脏页比重 （0-100）
-uint64_t  flush_once_size;//刷新动作单词写入的脏页数量。
+uint64_t  flush_trigger_level;//唤醒刷新线程执行的脏块比重 （0-100）
+uint64_t  flush_once_size;//刷新动作单次写入的脏块数量。
 uint64_t  total_write_count; //总写入请求数 
 uint64_t  total_read_count;  //总读取请求数
 uint64_t  cache_full_hit;    //读请求cache全部命中数
@@ -68,7 +68,7 @@ int cache_init(struct cache_ctrl* ctrl,
 int cache_set_write_cb(cache_ctrl* ctrl,void* cb_func,void* cb_param);
 该函数设置flush函数回调函数和用户参数
 
-int cache_destroy（struct cache_ctrl* ctrl;
+int cache_destroy（struct cache_ctrl* ctrl）;
 该函数负责终止后台线程、销毁容器、销毁ctrl结构。
 
 int cache_insert（struct cache_ctrl* ctrl,uint64_t block_no,char* block）;

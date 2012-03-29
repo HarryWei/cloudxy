@@ -37,7 +37,7 @@ SYSDISK=$VMS_WORK_DIR/$VM_DIR/sysdisk
 
 
 LOG_MSG "step.0 do some check ..."
-if xm domid $VM_NAME
+if xm domid $VM_NAME 1>/dev/null 2>&1
 then
    LOG_MSG "$VM_NAME has exist"
    exit 255

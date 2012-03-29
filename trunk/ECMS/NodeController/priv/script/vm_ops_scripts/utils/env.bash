@@ -7,7 +7,7 @@ if [ `getconf LONG_BIT` == "64" ];then
 HLFS_TOOLS_DIR="/opt/hlfs_tools/bin64"
 #export LD_LIBRARY_PATH=/opt/hlfs_tools/lib64
 #mkdir -p /usr/lib/hlfs
-ldconfig -p |grep /opt/hlfs_tools/lib64
+ldconfig -p |grep /opt/hlfs_tools/lib64 1>/dev/null 2>&1
 if [ $? -ne 0 ];then
 echo "/opt/hlfs_tools/lib64" >> /etc/ld.so.conf
 ldconfig
@@ -16,7 +16,7 @@ fi
 if [ `getconf LONG_BIT` == "32" ];then
 HLFS_TOOLS_DIR="/opt/hlfs_tools/bin32"
 #export LD_LIBRARY_PATH=/opt/hlfs_tools/lib32
-ldconfig -p |grep /opt/hlfs_tools/lib32
+ldconfig -p |grep /opt/hlfs_tools/lib32 1>/dev/null 2>&1
 if [ $? -ne 0 ];then
 echo "/opt/hlfs_tools/lib32" >> /etc/ld.so.conf
 ldconfig

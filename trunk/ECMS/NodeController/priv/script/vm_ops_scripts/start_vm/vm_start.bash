@@ -6,7 +6,7 @@ function clean_all_ops(){
 local VM_ID=$1
 local HLFS_URI=$2
 LOG_MSG "destroy vm if need"
-xm des vm-$VM_ID >/dev/null 2>&1
+xm destroy vm-$VM_ID >/dev/null 2>&1
 sleep 2
 LOG_MSG "unbind hlfs from nbd if need"
 unbind_nbd_from_hlfs $HLFS_URI

@@ -57,6 +57,7 @@ else
    modprobe nbd
    rm -rf /tmp/nbd* > /dev/null 2>&1 
    $HLFS_TOOLS_DIR/nbd-server $NBD_LISTION_PORT >/dev/null 2>&1 &
+   sleep 1
    netstat -nlpt|grep nbd-server >/dev/null 2>&1
    if [ $? -eq 0 ];then
    	LOG_MSG  "nbd server has been lauched"

@@ -1,7 +1,9 @@
-#summary English brief Introduction
+#summary Brief Introduction to Cloudxy
 
-= Cloudxy Project =
-Cloudxy Project now is made up of HLFS sub probject and EMCS sub project<br>
+= Cloudxy =
+Cloudxy is a generic and open source platform which can provide resizable compute capacity in the cloud.It means you can scale capacity as your computing requirements change.Also,you can recover your virtual machine when failure occurs.
+
+Cloudxy is constructed of HLFS(Hadoop Log-structured file system) and EMCS(Elastic Cloud Management System).
 == HLFS == 
 The first part of Cloudxy is HLFS sub project,which is a distributed vm image storage system for XEN.HLFS(Hadoop Log Structure Filesystem,acturally named Hadoop Log Structure Block System is more proper) provides highly available block level 
 storage volumes that can be attached to XEN virtual machines by its tapdisk driver — Similar projects in KVM region is sheepdog，however in different architecture

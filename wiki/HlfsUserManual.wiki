@@ -11,7 +11,8 @@
    我们建议使用cloudera的cdh3，安装方式参见  https://ccp.cloudera.com/display/CDHDOC/CDH3+Installation
 ===Xen 安装===   
    我们使用xen中的tapdisk2模式加载hlfs磁盘，因此需要使用xen4.0之上版本（如果低版本xen需要打上tapdisk2的patch)。因此我们建议使用xen4.1.x 。 对于dom0内核版本，我们建议不要用2.6.18的老内核，使用当前2.6.32以上的内核比较可靠。<br>
-   关于xen的安装，网上资料很多。 也可以参见我们download中提供的资料http://code.google.com/p/cloudxy/downloads/detail?name=xen_guide.pdf
+   关于xen的安装，网上资料很多。 
+   也可以参见我们wiki上的资料。如果启动虚拟机有问题，去看看权威http://wiki.xen.org/xenwiki/XenCommonProblems文档，相信所有问题都有解决办法。
    
 
 == HLFS START UP ==

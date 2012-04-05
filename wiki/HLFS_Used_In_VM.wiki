@@ -54,7 +54,7 @@ cd /opt/vm_ops_scripts
  * 重新启动vmid=77的虚拟机
    * bash -x restart_vm/vm_restart.bash 77 local:///tmp/testfs
  * 为vmid=77的虚拟机加入虚拟磁盘local:///tmp/datafs --- 这步需要给xen打patch后才能支持
-   *bash -x add_vdisk/vdisk_add.bash 77 local:///tmp/datafs 64
+   * bash -x add_vdisk/vdisk_add.bash 77 local:///tmp/datafs 64
 {{{ 
    注意
    1.虚拟数据盘实现是通过在tapdisk2中增加了一个hlfs-block的驱动实现的，和NBD实现的网盘有类似之处，但IO流上来讲直接从tapdisk2的用户态走了，而NBD则IO经tapdisk2后还要再转到内核态nbd device，然后再转化到nbd-server用户态才能走,所以更精炼。

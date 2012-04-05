@@ -1,0 +1,82 @@
+#summary One-sentence summary of this page.
+#labels Phase-Implementation,Featured,Phase-Design
+
+= Introduction =
+
+虚拟机启动流程简述
+
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
+vm_start.sh
+
+1、通过引入env.bash 和 scene.bash 来部署环境变量及引入预定义函数，前者与环境变量相关，后者与场景化相关。
+
+2、定义回滚函数，确保发生任何错误的情况下，程序可以回滚到运行程序之前的状态。
+
+	xm destroy vm-$VM_ID >/dev/null 2>&1 #确保在发生错误的时候将标准错误输出到屏幕上，正常运行不打印任何内容，防止被调
+
+度程序读取。
+	sleep 2 #睡眠一会儿，确保Dom-U被destroy后释放虚拟设备资源。
+
+   unbind nbd设备与$URL描述的hlfs文件系统；destroy hlfs文件系统。
+
+3、读入参数包含场景化参数所在的iso文件信息，这里场景化信息的内容，由前面参数列表中包含的内容指定。
+
+4、检查是否有同名Dom-U正在运行，是否有与$URL同名hlfs文件系统已经存在，如果存在任意一个，表示与预期不符（因为这两者都要在后
+
+面的过程创建），退出运行。
+
+5、为Dom-U运行创建本地工作目录，用于准备启动配置文件，快照文件以及场景化iso之用。
+
+6、使用url创建hlfs文件系统，这里可以通俗的将其理解为为一块新硬盘做低级格式化，生成用于磁盘管理的基本信息。
+
+7、加锁；自动选择空闲nbd设备与$URL指代的hlfs文件系统bind，可以通俗的理解为，将一块新的，做过低级格式化的硬盘，连接到本地节
+
+点。由于涉及到nbd块设备的分配和使用问题，所以
+这个过程需要在临界区内执行，以防多个线程争夺同一个nbd块设备。
+
+
+8、为nbd块设备准备文件系统，可以通俗的理解为将前面连接到系统的硬盘高级格式化为ext3文件系统。
+
+9、将格式化好的的$NBD设备mount在相应Dom-U工作目录下的系统盘目录，这里是$SYSDISK ，最后解除前面对临界区加的共享互斥锁，因为
+
+涉及到$NBD设备的使用到这里已经全部完成了。前面的几个步骤，如果有任何问题导致退出都不要忘了最后要做解锁工作。
+
+10、使用vhd-util工具，在$SYSDISK创建系统增量盘映像文件，根据$VM_OS_TYPE确定系统母盘映像文件。
+
+
+11、在$SYSDISK创建对应Dom-U启动配置文件：$SYSDISK/vm-$VMID.cfg，包括Name、CPU、Memory、boot、Disk、IP、VNC等信息。
+	name = "vm-$VMID"
+	memory = $VMMEM
+	vcpu = 1
+	bootloader="/usr/bin/pygrub"
+	disk = [ "tap2:vhd:$DIFFIMAGE_PATH,xvda1,w" ]
+	vif  = [ "ip=$VMIP"]
+	vfb  = [ "type=vnc,vncunused=$((VNCPORT-5900)),vncpasswd=$VNCPASSWD" ]
+
+12、使用mkisofs创建场景化iso映像文件，内容包括IP地址，主机名，root口令。
+	local scene_file=`dirname $scene_iso_file`/initialize
+	echo "hostname $vm_hostname" > $scene_file;
+	echo "password $vm_passwd" >> $scene_file;		
+	echo "ipaddr $vm_ipaddr" >> $scene_file;
+	#cat $scene_file
+	mkisofs -r -o $scene_iso_file $scene_file >/dev/null 2>&1;
+ 
+13、将场景化光盘连接到对应Dom-U的cd设备上。
+	xm block-attach $VMNAME file:$ISO_FILE_PATH xvdd:cdrom r >/dev/null 2>&1
+
+14、通知对应Dom-U，场景化滚光盘已经就位。
+	xenstore-write /local/domain/$VMID/iso_attach 1
+    并将对应的访问域置为监听状态。
+	xenstore-chmod /local/domain/$VMID/iso_attach b
+
+15、等待Dom-U场景化动作完成并将访问域flag置位，通知Dom-0。Dom-0会循环20次，间隔2秒去扫描xenstore-read /local/domain/
+
+$VMID/iso_attach域。
+
+16、将场景化iso文件与相关Dom-U断开连接。

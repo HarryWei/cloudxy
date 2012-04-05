@@ -1,5 +1,5 @@
 #summary One-sentence summary of this page.
-#labels Phase-Implementation,Featured,Phase-Design
+#labels 虚拟机启动流程简述
 
 = Introduction =
 

@@ -12,7 +12,114 @@ Add your content here.  Format your content with:
   * Text in *bold* or _italic_
   * Headings, paragraphs, and lists
   * Automatic links to other wiki pages
+在描述所有细节之前，先展示一下目录结构：
+
+
+|-- baseimage
+|   |-- domU-32bit-FS.img
+|   `-- domU-64bit-FS.img
+|-- hlfs_tools
+|   |-- bin32
+|   |   |-- mkfs.hlfs
+|   |   |-- nbd-client
+|   |   `-- nbd-server
+|   |-- bin64
+|   |   |-- mkfs.hlfs
+|   |   |-- nbd-client
+|   |   `-- nbd-server
+|   |-- lib32
+|   |   |-- libhdfs.so.0
+|   |   |-- libhlfs.so
+|   |   |-- libjvm.so
+|   |   `-- liblog4c.so.3
+|   `-- lib64
+|       |-- libglib-2.0.so.0
+|       |-- libhdfs.so.0
+|       |-- libhlfs.so
+|       |-- libjvm.so
+|       `-- liblog4c.so.3
+|-- priv
+|   |-- domU-32bit-FS.img.tgz
+|   |-- domU-64bit-FS.img.tgz
+|   |-- hlfs_tools
+|   |   |-- bin32
+|   |   |   |-- mkfs.hlfs
+|   |   |   |-- nbd-client
+|   |   |   `-- nbd-server
+|   |   |-- bin64
+|   |   |   |-- mkfs.hlfs
+|   |   |   |-- nbd-client
+|   |   |   `-- nbd-server
+|   |   |-- lib32
+|   |   |   |-- libhdfs.so.0
+|   |   |   |-- libhlfs.so
+|   |   |   |-- libjvm.so
+|   |   |   `-- liblog4c.so.3
+|   |   `-- lib64
+|   |       |-- libglib-2.0.so.0
+|   |       |-- libhdfs.so.0
+|   |       |-- libhlfs.so
+|   |       |-- libjvm.so
+|   |       `-- liblog4c.so.3
+|   `-- script
+|       `-- vm_ops_scripts
+|           |-- add_vdisk
+|           |   `-- vdisk_add.bash
+|           |-- destroy_vm
+|           |-- restart_vm
+|           |   `-- vm_restart.bash
+|           |-- start_vm
+|           |   |-- scene.bash
+|           |   `-- vm_start.bash
+|           |-- stop_vm
+|           |   `-- vm_stop.bash
+|           |-- utils
+|           |   |-- env.bash
+|           |   |-- hlfs_ops.bash
+|           |   |-- log.bash
+|           |   |-- misc.bash
+|           |   |-- nbd_ops.bash
+|           |   |-- vdisk_ops.bash
+|           |   |-- vhd_ops.bash
+|           |   `-- vm_ops.bash
+|           `-- vdisk_attach
+|-- vm_ops_scripts
+|   |-- add_vdisk
+|   |   `-- vdisk_add.bash
+|   |-- destroy_vm
+|   |-- restart_vm
+|   |   `-- vm_restart.bash
+|   |-- start_vm
+|   |   |-- scene.bash
+|   |   `-- vm_start.bash
+|   |-- stop_vm
+|   |   `-- vm_stop.bash
+|   |-- utils
+|   |   |-- env.bash
+|   |   |-- hlfs_ops.bash
+|   |   |-- log.bash
+|   |   |-- misc.bash
+|   |   |-- nbd_ops.bash
+|   |   |-- vdisk_ops.bash
+|   |   |-- vhd_ops.bash
+|   |   `-- vm_ops.bash
+|   `-- vdisk_attach
+`-- vms_work_dir
+    `-- VM-77
+        |-- initialize
+        |-- sysdisk
+        |   |-- diff.img
+        |   |-- lost+found
+        |   `-- vm-77.cfg
+        `-- vm-77-scene.iso
+
+
+
+
+
+
 vm_start.sh
+
 
 1、通过引入env.bash 和 scene.bash 来部署环境变量及引入预定义函数，前者与环境变量相关，后者与场景化相关。
 
@@ -79,4 +186,64 @@ vm_start.sh
 
 $VMID/iso_attach域。
 
-16、将场景化iso文件与相关Dom-U断开连接。
+
+
+16、read
+    这条指令字面的作用是可以将输入赋值给$REPLY，但是就像你看到的，既没有把你的输入当作命令来执行，也没有打印这个$REPLY。
+这里的实质是康sir秀了一个编程的技巧，如果场景化动作失败，比如说循环20次还没有读到场景化完成的消息，在回退，清除痕迹之前暂
+
+停一下，让你可以进入Dom-U中查看原因：P
+
+
+17、将场景化iso文件与相关Dom-U断开连接。
+
+
+
+
+
+
+
+vm_stop.bash
+
+1、通过引入env.bash 和 scene.bash 来部署环境变量及引入预定义函数，前者与环境变量相关，后者与场景化相关。
+
+2、定义回滚函数，确保发生任何错误的情况下，程序可以回滚到运行程序之前的状态。
+
+3、首先检查对应Dom-U是否正在运行，if xm domid $VM_NAME；如果正在运行就向其发关机指令，xm des $VM_NAME。
+
+4、查找与对应Dom-U关联的工作目录与哪个nbd设备相关，NBD=`mount -l|grep "\/$VM_DIR\/"|cut -d" " -f1`。
+
+5、等待3秒后（等待tapdisk释放vhd设备，不再使用nbd设备）,unmount $NBD, unbind /dev/nbd-?，
+
+为了清晰说明卸载过程，下面列出Dom-U所使用的系统硬盘的装载过程：
+	mkfs.hlfs		—>	URL@hlfs
+	bind&mkfs.ext3		—>	/dev/nbd-?
+	mount			—>	$SYSDISK（workdir/dom-U/sysdisk）
+	vhd-util snapshot	—>	$DIFFIMAGE（vhd）
+	tapdisk			—>     hda@Dom-U
+	
+6、清除tapdisk？ 本意是处理xen的一个bug，强行关机后tapdisk设备没有被release掉，我好想也观察到过一次，不过好像只是时间的问
+
+题，我不干确定那次是我没有调用vm_stop.bash之后还是之前看到的。不过这一没有发生作用，且因为地址没有完全对应而没有得到执行。
+
+但是前面说的那个问题的确没有出现现，还得需要康sir给大伙扫下盲。
+
+	function destroy_blktap_dev(){
+	if [ $# != 1 ]; then
+    	LOG_MSG  "$* parameter error";
+    	return 255
+	fi
+	local URI=$1
+	tap-ctl list|grep -w $URI
+	if [ $? -ne 0 ]; then
+	    LOG_MSG  "can not find dev:$URI";
+	    return 255
+	fi
+	PID=`tap-ctl list|grep -w local:///tmp/testenv/datafs83|cut -d" " -f1|cut -d"=" -f2`
+	MINOR=`tap-ctl list|grep -w local:///tmp/testenv/datafs83|cut -d" " -f2|cut -d"=" -f2`
+	tap-ctl destroy -p $PID -m $MINOR
+	if [ $? -ne 0 ]; then
+	    LOG_MSG  "can not destroy dev:$URI";
+	    return 255
+	fi
+	}

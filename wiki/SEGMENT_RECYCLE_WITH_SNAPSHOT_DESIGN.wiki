@@ -33,8 +33,16 @@ Log Structure的存储系统都跑不了旧数据回收这个环节。回收数�
 
 = 基本数据结构 =
 {{{
+
+struct snapshot {
+     uint64_t timestamp;
+     uint64_t inode_addr;
+     char sname[HLFS_FILE_NAME_MAX];
+     char up_sname[HLFS_FILE_NAME_MAX]; /* for tree style snapshot */
+};
+
 struct seg_usage_t{
-         seg_no；
+         uint64_t seg_no；
          char up_snapshot[128]；up快照，对于非快照区间的段而言，这个值可以是空。
          uint64_t inode_saddr ；快照间的段该值为up快照地址值，非快照区间则是次新inode地址。
          uint64_t timestamp   ；统计时刻时间戳

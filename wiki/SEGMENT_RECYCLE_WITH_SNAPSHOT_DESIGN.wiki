@@ -33,14 +33,14 @@ Log Structure的存储系统都跑不了旧数据回收这个环节。回收数�
 
 = 基本数据结构 =
 {{{
-
-struct snapshot {
+快照结构
+struct snapshot_t {
      uint64_t timestamp;
      uint64_t inode_addr;
      char sname[HLFS_FILE_NAME_MAX];
      char up_sname[HLFS_FILE_NAME_MAX]; /* for tree style snapshot */
 };
-
+段统计结构
 struct seg_usage_t{
          uint64_t seg_no；
          char up_snapshot[128]；up快照，对于非快照区间的段而言，这个值可以是空。
@@ -84,6 +84,7 @@ struct seg_usage_t{
 段统计文件Merge工具：将段统计文件中alive block的段统计记录去除（只有当对应的段不存在时）。
 
 = 伪代码算法描述 =
+示意性、非标准的伪代码
 {{{
 段统计逻辑
 segs_usage_status(storage_t *storage,uint64_t start_segno,uint64_t end_segno)

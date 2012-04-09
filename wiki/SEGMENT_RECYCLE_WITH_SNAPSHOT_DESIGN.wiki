@@ -103,19 +103,20 @@ segs_usage_status(storage_t *storage,uint64_t start_segno,uint64_t end_segno)
         if(segno => start_no && segno <= end_segno){
            segment_usage = get_segment_usage(seg_usage_hashtable);
            if(segment_usage != NULL){/*存在块记录结构，则说明已经执行过块统计操作*/
-              ret = get_up_snapshot_by_segno(snapshot_hashtable,segno,snapshot);/*查找指定段上的up快照变更情况*/
+              ret = get_up_snapshot_by_segno(snapshot_hashtable,segno,snapshot);/*查找指定段上对应的up快照变更情况*/
               case ret in{
                 SN_NOT_FIND: /*快照已经被删除,需要重新做段统计*/
           	    inode = get_ref_inode(segno,snapshot_hashtable)；/*获取段所在段的参考inode*/
                     __seg_usage_calc(storage,segno,inode,seg_usage,block_size);/*执行实际的计算动作*/ 
                     break;
                 SN_FIND:  
+                    if(get_segno(snapshot->inode_addr))==segno){/*快照所在段不做统计*/
+                       break;
+                    }
                     if(snapshot->inode_addr != segment_usage->inode_addr){/*说明当时参考快照已经改变，需要重新做段统计*/
                     	inode = get_ref_inode(segno,snapshot_hashtable)；/*获取段所在段的参考inode*/
                     	__seg_usage_calc(storage,segno,inode,seg_usage,block_size); /*执行实际的计算动作*/    
                     }
-                    break;
-                MUTI_SN_FIND:/*发现段上存在多个snapshot，目前不做统计*/
                     break;
                }    
            }else{ /*未执行过块统计操作*/

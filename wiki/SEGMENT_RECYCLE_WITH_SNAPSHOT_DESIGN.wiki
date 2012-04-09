@@ -102,8 +102,8 @@ segs_usage_status(storage_t *storage,uint64_t start_segno,uint64_t end_segno)
         segno = get_segno(file_info);
         if(segno => start_no && segno <= end_segno){
            segment_usage = get_segment_usage(seg_usage_hashtable);
-           if(segment_usage != NULL){/*存在块记录结构，则索命已经执行过块统计操作*/
-              ret = get_up_snapshot_by_segno(snapshot_hashtable,segno,snapshot);/*查找指定段上的快照*/
+           if(segment_usage != NULL){/*存在块记录结构，则说明已经执行过块统计操作*/
+              ret = get_up_snapshot_by_segno(snapshot_hashtable,segno,snapshot);/*查找指定段上的up快照变更情况*/
               case ret in{
                 SN_NOT_FIND: /*快照已经被删除,需要重新做段统计*/
           	    inode = get_ref_inode(segno,snapshot_hashtable)；/*获取段所在段的参考inode*/

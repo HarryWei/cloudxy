@@ -181,6 +181,8 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname);
 
 /**
  * Cache APIs
+ * The comments about how to use hlfs cache feature is located in cache.h. You 
+ * can find something intetesting there.
  */
 
 CACHE_CTRL *cache_new();

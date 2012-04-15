@@ -7,7 +7,8 @@ CACHE_CTRL *cache_new()
 	HLOG_DEBUG("--Entering func %s", __func__);
 
 	struct cache_ctrl *cache_ctrl = NULL;
-	if (NULL == (cache_ctrl = (struct cache_ctrl *)g_malloc0(sizeof(struct cache_ctrl)))) {
+	if (NULL == (cache_ctrl = (struct cache_ctrl *)g_malloc0(sizeof(struct \
+						cache_ctrl)))) {
 		HLOG_ERROR("--Error:Apply for mem");
 		return NULL;
 	}
@@ -37,7 +38,8 @@ int cache_init(CACHE_CTRL *cache_ctrl, \
 		return -1;
 	}
 
-	if (NULL == (cache_ctrl->block_cache = (GTrashStack *)g_malloc0(sizeof(GTrashStack)))) {
+	if (NULL == (cache_ctrl->block_cache = (GTrashStack *)g_malloc0(sizeof \
+					(GTrashStack)))) {
 		HLOG_ERROR("--Error:Apply for cache");
 		ret = -EHLFS_MEM;
 		goto err;

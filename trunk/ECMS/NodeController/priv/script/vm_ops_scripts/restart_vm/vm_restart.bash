@@ -67,7 +67,6 @@ if [ $? -eq 0 ];then
 else
    exit 255
 fi
-read
 LOG_MSG "step.3 mount block device for sysdisk "
 mkdir -p $SYSDISK
 mount $NBD $SYSDISK >/dev/null 2>&1

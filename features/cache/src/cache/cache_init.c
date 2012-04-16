@@ -34,11 +34,6 @@ int cache_init(CACHE_CTRL *cache_ctrl, \
 		return -EHLFS_PARAM;
 	}
 
-	if (NULL == (cache_ctrl->cache_mutex = g_mutex_new())) {
-		HLOG_ERROR("--Error:Apply for mutext");
-		return -1;
-	}
-
 	HLOG_DEBUG("--block_size:%lu,cache_size:%lu,flush_interval:%lu,flush_trigger_level:%lu,flush_once_size:%lu,%s",
                block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size,__func__);
     cache_ctrl->block_size = block_size;
@@ -72,15 +67,19 @@ int cache_init(CACHE_CTRL *cache_ctrl, \
 		HLOG_ERROR("--Error:Apply for block_map");
 		ret = -1;
 		goto err;
-	}
+    }
     HLOG_DEBUG("--dirty block_map init over!--");
     g_thread_init(NULL);
+    if (NULL == (cache_ctrl->cache_mutex = g_mutex_new())) {
+        HLOG_ERROR("--Error:Apply for mutext");
+        return -1;
+    }
     cache_ctrl->flush_waken_cond =  g_cond_new();
     cache_ctrl->writer_waken_cond = g_cond_new();
     cache_ctrl->flush_worker = g_thread_create(flush_work,cache_ctrl,TRUE,NULL);
     g_assert(cache_ctrl->flush_worker);
     HLOG_DEBUG("--flush worker init over!--");
-	return ret;
+    return ret;
 err:
     if(cache_ctrl->cache_mutex)
         g_mutex_free(cache_ctrl->cache_mutex);

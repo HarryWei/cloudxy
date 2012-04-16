@@ -12,8 +12,8 @@
  * 
  */
 
-#ifndef _CACHE_H
-#define _CACHE_H
+#ifndef __CACHE_H__
+#define __CACHE_H__
 
 #include "api/hlfs.h"
 #include "glib.h"
@@ -27,10 +27,10 @@ struct cache_ctrl {
 	GMutex *cache_mutex; 	//Lock of cache
 	GTrashStack *block_cache; 	//Stack used to store cache buffers
 	GQueue *dirty_block; 	//LRU queue of dirty blocks
-	Ghash *block_map; 	//
-	Gthread *flush_worker; 	//Back end flush thread 
-	Gcond *flush_waken_cond; 	//The condition of Writer thread awaking flush thread
-	Gcond *writer_waken_cond; 	//The condition of flush thread awaking writer thread
+	GHashTable *block_map; 	//Hash Map
+	GThread *flush_worker; 	//Back end flush thread 
+	GCond *flush_waken_cond; 	//The condition of Writer thread awaking flush thread
+	GCond *writer_waken_cond; 	//The condition of flush thread awaking writer thread
 	void *write_callback_func; 	//
 	void *write_callback_user_param; 	//
 	uint64_t cache_size; 	//Number of cache buffers

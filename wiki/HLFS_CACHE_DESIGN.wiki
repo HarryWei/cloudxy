@@ -19,6 +19,7 @@
  * 读请求来了后首先从cache中查询，如果没有再去从后台查询——但是这里要注意，由于读请求必然连续，但是如果有部分block在cache中，则可能要将请求分成多个小请求下发给后台存储。但后台hdfs没有（网络文件系统可能也不要）类似于readv的scatter io操作，所以多次小调用带来的开销远大于1次大的读请求。所以我们读到cache中的数据先临时缓存，然后请求原样发到后端，待返回结果后将临时缓存的脏块覆盖对应的块，然后返回该结果。这里还要说明一下，我们将全部命中的叫full hit,将只命中部分的叫part hit。
   
 == 数据结构描述 ==
+http://cloudxy.googlecode.com/svn/wiki/images/tree-snapshot.png
  * block cache —— block buffer 
  * hash table  —— 用于维护存储地址到block buffer中block的内存地址；后期将使用radix以优化。
  * dirty_block list —— 用于按时间序列排列脏块，以便flush时根据按时间进行。

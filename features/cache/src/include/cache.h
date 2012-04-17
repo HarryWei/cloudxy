@@ -26,15 +26,17 @@ typedef struct {
 	char *block;
 } block_t;
 
+typedef int(*FLUSH_CB)(void* user_data,char *buf,uint32_t buf_len);
 struct cache_ctrl {
 	GMutex *cache_mutex; 	//Lock of cache
 	GTrashStack *block_cache; 	//Stack used to store cache buffers
 	GQueue *dirty_block; 	//LRU queue of dirty blocks
 	GHashTable *block_map; 	//Hash Map
 	GThread *flush_worker; 	//Back end flush thread 
+    uint32_t flush_worker_should_exit;
 	GCond *flush_waken_cond; 	//The condition of Writer thread awaking flush thread
 	GCond *writer_waken_cond; 	//The condition of flush thread awaking writer thread
-	void *write_callback_func; 	//
+	FLUSH_CB write_callback_func; 	//
 	void *write_callback_user_param; 	//
 	uint64_t cache_size; 	//Number of cache buffers
 	uint64_t block_size; 	//Size of each buffer

@@ -64,7 +64,7 @@ int cache_init(CACHE_CTRL *cache_ctrl, \
 		HLOG_ERROR("--Error:Apply for LRU queue");
 		ret = -EHLFS_MEM;
 		goto err;
-	}
+    }	
     HLOG_DEBUG("--dirty block queue init over!--");
 	if (NULL == (cache_ctrl->block_map = g_hash_table_new_full(g_int64_hash, \
 					g_int64_equal, NULL, NULL))) {
@@ -83,6 +83,7 @@ int cache_init(CACHE_CTRL *cache_ctrl, \
     cache_ctrl->writer_waken_cond = g_cond_new();
     cache_ctrl->flush_worker = g_thread_create((GThreadFunc)flush_work, cache_ctrl, TRUE, NULL);
     g_assert(cache_ctrl->flush_worker);
+    cache_ctrl->flush_worker_should_exit = 0;
     HLOG_DEBUG("--flush worker init over!--");
     return ret;
 err:

@@ -7,8 +7,9 @@
  * Copyright (C) 2012 XUPT
  * 
  * Authors:
- * 	Kelvin Wang <senwang@linux.vnet.ibm.com>
- * 				<kelvin.xupt@gmail.com>
+ * 	Kelvin Wang 
+ * 		<senwang@linux.vnet.ibm.com>
+ * 		<kelvin.xupt@gmail.com>
  * 
  */
 
@@ -17,6 +18,8 @@
 
 #include "api/hlfs.h"
 #include "glib.h"
+#include "hlfs_log.h"
+#include "comm_define.h"
 
 typedef struct {
 	uint64_t block_no;

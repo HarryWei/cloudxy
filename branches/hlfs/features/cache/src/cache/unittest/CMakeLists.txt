@@ -1,6 +1,9 @@
 # CMAKE by Zhang bo.
 # Time & Place: 2011, 3, 26, @ linux lab in xiyou.
 # Just for our HLFS project.
+# Modified by Kanghua <kanghua151@gmail.com>
+# Kelvin Wang <senwang@linux.vnet.ibm.com>
+# Used for cache testing
 
 # This *ON* can let cmake procedure output into console.
 # _So_that we can debug it.
@@ -13,10 +16,10 @@ SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(HLFS)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-SET(WORK_HOME "$ENV{PWD}/../../../")
+SET(WORK_HOME "$ENV{PWD}/../../..")
 MESSAGE(STATUS "Root directory of project:" ${WORK_HOME})
-SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
-#SET(JAVA_HOME 	/mnt/jdk1.7.0)
+#SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
+SET(JAVA_HOME 	/mnt/jdk1.7.0)
 MESSAGE(STATUS "JAVA HOME:" ${JAVA_HOME})
 #SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk)
 

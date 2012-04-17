@@ -13,9 +13,9 @@
  * 
  * Mail List : cloudxy@googlegroups.com
  */
-
 #ifndef _HDFS_LFS_H_
 #define _HDFS_LFS_H_
+#include "cache.h"
 #include "hlfs_ctrl.h"
 #include "ctrl_region.h"
 #include "comm_define.h"
@@ -35,11 +35,9 @@ extern "C" {
  * local:///tmp/testenv/testfs
  * hdfs:///tmp/testenv/testfs
  * hdfs://localhost:8020/tmp/testenv/testfs
- * hdfs://localhost/tmp/testenv/testfs
- * hdfs://192.168.0.1:8020/tmp/testenv/testfs
- * @return value: The pointer of the structure HLFS_CTRL will be return.
+ * hdfs://localhost/tmp/testenv/testfs * hdfs://192.168.0.1:8020/tmp/testenv/testfs * @return value: The pointer of the structure HLFS_CTRL will be return.
  */
-HLFS_CTRL * init_hlfs(const char *uri);
+HLFS_CTRL *init_hlfs(const char *uri);
 
 /**
  * deinit_hlfs: Free the ctrl structure.

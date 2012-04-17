@@ -33,6 +33,7 @@ extern uint32_t HBLOCK_SIZE;
 #define EHLFS_SSNOTEXIST 	((int) (5))		/* snapshot name not exist */
 #define EHLFS_PERM 			((int) (6)) 		/* Permssion deny*/
 #define EHLFS_PARAM			((int) (7)) 		/* Parameter error*/
+#define EHLFS_NOITEM		((int) (8)) 		/* NO item in one data structure*/
 #define EHLFS_UNKNOWN		((int) (99)) 		/* unknown error */
 
 #endif

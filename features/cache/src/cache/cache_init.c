@@ -1,7 +1,21 @@
 #include "cache.h"
 
-extern int flush_work(gpointer data); 
+extern int flush_work(gpointer data);
 
+void destroy_hash_element(gpointer *data)
+{
+	HLOG_DEBUG("--enter func %s--", __func__);
+	block_t *_block = (block_t *)data;
+	if (_block != NULL) {
+		HLOG_DEBUG("_block != NULL");
+		if (_block->block != NULL) {
+			HLOG_DEBUG("_block->block != NULL");
+			g_free(_block->block);
+		}
+		g_free(_block);
+	}
+	HLOG_DEBUG("--leave func %s--", __func__);
+}
 
 CACHE_CTRL *cache_new()
 {
@@ -87,20 +101,20 @@ int cache_init(CACHE_CTRL *cache_ctrl, \
     HLOG_DEBUG("--flush worker init over!--");
     return ret;
 err:
-    if(cache_ctrl->cache_mutex)
+    if (cache_ctrl->cache_mutex)
         g_mutex_free(cache_ctrl->cache_mutex);
-    if(cache_ctrl->flush_waken_cond)
+    if (cache_ctrl->flush_waken_cond)
         g_cond_free(cache_ctrl->flush_waken_cond);
-    if(cache_ctrl->writer_waken_cond)
+    if (cache_ctrl->writer_waken_cond)
         g_cond_free(cache_ctrl->writer_waken_cond);
-    if(cache_ctrl->block_map)
+    if (cache_ctrl->block_map)
         g_hash_table_destroy(cache_ctrl->block_map);
-    if(cache_ctrl->dirty_block)
+    if (cache_ctrl->dirty_block)
         g_queue_free(cache_ctrl->dirty_block);
-    if(cache_ctrl->block_cache){
-        while(g_trash_stack_height(&cache_ctrl->block_cache) == 0){
+    if (cache_ctrl->block_cache) {
+        while (g_trash_stack_height(&cache_ctrl->block_cache) != 0) {
            block_t *_block = (block_t *)g_trash_stack_pop(&cache_ctrl->block_cache);
-           if(_block->block!=NULL)
+           if (_block->block != NULL)
                g_free(_block->block);
            g_free(_block);
         }

@@ -4,6 +4,7 @@ int cache_query(CACHE_CTRL *cache_ctrl, uint64_t block_no, char **block)
 {
 	HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;
+	block_t *_block = NULL;
 	
 	if (cache_ctrl == NULL || block == NULL) {
 		ret = -EHLFS_PARAM;
@@ -17,14 +18,16 @@ int cache_query(CACHE_CTRL *cache_ctrl, uint64_t block_no, char **block)
 		return ret;
 	}
 
-	*block = (char *)g_hash_table_lookup(cache_ctrl->block_map, (gconstpointer)block_no);
+	_block = (block_t *)g_hash_table_lookup(cache_ctrl->block_map, \
+			(gconstpointer)block_no);
 
 	if (*block == NULL) {
 		ret = -EHLFS_NOITEM;
 		HLOG_ERROR("NO item in hash table");
 		return ret;
 	}
-
+	
+	*block = _block->block;
 	HLOG_DEBUG("--Leaving func %s", __func__);
 	return ret;
 }

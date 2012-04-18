@@ -67,7 +67,6 @@ int cache_init(CACHE_CTRL *cache_ctrl, \
     for (i = 0; i < cache_size; i++) {
         block_t *_block = g_malloc0(sizeof(block_t));
         g_assert(_block != NULL);
-		_block->no = i;
         _block->block = (char *)g_malloc0(block_size);
         g_assert(_block->block != NULL);
         g_trash_stack_push(&cache_ctrl->block_cache, _block);

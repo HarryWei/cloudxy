@@ -24,7 +24,6 @@ int flush_work(gpointer data){
                HLOG_ERROR("Never reach here");
                g_assert(0);
             }
-
             if(NULL!=cctrl->write_callback_func){
                char* tmp_buf = g_malloc0(buff_len);
                int i=0;

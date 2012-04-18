@@ -163,23 +163,7 @@ int max_blockno = block->block_no - 1;
 int min_blockno = block->block_no + 1;
 for(i=size-1;i>0;i++){
     block_t *block = g_queue_peek_nth(i);
-    if(max_blockno+1!=block->block_no && min_block_no-1!=block->block_no){
-        break;
-    }
-    if(block->no > max_blockno){
-       max_blockno+1;
-    }
-    if(block->no < min_blockno){
-       min_blockno-1;
-    }
-}
-int size = g_queue_get_length(ctrl->block_cache);
-block_t *block = g_queue_peek_nth(size);
-int max_blockno = block->block_no - 1;
-int min_blockno = block->block_no + 1;
-for(i=size-1;i>0;i++){
-    block_t *block = g_queue_peek_nth(i);
-    if(max_blockno+1!=block->block_no && min_block_no-1!=block->block_no){
+    if(max_blockno+1!=block->block_no || min_block_no-1!=block->block_no){
         break;
     }
     if(block->no > max_blockno){

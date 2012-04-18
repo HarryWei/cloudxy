@@ -157,7 +157,7 @@ g_mutex_unlock(ctrl->cache_lock)
 
 === get_continues_blocks 伪代码 ===
 {{{
-int size = g_queue_get_length(ctrl->block_cache);
+int size = g_queue_get_length(ctrl->dirty_block);
 block_t *block = g_queue_peek_nth(size);
 int max_blockno = block->block_no - 1;
 int min_blockno = block->block_no + 1;

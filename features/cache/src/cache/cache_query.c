@@ -20,14 +20,14 @@ int cache_query(CACHE_CTRL *cache_ctrl, uint64_t block_no, char **block)
 
 	_block = (block_t *)g_hash_table_lookup(cache_ctrl->block_map, \
 			(gconstpointer)block_no);
-
-	if (*block == NULL) {
+	if (_block == NULL) {
 		ret = -EHLFS_NOITEM;
 		HLOG_ERROR("NO item in hash table");
 		return ret;
 	}
 	
 	*block = _block->block;
+	
 	HLOG_DEBUG("--Leaving func %s", __func__);
 	return ret;
 }

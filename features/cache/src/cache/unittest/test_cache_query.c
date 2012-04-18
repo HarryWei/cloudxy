@@ -9,43 +9,46 @@
 #include "cache.h"
 #include "comm_define.h"
 
+#define HASH_LEN 10
 typedef struct {
     CACHE_CTRL *cache_ctrl;
 } Fixture;
 
 Fixture fixture;
-block_t _block[100];
 void case_setup()
 {
+	g_message("--enter fun %s", __func__);
 	fixture.cache_ctrl = cache_new();
 	int ret = 0;
-	int i = 0;
+	uint64_t i = 0;
 	block_t *block = NULL;
     ret = cache_init(fixture.cache_ctrl, 8192, 1024, 100, 80, 1024);
-	for (i = 1; i <= 100; i++) {
+	for (i = 0; i < HASH_LEN; i++) {
 		block = (block_t *)g_trash_stack_pop(&fixture.cache_ctrl->block_cache);
 		if (block == NULL) {
 			g_message("No available cache left");
 			return;
 		}
-		_block[i].block_no = block->block_no;
-		_block[i].block = block->block;
-		g_hash_table_insert(fixture.cache_ctrl->block_map, (gpointer)i, \
+		block = (block_t *)g_trash_stack_pop(&fixture.cache_ctrl->block_cache);
+		g_message("block no: %llu\nblock addr: %p", block->block_no, block->block);
+		g_hash_table_insert(fixture.cache_ctrl->block_map, i, \
 				(gpointer)block);
+		g_message("insert %llu succ");
 	}
+	g_message("--leave fun %s", __func__);
 }
 
 void test_case_cache_query()
 {
-	uint64_t i = 0;
-	char *__block = NULL;
-	for (i = 1; i <= 100; i++) {
-		if (0 > cache_query(fixture.cache_ctrl, i, &__block)) {
-			g_message("query error");
-			return;
-		}
-		g_assert(__block == _block[i].block); 
-	}
+	g_message("--enter fun %s", __func__);
+	int ret = 0;
+	uint64_t i = 2;
+	char *_block = NULL;
+	ret = cache_query(fixture.cache_ctrl, i, &_block);
+	g_assert(ret == 0);
+	g_assert(_block != NULL); 
+	g_message("block no: %llu\nblock addr: %p", i, _block);
+	g_message("--leave fun %s", __func__);
 }
 
 void case_teardown()

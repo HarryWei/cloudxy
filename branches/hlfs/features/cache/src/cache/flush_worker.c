@@ -2,18 +2,20 @@
 #include "cache.h"
 #include "cache_helper.h"
 #include "hlfs_log.h"
+
 int flush_work(gpointer data){
-    int ret;
+    int ret = 0;
     CACHE_CTRL *cctrl = (CACHE_CTRL*)data;
     GTimeVal expired;
-    while(!cctrl->flush_worker_should_exit){
+    while (!cctrl->flush_worker_should_exit) {
          HLOG_DEBUG("--flush worker doing--");
          g_get_current_time(&expired);
-         g_time_val_add(&expired,cctrl->flush_interval);
-         gboolean res = g_cond_timed_wait(cctrl->flush_waken_cond,cctrl->cache_mutex,&expired);
+         g_time_val_add(&expired, cctrl->flush_interval);
+         gboolean res = g_cond_timed_wait(cctrl->flush_waken_cond, \
+				 cctrl->cache_mutex, &expired);
          do{
             GSList *continue_blocks = NULL;
-            ret = get_continues_blocks(cctrl,continue_blocks);
+            ret = get_continues_blocks(cctrl, continue_blocks);
             g_assert(ret==0);
             uint32_t blocks_count = g_slist_length(continue_blocks);
             uint32_t buff_len = blocks_count * cctrl->block_size;

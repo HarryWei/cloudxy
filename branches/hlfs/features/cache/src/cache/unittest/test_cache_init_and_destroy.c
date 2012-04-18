@@ -39,7 +39,7 @@ void case_teardown()
 {
 	if (0 > cache_destroy(fixture.cache_ctrl)) {
 		g_message("destroy cache error");
-		return -1;
+		return;
 	}	
 }
 

@@ -98,6 +98,7 @@ int cache_init(CACHE_CTRL *cache_ctrl, \
     g_assert(cache_ctrl->flush_worker);
     cache_ctrl->flush_worker_should_exit = 0;
     HLOG_DEBUG("--flush worker init over!--");
+	HLOG_DEBUG("--Leaving func %s", __func__);
     return ret;
 err:
     if (cache_ctrl->cache_mutex)

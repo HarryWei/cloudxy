@@ -44,6 +44,7 @@ void test_case_cache_query()
 	int ret = 0;
 	uint64_t i = 2;
 	char *_block = NULL;
+	_block = (char *)g_malloc0(fixture.cache_ctrl->block_size);
 	ret = cache_query(fixture.cache_ctrl, i, &_block);
 	g_assert(ret == 0);
 	g_assert(_block != NULL); 

@@ -10,8 +10,7 @@
 #include "comm_define.h"
 
 #define HASH_LEN 10
-typedef struct {
-    CACHE_CTRL *cache_ctrl;
+typedef struct { CACHE_CTRL *cache_ctrl;
 } Fixture;
 
 Fixture fixture;
@@ -29,9 +28,9 @@ void case_setup()
 			g_message("No available cache left");
 			return;
 		}
-		block = (block_t *)g_trash_stack_pop(&fixture.cache_ctrl->block_cache);
+		block->block_no = i;
 		g_message("block no: %llu\nblock addr: %p", block->block_no, block->block);
-		g_hash_table_insert(fixture.cache_ctrl->block_map, i, \
+		g_hash_table_insert(fixture.cache_ctrl->block_map, (gpointer)&block->block_no, \
 				(gpointer)block);
 		g_message("insert %llu succ");
 	}

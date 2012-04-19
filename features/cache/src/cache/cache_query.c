@@ -19,12 +19,14 @@ int cache_query(CACHE_CTRL *cache_ctrl, uint64_t block_no, char **block)
 	}
 
 	_block = (block_t *)g_hash_table_lookup(cache_ctrl->block_map, \
-			(gconstpointer)block_no);
+			(gpointer)&block_no);
 	if (_block == NULL) {
 		ret = -EHLFS_NOITEM;
 		HLOG_ERROR("NO item in hash table");
 		return ret;
 	}
+	HLOG_DEBUG("_block->block_no: %llu, _block->block: %p", _block->block_no, \
+			_block->block);
 	
 	*block = _block->block;
 	

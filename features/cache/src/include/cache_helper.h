@@ -5,16 +5,32 @@
 #include "cache.h"
 
 static uint32_t get_cache_free_size(CACHE_CTRL *cctrl){
-    return 0;
+    g_mutex_lock(cctrl->cache_mutex);
+    int used_block_size = g_queue_get_length(cctrl->dirty_block);
+    g_mutex_unlock(cctrl->cache_mutex);
+    uint32_t free_block_size = cctrl->cache_size - used_block_size;
+    return free_block_size;
+}
+static void __free_from_cache(CACHE_CTRL *cctrl,GSList *free_list){
+    int free_block_count =  g_slist_length(free_list);
+    int i;
+    for(i=0;i<free_block_count;i++){
+        block_t *block = g_slist_nth_data(free_list,i);  
+        g_hash_table_remove(cctrl->block_map,block->block_no);
+        g_queue_pop_head(cctrl->dirty_block);
+        g_trash_stack_push(&cctrl->block_cache,block);
+    }
 }
 static void free_from_cache(CACHE_CTRL *cctrl,GSList *free_list){
-    return;
+    g_mutex_lock(cctrl->cache_mutex);
+    __free_from_cache(cctrl,free_list);
+    g_mutex_unlock(cctrl->cache_mutex);
 }
 static int get_continues_blocks(CACHE_CTRL *cctrl,GSList *continue_block_list){
     HLOG_DEBUG("--enter func %s--",__func__);
     g_mutex_lock(cctrl->cache_mutex);
     int size = g_queue_get_length(cctrl->dirty_block);
-    block_t *block = (gpointer)g_queue_pop_head(cctrl->dirty_block);
+    block_t *block = (gpointer)g_queue_peek_head(cctrl->dirty_block);
     int max_block_no = block->block_no;
     int min_block_no = block->block_no;
     HLOG_DEBUG("--oldest block no:%lu--",block->block_no);

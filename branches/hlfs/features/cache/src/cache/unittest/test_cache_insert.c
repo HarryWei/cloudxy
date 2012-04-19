@@ -1,5 +1,5 @@
 /*
- * Unit test for cache query;
+ * Unit test for cache insert;
  * Copyright (c) XUPT
  * By Kelvin Wang<senwang@linux.vnet.ibm.com> (c) 2012
  */
@@ -9,7 +9,7 @@
 #include "cache.h"
 #include "comm_define.h"
 
-#define HASH_LEN 10
+#define BLOCK_SIZE 8192
 typedef struct { 
 	CACHE_CTRL *cache_ctrl;
 } Fixture;
@@ -19,35 +19,31 @@ void case_setup()
 {
 	g_message("--enter fun %s", __func__);
 	fixture.cache_ctrl = cache_new();
-	int ret = 0;
-	uint64_t i = 0;
-	block_t *block = NULL;
-    ret = cache_init(fixture.cache_ctrl, 8192, 1024, 100, 80, 1024);
-	for (i = 0; i < HASH_LEN; i++) {
-		block = (block_t *)g_trash_stack_pop(&fixture.cache_ctrl->block_cache);
-		if (block == NULL) {
-			g_message("No available cache left");
-			return;
-		}
-		block->block_no = i;
-		g_message("block no: %llu\nblock addr: %p", block->block_no, block->block);
-		g_hash_table_insert(fixture.cache_ctrl->block_map, (gpointer)&block->block_no, \
-				(gpointer)block);
-		g_message("insert %llu succ");
-	}
-	g_message("--leave fun %s", __func__);
+    cache_init(fixture.cache_ctrl, BLOCK_SIZE, 1024, 100, 80, 1024);
 }
 
-void test_case_cache_query()
+void test_case_cache_insert()
 {
 	g_message("--enter fun %s", __func__);
 	int ret = 0;
 	uint64_t i = 2;
 	char *_block = NULL;
-	ret = cache_query(fixture.cache_ctrl, i, &_block);
+	char *__block = NULL;
+
+	_block = (char *)g_malloc0(BLOCK_SIZE);
+	__block = (char *)g_malloc0(BLOCK_SIZE);
+	sprintf(_block, "hello cache");
+	ret = cache_insert(fixture.cache_ctrl, i, _block);
 	g_assert(ret == 0);
-	g_assert(_block != NULL); 
-	g_message("block no: %llu block addr: %p", i, _block);
+	g_message("inserted,now test");
+	ret = cache_query(fixture.cache_ctrl, i, &__block);
+	
+	g_message("If hello cache printed, we test successfully");
+	g_message("waiting...");
+	g_message("%s\n", __block);
+	g_message("Got it");
+	g_free(_block);
+	g_free(__block);
 	g_message("--leave fun %s", __func__);
 }
 
@@ -68,7 +64,7 @@ int main(int argc, char **argv) {
 				Fixture, 
 				NULL,
 				case_setup, 
-				test_case_cache_query, 
+				test_case_cache_insert, 
 				case_teardown);
 	
 	return g_test_run();

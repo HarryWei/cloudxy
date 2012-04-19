@@ -4,6 +4,20 @@
 #include "glib.h"
 #include "cache.h"
 
+static int write_cache(CACHE_CTRL *cctrl,uint32_t start_block_no,uint32_t block_count,char*block_buf){
+    g_mutex_lock(cctrl->cache_mutex);
+    int i;
+    int idx=0;
+    for(i=start_block_no;i<start_block_no+block_count;i++,idx++){
+        block_t * block = g_trash_stack_pop(&cctrl->block_cache);
+        block->block_no = i;
+        memcpy(block->block,block_buf+idx*cctrl->block_size,cctrl->block_size);
+        g_hash_table_insert(cctrl->block_map,&block->block_no,block);
+        g_queue_push_tail(cctrl->dirty_block,block);
+    }
+    g_mutex_unlock(cctrl->cache_mutex);
+    return block_count;
+}
 static uint32_t get_cache_free_size(CACHE_CTRL *cctrl){
     g_mutex_lock(cctrl->cache_mutex);
     int used_block_size = g_queue_get_length(cctrl->dirty_block);
@@ -16,7 +30,7 @@ static void __free_from_cache(CACHE_CTRL *cctrl,GSList *free_list){
     int i;
     for(i=0;i<free_block_count;i++){
         block_t *block = g_slist_nth_data(free_list,i);  
-        g_hash_table_remove(cctrl->block_map,block->block_no);
+        g_hash_table_remove(cctrl->block_map,&block->block_no);
         g_queue_pop_head(cctrl->dirty_block);
         g_trash_stack_push(&cctrl->block_cache,block);
     }
@@ -45,12 +59,12 @@ static int get_continues_blocks(CACHE_CTRL *cctrl,GSList *continue_block_list){
         if(block->block_no == max_block_no + 1){
            HLOG_DEBUG("--find continue block no:%lu--",block->block_no);
            max_block_no++;
-           g_slist_append(continue_block_list,block);
+           continue_block_list = g_slist_append(continue_block_list,block);
         }
         if(block->block_no == min_block_no - 1){
            HLOG_DEBUG("--find continue block no:%lu--",block->block_no);
            min_block_no--;
-           g_slist_prepend(continue_block_list,block);
+           continue_block_list = g_slist_prepend(continue_block_list,block);
         }
         count++;
         if(count >= cctrl->flush_once_size){

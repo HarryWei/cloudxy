@@ -177,28 +177,6 @@ struct snapshot* hlfs_get_all_snapshots(const char *uri,int *num_entries);
  */
 int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname);
 
-/**
- * Cache APIs
- * The comments about how to use hlfs cache feature is located in cache.h. You 
- * can find something intetesting there.
- */
-
-CACHE_CTRL *cache_new();
-
-int cache_init(CACHE_CTRL *cache_ctrl, \
-		uint64_t block_size, \
-		uint64_t cache_size, \
-		uint64_t flush_interval, \
-		uint64_t flush_trigger_level, \
-		uint64_t flush_once_size);
-
-int cache_set_write_cb(CACHE_CTRL *cache_ctrl, void *cb_func, void * cb_param);
-
-int cache_destroy(CACHE_CTRL *cache_ctrl);
-
-int cache_insert(CACHE_CTRL *cache_ctrl, uint64_t block_no, char *block);
-
-int cache_query(CACHE_CTRL *cache_ctrl, uint64_t block_no, char **block);
 #ifdef __cplusplus 
 } 
 #endif 

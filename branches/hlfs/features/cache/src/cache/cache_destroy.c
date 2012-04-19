@@ -10,13 +10,13 @@ int cache_destroy(CACHE_CTRL *cache_ctrl)
 		HLOG_ERROR("param still NULL");
 		return ret;
 	}
- 	
+/*  destroy thread
 	cache_ctrl->flush_worker_should_exit = 1;
  	g_thread_join(cache_ctrl->flush_worker);
 	if (cache_ctrl->dirty_block != NULL) {
 		//TODO
 	}
-
+*/
 	/*destroy the LRU list*/
     if (cache_ctrl->dirty_block)
         g_queue_free(cache_ctrl->dirty_block);
@@ -27,11 +27,15 @@ int cache_destroy(CACHE_CTRL *cache_ctrl)
 	
 	/*destroy the cache container*/
     if (cache_ctrl->block_cache) {
-        while (g_trash_stack_height(&cache_ctrl->block_cache) != 0) {
-           block_t *_block = (block_t *)g_trash_stack_pop(&cache_ctrl->block_cache);
-           if (_block->block != NULL)
-               g_free(_block->block);
-           g_free(_block);
+		int i = 0;
+        while (g_trash_stack_height(&cache_ctrl->block_cache) != 1) {
+			HLOG_DEBUG("g_trash_stack_height: %d", g_trash_stack_height(&cache_ctrl->block_cache));
+			block_t *_block = (block_t *)g_trash_stack_pop(&cache_ctrl->block_cache);
+			if (_block->block != NULL) 
+				g_free(_block->block);
+			g_free(_block);
+			i++;
+			HLOG_DEBUG("----destroy %d succ", i);
         }
     }
 	

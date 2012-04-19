@@ -40,7 +40,7 @@ int flush_work(gpointer data){
             if(ret == 0){
                HLOG_DEBUG("--singal write thread--");
                g_mutex_lock(cctrl->cache_mutex);
-               free_from_cache(cctrl,continue_blocks);
+               __free_from_cache(cctrl,continue_blocks);
                g_cond_signal(cctrl->cache_mutex);
                g_mutex_unlock(cctrl->cache_mutex);
                g_slist_free(continue_blocks);

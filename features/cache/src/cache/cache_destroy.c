@@ -3,28 +3,23 @@
 int cache_destroy(CACHE_CTRL *cache_ctrl)
 {
 	HLOG_DEBUG("--Entering func %s", __func__);
-   	
 	int ret = 0, i = 0;
 	if (cache_ctrl == NULL) {
 		ret = -EHLFS_PARAM;
 		HLOG_ERROR("param still NULL");
 		return ret;
 	}
-/*  destroy thread
-	cache_ctrl->flush_worker_should_exit = 1;
- 	g_thread_join(cache_ctrl->flush_worker);
-	if (cache_ctrl->dirty_block != NULL) {
-		//TODO
-	}
-*/
+    if(cache_ctrl->flush_worker_should_exit!=1){
+	    cache_ctrl->flush_worker_should_exit = 1;
+ 	    g_thread_join(cache_ctrl->flush_worker);
+    }
 	/*destroy the LRU list*/
-    if (cache_ctrl->dirty_block)
+    if (cache_ctrl->dirty_block){
         g_queue_free(cache_ctrl->dirty_block);
-	
+    }
 	/*destroy the Hash table*/
     if (cache_ctrl->block_map)
         g_hash_table_destroy(cache_ctrl->block_map);
-	
 	/*destroy the cache container*/
     if (cache_ctrl->block_cache) {
 		int i = 0;
@@ -38,9 +33,11 @@ int cache_destroy(CACHE_CTRL *cache_ctrl)
 			HLOG_DEBUG("----destroy %d succ", i);
         }
     }
-	
+    g_mutex_free(cache_ctrl->cache_mutex);     
+    g_cond_free(cache_ctrl->flush_waken_cond);     
+    g_cond_free(cache_ctrl->writer_waken_cond);     
+    /* do not free write callback user param */ 
 	g_free(cache_ctrl);
-
 	HLOG_DEBUG("--Leaving func %s", __func__);
 	return ret;
 }

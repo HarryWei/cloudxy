@@ -37,7 +37,7 @@ struct cache_ctrl {
 	GCond *flush_waken_cond; 	//The condition of Writer thread awaking flush thread
 	GCond *writer_waken_cond; 	//The condition of flush thread awaking writer thread
 	FLUSH_CB write_callback_func; 	//
-	void *write_callback_user_param; 	//
+	void *write_callback_user_param;//
 	uint64_t cache_size; 	//Number of cache buffers
 	uint64_t block_size; 	//Size of each buffer
 	uint64_t flush_interval; 

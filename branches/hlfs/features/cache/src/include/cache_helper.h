@@ -5,6 +5,7 @@
 #include "cache.h"
 
 static int write_cache(CACHE_CTRL *cctrl,uint64_t start_block_no,uint32_t block_count,char*block_buf){
+	g_message("--enter fun %s", __func__);
     g_mutex_lock(cctrl->cache_mutex);
     int i;
     int idx=0;
@@ -18,15 +19,21 @@ static int write_cache(CACHE_CTRL *cctrl,uint64_t start_block_no,uint32_t block_
     g_mutex_unlock(cctrl->cache_mutex);
     return block_count;
 }
+
+static uint32_t __get_cache_free_size(CACHE_CTRL *cctrl){
+	 g_message("--enter fun %s", __func__);
+     uint32_t free_block_size = cctrl->cache_size - g_queue_get_length(cctrl->dirty_block);
+     return free_block_size;
+}
 static uint32_t get_cache_free_size(CACHE_CTRL *cctrl){
     g_mutex_lock(cctrl->cache_mutex);
-    int used_block_size = g_queue_get_length(cctrl->dirty_block);
+    uint32_t free_block_size = __get_cache_free_size(cctrl);
     g_mutex_unlock(cctrl->cache_mutex);
-    uint32_t free_block_size = cctrl->cache_size - used_block_size;
     return free_block_size;
 }
 
 static void __free_from_cache(CACHE_CTRL *cctrl,GSList *free_list){
+	g_message("--enter fun %s", __func__);
     int free_block_count =  g_slist_length(free_list);
     int i;
     for(i=0;i<free_block_count;i++){

@@ -21,7 +21,6 @@
 #include "comm_define.h"
 
 typedef struct hlfs_ctrl  HLFS_CTRL;
-typedef struct cache_ctrl  CACHE_CTRL;
 
 #ifdef __cplusplus  
 extern "C" {

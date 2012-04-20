@@ -27,7 +27,7 @@ typedef struct {
 } block_t;
 
 typedef int(*FLUSH_CB)(void* user_data,char *buf,uint32_t buf_len);
-struct cache_ctrl {
+typedef struct cache_ctrl {
 	GMutex *cache_mutex; 	//Lock of cache
 	GTrashStack *block_cache; 	//Stack used to store cache buffers
 	GQueue *dirty_block; 	//LRU queue of dirty blocks
@@ -47,7 +47,18 @@ struct cache_ctrl {
 	uint64_t total_read_count;
 	uint64_t cache_full_hit; 
 	uint64_t cache_part_hit;
-};
+}CACHE_CTRL;
 
-
+CACHE_CTRL *cache_new();
+int cache_init(CACHE_CTRL *cache_ctrl,
+		uint64_t block_size,
+		uint64_t cache_size,
+		uint64_t flush_interval,
+		uint64_t flush_trigger_level,
+		uint64_t flush_once_size);
+int cache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_t block_count,char *block_buf);
+int cache_insert_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf);
+int cache_query_block(CACHE_CTRL *cache_ctrl, uint64_t block_no, char **block_buf);
+int cache_set_write_cb(CACHE_CTRL *cache_ctrl, void *cb_func, void * cb_user_param);
+int cache_destroy(CACHE_CTRL *cache_ctrl);
 #endif

@@ -4,7 +4,7 @@
 #include "glib.h"
 #include "cache.h"
 
-static int write_cache(CACHE_CTRL *cctrl,uint32_t start_block_no,uint32_t block_count,char*block_buf){
+static int write_cache(CACHE_CTRL *cctrl,uint64_t start_block_no,uint32_t block_count,char*block_buf){
     g_mutex_lock(cctrl->cache_mutex);
     int i;
     int idx=0;
@@ -25,6 +25,7 @@ static uint32_t get_cache_free_size(CACHE_CTRL *cctrl){
     uint32_t free_block_size = cctrl->cache_size - used_block_size;
     return free_block_size;
 }
+
 static void __free_from_cache(CACHE_CTRL *cctrl,GSList *free_list){
     int free_block_count =  g_slist_length(free_list);
     int i;
@@ -35,11 +36,13 @@ static void __free_from_cache(CACHE_CTRL *cctrl,GSList *free_list){
         g_trash_stack_push(&cctrl->block_cache,block);
     }
 }
+
 static void free_from_cache(CACHE_CTRL *cctrl,GSList *free_list){
     g_mutex_lock(cctrl->cache_mutex);
     __free_from_cache(cctrl,free_list);
     g_mutex_unlock(cctrl->cache_mutex);
 }
+
 static int get_continues_blocks(CACHE_CTRL *cctrl,GSList *continue_block_list){
     HLOG_DEBUG("--enter func %s--",__func__);
     g_mutex_lock(cctrl->cache_mutex);
@@ -75,5 +78,8 @@ static int get_continues_blocks(CACHE_CTRL *cctrl,GSList *continue_block_list){
     g_mutex_unlock(cctrl->cache_mutex);
     return 0;
 }
+
+
+
 #endif
 

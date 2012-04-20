@@ -33,10 +33,10 @@ void test_case_cache_insert()
 	_block = (char *)g_malloc0(BLOCK_SIZE);
 	__block = (char *)g_malloc0(BLOCK_SIZE);
 	sprintf(_block, "hello cache");
-	ret = cache_insert(fixture.cache_ctrl, i, _block);
+	ret = cache_insert_block(fixture.cache_ctrl, i, _block);
 	g_assert(ret == 0);
 	g_message("inserted,now test");
-	ret = cache_query(fixture.cache_ctrl, i, &__block);
+	ret = cache_query_block(fixture.cache_ctrl, i, &__block);
 	
 	g_message("If hello cache printed, we test successfully");
 	g_message("waiting...");

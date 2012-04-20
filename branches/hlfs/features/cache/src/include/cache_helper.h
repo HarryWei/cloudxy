@@ -47,6 +47,11 @@ static int get_continues_blocks(CACHE_CTRL *cctrl,GSList *continue_block_list){
     HLOG_DEBUG("--enter func %s--",__func__);
     g_mutex_lock(cctrl->cache_mutex);
     int size = g_queue_get_length(cctrl->dirty_block);
+    if(size == 0){
+       HLOG_DEBUG("-- not find any dirty block --");
+       g_mutex_unlock(cctrl->cache_mutex);
+       return 0;
+    }
     block_t *block = (gpointer)g_queue_peek_head(cctrl->dirty_block);
     int max_block_no = block->block_no;
     int min_block_no = block->block_no;

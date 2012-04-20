@@ -7,6 +7,7 @@
 #include <glib.h>
 #include <stdlib.h>
 #include "cache.h"
+#include "cache_helper.h"
 #include "comm_define.h"
 
 #define BLOCK_SIZE 8192
@@ -16,35 +17,34 @@ typedef struct {
 
 Fixture fixture;
 void case_setup()
-{
+{ 
+    int ret;
 	g_message("--enter fun %s", __func__);
 	fixture.cache_ctrl = cache_new();
-    cache_init(fixture.cache_ctrl, BLOCK_SIZE, 1024, 100, 80, 1024);
+    g_assert(fixture.cache_ctrl!=NULL);
+    ret = cache_init(fixture.cache_ctrl, BLOCK_SIZE, 1024, 1000, 80, 1024);
+    g_assert(ret == 0);
 }
 
-void test_case_cache_insert()
+void test_cache_insert_1()
 {
 	g_message("--enter fun %s", __func__);
 	int ret = 0;
-	uint64_t i = 2;
-	char *_block = NULL;
-	char *__block = NULL;
-
-	_block = (char *)g_malloc0(BLOCK_SIZE);
-	__block = (char *)g_malloc0(BLOCK_SIZE);
-	sprintf(_block, "hello cache");
-	ret = cache_insert_block(fixture.cache_ctrl, i, _block);
+	char *_block_buf = NULL;
+	_block_buf = (char *)g_malloc0(BLOCK_SIZE);
+	sprintf(_block_buf,"hello cache mine");
+	ret = cache_insert_block(fixture.cache_ctrl,1, _block_buf);
+    printf("ret is :%d\n",ret);
 	g_assert(ret == 0);
-	g_message("inserted,now test");
-	ret = cache_query_block(fixture.cache_ctrl, i, &__block);
-	
-	g_message("If hello cache printed, we test successfully");
-	g_message("waiting...");
-	g_message("%s\n", __block);
-	g_message("Got it");
-	g_free(_block);
-	g_free(__block);
-	g_message("--leave fun %s", __func__);
+	sprintf(_block_buf,"hello cache you");
+	ret = cache_insert_block(fixture.cache_ctrl, 2, _block_buf);
+    printf("ret is :%d\n",ret);
+	g_assert(ret == 0);
+	sprintf(_block_buf,"hello cache him");
+	ret = cache_insert_block(fixture.cache_ctrl, 4, _block_buf);
+	g_assert(ret == 0);
+	g_free(_block_buf);
+    g_assert(get_cache_free_size(fixture.cache_ctrl)==1024-3);
 }
 
 void case_teardown()
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 				Fixture, 
 				NULL,
 				case_setup, 
-				test_case_cache_insert, 
+				test_cache_insert_1, 
 				case_teardown);
 	
 	return g_test_run();

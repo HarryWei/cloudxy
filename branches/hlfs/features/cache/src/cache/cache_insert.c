@@ -3,7 +3,7 @@
 #include "cache_helper.h"
 #include "hlfs_log.h"
 
-int cache_insert(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_t block_count,char *block_buf)
+int cache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_t block_count,char *block_buf)
 {
 	HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;
@@ -23,4 +23,9 @@ int cache_insert(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_t block
        write_cache(cache_ctrl,start_block_no,block_count,block_buf); 
     }
 	return ret;
+}
+
+
+int cache_insert_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf){
+    return cache_insert_blocks(cache_ctrl,block_no,1,block_buf);
 }

@@ -2,21 +2,6 @@
 
 extern int flush_work(gpointer data);
 
-void destroy_hash_element(gpointer *data)
-{
-	HLOG_DEBUG("--enter func %s--", __func__);
-	block_t *_block = (block_t *)data;
-	if (_block != NULL) {
-		HLOG_DEBUG("_block != NULL");
-		if (_block->block != NULL) {
-			HLOG_DEBUG("_block->block != NULL");
-			g_free(_block->block);
-		}
-		g_free(_block);
-	}
-	HLOG_DEBUG("--leave func %s--", __func__);
-}
-
 CACHE_CTRL *cache_new()
 {
 	HLOG_DEBUG("--Entering func %s", __func__);

@@ -10,11 +10,12 @@ int flush_work(gpointer data){
     while (!cctrl->flush_worker_should_exit) {
          HLOG_DEBUG("--flush worker doing--");
          g_get_current_time(&expired);
-         g_time_val_add(&expired, cctrl->flush_interval);
+         g_time_val_add(&expired, cctrl->flush_interval*1000*1000);
          g_mutex_lock(cctrl->cache_mutex);
          gboolean res = g_cond_timed_wait(cctrl->flush_waken_cond, \
 				 cctrl->cache_mutex, &expired);
          g_mutex_unlock(cctrl->cache_mutex); //?
+         HLOG_DEBUG(" res for cond is :%d\n",res);
          do{
             GSList *continue_blocks = NULL;
             ret = get_continues_blocks(cctrl,&continue_blocks);
@@ -42,7 +43,7 @@ int flush_work(gpointer data){
                 HLOG_DEBUG("--singal write thread--");
                 g_mutex_lock(cctrl->cache_mutex);
                 __free_from_cache(cctrl,continue_blocks);
-                g_cond_signal(cctrl->cache_mutex);
+                g_cond_signal(cctrl->writer_waken_cond);
                 g_mutex_unlock(cctrl->cache_mutex);
                 g_slist_free(continue_blocks);
             }

@@ -1,13 +1,12 @@
 #include "cache.h"
 #include "cache_helper.h"
 
-int cache_query_block(CACHE_CTRL *cache_ctrl, uint64_t block_no, char **block_buf)
+int cache_query_block(CACHE_CTRL *cache_ctrl, uint64_t block_no, char *block_buf)
 {
 	HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;
 	block_t *block = NULL;
-	
-	if (cache_ctrl == NULL || block == NULL) {
+	if (cache_ctrl == NULL || block_buf == NULL) {
 		ret = -EHLFS_PARAM;
 		HLOG_ERROR("param error");
 		return ret;
@@ -30,7 +29,7 @@ int cache_query_block(CACHE_CTRL *cache_ctrl, uint64_t block_no, char **block_bu
 		return ret;
 	}
 	g_assert(block_no == block->block_no);
-	memcpy(*block_buf, block->block, (size_t)cache_ctrl->block_size);
+	memcpy(block_buf, block->block, (size_t)cache_ctrl->block_size);
 	HLOG_DEBUG("--Leaving func %s", __func__);
 	return ret;
 }

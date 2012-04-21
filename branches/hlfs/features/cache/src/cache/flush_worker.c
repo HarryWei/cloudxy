@@ -17,7 +17,7 @@ int flush_work(gpointer data){
          g_mutex_unlock(cctrl->cache_mutex); //?
          do{
             GSList *continue_blocks = NULL;
-            ret = get_continues_blocks(cctrl, continue_blocks);
+            ret = get_continues_blocks(cctrl,&continue_blocks);
             g_assert(ret==0);
             uint32_t blocks_count = g_slist_length(continue_blocks);
             uint32_t buff_len = blocks_count * cctrl->block_size;
@@ -44,7 +44,7 @@ int flush_work(gpointer data){
                 __free_from_cache(cctrl,continue_blocks);
                 g_cond_signal(cctrl->cache_mutex);
                 g_mutex_unlock(cctrl->cache_mutex);
-               g_slist_free(continue_blocks);
+                g_slist_free(continue_blocks);
             }
          }while(get_cache_free_size(cctrl)< cctrl->flush_trigger_level * cctrl->cache_size);
     }

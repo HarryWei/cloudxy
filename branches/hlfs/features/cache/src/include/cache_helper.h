@@ -68,6 +68,9 @@ static int get_continues_blocks(CACHE_CTRL *cctrl,GSList **continue_block_list){
     int min_block_no = block->block_no;
     HLOG_DEBUG("--total dirty block:%d,oldest block no:%lu--",size,block->block_no);
     *continue_block_list = g_slist_append(*continue_block_list,block);
+    if(size == 1){
+       return 0; 
+    }
     uint64_t count=0;
     int idx = 1; 
     while(TRUE){

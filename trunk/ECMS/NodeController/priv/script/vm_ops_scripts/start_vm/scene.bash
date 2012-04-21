@@ -12,7 +12,7 @@ local VMNAME=$1
 local ISO_FILE_PATH=$2
 #local FIND=0
 
-xm domname $VMNAME
+xm domname $VMNAME >/dev/null 2>&1
 if [ $? -ne 0 ];then
    LOG_MSG "not find VM:$VMNAME"
    return 255
@@ -64,7 +64,7 @@ if [ $# != 1 ]; then
 return 255
 fi 
 local VMNAME=$1
-xm domname $VMNAME
+xm domname $VMNAME >/dev/null 2>&1
 if [ $? -ne 0 ];then
    LOG_MSG "not find VM:$VMNAME"
    return 255

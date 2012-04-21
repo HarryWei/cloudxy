@@ -16,6 +16,7 @@ LOG_MSG "start vm ops begin..."
 
 if [ $# != 1 ]; then
     LOG_MSG  "$* parameter error";
+    echo "FAIL"
     exit 255
 fi  
 
@@ -25,12 +26,13 @@ VM_DIR=VM-$VM_ID
 SYSDISK=$VMS_WORK_DIR/$VM_DIR/sysdisk
 
 LOG_MSG "step.0 do some check ..."
-if xm domid $VM_NAME
+if xm domid $VM_NAME >/dev/null 2>&1
 then
    LOG_MSG "$VM_NAME has exist"
    xm des $VM_NAME
    if [ $? -ne 0 ];then
       LOG_MSG "destroy vm:$VM_NAME failed"
+      echo "FAIL"
       exit 255
    fi
 else
@@ -42,6 +44,7 @@ LOG_MSG "step.1 ubind nbd ..."
 NBD=`mount -l|grep "\/$VM_DIR\/"|cut -d" " -f1`
 if [ $? -ne 0 ];then
    LOG_MSG "can not find nbd device for vm:%$VM_NAME"
+   echo "FAIL"
    exit 0
 fi
 
@@ -51,3 +54,4 @@ unbind_nbd $NBD
 LOG_MSG "step.2 do blktap destroy for some xend bug hardcode fix?"
 destroy_blktap_dev $SYSDISK/diff.img
 LOG_MSG "over"
+echo "SUCC"

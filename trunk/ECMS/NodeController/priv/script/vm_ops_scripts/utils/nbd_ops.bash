@@ -21,9 +21,9 @@ if [ $# != 1 ]; then
    return 1
 fi
 local NBD=$1
-if mount -l|grep $NBD
+if mount -l|grep $NBD >/dev/null 2>&1
 then
- umount $NBD
+ umount $NBD >/dev/null 2>&1
  if [ $? -ne 0 ];then
    #LOG_MSG "umount for $BDEV failed"
    return 255;
@@ -38,7 +38,7 @@ if [ $# != 2 ]; then
 fi
 local HLFS_URI=$1
 local NBD=$2
-$HLFS_TOOLS_DIR/nbd-client bs=512 127.0.0.1 $NBD_LISTION_PORT $HLFS_URI $NBD
+$HLFS_TOOLS_DIR/nbd-client bs=512 127.0.0.1 $NBD_LISTION_PORT $HLFS_URI $NBD >/dev/null 2>&1 
 if [ $? -ne 0 ];then
    #LOG_MSG "build block device for $HLFS_URI failed"
    return 255;
@@ -79,7 +79,7 @@ if [ $? -ne 0 ];then
    LOG_MSG "umount for $NBD failed"
    return 255
 fi
-$HLFS_TOOLS_DIR/nbd-client -d $NBD
+$HLFS_TOOLS_DIR/nbd-client -d $NBD >/dev/null 2>&1
 if [ $? -ne 0 ];then
    LOG_MSG "nbd-client -d failed"
    return 255

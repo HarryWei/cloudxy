@@ -15,7 +15,6 @@ CACHE_CTRL *cache_new()
 	HLOG_DEBUG("--Leaving func %s", __func__);
 }
 
-
 int cache_init(CACHE_CTRL *cache_ctrl, 
 		uint64_t block_size, \
 		uint64_t cache_size, \

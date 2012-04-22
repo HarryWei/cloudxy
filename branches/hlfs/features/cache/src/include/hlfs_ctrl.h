@@ -6,6 +6,7 @@
 #include "storage.h"
 #include "cmd_define.h"
 #include "ctrl_region.h"
+#include "cache.h"
 
 #define MAX_FILE_NAME_LEN 128
 struct inode {
@@ -59,7 +60,6 @@ struct write_rsp{
     uint64_t size;
 };
 
-
 /* The control structure in RAM */
 struct hlfs_ctrl {
 	struct   super_block sb;	        	/* the sb in RAM */
@@ -82,6 +82,7 @@ struct hlfs_ctrl {
     int usage_ref;
 	int rw_inode_flag;
 	char alive_ss_name[MAX_FILE_NAME_LEN];
+    struct cache_ctrl *cctrl;
 };
 
 typedef struct hlfs_stat{

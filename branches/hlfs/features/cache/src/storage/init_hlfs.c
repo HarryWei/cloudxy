@@ -100,3 +100,49 @@ out:
 	HLOG_DEBUG("leave func %s", __func__);
     return ctrl;
 } 
+
+
+struct hlfs_ctrl *
+init_hlfs2(const char *config_file_path){
+   int ret = 0;
+   GKeyFile * hlfs_conf_keyfile=g_key_file_new();
+   gboolean res = g_key_file_load_from_file (hlfs_conf_keyfile,config_file_path,G_KEY_FILE_NONE,NULL);
+   if(res == FALSE){
+	  HLOG_ERROR("parse config file error", __func__);
+      return NULL;
+   }
+   if (FALSE == g_key_file_has_group(hlfs_conf_keyfile,"STORAGE")){
+	  HLOG_ERROR("not find STORAGE option");
+      return NULL;
+   }
+   const char * uri = g_key_file_get_string (hlfs_conf_keyfile,"STORAGE","storage_uri",NULL);
+   struct hlfs_ctrl * hlfs_ctrl = init_hlfs(uri);
+   if(hlfs_ctrl == NULL){
+	  HLOG_ERROR("init hlfs failed");
+      return NULL;
+   }
+   if (TRUE == g_key_file_has_group(hlfs_conf_keyfile,"CACHE")){
+       //gsize length=0;
+       //gchar * keys = g_key_file_get_keys(hlfs_conf_keyfile,"CACHE",&length,NULL);
+       gboolean enable = g_key_file_get_boolean (hlfs_conf_keyfile,"CACHE","is_enable_cache",NULL);
+       if(TRUE ==  enable){
+           uint64_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
+           block_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","block_size",NULL);
+           cache_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","cache_size",NULL);
+           flush_interval = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","flush_interval",NULL);
+           flush_trigger_level = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","flush_trigger_level",NULL);
+           flush_once_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","flush_once_size",NULL);
+           /* check .... */
+           hlfs_ctrl->cctrl = cache_new();
+           ret = cache_init(hlfs_ctrl->cctrl,block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size);
+           if (ret !=0){
+	          HLOG_ERROR("init cache failed");
+              return -1;
+           }
+       }
+   }
+   g_key_file_free (hlfs_conf_keyfile);
+   return hlfs_ctrl;
+}
+
+

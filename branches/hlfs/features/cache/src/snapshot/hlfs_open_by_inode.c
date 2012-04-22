@@ -66,7 +66,6 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 		HLOG_DEBUG("do not need read alive snapshot file");
 		memset(ss.up_sname, 0, MAX_FILE_NAME_LEN);
 	}
-
 	memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
 	sprintf(ctrl->alive_ss_name, "%s", ss.sname);
     if(ctrl->rw_inode_flag == 1){

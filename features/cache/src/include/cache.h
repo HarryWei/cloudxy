@@ -16,7 +16,7 @@
 #ifndef __CACHE_H__
 #define __CACHE_H__
 
-#include "api/hlfs.h"
+//#include "api/hlfs.h"
 #include "glib.h"
 #include "hlfs_log.h"
 #include "comm_define.h"

@@ -15,7 +15,7 @@ int cache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_
                (cache_ctrl->flush_trigger_level * cache_ctrl->cache_size)/100);
 #endif
 	if (block_count + cache_ctrl->cache_size - get_cache_free_size(cache_ctrl) 
-            >= (cache_ctrl->flush_trigger_level * cache_ctrl->cache_size)/100) {
+            >= (cache_ctrl->flush_trigger_level * cache_ctrl->cache_size) / 100) {
        HLOG_DEBUG("--wake up flush worker--");
        g_mutex_lock(cache_ctrl->cache_mutex);
        g_cond_signal(cache_ctrl->flush_waken_cond);

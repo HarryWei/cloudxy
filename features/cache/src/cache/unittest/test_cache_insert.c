@@ -9,11 +9,17 @@
 #include "cache.h"
 #include "cache_helper.h"
 #include "comm_define.h"
+#include "api/hlfs.h"
 
 #define BLOCK_SIZE 8192
 typedef struct { 
 	CACHE_CTRL *cache_ctrl;
 } Fixture;
+
+int my_cb(void *user_data, char *buf, uint32_t buf_len)
+{
+	return 0;
+}
 
 Fixture fixture;
 void case_setup()
@@ -68,8 +74,10 @@ void test_cache_insert_1()
     printf("con block count:%d\n", con_blocks_count);
     g_assert(con_blocks_count == 100);
 	/* test trigger level + */
+	cache_set_write_cb(fixture.cache_ctrl, my_cb, NULL);
 	for (i = 0; i < 1024 * 90 / 100; i++) {
 	    ret = cache_insert_block(fixture.cache_ctrl, i, _block_buf);
+		g_message("insert_block:%d", i);
 	    g_assert(ret == 0);
 	}
 	g_free(_block_buf);

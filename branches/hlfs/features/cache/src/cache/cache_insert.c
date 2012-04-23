@@ -38,3 +38,4 @@ int cache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_
 int cache_insert_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf){
     return cache_insert_blocks(cache_ctrl, block_no, 1, block_buf);
 }
+

@@ -12,6 +12,7 @@ int cache_destroy(CACHE_CTRL *cache_ctrl)
     
 	if (cache_ctrl->flush_worker_should_exit != 1) {
 	    cache_ctrl->flush_worker_should_exit = 1;
+        g_cond_signal(cache_ctrl->flush_waken_cond);
  	    g_thread_join(cache_ctrl->flush_worker);
     }
 	

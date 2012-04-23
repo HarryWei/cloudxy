@@ -14,7 +14,17 @@
 #include "logger.h"
 
 CTRL_REGION_T CTRL_REGION;
-//extern int log_write_task(struct hlfs_ctrl * ctrl);
+extern int append_log(struct hlfs_ctrl * ctrl,const char*db_buff,uint32_t db_start,uint32_t db_end);
+int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end){
+    int size = append_log(ctrl,db_buff,db_start,db_end);
+    if(size < 0){
+       HLOG_ERROR("append log error");
+       return -1;
+    }
+    ctrl->last_offset += size;
+    return size;
+}
+
 
 int read_fs_superblock(struct back_storage *storage,struct super_block *sb)
 {
@@ -104,8 +114,11 @@ out:
 
 struct hlfs_ctrl *
 init_hlfs2(const char *config_file_path){
+   HLOG_DEBUG("enter func %s", __func__);
    int ret = 0;
    GKeyFile * hlfs_conf_keyfile=g_key_file_new();
+
+   HLOG_DEBUG("config path:%s",config_file_path);
    gboolean res = g_key_file_load_from_file (hlfs_conf_keyfile,config_file_path,G_KEY_FILE_NONE,NULL);
    if(res == FALSE){
 	  HLOG_ERROR("parse config file error", __func__);
@@ -125,7 +138,9 @@ init_hlfs2(const char *config_file_path){
        //gsize length=0;
        //gchar * keys = g_key_file_get_keys(hlfs_conf_keyfile,"CACHE",&length,NULL);
        gboolean enable = g_key_file_get_boolean (hlfs_conf_keyfile,"CACHE","is_enable_cache",NULL);
+       HLOG_DEBUG("enable is :%d",enable); 
        if(TRUE ==  enable){
+           HLOG_DEBUG("do support cache!"); 
            uint64_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
            block_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","block_size",NULL);
            cache_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","cache_size",NULL);
@@ -133,16 +148,37 @@ init_hlfs2(const char *config_file_path){
            flush_trigger_level = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","flush_trigger_level",NULL);
            flush_once_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","flush_once_size",NULL);
            /* check .... */
+           if(block_size!=hlfs_ctrl->sb.block_size){
+              HLOG_ERROR("cache block size is not equal to block size in superblock"); 
+              goto out;
+           }
+           if(flush_trigger_level > 100){
+              HLOG_ERROR("cache flush_trigger_level can not > 100"); 
+              goto out;
+           }
+           if(flush_once_size * block_size * 64 > hlfs_ctrl->sb.seg_size){
+              HLOG_ERROR("flush_once_size can not too much:%d",flush_once_size); 
+              goto out;
+           }
+
            hlfs_ctrl->cctrl = cache_new();
            ret = cache_init(hlfs_ctrl->cctrl,block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size);
            if (ret !=0){
 	          HLOG_ERROR("init cache failed");
-              return -1;
+              g_free(hlfs_ctrl->cctrl);
+              hlfs_ctrl->cctrl=NULL;
+              goto out;
            }
+           cache_set_write_cb(hlfs_ctrl->cctrl,flush_log,hlfs_ctrl);
        }
+   }else{
+       HLOG_DEBUG("do not support cache!"); 
    }
    g_key_file_free (hlfs_conf_keyfile);
    return hlfs_ctrl;
+out:
+   deinit_hlfs(hlfs_ctrl);
+   return NULL;
 }
 
 

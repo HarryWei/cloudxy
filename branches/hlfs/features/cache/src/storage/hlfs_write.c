@@ -165,7 +165,9 @@ write_log:;
 	}
 #endif 
     g_free(datablocks);
+#if 1
     ctrl->last_offset += size;
+#endif
 	HLOG_DEBUG("last offset: %u fs length: %lld", ctrl->last_offset, ctrl->inode.length);
     g_mutex_unlock (ctrl->hlfs_access_mutex);
 	HLOG_DEBUG("leave func %s", __func__);

@@ -63,6 +63,7 @@ static int get_continues_blocks(CACHE_CTRL *cctrl, GSList **continue_block_list)
     }
     if (*continue_block_list != NULL) {
        HLOG_DEBUG("-- continues block list should be NULL before start --");
+       g_mutex_unlock(cctrl->cache_mutex);
        return -1;
     }
     block_t *block = (gpointer)g_queue_peek_head(cctrl->dirty_block);
@@ -71,6 +72,7 @@ static int get_continues_blocks(CACHE_CTRL *cctrl, GSList **continue_block_list)
     HLOG_DEBUG("--total dirty block:%d,oldest block no:%lu--",size,block->block_no);
     *continue_block_list = g_slist_append(*continue_block_list, block);
     if (size == 1) {
+       g_mutex_unlock(cctrl->cache_mutex);
        return 0; 
     }
     uint64_t count = 0;
@@ -96,7 +98,7 @@ static int get_continues_blocks(CACHE_CTRL *cctrl, GSList **continue_block_list)
            HLOG_DEBUG("--get enought flush once count block :%lu--",cctrl->flush_once_size);
            break;
         }
-        if (++idx >= size - 1) {
+        if (++idx > size - 1) {
            HLOG_DEBUG("--iterator over :%d--",idx);
            break;
         }

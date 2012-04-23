@@ -26,7 +26,7 @@ typedef struct {
 	char *block;
 } block_t;
 
-typedef int(*FLUSH_CB)(void* user_data,char *buf,uint32_t buf_len);
+typedef int (*FLUSH_CB)(void* user_data, char *buf, uint32_t buf_len);
 typedef struct cache_ctrl {
 	GMutex *cache_mutex; 	//Lock of cache
 	GTrashStack *block_cache; 	//Stack used to store cache buffers

@@ -16,7 +16,7 @@ int flush_work(gpointer data){
 				 cctrl->cache_mutex, &expired);
          g_mutex_unlock(cctrl->cache_mutex); //?
          HLOG_DEBUG(" res for cond is :%d\n",res);
-         do{
+         do {
             GSList *continue_blocks = NULL;
             ret = get_continues_blocks(cctrl,&continue_blocks);
             g_assert(ret==0);
@@ -32,22 +32,22 @@ int flush_work(gpointer data){
                 break;
             }
             char* tmp_buf = g_malloc0(buff_len);
-            int i=0;
-            for(i=0;i<blocks_count;i++){
-                block_t *block =  g_slist_nth_data(continue_blocks,i);
-                memcpy(tmp_buf + i*cctrl->block_size,block->block,cctrl->block_size);
+            int i = 0;
+            for (i = 0; i < blocks_count; i++) {
+                block_t *block =  g_slist_nth_data(continue_blocks, i);
+                memcpy(tmp_buf + i * cctrl->block_size, block->block, cctrl->block_size);
             }
-            ret = cctrl->write_callback_func(cctrl->write_callback_user_param,tmp_buf,buff_len);
+            ret = cctrl->write_callback_func(cctrl->write_callback_user_param, tmp_buf, buff_len);
             g_free(tmp_buf);
-            if(ret == 0){
+            if (ret == 0) {
                 HLOG_DEBUG("--singal write thread--");
                 g_mutex_lock(cctrl->cache_mutex);
-                __free_from_cache(cctrl,continue_blocks);
+                __free_from_cache(cctrl, continue_blocks);
                 g_cond_signal(cctrl->writer_waken_cond);
                 g_mutex_unlock(cctrl->cache_mutex);
                 g_slist_free(continue_blocks);
             }
-         }while(get_cache_free_size(cctrl)< cctrl->flush_trigger_level * cctrl->cache_size);
+         } while (get_cache_free_size(cctrl) < cctrl->flush_trigger_level * cctrl->cache_size / 100);
     }
     HLOG_WARN("--flush worker exit--");
     return 0;

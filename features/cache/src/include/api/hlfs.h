@@ -37,7 +37,8 @@ extern "C" {
  * hdfs://localhost/tmp/testenv/testfs * hdfs://192.168.0.1:8020/tmp/testenv/testfs * @return value: The pointer of the structure HLFS_CTRL will be return.
  */
 HLFS_CTRL *init_hlfs(const char *uri);
-
+HLFS_CTRL * init_hlfs2(const char *config_file_path);
+ 
 /**
  * deinit_hlfs: Free the ctrl structure.
  * @param ctrl: The pointer of ctrl structure.

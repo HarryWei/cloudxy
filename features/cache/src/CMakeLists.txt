@@ -17,10 +17,10 @@ MESSAGE(STATUS "This is dir " ${WORK_HOME})
 SET(HADOOP_HOME ${WORK_HOME}/3part/hadoop)
 SET(LOG_HOME ${WORK_HOME}/3part/log)
 #MESSAGE(STATUS "This is dir " ${HADOOP_HOME})
-#SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
+SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
 #SET(JAVA_HOME 	/usr/lib/jvm/java-6-openjdk)
 #SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk.x86_64)
-SET(JAVA_HOME /mnt/jdk1.7.0)
+#SET(JAVA_HOME /mnt/jdk1.7.0)
 INCLUDE_DIRECTORIES(
        /usr/include/glib-2.0 
        /usr/lib/glib-2.0/include 

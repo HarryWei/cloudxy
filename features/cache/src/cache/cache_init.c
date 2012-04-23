@@ -106,5 +106,4 @@ err:
 	g_free(cache_ctrl);
 	HLOG_DEBUG("--Leaving func %s", __func__);
 	return ret;
-
 }

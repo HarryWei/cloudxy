@@ -12,10 +12,15 @@ int flush_work(gpointer data){
          g_get_current_time(&expired);
          g_time_val_add(&expired, cctrl->flush_interval*1000*1000);
          g_mutex_lock(cctrl->cache_mutex);
+
          gboolean res = g_cond_timed_wait(cctrl->flush_waken_cond, \
 				 cctrl->cache_mutex, &expired);
          g_mutex_unlock(cctrl->cache_mutex); //?
          HLOG_DEBUG(" res for cond is :%d\n",res);
+         if(cctrl->flush_worker_should_exit){
+             break;
+         }
+   
          do {
             GSList *continue_blocks = NULL;
             ret = get_continues_blocks(cctrl,&continue_blocks);
@@ -32,20 +37,30 @@ int flush_work(gpointer data){
                 break;
             }
             char* tmp_buf = g_malloc0(buff_len);
+            uint64_t start_no;
+            uint64_t end_no; 
             int i = 0;
             for (i = 0; i < blocks_count; i++) {
                 block_t *block =  g_slist_nth_data(continue_blocks, i);
+                if(i==0){
+                   start_no = block->block_no;
+                }
+                if(i==blocks_count-1){
+                   end_no = block->block_no;
+                }
                 memcpy(tmp_buf + i * cctrl->block_size, block->block, cctrl->block_size);
             }
-            ret = cctrl->write_callback_func(cctrl->write_callback_user_param, tmp_buf, buff_len);
+            ret = cctrl->write_callback_func(cctrl->write_callback_user_param,tmp_buf,start_no,end_no);
             g_free(tmp_buf);
-            if (ret == 0) {
-                HLOG_DEBUG("--singal write thread--");
+            if (ret >=0 ) {
+                HLOG_DEBUG("--signal write thread--");
                 g_mutex_lock(cctrl->cache_mutex);
                 __free_from_cache(cctrl, continue_blocks);
+                //g_cond_broadcast(cctrl->writer_waken_cond);
                 g_cond_signal(cctrl->writer_waken_cond);
                 g_mutex_unlock(cctrl->cache_mutex);
                 g_slist_free(continue_blocks);
+                HLOG_DEBUG("--return blocks to cache over--");
             }
          } while (get_cache_free_size(cctrl) < cctrl->flush_trigger_level * cctrl->cache_size / 100);
     }

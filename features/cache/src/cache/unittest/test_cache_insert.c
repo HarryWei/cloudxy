@@ -16,7 +16,7 @@ typedef struct {
 	CACHE_CTRL *cache_ctrl;
 } Fixture;
 
-int my_cb(void *user_data, char *buf, uint32_t buf_len)
+int my_cb(void *user_data, char *buf, uint32_t start_no,uint32_t end_no)
 {
 	return 0;
 }

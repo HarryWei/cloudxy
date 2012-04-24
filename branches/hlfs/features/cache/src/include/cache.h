@@ -59,6 +59,7 @@ int cache_init(CACHE_CTRL *cache_ctrl,
 int cache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_t block_count,char *block_buf);
 int cache_insert_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf);
 int cache_query_block(CACHE_CTRL *cache_ctrl, uint64_t block_no, char *block_buf);
+gboolean  cache_block_exist(CACHE_CTRL *cache_ctrl, uint64_t block_no);
 int cache_set_write_cb(CACHE_CTRL *cache_ctrl, void *cb_func, void * cb_user_param);
 int cache_destroy(CACHE_CTRL *cache_ctrl);
 int cache_sync(CACHE_CTRL *cache_ctrl);

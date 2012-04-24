@@ -145,6 +145,18 @@ out:
 
 int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
 	HLOG_DEBUG("enter func %s", __func__);
+    int ret =0;
+    if(ctrl->cctrl!=NULL){
+	   HLOG_DEBUG("read from cache first");
+       *block = g_malloc0(ctrl->cctrl->block_size);
+       ret = cache_query_block(ctrl->cctrl,no,*block);
+       if(ret == 0 ){
+	      HLOG_DEBUG("read from cache!");
+          return 0;
+       }
+       g_free(*block);
+	   HLOG_DEBUG("not find in cache!");
+    }
     uint64_t storage_address ;
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     uint32_t db_no = no;

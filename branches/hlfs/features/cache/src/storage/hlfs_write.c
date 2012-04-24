@@ -44,14 +44,14 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
         HLOG_DEBUG("only need to write part in one block:%llu", pos / BLOCKSIZE);
         char *block=NULL;
         if(1==(ret=load_block_by_addr(ctrl,pos,&block))){
-		HLOG_DEBUG("fail to load block for addr! %llu", pos);
-            	block = (char*)g_malloc0(BLOCKSIZE);
-            	if (!block) {
-            		HLOG_ERROR("# -- allocate error!");
-                	g_mutex_unlock (ctrl->hlfs_access_mutex);
-                	return -1;
-            	}
-       }else if(-1 == ret){
+            HLOG_DEBUG("fail to load block for addr! %llu", pos);
+            block = (char*)g_malloc0(BLOCKSIZE);
+            if (!block) {
+                HLOG_ERROR("# -- allocate error!");
+                g_mutex_unlock (ctrl->hlfs_access_mutex);
+                return -1;
+            }
+        }else if(-1 == ret){
             HLOG_ERROR("can not read logic block: %llu", pos / BLOCKSIZE);
             g_mutex_unlock (ctrl->hlfs_access_mutex);
             return -1;

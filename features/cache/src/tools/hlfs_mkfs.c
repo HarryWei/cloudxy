@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 	}
     GError *error = NULL;
     GOptionContext *context;
-    context = g_option_context_new("- mkfs lhfs");
+    context = g_option_context_new("- mkfs hlfs");
     g_option_context_add_main_entries(context, entries, NULL);
     g_option_context_set_help_enabled(context, TRUE);
     g_option_group_set_error_hook(g_option_context_get_main_group(context),
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    GKeyFile *  sb_keyfile= g_key_file_new();
+    GKeyFile *sb_keyfile= g_key_file_new();
     g_key_file_set_string(sb_keyfile,"METADATA","uri",uri);
     g_key_file_set_integer(sb_keyfile,"METADATA","block_size",block_size);
     g_key_file_set_integer(sb_keyfile,"METADATA","segment_size",seg_size);
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     bs_file_t file = storage->bs_file_create(storage,"superblock");
     g_message("sb file path 1%s",sb_file_path);
     //bs_file_t file = storage->bs_file_open(storage,"superblock",BS_WRITEABLE);
-    if(NULL == file){
+    if (NULL == file) {
        g_message("open file :superblock failed");
        g_free(sb_file_path);
        g_option_context_free(context);
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     }
 
     g_message("sb file path 2%s",sb_file_path);
-    int size = storage->bs_file_append(storage,file,(char*)data,strlen(data)+1);
+    int size = storage->bs_file_append(storage, file,(char*)data,strlen(data)+1);
     if(size != strlen(data)+1){
        g_message("can not write superblock file");
        g_free(sb_file_path);

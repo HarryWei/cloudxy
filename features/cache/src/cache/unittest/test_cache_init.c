@@ -1,7 +1,7 @@
 /*
  * Unit test for cache creation and initialization;
  * 
- * By Kelvin Wang<senwang@linux.vnet.ibm.com> (c) 2012
+ * By Kelvin Wang <senwang@linux.vnet.ibm.com> (c) 2012
  */
 
 #include <glib.h>

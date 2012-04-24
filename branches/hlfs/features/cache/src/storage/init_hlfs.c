@@ -41,7 +41,7 @@ int read_fs_superblock(struct back_storage *storage,struct super_block *sb)
 
 /*
  * init_hlfs - initial the hlfs
- * @param uri   fs localtion
+ * @param uri fs localtion
  * @return Return a handle to the lhdfs
  */
 struct hlfs_ctrl *
@@ -65,7 +65,7 @@ init_hlfs(const char *uri)
     HLOG_DEBUG("uri %s", uri);
     struct back_storage *storage = init_storage_handler(uri);
     if( storage == NULL){
-        HLOG_ERROR("[uri:%s] can not accessable",uri);
+        HLOG_ERROR("[uri:%s] can not accessable", uri);
         g_free(ctrl);
         return NULL;
     }
@@ -111,12 +111,11 @@ out:
     return ctrl;
 } 
 
-
 struct hlfs_ctrl *
-init_hlfs2(const char *config_file_path){
+init_hlfs_by_config(const char *config_file_path){
    HLOG_DEBUG("enter func %s", __func__);
    int ret = 0;
-   GKeyFile * hlfs_conf_keyfile=g_key_file_new();
+   GKeyFile * hlfs_conf_keyfile = g_key_file_new();
 
    HLOG_DEBUG("config path:%s",config_file_path);
    gboolean res = g_key_file_load_from_file (hlfs_conf_keyfile,config_file_path,G_KEY_FILE_NONE,NULL);
@@ -144,7 +143,7 @@ init_hlfs2(const char *config_file_path){
            uint64_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
            block_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","block_size",NULL);
            cache_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","cache_size",NULL);
-           flush_interval = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","flush_interval",NULL);
+           flush_interval = g_key_file_get_uint64(hlfs_conf_keyfile,"CACHE","flush_interval",NULL);
            flush_trigger_level = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","flush_trigger_level",NULL);
            flush_once_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","flush_once_size",NULL);
            /* check .... */
@@ -180,5 +179,3 @@ out:
    deinit_hlfs(hlfs_ctrl);
    return NULL;
 }
-
-

@@ -36,8 +36,7 @@ int log_write_task(struct hlfs_ctrl * ctrl)
             int size = 0;
             if(ctrl->cctrl != NULL){
                HLOG_DEBUG("use write back mode");
-               int ret = cache_insert_blocks(ctrl->cctrl,w_req->db_start,(w_req->db_end - w_req->db_start + 1),w_req->req_buf); 
-               g_assert(ret == 0);
+               int ret = cache_insert_blocks(ctrl->cctrl,w_req->db_start,(w_req->db_end - w_req->db_start + 1),w_req->req_buf); g_assert(ret == 0);
                size = 0; 
             }else{
                HLOG_DEBUG("use write through mode");

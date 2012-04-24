@@ -4,26 +4,22 @@
 #include "glib.h"
 #include "cache.h"
 
-static int write_cache(CACHE_CTRL *cctrl, uint64_t start_block_no, \
-		uint32_t block_count, char *block_buf) {
+static int write_cache(CACHE_CTRL *cctrl, uint64_t start_block_no,char *block_buf) {
 	HLOG_DEBUG("--enter fun %s", __func__);
     g_mutex_lock(cctrl->cache_mutex);
-    int i;
-    int idx = 0;
-    for (i = start_block_no; i < start_block_no + block_count; i++, idx++) {
-        block_t *block = g_trash_stack_pop(&cctrl->block_cache);
-        block->block_no = i;
-        memcpy(block->block, block_buf + idx * cctrl->block_size, cctrl->block_size);
-        g_hash_table_insert(cctrl->block_map, &block->block_no, block);
-        g_queue_push_tail(cctrl->dirty_block, block);
-    }
+    block_t *block = g_trash_stack_pop(&cctrl->block_cache);
+    block->block_no = start_block_no;
+    memcpy(block->block, block_buf , cctrl->block_size);
+    g_hash_table_insert(cctrl->block_map, &block->block_no, block);
+    g_queue_push_tail(cctrl->dirty_block, block);
     g_mutex_unlock(cctrl->cache_mutex);
-    return block_count;
+    return 0;
 }
 
 static uint32_t __get_cache_free_size(CACHE_CTRL *cctrl){
 	 HLOG_DEBUG("--enter fun %s", __func__);
      uint32_t free_block_size = cctrl->cache_size - g_queue_get_length(cctrl->dirty_block);
+	 HLOG_DEBUG("--free block size:%d",free_block_size);
      return free_block_size;
 }
 
@@ -107,4 +103,27 @@ static int get_continues_blocks(CACHE_CTRL *cctrl, GSList **continue_block_list)
     return 0;
 }
 
+static block_t * cache_query(CACHE_CTRL *cache_ctrl,uint64_t block_no){
+	HLOG_DEBUG("--Entering func %s", __func__);
+	int ret = 0;
+	block_t *block = NULL;
+	if (cache_ctrl == NULL) {
+		ret = -EHLFS_PARAM;
+		HLOG_ERROR("param error");
+		return NULL;
+	}
+
+	if (0 == cache_ctrl->cache_size - get_cache_free_size(cache_ctrl)) {
+		ret = -EHLFS_NOITEM;
+		HLOG_ERROR("The hash table of block_map is empty");
+		return NULL;
+	}
+	
+	HLOG_DEBUG("block_no %llu will be queried",block_no);
+    g_mutex_lock(cache_ctrl->cache_mutex);
+	block = (block_t*)g_hash_table_lookup(cache_ctrl->block_map, \
+			(gpointer)&block_no);
+    g_mutex_unlock(cache_ctrl->cache_mutex);
+    return block;
+}
 #endif

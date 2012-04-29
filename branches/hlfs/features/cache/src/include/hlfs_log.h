@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "glib.h"
 
 #define LOG_LEN				(1024)
 
@@ -21,7 +22,7 @@
 			__mycat = log4c_category_get("hlfslog");											\
 		}																						\
 		memset(__msg_log, 0, LOG_LEN);															\
-		snprintf(__msg_log, LOG_LEN, "[%s][%s][%d]%s", __FILE__, __func__, __LINE__, msg);		\
+		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_NOTICE, __msg_log, ##args);	\
 	} else {																					\
 		printf(msg, ##args);																	\
@@ -42,7 +43,7 @@
 			__mycat = log4c_category_get("hlfslog");											\
 		}																						\
 		memset(__msg_log, 0, LOG_LEN);															\
-		snprintf(__msg_log, LOG_LEN, "[%s][%s][%d]%s", __FILE__, __func__, __LINE__, msg);		\
+		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_TRACE, __msg_log, ##args);		\
 	} else {																					\
 		printf(msg, ##args);																	\
@@ -63,7 +64,7 @@
 			__mycat = log4c_category_get("hlfslog");											\
 		}																						\
 		memset(__msg_log, 0, LOG_LEN);															\
-		snprintf(__msg_log, LOG_LEN, "[%s][%s][%d]%s", __FILE__, __func__, __LINE__, msg);		\
+		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_FATAL, __msg_log, ##args);		\
 	} else {																					\
 		printf(msg, ##args);																	\
@@ -84,7 +85,7 @@
 			__mycat = log4c_category_get("hlfslog");											\
 		}																						\
 		memset(__msg_log, 0, LOG_LEN);															\
-		snprintf(__msg_log, LOG_LEN, "[%s][%s][%d]%s", __FILE__, __func__, __LINE__, msg);		\
+		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_DEBUG, __msg_log, ##args);		\
 	} else {																					\
 		printf(msg, ##args);																	\
@@ -105,7 +106,7 @@
 			__mycat = log4c_category_get("hlfslog");											\
 		}																						\
 		memset(__msg_log, 0, LOG_LEN);															\
-		snprintf(__msg_log, LOG_LEN, "[%s][%s][%d]%s", __FILE__, __func__, __LINE__, msg);		\
+		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_INFO, __msg_log, ##args);		\
 	} else {																					\
 		printf(msg, ##args);																	\
@@ -126,7 +127,7 @@
 			__mycat = log4c_category_get("hlfslog");											\
 		}																						\
 		memset(__msg_log, 0, LOG_LEN);															\
-		snprintf(__msg_log, LOG_LEN, "[%s][%s][%d]%s", __FILE__, __func__, __LINE__, msg);		\
+		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_ERROR, __msg_log, ##args);		\
 	} else {																					\
 		printf(msg, ##args);																	\
@@ -147,7 +148,7 @@
 			__mycat = log4c_category_get("hlfslog");											\
 		}																						\
 		memset(__msg_log, 0, LOG_LEN);															\
-		snprintf(__msg_log, LOG_LEN, "[%s][%s][%d]%s", __FILE__, __func__, __LINE__, msg);		\
+		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_WARN, __msg_log, ##args);		\
 	} else {																					\
 		printf(msg, ##args);																	\

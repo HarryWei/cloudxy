@@ -32,11 +32,16 @@ int flush_work(gpointer data){
                 HLOG_ERROR("Never reach here");
                 g_assert(0);
             }
+            if(buff_len == 0){
+                HLOG_DEBUG("do not need flush now");
+                continue;
+            }
             if(NULL==cctrl->write_callback_func){
                 HLOG_ERROR("--not given flush callback func--");
                 break;
             }
             char* tmp_buf = g_malloc0(buff_len);
+            g_assert(tmp_buf!=NULL);
             uint64_t start_no;
             uint64_t end_no; 
             int i = 0;
@@ -48,8 +53,10 @@ int flush_work(gpointer data){
                 if(i==blocks_count-1){
                    end_no = block->block_no;
                 }
+
                 memcpy(tmp_buf + i * cctrl->block_size, block->block, cctrl->block_size);
             }
+            HLOG_DEBUG("--tmp_buf:%p",tmp_buf);
             ret = cctrl->write_callback_func(cctrl->write_callback_user_param,tmp_buf,start_no,end_no);
             g_free(tmp_buf);
             if (ret >=0 ) {

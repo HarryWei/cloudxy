@@ -21,6 +21,7 @@ int cache_insert_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_bu
     int ret = 0;
     block_t *block = cache_query(cache_ctrl,block_no);
     if(block!=NULL){
+        HLOG_DEBUG("--update dirty block--");
         memcpy(block->block,block_buf,cache_ctrl->block_size);  
     }else{
         uint32_t block_count =1;
@@ -41,6 +42,7 @@ int cache_insert_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_bu
         }
         write_cache(cache_ctrl,block_no,block_buf);
     }
+    cache_ctrl->total_write_count++;
     return ret;
 }
 

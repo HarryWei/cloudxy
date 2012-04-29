@@ -16,12 +16,33 @@
 CTRL_REGION_T CTRL_REGION;
 extern int append_log(struct hlfs_ctrl * ctrl,const char*db_buff,uint32_t db_start,uint32_t db_end);
 int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end){
+	HLOG_DEBUG("enter func %s", __func__);
+    guint32 BLOCKSIZE = ctrl->sb.block_size;
+    int expand_size =  (db_end-db_start + 1)*BLOCKSIZE + 
+        ib_amount(db_start,db_end) * BLOCKSIZE + 
+        LOG_HEADER_LENGTH + 
+        sizeof(struct inode) + 
+        sizeof(struct inode_map_entry);
+    if (expand_size > ctrl->sb.seg_size) {
+        HLOG_ERROR("write length is beyond the limit length!");
+        g_mutex_unlock (ctrl->hlfs_access_mutex);
+        return -1;
+    }
+    if (ctrl->last_offset + expand_size > ctrl->sb.seg_size) {
+        ctrl->last_segno++;
+        ctrl->last_offset = 0;
+    }
+
+    HLOG_DEBUG("last segno: %u last offset: %u", ctrl->last_segno, ctrl->last_offset);
+    g_mutex_lock (ctrl->hlfs_access_mutex);
     int size = append_log(ctrl,db_buff,db_start,db_end);
+    g_mutex_unlock (ctrl->hlfs_access_mutex);
     if(size < 0){
-       HLOG_ERROR("append log error");
-       return -1;
+        HLOG_ERROR("append log error");
+        return -1;
     }
     ctrl->last_offset += size;
+	HLOG_DEBUG("last offset: %u", ctrl->last_offset);
     return size;
 }
 

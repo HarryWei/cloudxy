@@ -45,8 +45,12 @@ typedef struct cache_ctrl {
 	uint64_t flush_once_size; 	//Number of dirty blocks have been written one time 
 	uint64_t total_write_count; 
 	uint64_t total_read_count;
+#if 0
 	uint64_t cache_full_hit; 
 	uint64_t cache_part_hit;
+#else
+    uint64_t cache_hit;
+#endif 
 }CACHE_CTRL;
 
 CACHE_CTRL *cache_new();

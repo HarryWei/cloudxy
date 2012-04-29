@@ -87,9 +87,13 @@ int log_write_task(struct hlfs_ctrl * ctrl)
             }
             int ret = rewrite_alive_blocks_from_seg(ctrl,seg_usage);
             g_assert(ret != -1);
+#ifdef SUPPORT_LOCAL_FILESYSTEM
             g_mutex_lock (ctrl->hlfs_access_mutex);
+#endif
             dump_segment_delmark(ctrl->storage,SEGMENTS_DEL_FILE,seg_usage->segno);
+#ifdef SUPPORT_LOCAL_FILESYSTEM
             g_mutex_unlock (ctrl->hlfs_access_mutex);
+#endif
             const char segfile[SEGMENT_FILE_NAME_MAX];
             build_segfile_name(seg_usage->segno,segfile);
             ctrl->storage->bs_file_delete(ctrl->storage,segfile);

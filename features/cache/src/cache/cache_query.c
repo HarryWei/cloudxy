@@ -11,7 +11,7 @@ int cache_query_block(CACHE_CTRL *cache_ctrl, uint64_t block_no, char *block_buf
 		HLOG_ERROR("NO item in hash table");
 		return ret;
 	}
-	HLOG_DEBUG("--read block no:%d",block->block_no);
+	HLOG_DEBUG("--read block no:%llu",block->block_no);
 	g_assert(block_no == block->block_no);
 	memcpy(block_buf, block->block, (size_t)cache_ctrl->block_size);
     cache_ctrl->cache_hit++;

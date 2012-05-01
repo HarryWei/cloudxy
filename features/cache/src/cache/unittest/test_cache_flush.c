@@ -16,7 +16,7 @@ typedef struct {
  */
 Fixture fixture;
 static int test_printf(void* handle,char* buf,uint32_t start_no,uint32_t end_no){
-    printf("%p;%d,%d\n",start_no,end_no);
+    printf("%d,%d\n", start_no, end_no);
     return 0;
 }
 void case_setup()

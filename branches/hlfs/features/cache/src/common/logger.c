@@ -170,7 +170,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE);
         if(_ib==NULL) {
-		HLOG_ERROR("read_block error for iblock_addr:%u",ctrl->inode.iblock);
+		HLOG_ERROR("read_block error for iblock_addr:%llu",ctrl->inode.iblock);
 		return -1;
 	}
         int  _idx = (db_no-12)%IB_ENTRY_NUM;
@@ -182,7 +182,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE);
         if(_ib==NULL) {
-		HLOG_ERROR("read_block error for doubly_iblock_addr:%u",ctrl->inode.doubly_iblock);
+		HLOG_ERROR("read_block error for doubly_iblock_addr:%llu",ctrl->inode.doubly_iblock);
 		return -1;
 	}
         int _idx   = ( db_no - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
@@ -204,7 +204,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib  = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE);
         if(_ib==NULL) {
-		HLOG_ERROR("read_block error for triply_iblock_addr:%u",ctrl->inode.triply_iblock);
+		HLOG_ERROR("read_block error for triply_iblock_addr:%llu",ctrl->inode.triply_iblock);
 		return -1;
 	}
         int _idx   = (db_no -12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM*IB_ENTRY_NUM);
@@ -417,7 +417,7 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
     int size = ctrl->storage->bs_file_append(ctrl->storage,(bs_file_t)ctrl->cur_write_file_handler,(char*)log,log->log_size);
     HLOG_DEBUG("write to filewrite size %d  expect size %d",size,log->log_size);
     if(size != log->log_size){
-       HLOG_DEBUG("write to file:%s failed, write size %d  expect size %d # %p",
+       HLOG_ERROR("write to file:%s failed, write size %d  expect size %d # ",
 		       segfile_name,size,log->log_size,ctrl->cur_write_file_handler);
        HLOG_ERROR("bs_file_append error");
        ret = -1;

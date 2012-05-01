@@ -65,7 +65,7 @@ static int get_continues_blocks(CACHE_CTRL *cctrl, GSList **continue_block_list)
     block_t *block = (gpointer)g_queue_peek_head(cctrl->dirty_block);
     int max_block_no = block->block_no;
     int min_block_no = block->block_no;
-    HLOG_DEBUG("--total dirty block:%d,oldest block no:%lu--",size,block->block_no);
+    HLOG_DEBUG("--total dirty block:%d,oldest block no:%llu--",size,block->block_no);
     *continue_block_list = g_slist_append(*continue_block_list, block);
     if (size == 1) {
        g_mutex_unlock(cctrl->cache_mutex);
@@ -77,21 +77,21 @@ static int get_continues_blocks(CACHE_CTRL *cctrl, GSList **continue_block_list)
         block_t *block = (gpointer)g_queue_peek_nth(cctrl->dirty_block, idx);
         g_assert(block != NULL);
         if (max_block_no + 1 != block->block_no && min_block_no - 1 != block->block_no) {
-           HLOG_DEBUG("--not find continue block no:%lu!--",block->block_no);
+           HLOG_DEBUG("--not find continue block no:%llu!--",block->block_no);
            break;
         }
         if (block->block_no == max_block_no + 1) {
-           HLOG_DEBUG("--find after continue block no:%lu--",block->block_no);
+           HLOG_DEBUG("--find after continue block no:%llu--",block->block_no);
            max_block_no++;
            *continue_block_list = g_slist_append(*continue_block_list, block);
         }
         if (block->block_no == min_block_no - 1) {
-           HLOG_DEBUG("--find before continue block no:%lu--",block->block_no);
+           HLOG_DEBUG("--find before continue block no:%llu--",block->block_no);
            min_block_no--;
            *continue_block_list = g_slist_prepend(*continue_block_list, block);
         }
         if (++count >= cctrl->flush_once_size - 1) {
-           HLOG_DEBUG("--get enought flush once count block :%lu--",cctrl->flush_once_size);
+           HLOG_DEBUG("--get enought flush once count block :%llu--",cctrl->flush_once_size);
            break;
         }
         if (++idx > size - 1) {

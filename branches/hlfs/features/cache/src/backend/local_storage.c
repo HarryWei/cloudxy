@@ -124,10 +124,20 @@ uint64_t local_file_tell(struct back_storage *storage,bs_file_t file){
 
 int local_file_append(struct back_storage * storage,bs_file_t file,const char *write_buff,uint32_t write_len){
 	HLOG_DEBUG("local -- enter func %s", __func__);
+	int ret = 0;
+	HLOG_DEBUG("storage:%p file:%p write_buf:%p write_len:%u", storage, file, write_buff, write_len);
+	if (storage == NULL || file == NULL || write_buff == NULL) {
+		HLOG_ERROR("Param error");
+		ret = -EHLFS_PARAM;
+		return ret;
+	}
     //int fd = *(int*)file;
     int fd = GPOINTER_TO_INT((gpointer)file);
+	HLOG_DEBUG("fd = %d", fd);
 	HLOG_DEBUG("local -- leave func %s", __func__);
-    return write(fd,write_buff,write_len);
+    ret = write(fd,write_buff,write_len);
+	HLOG_DEBUG("ret = %d", ret);
+	return ret;
 }
 
 int local_file_pread(struct back_storage *storage,bs_file_t file,const char*read_buff,uint32_t read_len,uint64_t pos){

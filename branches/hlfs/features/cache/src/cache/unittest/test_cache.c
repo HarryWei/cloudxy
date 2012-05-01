@@ -9,8 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include <sys/stat.h>
+#include <sys/stat.h> 
 #include <fcntl.h>
+#include <stdlib.h>
+#include <errno.h>
 #include "cache.h"
 #include "comm_define.h"
 #include "api/hlfs.h"
@@ -30,6 +32,7 @@ int gen_conf_file(char *path, gboolean enable, char *storage_uri, uint64_t block
 		uint64_t flush_once_size)
 {
 	g_message("enter func : %s", __func__);
+
 	if (path == NULL) {
 		g_message("path NULL");
 		return -1;
@@ -65,6 +68,9 @@ int gen_conf_file(char *path, gboolean enable, char *storage_uri, uint64_t block
 
 void case_setup()
 {
+	system("rm -rf /tmp/testenv");
+	system("mkdir /tmp/testenv");
+	system("cd ../../../build && ./build_local.sh");
 	fixture.config_file = (char *)g_malloc(20);
 	sprintf(fixture.config_file, "./hlfsrc");
 	int ret = 0;
@@ -73,6 +79,7 @@ void case_setup()
 	g_message("gen config file succ");
 	fixture.ctrl = init_hlfs_by_config(fixture.config_file);
 	g_message("init hlfs done");
+	g_assert(fixture.ctrl != NULL);
 	if (fixture.ctrl == NULL) {
 		g_message("fixture.ctrl NULL");
 		return;
@@ -101,7 +108,7 @@ void test_cache()
 	g_assert(fixture.ctrl->cctrl->flush_waken_cond != NULL);
 	g_message("initializing HLFS successfully");
 
-/*---Write something and check when the cache call flush---*/
+/*---Write something and check when flush---*/
 	uint64_t pos = 0;
 	int loop = 0;
 	char *buf = (char *)g_malloc0(8192);
@@ -109,6 +116,7 @@ void test_cache()
 		g_message("open HLFS error");
 		return;
 	}
+	struct stat *_stat = (struct stat *)g_malloc0(sizeof(struct stat));
 	for (loop = 0; loop < BLK_NO; loop++) {
 		if (0 > hlfs_write(fixture.ctrl, buf, BLK_NO, pos)) {
 			g_message("hlfs_write error");
@@ -116,13 +124,21 @@ void test_cache()
 		}
 		g_message("write the %dth blk", loop);
 		pos += BLK_NO;
-		/*
-		if (g_file_test("/tmp/testenv/testfs/0.seg", G_FILE_TEST_EXISTS)) {
-			g_message("no seg0 exists");
+		if (!g_file_test("/tmp/testenv/testfs/0.seg", G_FILE_TEST_EXISTS)) {
+			g_message("file not exists");
 		} else {
-			g_message("seg0 OK");
-		}*/
+			memset(_stat, 0, sizeof(_stat));
+			ret = stat("/tmp/testenv/testfs/0.seg", _stat);
+			if (ret < 0) {
+				g_message("error no: %d", errno);
+				perror("stat error:");
+			}
+			g_assert(ret == 0);
+			g_message("size of 0.seg:%d", _stat->st_size);
+			g_message("inode of 0.seg:%d", _stat->st_ino);
+			g_message("atime of 0.seg:%d", _stat->st_atime);
 		//sleep(1);
+		}
 	}
 }
 
@@ -131,6 +147,16 @@ void case_teardown()
 	int ret = 0;
 	g_message("going out...");
 	ret = hlfs_close(fixture.ctrl); 
+	struct stat *_stat = (struct stat *)g_malloc0(sizeof(struct stat));
+	ret = stat("/tmp/testenv/testfs/0.seg", _stat);
+	g_assert(ret == 0);
+	g_message("size of 0.seg:%d", _stat->st_size);
+	g_message("inode of 0.seg:%d", _stat->st_ino);
+	g_message("atime of 0.seg:%d", _stat->st_atime);
+		//sleep(1);
+	ret = deinit_hlfs(fixture.ctrl);
+	system("rm -rf /tmp/testenv");
+	system("rm ./hlfsrc");
 	g_assert(ret == 0);
 }
 

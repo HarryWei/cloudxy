@@ -177,7 +177,7 @@ init_hlfs_by_config(const char *config_file_path){
               goto out;
            }
            if(flush_once_size * block_size * 64 > hlfs_ctrl->sb.seg_size){
-              HLOG_ERROR("flush_once_size can not too much:%d",flush_once_size); 
+              HLOG_ERROR("flush_once_size can not too much:%llu",flush_once_size); 
               goto out;
            }
 

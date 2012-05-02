@@ -12,7 +12,7 @@
 #include "comm_define.h"
 #include "misc.h"
 #include "logger.h"
-
+#include "cache.h"
 /*
  * hlfs_close: close a file. s
  * @param ctrl: The global control structure.
@@ -34,6 +34,10 @@ int hlfs_close(struct hlfs_ctrl *ctrl){
 	   ctrl->cur_read_file_handler = NULL;
     }
     ctrl->usage_ref--;
+    if(ctrl->cctrl!=NULL){
+       HLOG_DEBUG("before close hlfs,sync all dirty block");
+       cache_sync(ctrl->cctrl); 
+    }
     HLOG_DEBUG("leave func:%s",__func__);
     return ret;
 }        

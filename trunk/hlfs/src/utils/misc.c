@@ -100,8 +100,9 @@ char *read_block(struct back_storage *storage ,uint64_t storage_address,uint32_t
         block = NULL;
 	    goto out;
     }
-    if(block_size != storage->bs_file_pread(storage,file,block,block_size,offset)){
-	    HLOG_ERROR("bs_file_pread's size is not equal to block_size");
+    uint32_t read_size;
+    if(block_size != (read_size = storage->bs_file_pread(storage,file,block,block_size,offset))){
+	    HLOG_ERROR("bs_file_pread's size:%d is not equal to block_size:%d, at offset:%u",read_size,block_size,offset);
         g_free(block);
         block = NULL;
         goto out;

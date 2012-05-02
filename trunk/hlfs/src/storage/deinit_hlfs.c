@@ -12,6 +12,7 @@
 #include "comm_define.h"
 #include "storage.h"
 #include "storage_helper.h"
+#include "cache.h"
 
 int deinit_hlfs(struct hlfs_ctrl * ctrl)
 {
@@ -23,6 +24,10 @@ int deinit_hlfs(struct hlfs_ctrl * ctrl)
     if(0!=deinit_storage_handler(ctrl->storage)){
 		HLOG_ERROR("deinit_hlfs error");
        	return -1; 
+    }
+    if(ctrl->cctrl!=NULL){
+       HLOG_DEBUG("-destroy cache-");
+       cache_destroy(ctrl->cctrl);
     }
 	ctrl->write_task_run = 0;
     g_thread_join(ctrl->log_write_thread);

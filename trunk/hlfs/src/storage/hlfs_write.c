@@ -19,11 +19,10 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
 		HLOG_ERROR("hlfs_write error");
 		return -1;
     }
-
-    g_mutex_lock (ctrl->hlfs_access_mutex);
+    //g_mutex_lock (ctrl->hlfs_access_mutex);
     if(ctrl->rw_inode_flag == 0){
         HLOG_ERROR("only read!");
-        g_mutex_unlock (ctrl->hlfs_access_mutex);
+        //g_mutex_unlock (ctrl->hlfs_access_mutex);
         return -1;
     }
     int ret = 0;
@@ -35,7 +34,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
     char * datablocks = (char*)g_malloc0(write_blocks_size);
     if (!datablocks) {
             HLOG_ERROR("allocate error!");
-            g_mutex_unlock (ctrl->hlfs_access_mutex);
+            //g_mutex_unlock (ctrl->hlfs_access_mutex);
             return -1;
         }
 
@@ -43,19 +42,24 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
     if(db_start == db_end){
         HLOG_DEBUG("only need to write part in one block:%llu", pos / BLOCKSIZE);
         char *block=NULL;
-        if(1==(ret=load_block_by_addr(ctrl,pos,&block))){
-		HLOG_DEBUG("fail to load block for addr! %llu", pos);
-            	block = (char*)g_malloc0(BLOCKSIZE);
-            	if (!block) {
-            		HLOG_ERROR("# -- allocate error!");
-                	g_mutex_unlock (ctrl->hlfs_access_mutex);
-                	return -1;
-            	}
-       }else if(-1 == ret){
+        g_mutex_lock (ctrl->hlfs_access_mutex);
+        ret = load_block_by_addr(ctrl,pos,&block);
+        g_mutex_unlock (ctrl->hlfs_access_mutex);
+        if(1==ret){
+            HLOG_DEBUG("fail to load block for addr! %llu", pos);
+            block = (char*)g_malloc0(BLOCKSIZE);
+            if (!block) {
+                HLOG_ERROR("# -- allocate error!");
+                //g_mutex_unlock (ctrl->hlfs_access_mutex);
+                return -1;
+            }
+        }else if(-1 == ret){
             HLOG_ERROR("can not read logic block: %llu", pos / BLOCKSIZE);
-            g_mutex_unlock (ctrl->hlfs_access_mutex);
+            //g_mutex_unlock (ctrl->hlfs_access_mutex);
             return -1;
         }
+
+
         memcpy(datablocks,block,pos%BLOCKSIZE);
         memcpy(datablocks + pos%BLOCKSIZE,write_buf,write_len);
         memcpy(datablocks + pos%BLOCKSIZE + write_len, 
@@ -67,17 +71,20 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
     if(pos % BLOCKSIZE != 0 ){
         HLOG_DEBUG("to load first block!");
         char *first_block = NULL;
-        if(1==(ret =load_block_by_addr(ctrl,pos,&first_block))){
+        g_mutex_lock (ctrl->hlfs_access_mutex);
+        ret = load_block_by_addr(ctrl,pos,&first_block);
+        g_mutex_unlock (ctrl->hlfs_access_mutex);
+        if(1==ret){
             HLOG_DEBUG("fail to load first block");
             first_block = (char*)g_malloc0(BLOCKSIZE);
             if (!first_block) {
             	HLOG_ERROR("allocate error!");
-                g_mutex_unlock(ctrl->hlfs_access_mutex);
+                //g_mutex_unlock(ctrl->hlfs_access_mutex);
                 return -1;
             }
         }else if(ret == -1){
             HLOG_ERROR("can not read logic block: %llu", pos / BLOCKSIZE);
-            g_mutex_unlock (ctrl->hlfs_access_mutex);
+            //g_mutex_unlock (ctrl->hlfs_access_mutex);
             return -1;
         }
         memcpy(datablocks,first_block,BLOCKSIZE);
@@ -90,16 +97,19 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
     if((pos +write_len)%BLOCKSIZE !=0){
         HLOG_DEBUG("to load last block");
         char *last_block = NULL;
-        if(1==(ret=load_block_by_addr(ctrl, pos + write_len, &last_block))){
+        g_mutex_lock (ctrl->hlfs_access_mutex);
+        ret=load_block_by_addr(ctrl, pos + write_len, &last_block);
+        g_mutex_unlock (ctrl->hlfs_access_mutex);
+        if(1==ret){
             HLOG_DEBUG("fail to load last block");
             last_block = (char*)g_malloc0(BLOCKSIZE);
             if (!last_block) {
             HLOG_ERROR("allocate error!");
-                g_mutex_unlock (ctrl->hlfs_access_mutex);
+                //g_mutex_unlock (ctrl->hlfs_access_mutex);
                 return -1;
             }
         }else if(-1==ret){
-            g_mutex_unlock (ctrl->hlfs_access_mutex);
+            //g_mutex_unlock (ctrl->hlfs_access_mutex);
             HLOG_ERROR("can not read logic block: %llu", pos / BLOCKSIZE);
             return -1;
         }
@@ -118,23 +128,25 @@ write_log:;
 	ctrl->inode.ctime  = cur_time;
 	ctrl->inode.atime  = cur_time;
 	HLOG_DEBUG("get_current_time is %llu", ctrl->inode.mtime);
-	HLOG_DEBUG("length is %llu", ctrl->inode.length);
-    int expand_size =  (db_end-db_start + 1)*BLOCKSIZE + 
-    ib_amount(db_start,db_end) * BLOCKSIZE + 
-    LOG_HEADER_LENGTH + 
-    sizeof(struct inode) + 
-    sizeof(struct inode_map_entry);
-    if (expand_size > ctrl->sb.seg_size) {
-		HLOG_ERROR("write length is beyond the limit length!");
-        g_mutex_unlock (ctrl->hlfs_access_mutex);
-        return -1;
-	}
-	if (ctrl->last_offset + expand_size > ctrl->sb.seg_size) {
-		ctrl->last_segno++;
-		ctrl->last_offset = 0;
-	}
-	HLOG_DEBUG("last segno: %u last offset: %u", ctrl->last_segno, ctrl->last_offset);
-#if 0
+    HLOG_DEBUG("length is %llu", ctrl->inode.length);
+    if(NULL == ctrl->cctrl){
+        int expand_size =  (db_end-db_start + 1)*BLOCKSIZE + 
+            ib_amount(db_start,db_end) * BLOCKSIZE + 
+            LOG_HEADER_LENGTH + 
+            sizeof(struct inode) + 
+            sizeof(struct inode_map_entry);
+        if (expand_size > ctrl->sb.seg_size) {
+            HLOG_ERROR("write length is beyond the limit length!");
+            //g_mutex_unlock (ctrl->hlfs_access_mutex);
+            return -1;
+        }
+        if (ctrl->last_offset + expand_size > ctrl->sb.seg_size) {
+            ctrl->last_segno++;
+            ctrl->last_offset = 0;
+        }
+        HLOG_DEBUG("last segno: %u last offset: %u", ctrl->last_segno, ctrl->last_offset);
+    }
+#if 0 /* use async way */
     int size = append_log(ctrl,datablocks,db_start,db_end);
     if(size < 0){
 		g_message("fail to append log\n");
@@ -160,14 +172,17 @@ write_log:;
     //g_free(w_rsp);
     if(ret!=0){
 		HLOG_ERROR("fail to append log");
-        g_mutex_unlock (ctrl->hlfs_access_mutex);
+        //g_mutex_unlock (ctrl->hlfs_access_mutex);
         return -1;
 	}
-#endif 
+#endif /*use async queue*/
     g_free(datablocks);
-    ctrl->last_offset += size;
-	HLOG_DEBUG("last offset: %u fs length: %lld", ctrl->last_offset, ctrl->inode.length);
-    g_mutex_unlock (ctrl->hlfs_access_mutex);
+    if(NULL == ctrl->cctrl){
+        ctrl->last_offset += size;
+	    HLOG_DEBUG("last offset: %u fs length: %lld", ctrl->last_offset, ctrl->inode.length);
+    }
+
+    //g_mutex_unlock (ctrl->hlfs_access_mutex);
 	HLOG_DEBUG("leave func %s", __func__);
     return write_len;
 }

@@ -33,7 +33,15 @@ int log_write_task(struct hlfs_ctrl * ctrl)
         w_req = (struct write_req*)g_async_queue_timed_pop(ctrl->write_req_aqueue,&expired);
         if(w_req != NULL){
             HLOG_DEBUG("real write request comming");
-            int size = append_log(ctrl,w_req->req_buf,w_req->db_start,w_req->db_end);
+            int size = 0;
+            if(ctrl->cctrl != NULL){
+               HLOG_DEBUG("use write back mode");
+               int ret = cache_insert_blocks(ctrl->cctrl,w_req->db_start,(w_req->db_end - w_req->db_start + 1),w_req->req_buf); g_assert(ret == 0);
+               size = 0; 
+            }else{
+               HLOG_DEBUG("use write through mode");
+               size = append_log(ctrl,w_req->req_buf,w_req->db_start,w_req->db_end);
+            }
             //w_rsp = (struct write_rsp*)g_malloc0(sizeof(struct write_rsp));
             if(size < 0){
                 HLOG_DEBUG("failed to append log");
@@ -79,9 +87,13 @@ int log_write_task(struct hlfs_ctrl * ctrl)
             }
             int ret = rewrite_alive_blocks_from_seg(ctrl,seg_usage);
             g_assert(ret != -1);
+#ifdef SUPPORT_LOCAL_FILESYSTEM
             g_mutex_lock (ctrl->hlfs_access_mutex);
+#endif
             dump_segment_delmark(ctrl->storage,SEGMENTS_DEL_FILE,seg_usage->segno);
+#ifdef SUPPORT_LOCAL_FILESYSTEM
             g_mutex_unlock (ctrl->hlfs_access_mutex);
+#endif
             const char segfile[SEGMENT_FILE_NAME_MAX];
             build_segfile_name(seg_usage->segno,segfile);
             ctrl->storage->bs_file_delete(ctrl->storage,segfile);

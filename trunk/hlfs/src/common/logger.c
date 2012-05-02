@@ -145,6 +145,18 @@ out:
 
 int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
 	HLOG_DEBUG("enter func %s", __func__);
+    int ret =0;
+    if(ctrl->cctrl!=NULL){
+	   HLOG_DEBUG("read from cache first");
+       *block = g_malloc0(ctrl->cctrl->block_size);
+       ret = cache_query_block(ctrl->cctrl,no,*block);
+       if(ret == 0 ){
+	      HLOG_DEBUG("read from cache!");
+          return 0;
+       }
+       g_free(*block);
+	   HLOG_DEBUG("not find in cache!");
+    }
     uint64_t storage_address ;
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     uint32_t db_no = no;
@@ -158,7 +170,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE);
         if(_ib==NULL) {
-		HLOG_ERROR("read_block_fast error");
+		HLOG_ERROR("read_block error for iblock_addr:%llu",ctrl->inode.iblock);
 		return -1;
 	}
         int  _idx = (db_no-12)%IB_ENTRY_NUM;
@@ -170,7 +182,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE);
         if(_ib==NULL) {
-		HLOG_ERROR("read_block_fast error");
+		HLOG_ERROR("read_block error for doubly_iblock_addr:%llu",ctrl->inode.doubly_iblock);
 		return -1;
 	}
         int _idx   = ( db_no - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
@@ -179,7 +191,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE);
         if(_ib2==NULL) {
-		HLOG_ERROR("read_block_fast error");
+		HLOG_ERROR("read_block error");
 		return -1;
 	}
         int _idx2  = (db_no - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
@@ -192,7 +204,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib  = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE);
         if(_ib==NULL) {
-		HLOG_ERROR("read_block_fast error");
+		HLOG_ERROR("read_block error for triply_iblock_addr:%llu",ctrl->inode.triply_iblock);
 		return -1;
 	}
         int _idx   = (db_no -12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM*IB_ENTRY_NUM);
@@ -201,7 +213,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib + _idx),BLOCKSIZE);
         if(_ib2==NULL) {
-		HLOG_ERROR("read_block_fast error");
+		HLOG_ERROR("read_block error");
 		return -1;
 	}
         int _idx2  = (db_no-12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM)/IB_ENTRY_NUM % IB_ENTRY_NUM;
@@ -210,7 +222,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib3 = (uint64_t *)read_block(ctrl->storage,*(_ib2 + _idx2),BLOCKSIZE);
         if(_ib3==NULL) {
-		HLOG_ERROR("read_block_fast error");
+		HLOG_ERROR("read_block error");
 		return -1;
 	}
         int _idx3  = (db_no-12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 
@@ -233,7 +245,19 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
 }
 
 int load_block_by_no_fast(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
-	HLOG_DEBUG("enter func %s", __func__);
+    HLOG_DEBUG("enter func %s", __func__);
+    int ret=0;
+    if(ctrl->cctrl!=NULL){
+        HLOG_DEBUG("read from cache first");
+        *block = g_malloc0(ctrl->cctrl->block_size);
+        ret = cache_query_block(ctrl->cctrl,no,*block);
+        if(ret == 0 ){
+            HLOG_DEBUG("read from cache!");
+            return 0;
+        }
+        g_free(*block);
+        HLOG_DEBUG("not find in cache!");
+    }
     uint64_t storage_address ;
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     uint32_t db_no = no;
@@ -243,7 +267,7 @@ int load_block_by_no_fast(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         storage_address = ctrl->inode.blocks[_idx];
     }else if (is_db_in_level2_index_range(db_no)){
         if(ctrl->inode.iblock == 0){
-          return 1;
+            return 1;
         }
         uint64_t *_ib = (uint64_t *)read_block_fast(ctrl,ctrl->inode.iblock,BLOCKSIZE);
         if(_ib==NULL) {
@@ -384,15 +408,16 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
         HLOG_DEBUG("open a exist segment:%d file",ctrl->last_segno);
     }
 
-    HLOG_DEBUG("handler %p",ctrl->cur_write_file_handler);
+    HLOG_DEBUG("cur write handler %p",ctrl->cur_write_file_handler);
     if(ctrl->cur_write_file_handler==NULL){
         HLOG_ERROR("fail to open segment file %s",segfile_name);
         ret = -1;
         goto out;
     }
     int size = ctrl->storage->bs_file_append(ctrl->storage,(bs_file_t)ctrl->cur_write_file_handler,(char*)log,log->log_size);
+    HLOG_DEBUG("write to filewrite size %d  expect size %d",size,log->log_size);
     if(size != log->log_size){
-       HLOG_DEBUG("write to file:%s failed, write size %d  expect size %d # %p",
+       HLOG_ERROR("write to file:%s failed, write size %d  expect size %d # ",
 		       segfile_name,size,log->log_size,ctrl->cur_write_file_handler);
        HLOG_ERROR("bs_file_append error");
        ret = -1;

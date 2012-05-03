@@ -152,7 +152,7 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
 
      char *endptr = NULL;
      seg_usage->segno = strtoull(_segno_str,&endptr,0);
-	 seg_usage->up_sname = _up_sname;
+	 strcpy(seg_usage->up_sname,_up_sname,strlen(_up_sname));
 	 seg_usage->inode_saddr = strtoull(_inode_saddr_str,&endptr,0);
 	 seg_usage->timestamp = strtoull(_timestamp_str,&endptr,0);
 	 seg_usage->log_num = strtoull(_log_num_str,&endptr,0);
@@ -194,7 +194,7 @@ int get_refer_inode(struct back_storage *storage,uint64_t segno,GHashTable* seg_
 	   inode = semi_latest_inode(); 对于非快照区间的段,获取次新inode地址；
 	   return inode;
 	#endif
-    return 0
+    return 0;
 }
 
 

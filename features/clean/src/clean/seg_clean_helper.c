@@ -24,7 +24,7 @@ int seg_usage2text(SEG_USAGE_T * seg_usage,char *textbuf){
 		       seg_usage->inode_saddr,
 		       seg_usage->timestamp,
 		       seg_usage->log_num,
-		       seg_usage->block_num
+		       seg_usage->block_num,
 		       seg_usage->alive_block_num);
        HLOG_DEBUG("textbuf init:%s, n:%d",textbuf,n);
 	   int m=0;
@@ -130,7 +130,7 @@ out:
 
 
 
-int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * * seg_usage, const char *textbuf){
+int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usage, const char *textbuf){
      HLOG_DEBUG("enter func %s",__func__);
      HLOG_DEBUG("textbuf :%s",textbuf);
      gchar **v = g_strsplit (textbuf," ",1024);

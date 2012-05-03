@@ -152,11 +152,11 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
 
      char *endptr = NULL;
      seg_usage->segno = strtoull(_segno_str,&endptr,0);
-	 strcpy(seg_usage->up_sname,_up_sname,strlen(_up_sname));
+	 strncpy(seg_usage->up_sname,_up_sname,strlen(_up_sname));
 	 seg_usage->inode_saddr = strtoull(_inode_saddr_str,&endptr,0);
 	 seg_usage->timestamp = strtoull(_timestamp_str,&endptr,0);
 	 seg_usage->log_num = strtoull(_log_num_str,&endptr,0);
-     seg_usage->alive_blocks = strtoull(_alive_block_str,&endptr,0);
+     seg_usage->alive_block_num = strtoull(_alive_block_str,&endptr,0);
 	 
      g_strfreev(v);
      HLOG_DEBUG("segno:%llu,alive_blocks:%llu,timestamp:%llu,log_num:%llu",

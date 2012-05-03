@@ -11,7 +11,7 @@
 #include "comm_define.h"
 #include "storage.h"
 #include "storage_helper.h"
-#include "segment_cleaner.h"
+#include "seg_clean.h"
 
 int log_write_task(struct hlfs_ctrl * ctrl)
 {
@@ -55,6 +55,7 @@ int log_write_task(struct hlfs_ctrl * ctrl)
             continue;
             /*  */
         }else{
+        #if 0
             //HLOG_DEBUG("no real write request for expired ,do copy for cleaning");
             if(g_atomic_int_get(&ctrl->ctrl_region->is_start_clean) == 1){
                 int ret = load_all_segment_usage(ctrl->storage,SEGMENTS_USAGE_FILE,SEGMENTS_DEL_FILE,seg_usage_hashtable);
@@ -99,6 +100,7 @@ int log_write_task(struct hlfs_ctrl * ctrl)
             ctrl->storage->bs_file_delete(ctrl->storage,segfile);
             g_free(seg_usage->bitmap);
             /*  */
+#endif 
         }
     }
     if(seg_usage_list!=NULL)

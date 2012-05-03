@@ -152,7 +152,7 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
 
      char *endptr = NULL;
      seg_usage->segno = strtoull(_segno_str,&endptr,0);
-	 seg_usage->up_sname = strtoull(_up_sname,&endptr,0);
+	 seg_usage->up_sname = _up_sname;
 	 seg_usage->inode_saddr = strtoull(_inode_saddr_str,&endptr,0);
 	 seg_usage->timestamp = strtoull(_timestamp_str,&endptr,0);
 	 seg_usage->log_num = strtoull(_log_num_str,&endptr,0);
@@ -160,7 +160,7 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
 	 
      g_strfreev(v);
      HLOG_DEBUG("segno:%llu,alive_blocks:%llu,timestamp:%llu,log_num:%llu",
-		         seg_usage->segno,seg_usage->alive_blocks,seg_usage->timestamp,seg_usage->log_num);
+		         seg_usage->segno,seg_usage->alive_block_num,seg_usage->timestamp,seg_usage->log_num);
      seg_usage->bitmap = (char*)g_malloc0((seg_usage->log_num - 1)/8 +1);
      HLOG_DEBUG("bitmap_str :%s",bitmap_str);
      v = g_strsplit(bitmap_str,"#",1024);

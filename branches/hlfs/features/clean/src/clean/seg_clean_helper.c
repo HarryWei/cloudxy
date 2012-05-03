@@ -15,7 +15,7 @@
 #include "snapshot.h"
 #include "seg_clean.h"
 
-int seg_usage2text(SEG_USAGE_T ** seg_usage,char *textbuf){
+int seg_usage2text(SEG_USAGE_T * seg_usage,char *textbuf){
        HLOG_DEBUG("enter func %s",__func__);
        memset(textbuf,0,sizeof(SEG_USAGE_T)*10);
        int n = sprintf (textbuf,"%llu %s %llu %llu %u %u %u",
@@ -135,7 +135,7 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * * seg_us
      HLOG_DEBUG("textbuf :%s",textbuf);
      gchar **v = g_strsplit (textbuf," ",1024);
      gchar *_segno_str = v[0]; 
-	 gchar *_up_sname = v[1],
+	 gchar *_up_sname = v[1];
 	 gchar *_inode_saddr_str = v[2]; 
 	 gchar *_timestamp_str = v[3];
 	 gchar *_log_num_str = v[4];

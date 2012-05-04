@@ -18,7 +18,7 @@
 int seg_usage2text(SEG_USAGE_T * seg_usage,char *textbuf){
        HLOG_DEBUG("enter func %s",__func__);
        memset(textbuf,0,sizeof(SEG_USAGE_T)*10);
-       int n = sprintf (textbuf,"%llu %s %llu %llu %u %u %u",
+       int n = sprintf (textbuf,"%llu %s %llu %llu %u %u %u ",
 		       seg_usage->segno,
 		       seg_usage->up_sname,
 		       seg_usage->inode_addr,
@@ -29,7 +29,7 @@ int seg_usage2text(SEG_USAGE_T * seg_usage,char *textbuf){
        HLOG_DEBUG("textbuf init:%s, n:%d",textbuf,n);
 	   int m=0;
        int i,j;
-	   for(i=0;i<((seg_usage->log_num-1)/8)+1;i++){
+	   for(i=0;i<((seg_usage->log_num-1)/sizeof(gint))+1;i++){
            //for(j=0;j<8;j++){
 	           //gboolean value = (segment_usage->bitmap[i] & (1<<(8 - j))) != 0;
 	           //m += sprintf(textbuf + n + m,"%x ",value);
@@ -132,8 +132,8 @@ out:
 
 
 int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
-     if(storage == NULL || seg_usage == NULL || textbuf == NULL){
-	 return -1; 
+     if(seg_usage == NULL || textbuf == NULL){
+	    return -1; 
      }
      HLOG_DEBUG("enter func %s",__func__);
      HLOG_DEBUG("textbuf :%s",textbuf);
@@ -159,13 +159,20 @@ int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
      strncpy(seg_usage->up_sname,_up_sname,strlen(_up_sname));
      seg_usage->inode_addr = strtoull(_inode_addr_str,&endptr,0);
      seg_usage->timestamp = strtoull(_timestamp_str,&endptr,0);
-     seg_usage->log_num = strtoull(_log_num_str,&endptr,0);
-     seg_usage->alive_block_num = strtoull(_alive_block_str,&endptr,0);
+     //seg_usage->log_num = strtoull(_log_num_str,&endptr,0);
+     seg_usage->log_num = strtol(_log_num_str,&endptr,0);
+     seg_usage->alive_block_num = strtol(_alive_block_str,&endptr,0);
+     seg_usage->block_num = strtol(_block_num_str,&endptr,0);
+
 	 
      g_strfreev(v);
-     HLOG_DEBUG("segno:%llu,alive_blocks:%llu,timestamp:%llu,log_num:%llu",
-		         seg_usage->segno,seg_usage->alive_block_num,seg_usage->timestamp,seg_usage->log_num);
-     seg_usage->bitmap = (char*)g_malloc0((seg_usage->log_num - 1)/8 +1);
+     HLOG_DEBUG("segno:%llu,alive_blocks:%u,timestamp:%llu,log_num:%u,block_num:%u",
+		         seg_usage->segno,
+                 seg_usage->alive_block_num,
+                 seg_usage->timestamp,
+                 seg_usage->log_num,
+                 seg_usage->block_num);
+     seg_usage->bitmap = (char*)g_malloc0((seg_usage->log_num - 1)/sizeof(gint) +1);
      HLOG_DEBUG("bitmap_str :%s",bitmap_str);
      v = g_strsplit(bitmap_str,"#",1024);
      int i;
@@ -239,7 +246,7 @@ int load_all_seg_usage(struct back_storage *storage,
     int i;
     for(i=0;i<g_strv_length(segs)-1;i++){
         SEG_USAGE_T * seg_usage= (SEG_USAGE_T *)g_malloc(sizeof(SEG_USAGE_T));
-        load_seg_usage_from_text(storage,seg_usage,segs[i]);
+        seg_usage4text(seg_usage,segs[i]);
         //g_hash_table_insert(seg_usage_hashtable,seg_usage->segno,seg_usage);
         HLOG_DEBUG("segno:%llu",seg_usage->segno);
 	 if(seg_usage->alive_block_num !=0){

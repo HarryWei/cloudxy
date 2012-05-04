@@ -24,14 +24,10 @@ extern "C" {
 
 
 //int seg_range_usage_statis(struct back_storage *storage,uint32_t segment_size, uint32_t block_size,uint64_t start_segno,uint64_t end_segno,GHashTable *seg_usage_hashtable);
-int seg_usage_statis(struct back_storage* storage, uint32_t segment_size,uint32_t block_size,uint64_t segno,SEG_USAGE_T *seg_usage);
+int seg_usage_calc(struct back_storage* storage, uint32_t segment_size,uint32_t block_size,uint64_t segno,SEG_USAGE_T *seg_usage);
 //int load_seg_usage(struct back_storage * storage,uint32_t segno,const char* segment_usage_file,SEG_USAGE_T * seg_usage);
-
+int rewrite_alive_blocks (struct inode * refer_inode, SEG_USAGE_T *seg_usage);
 int dump_seg_usage      (struct back_storage * storage,   const char* seg_usage_file,  SEG_USAGE_T * seg_usage);
-int rewrite_alive_blocks (struct inode * refer_inode,        SEG_USAGE_T *seg_usage);
-
-
-
 
 #ifdef __cplusplus 
 } 

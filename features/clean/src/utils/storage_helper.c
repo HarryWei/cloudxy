@@ -505,7 +505,7 @@ int file_append_contents(struct back_storage *storage,const char* filename,const
     }
 	int ret = 0;
 	bs_file_t file = NULL;
-	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage,filename)) {
+	if ( 0!= storage->bs_file_is_exist(storage,filename)) {
 		HLOG_DEBUG("cp file not exist, create file");
 		file = storage->bs_file_create(storage,filename);
 		if (NULL == file) {
@@ -545,7 +545,7 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 	int ret = 0;
 	int i = 0;
 	HLOG_DEBUG("filename is %s", filename);
-	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage,filename)) {
+	if ( 0!= storage->bs_file_is_exist(storage,filename)) {
 		HLOG_ERROR("file is not exist, but may be first start, not error, check it please");
 		ret = -1;
 		goto out;

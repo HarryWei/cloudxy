@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     bs_file_info_t * info = infos;
     int i;
     GHashTable *seg_usage_hashtable = g_hash_table_new_full(g_direct_hash,g_direct_equal,NULL,NULL);//TODO
-    ret = load_all_segment_usage(storage,SEGMENTS_USAGE_FILE,SEGMENTS_DEL_FILE,seg_usage_hashtable);
+    ret = load_all_seg_usage(storage,SEGMENTS_USAGE_FILE,seg_usage_hashtable);
     g_assert(ret == 0 );
 
     uint32_t active_segno;
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
                 seg_usage = (struct segment_usage*)tmp;
            }
 #endif 
-           segment_usage_calc(storage,info->name,latest_inode,seg_usage,block_size);
+           seg_usage_calc(storage,info->name,latest_inode,seg_usage,block_size);
            dump_segment_usage(storage,SEGMENTS_USAGE_FILE,seg_usage);
 
            g_free(seg_usage->bitmap);

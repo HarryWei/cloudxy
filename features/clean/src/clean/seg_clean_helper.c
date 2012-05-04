@@ -163,7 +163,7 @@ int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
      seg_usage->log_num = strtol(_log_num_str,&endptr,0);
      seg_usage->alive_block_num = strtol(_alive_block_str,&endptr,0);
      seg_usage->block_num = strtol(_block_num_str,&endptr,0);
-
+    
 	 
      g_strfreev(v);
      HLOG_DEBUG("segno:%llu,alive_blocks:%u,timestamp:%llu,log_num:%u,block_num:%u",
@@ -223,25 +223,18 @@ int get_refer_inode_between_snapshots(struct back_storage *storage,uint64_t segn
 
 int load_all_seg_usage(struct back_storage *storage,
 						  const char   * seg_usage_file,
-						  GHashTable * seg_usage_hashtable){
+						  GHashTable   * seg_usage_hashtable){
     HLOG_DEBUG("enter func %s",__func__);
-    bs_file_t file = storage->bs_file_open(storage,seg_usage_file,BS_READONLY);      
-    if(NULL==file){
-        HLOG_DEBUG(" open seg usage  file failed ! not exist ? ");
-        return 0;
-    }
-    char textbuf[8192*1024];
-    memset(textbuf,0,8192*1024);
-    uint32_t count = storage->bs_file_pread(storage,file,textbuf,8192*1024,0);
-    if(count < 0){
-        g_message(" read seg usage file failed ");
-        storage->bs_file_close(storage,file);
-        return -1;
-    }
+	char *content = NULL;
+	uint32_t size;
+	if(0!= (size = file_get_contents(storage,seg_usage_file,&content,&size))){
+	    HLOG_ERROR("read segfile:%s failed",seg_usage_file);
+		return -1;
+	}		
 
-    HLOG_DEBUG("===read count %d ,%s",count,textbuf);
+    HLOG_DEBUG("===read count %d ,%s",size,content);
 #if 1
-    gchar ** segs = g_strsplit(textbuf,"\n",0);
+    gchar ** segs = g_strsplit(content,"\n",0);
     HLOG_DEBUG("there are %d segno in segment usage file",g_strv_length(segs));
     int i;
     for(i=0;i<g_strv_length(segs)-1;i++){
@@ -250,7 +243,7 @@ int load_all_seg_usage(struct back_storage *storage,
         //g_hash_table_insert(seg_usage_hashtable,seg_usage->segno,seg_usage);
         HLOG_DEBUG("segno:%llu",seg_usage->segno);
 	 if(seg_usage->alive_block_num !=0){
-            g_hash_table_insert(seg_usage_hashtable,GINT_TO_POINTER((uint32_t) seg_usage->segno),seg_usage);
+         g_hash_table_insert(seg_usage_hashtable,GINT_TO_POINTER((uint32_t) seg_usage->segno),seg_usage);
 	 }else{
 	     HLOG_DEBUG("segno:%llu can been delete ",seg_usage->segno);
 	     g_free(seg_usage);

@@ -3,6 +3,7 @@
 #define ALIVE_LOG_BITMAP 512
 #define SEGMENTS_USAGE_FILE "segments_usage.txt"
 //#define SEGMENTS_DEL_FILE   "segments_delmark.txt"
+#include "hlfs_ctrl.h"
 #include "storage.h"
 
 /* segment usage structure for cleaning task */
@@ -27,7 +28,7 @@ extern "C" {
 int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint64_t segno,struct inode *refer_inode,SEG_USAGE_T *seg_usage);
 //int load_seg_usage(struct back_storage * storage,uint32_t segno,const char* segment_usage_file,SEG_USAGE_T * seg_usage);
 int dump_seg_usage(struct back_storage * storage,  const char* seg_usage_file,  SEG_USAGE_T * seg_usage);
-int migrate_alive_blocks (HLFS_CTRL *hctrl,SEG_USAGE_T *seg_usage);
+int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage);
 
 
 #ifdef __cplusplus 

@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "storage_helper.h"
-#include "segment_cleaner.h"
+#include "seg_clean.h"
 #include "glib.h"
-#include "clean_route.h"
 #include "hlfs_log.h"
 #include "api/hlfs.h"
 #include "comm_define.h"
@@ -77,10 +76,10 @@ int main(int argc, char *argv[])
         for(i=0;i<g_list_length(seg_usage_list);i++){
             gpointer tmp = g_list_nth_data (seg_usage_list,i);
             struct segment_usage *seg_usage = (struct segment_usage*)tmp;
-            if(seg_usage->alive_blocks > copy_waterlevel){
+            if(seg_usage->alive_block_num > copy_waterlevel){
                 continue;
             }
-            ret = rewrite_alive_blocks_from_seg(ctrl,seg_usage);
+            ret = migrate_alive_blocks(ctrl,seg_usage);
             g_assert(ret != -1);
             //dump_segment_delmark(ctrl->storage,SEGMENTS_DEL_FILE,seg_usage->segno);
             //char * segfile = build_segfile_name(seg_usage->segno);

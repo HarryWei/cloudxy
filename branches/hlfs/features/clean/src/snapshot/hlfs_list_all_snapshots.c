@@ -15,6 +15,7 @@
 
 #define MAX_BUFSIZE (4 * 1024)
 
+struct snapshot *__hlfs_get_all_snapshots(struct back_storage *storage,int *num_entries);
 /*
  */
 struct snapshot *hlfs_get_all_snapshots(const char *uri,int *num_entries)
@@ -29,7 +30,6 @@ struct snapshot *hlfs_get_all_snapshots(const char *uri,int *num_entries)
 	struct back_storage *storage = init_storage_handler(uri);
 	if (NULL == storage) {
 		HLOG_ERROR("init storage handler error!");
-		g_hash_table_destroy(ss_hashtable);
 		return NULL;
 	}
 	struct snapshot * snapshot =  __hlfs_get_all_snapshots(storage,num_entries);

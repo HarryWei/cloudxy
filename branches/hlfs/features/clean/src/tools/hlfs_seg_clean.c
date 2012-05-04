@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     g_message("ctrl open over");
     g_assert(ret == 0);
     GHashTable *seg_usage_hashtable = g_hash_table_new_full(g_direct_hash,g_direct_equal,NULL,NULL);//TODO
-    ret = load_all_segment_usage(ctrl->storage,SEGMENTS_USAGE_FILE,SEGMENTS_DEL_FILE,seg_usage_hashtable);
+    ret = load_all_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage_hashtable);
     g_assert(ret == 0 );
     g_message("to load segment usage for seg:%d",segno);
     if(segno == -1){
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
             }
             ret = rewrite_alive_blocks_from_seg(ctrl,seg_usage);
             g_assert(ret != -1);
-            dump_segment_delmark(ctrl->storage,SEGMENTS_DEL_FILE,seg_usage->segno);
+            //dump_segment_delmark(ctrl->storage,SEGMENTS_DEL_FILE,seg_usage->segno);
             //char * segfile = build_segfile_name(seg_usage->segno);
 	        const char segfile[SEGMENT_FILE_NAME_MAX];
 	        build_segfile_name(seg_usage->segno, segfile);
@@ -98,9 +98,9 @@ int main(int argc, char *argv[])
            return -1;
         }
         seg_usage = (struct segment_usage*)tmp;
-        ret = rewrite_alive_blocks_from_seg(ctrl,seg_usage);
+        ret = migrate_alive_blocks(ctrl,seg_usage);
         g_assert(ret != -1);
-        dump_segment_delmark(ctrl->storage,SEGMENTS_DEL_FILE,seg_usage->segno);
+        //dump_segment_delmark(ctrl->storage,SEGMENTS_DEL_FILE,seg_usage->segno);
         g_free(seg_usage->bitmap);
     }
 

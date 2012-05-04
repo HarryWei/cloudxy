@@ -59,11 +59,13 @@ struct segment_usage *get_segment_usage(uint32_t segno){
 
 #endif 
 
-int seg_usage_calc(struct back_storage* storage, const char *segfile,
-			struct inode * latest_inode ,struct segment_usage *seg_usage,
-			uint32_t block_size) 
+int seg_usage_calc(struct back_storage* storage, uint32_t segment_size,uint32_t block_size,uint64_t segno,struct inode *refer_inode,SEG_USAGE_T *seg_usage)
 {
     HLOG_DEBUG("enter func %s",__func__);
+    if(storage == NULL || refer_inode == NULL || SEG_USAGE_T == NULL){
+		return -1;
+    }
+		
     int ret = 0;
     int log_idx=0;
     int idx;

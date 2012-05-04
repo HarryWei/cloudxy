@@ -9,12 +9,12 @@
 typedef struct segment_usage {
 	uint64_t segno;	
 	char up_sname[HLFS_FILE_NAME_MAX];
-	uint64_t inode_saddr; /*up snapshot's inode address between snapshot region;if in non-shapshot region,it is pre seg last inode address */
-	uint64_t timestamp;
+	uint64_t inode_addr; /* up snapshot's inode address between snapshot region;if in non-shapshot region,it is pre seg last inode address */
+	uint64_t timestamp;   /* create time */
 	uint32_t log_num;
 	uint32_t block_num;
 	uint32_t alive_block_num;
-	uint32_t blitmap_size; 
+	//uint32_t blitmap_size; 
 	char *bitmap; 
 }SEG_USAGE_T;
 

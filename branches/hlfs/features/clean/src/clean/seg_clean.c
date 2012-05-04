@@ -13,81 +13,15 @@
 #include "seg_clean.h"
 
 
-int load_all_seg_usage(struct back_storage *storage,
-			const char *seg_usage_file,
-			const char * seg_delmark_file,
-			GHashTable* seg_usage_hashtable){
-       HLOG_DEBUG("enter func %s",__func__);
-    bs_file_t file = storage->bs_file_open(storage,seg_usage_file,BS_READONLY);      
-    if(NULL==file){
-        HLOG_DEBUG(" open seg usage  file failed ! not exist ? ");
-        return 0;
-    }
-    char textbuf[8192*10];
-    memset(textbuf,0,8192*10);
-    uint32_t count = storage->bs_file_pread(storage,file,textbuf,8192*10,0);
-    if(count < 0){
-        g_message(" read seg usage file failed ");
-        storage->bs_file_close(storage,file);
-        return -1;
-    }
 
-    HLOG_DEBUG("===read count %d ,%s",count,textbuf);
-#if 1
-    gchar ** segs = g_strsplit(textbuf,"\n",0);
-    HLOG_DEBUG("there are %d segno in segment usage file",g_strv_length(segs));
-    int i;
-    for(i=0;i<g_strv_length(segs)-1;i++){
-        struct segment_usage* seg_usage= (struct segment_usage*)g_malloc(sizeof(struct segment_usage));
-        load_segment_usage_from_text(storage,seg_usage,segs[i]);
-        //g_hash_table_insert(seg_usage_hashtable,seg_usage->segno,seg_usage);
-        HLOG_DEBUG("segno:%llu",seg_usage->segno);
-        g_hash_table_insert(seg_usage_hashtable,GINT_TO_POINTER((uint32_t) seg_usage->segno),seg_usage);
-    }
-    g_strfreev(segs);
-#else 
-    char *line = textbuf;
-    int offset = 0;
-    do{
-      HLOG_DEBUG("........line:%s,len:%d",line,strlen(line));
-      int len = strlen(line);
-      line += len+1;
-      offset += len+1 ;
-    }while(offset < count);
-#endif
-    HLOG_DEBUG("read seg usage del mark file...");
-    file = storage->bs_file_open(storage,seg_delmark_file,BS_READONLY);      
-    if(NULL == file){
-        HLOG_DEBUG(" open seg del mark file failed ! not exist ? ");
-        return 0;
-    }
-    memset(textbuf,0,8192*10);
-    count = storage->bs_file_pread(storage,file,textbuf,8192*10,0);
-    HLOG_DEBUG("===read count %d ,%s",count,textbuf);
-    storage->bs_file_close(storage,file);
-    if(count < 0){
-        HLOG_ERROR(" read seg del mark file failed ");
-        return -1;
-    }else if(count == 0){
-        return 0;
-    }
-#if 1
-    segs = g_strsplit(textbuf,"\n",0);
-    char* endptr = NULL;
-    for(i=0;i<g_strv_length (segs)-1;i++){
-        HLOG_DEBUG("segment :%s has del",segs[i]);
-        uint32_t segno = strtoul(segs[i],&endptr,0);
-        g_hash_table_remove(seg_usage_hashtable,GINT_TO_POINTER(segno));
-    }
-    g_strfreev(segs);
-#endif
-    HLOG_DEBUG("read seg del mark file ...");
-       HLOG_DEBUG("leave func %s",__func__);
-    return 0;
+
+#if 0
+int load_seg_usage(,uint32_t segno,SEG_USAGE_T * seg_usage){
+
 }
 
-int load_segment_usage(struct back_storage * storage,
-		struct segment_usage* seg_usage,uint32_t segno){
+int load_seg_usage(struct back_storage * storage,
+		SEG_USAGE_T* seg_usage,uint32_t segno){
      HLOG_DEBUG("enter func %s",__func__);
      const char segfile[SEGMENT_FILE_NAME_MAX];
      build_segfile_name(segno,segfile);
@@ -115,11 +49,15 @@ int load_segment_usage(struct back_storage * storage,
      return 0;  
 }
 
+
+
 struct segment_usage *get_segment_usage(uint32_t segno){
     HLOG_DEBUG( "enter func %s",__func__);
-	HLOG_DEBUG("leave func %s",__func__);
+    HLOG_DEBUG("leave func %s",__func__);
     return NULL;    
 }
+
+#endif 
 
 int seg_usage_calc(struct back_storage* storage, const char *segfile,
 			struct inode * latest_inode ,struct segment_usage *seg_usage,
@@ -245,15 +183,15 @@ int seg_usage_calc(struct back_storage* storage, const char *segfile,
 }
 
 int dump_seg_usage(struct back_storage * storage,
-		const char*segment_usage_file,
-		struct segment_usage * seg_usage){
-       HLOG_DEBUG("enter func %s",__func__);
+    const char*segment_usage_file,
+    struct segment_usage * seg_usage){
+    HLOG_DEBUG("enter func %s",__func__);
     HLOG_DEBUG("enter func %s,seg usage file:%s",__func__,segment_usage_file);
     char segtextbuf[sizeof(struct segment_usage)*10];
     memset(segtextbuf,0,sizeof(struct segment_usage)*10);
     uint32_t len = segment_usage2text(seg_usage,segtextbuf);
     int ret = dump_segment_usage_text(storage,segment_usage_file,segtextbuf);
-       HLOG_DEBUG("leave func %s",__func__);
+    HLOG_DEBUG("leave func %s",__func__);
     return ret;
 }
 

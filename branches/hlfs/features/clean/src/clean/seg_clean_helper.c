@@ -135,11 +135,11 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
      HLOG_DEBUG("textbuf :%s",textbuf);
      gchar **v = g_strsplit (textbuf," ",1024);
      gchar *_segno_str = v[0]; 
-	 gchar *_up_sname = v[1];
-	 gchar *_inode_saddr_str = v[2]; 
-	 gchar *_timestamp_str = v[3];
-	 gchar *_log_num_str = v[4];
-	 gchar *_block_num_str = v[5];
+     gchar *_up_sname = v[1];
+     gchar *_inode_saddr_str = v[2]; 
+     gchar *_timestamp_str = v[3];
+     gchar *_log_num_str = v[4];
+     gchar *_block_num_str = v[5];
      gchar *_alive_block_str = v[6]; 
      gchar *bitmap_str = g_strdup(v[7]);
      HLOG_DEBUG("segno str:%s,up sname:%s,inode addr:%s,log num:%s,block num:%s,alive block str:%s",
@@ -152,10 +152,10 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
 
      char *endptr = NULL;
      seg_usage->segno = strtoull(_segno_str,&endptr,0);
-	 strncpy(seg_usage->up_sname,_up_sname,strlen(_up_sname));
-	 seg_usage->inode_saddr = strtoull(_inode_saddr_str,&endptr,0);
-	 seg_usage->timestamp = strtoull(_timestamp_str,&endptr,0);
-	 seg_usage->log_num = strtoull(_log_num_str,&endptr,0);
+     strncpy(seg_usage->up_sname,_up_sname,strlen(_up_sname));
+     seg_usage->inode_saddr = strtoull(_inode_saddr_str,&endptr,0);
+     seg_usage->timestamp = strtoull(_timestamp_str,&endptr,0);
+     seg_usage->log_num = strtoull(_log_num_str,&endptr,0);
      seg_usage->alive_block_num = strtoull(_alive_block_str,&endptr,0);
 	 
      g_strfreev(v);
@@ -174,29 +174,115 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
 }
 
 
-//TODO list  
 
 
 /*该函数用于根据段号和快照表找到回收使用的参考inode*/
-int get_refer_inode(struct back_storage *storage,uint64_t segno,GHashTable* seg_usage_hashtable){
-    int num_entries;
-	struct snapshot* snapshots = __hlfs_get_all_snapshots(storage,&num_entries);
+int get_refer_inode_between_snapshots(struct back_storage *storage,uint64_t segno,GList *snapshot_sorted_list, struct inode ** inode){
+    if(storage == NULL && snapshot_sorted_list == NULL){
+	 return -1; 
+    }
+    int num_entries = g_list_length(snapshot_sorted_list);
+    if(num_entries == 1) {
+	 struct snapshot * snapshot = (struct snapshot *)g_list_nth_data(snapshot_sorted_list,0);
+    	 if( segno < get_segno(snapshots->inode_addr)){
+    	      HLOG_DEBUG("noly one snapshot and in first range");	
+    	      *inode =  load_inode(storage,snapshots->inode_addr);
+	      return 0;
+    	 }else {
+             return 1;	        
+    	 }
+    }		
 
-	#if 0
-	   g_slist_sort(segno，snapshot_hashtable,compare_func); /*按照段号，即时间序排序*/
-	   for_each_item_in_snapshots{
-		   if (get_segno(prev_snapshot->inode_addr) < segno) && (get_segno(cur_snapshot->inode_addr) > segno){
-			   /* 在快照区间内,获取up snapshot的inode地址；注意如果只有1个快照，区间是段0到当前快照所在段区间，这个要单独处理*/
-			   inode = load_inode(cur_snapshot->inode_addr);
-		   }
-		   pre_snapshot=cur_snapshot;
-	   }
-	   inode = semi_latest_inode(); 对于非快照区间的段,获取次新inode地址；
-	   return inode;
-	#endif
+    struct snapshot * cur_snapshot,
+    struct snapshot * pre_snapshot,	
+
+    cur_snapshot = (struct snapshot *)g_list_nth_data(snapshot_sorted_list,0);
+    pre_snapshot = cur_snapshot;
+    int i=0;
+    for(i=1;i<num_entries;i++){
+	 if ( segno > get_segno (pre_snapshot->inode_addr) && segno < get_segno(cur_snapshot->inode_addr) ){
+	 	*inode = load_inode(cur_snapshot->inode_addr);
+		return 0;
+	 }
+	 pre_snapshot=cur_snapshot;
+	 cur_snapshot = (struct snapshot *)g_list_nth_data(snapshot_sorted_list,i);
+    }		
+    return 1;
+}
+
+int load_all_seg_usage(struct back_storage *storage,
+						  const char   * seg_usage_file,
+						  GHashTable * seg_usage_hashtable){
+    HLOG_DEBUG("enter func %s",__func__);
+    bs_file_t file = storage->bs_file_open(storage,seg_usage_file,BS_READONLY);      
+    if(NULL==file){
+        HLOG_DEBUG(" open seg usage  file failed ! not exist ? ");
+        return 0;
+    }
+    char textbuf[8192*1024];
+    memset(textbuf,0,8192*1024);
+    uint32_t count = storage->bs_file_pread(storage,file,textbuf,8192*1024,0);
+    if(count < 0){
+        g_message(" read seg usage file failed ");
+        storage->bs_file_close(storage,file);
+        return -1;
+    }
+
+    HLOG_DEBUG("===read count %d ,%s",count,textbuf);
+#if 1
+    gchar ** segs = g_strsplit(textbuf,"\n",0);
+    HLOG_DEBUG("there are %d segno in segment usage file",g_strv_length(segs));
+    int i;
+    for(i=0;i<g_strv_length(segs)-1;i++){
+        SEG_USAGE_T * seg_usage= (SEG_USAGE_T *)g_malloc(sizeof(SEG_USAGE_T));
+        load_segment_usage_from_text(storage,seg_usage,segs[i]);
+        //g_hash_table_insert(seg_usage_hashtable,seg_usage->segno,seg_usage);
+        HLOG_DEBUG("segno:%llu",seg_usage->segno);
+	 if(seg_usage->alive_block_num !=0){
+            g_hash_table_insert(seg_usage_hashtable,GINT_TO_POINTER((uint32_t) seg_usage->segno),seg_usage);
+	 }else{
+	     HLOG_DEBUG("segno:%llu can been delete ",seg_usage->segno);
+	     g_free(seg_usage);
+	 }
+    }
+    g_strfreev(segs);
+#else 
+    char *line = textbuf;
+    int offset = 0;
+    do{
+      HLOG_DEBUG("........line:%s,len:%d",line,strlen(line));
+      int len = strlen(line);
+      line += len+1;
+      offset += len+1 ;
+    }while(offset < count);
+#endif
+    HLOG_DEBUG("leave func %s",__func__);
     return 0;
 }
 
+
+static int compare_seg_usage(gconstpointer litem,
+                        gconstpointer ritem){
+        int ret = 0;
+		SEG_USAGE_T *ls = (SEG_USAGE_T *)litem;
+		SEG_USAGE_T *rs = (SEG_USAGE_T *)ritem;
+        if(ls->segno < rs->segno){
+           ret = -1;
+        }else if(ls->segno > rs->segno){
+           ret =  1;
+        }else{
+           ret =  0;
+        }
+     return ret;
+}
+
+
+
+int sort_all_seg_usage(GHashTable *su_hashtable,GList **su_list){
+    (*su_list) = g_hash_table_get_values(su_hashtable);
+    (*su_list) = g_list_sort((*su_list),compare_seg_usage);
+    return 0;
+}
 
 
 

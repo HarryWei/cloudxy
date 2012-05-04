@@ -92,13 +92,13 @@ int deinit_storage_handler(struct back_storage * storage){
  */
 uint64_t get_last_inode_storage_addr_in_seg( struct back_storage * storage, uint32_t segno) 
 {
-    HLOG_DEBUG("enter func %s",__func__);
+       HLOG_DEBUG("enter func %s",__func__);
 #if 1
 	bs_file_t file = NULL;
 	bs_file_info_t *info = NULL;
 	struct inode_map_entry im;
-    const char segfile[SEGMENT_FILE_NAME_MAX];
-    build_segfile_name(segno,segfile);
+       const char segfile[SEGMENT_FILE_NAME_MAX];
+       build_segfile_name(segno,segfile);
 	if (0 == storage->bs_file_is_exist(storage, segfile)) {
 		if (NULL == (file = storage->bs_file_open(storage, segfile, BS_READONLY))) {
 			HLOG_ERROR("open segfile error!");
@@ -192,7 +192,7 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
     const char* latest_file = NULL;
     uint64_t latest_st_mtime = 0;
     bs_file_info_t * info = infos;
-	bs_file_info_t * __info = NULL;
+    bs_file_info_t * __info = NULL;
     for(i=0;i<num_entries;i++){
         HLOG_DEBUG("7777 file:%s,size:%llu,time:%llu\n",info->name,info->size,info->lmtime);  
         if(g_str_has_suffix(info->name,"seg")){
@@ -238,7 +238,7 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
 #endif
     }
 out:
-	HLOG_DEBUG("leave func %s", __func__);
+    HLOG_DEBUG("leave func %s", __func__);
     free(infos);
     return ret;   
 }
@@ -492,7 +492,7 @@ int load_latest_inode_map_entry(struct back_storage *storage,
        ret = -1;
     }
     storage->bs_file_close(storage,file);
-	HLOG_DEBUG("leave func %s", __func__);
+    HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
 

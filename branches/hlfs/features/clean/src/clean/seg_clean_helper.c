@@ -44,7 +44,7 @@ int seg_usage2text(SEG_USAGE_T * seg_usage,char *textbuf){
 }
 
 
-
+#if 0
 int dump_seg_usage_text(struct back_storage * storage,const char*segment_usage_file, const char *seg_usage_text){
     HLOG_DEBUG("enter func %s",__func__);
     HLOG_DEBUG("enter func %s,seg usage file:%s",__func__,segment_usage_file);
@@ -81,6 +81,7 @@ out:
 	return ret;
   
 }
+#endif 
 
 #if 0
 int segment_delmark2text(uint32_t segno,char *textbuf){
@@ -130,7 +131,7 @@ out:
 
 
 
-int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usage, const char *textbuf){
+int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
      if(storage == NULL || seg_usage == NULL || textbuf == NULL){
 	 return -1; 
      }
@@ -172,7 +173,7 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
          seg_usage->bitmap[i] = strtoul(v[i],&endptr,16);
      }
      g_strfreev(v);
-       HLOG_DEBUG("leave func %s",__func__);
+     HLOG_DEBUG("leave func %s",__func__);
      return 0;
 }
 

@@ -131,6 +131,9 @@ out:
 
 
 int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usage, const char *textbuf){
+     if(storage == NULL || seg_usage == NULL || textbuf == NULL){
+	 return -1; 
+     }
      HLOG_DEBUG("enter func %s",__func__);
      HLOG_DEBUG("textbuf :%s",textbuf);
      gchar **v = g_strsplit (textbuf," ",1024);
@@ -178,7 +181,7 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
 
 /*该函数用于根据段号和快照表找到回收使用的参考inode*/
 int get_refer_inode_between_snapshots(struct back_storage *storage,uint64_t segno,GList *snapshot_sorted_list, struct inode ** inode){
-    if(storage == NULL && snapshot_sorted_list == NULL){
+    if(storage == NULL || snapshot_sorted_list == NULL){
 	 return -1; 
     }
     int num_entries = g_list_length(snapshot_sorted_list);

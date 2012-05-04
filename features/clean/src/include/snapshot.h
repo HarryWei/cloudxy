@@ -18,7 +18,7 @@ struct snapshot {
 
 #define SS_ITEM_SEP 			"@@##$$"
 
-struct snapshot *__hlfs_get_all_snapshots(struct back_storage *storage,int *num_entries);
+//struct snapshot *__hlfs_get_all_snapshots(struct back_storage *storage,int *num_entries);
 
 
 #endif 

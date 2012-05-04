@@ -156,7 +156,7 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
      char *endptr = NULL;
      seg_usage->segno = strtoull(_segno_str,&endptr,0);
      strncpy(seg_usage->up_sname,_up_sname,strlen(_up_sname));
-     seg_usage->inode_saddr = strtoull(_inode_addr_str,&endptr,0);
+     seg_usage->inode_addr = strtoull(_inode_addr_str,&endptr,0);
      seg_usage->timestamp = strtoull(_timestamp_str,&endptr,0);
      seg_usage->log_num = strtoull(_log_num_str,&endptr,0);
      seg_usage->alive_block_num = strtoull(_alive_block_str,&endptr,0);
@@ -187,24 +187,24 @@ int get_refer_inode_between_snapshots(struct back_storage *storage,uint64_t segn
     int num_entries = g_list_length(snapshot_sorted_list);
     if(num_entries == 1) {
 	 struct snapshot * snapshot = (struct snapshot *)g_list_nth_data(snapshot_sorted_list,0);
-    	 if( segno < get_segno(snapshots->inode_addr)){
+    	 if( segno < get_segno(snapshot->inode_addr)){
     	      HLOG_DEBUG("noly one snapshot and in first range");	
-    	      *inode =  load_inode(storage,snapshots->inode_addr);
-	      return 0;
+    	      *inode =  load_inode(storage,snapshot->inode_addr);
+	         return 0;
     	 }else {
              return 1;	        
     	 }
     }		
 
-    struct snapshot * cur_snapshot,
-    struct snapshot * pre_snapshot,	
+    struct snapshot * cur_snapshot;
+    struct snapshot * pre_snapshot;
 
     cur_snapshot = (struct snapshot *)g_list_nth_data(snapshot_sorted_list,0);
     pre_snapshot = cur_snapshot;
     int i=0;
     for(i=1;i<num_entries;i++){
 	 if ( segno > get_segno (pre_snapshot->inode_addr) && segno < get_segno(cur_snapshot->inode_addr) ){
-	 	*inode = load_inode(cur_snapshot->inode_addr);
+	 	*inode = load_inode(storage,cur_snapshot->inode_addr);
 		return 0;
 	 }
 	 pre_snapshot=cur_snapshot;
@@ -238,7 +238,7 @@ int load_all_seg_usage(struct back_storage *storage,
     int i;
     for(i=0;i<g_strv_length(segs)-1;i++){
         SEG_USAGE_T * seg_usage= (SEG_USAGE_T *)g_malloc(sizeof(SEG_USAGE_T));
-        load_segment_usage_from_text(storage,seg_usage,segs[i]);
+        load_seg_usage_from_text(storage,seg_usage,segs[i]);
         //g_hash_table_insert(seg_usage_hashtable,seg_usage->segno,seg_usage);
         HLOG_DEBUG("segno:%llu",seg_usage->segno);
 	 if(seg_usage->alive_block_num !=0){

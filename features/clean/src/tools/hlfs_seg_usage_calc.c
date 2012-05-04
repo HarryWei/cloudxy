@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "storage_helper.h"
-#include "segment_cleaner.h"
+#include "seg_clean.h"
 #include "comm_define.h"
 #include "hlfs_log.h"
 #include "api/hlfs.h"
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
            }
 #endif 
            seg_usage_calc(storage,info->name,latest_inode,seg_usage,block_size);
-           dump_segment_usage(storage,SEGMENTS_USAGE_FILE,seg_usage);
+           dump_seg_usage(storage,SEGMENTS_USAGE_FILE,seg_usage);
 
            g_free(seg_usage->bitmap);
            g_free(seg_usage);

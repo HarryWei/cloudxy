@@ -21,7 +21,7 @@ int seg_usage2text(SEG_USAGE_T * seg_usage,char *textbuf){
        int n = sprintf (textbuf,"%llu %s %llu %llu %u %u %u",
 		       seg_usage->segno,
 		       seg_usage->up_sname,
-		       seg_usage->inode_saddr,
+		       seg_usage->inode_addr,
 		       seg_usage->timestamp,
 		       seg_usage->log_num,
 		       seg_usage->block_num,
@@ -139,7 +139,7 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
      gchar **v = g_strsplit (textbuf," ",1024);
      gchar *_segno_str = v[0]; 
      gchar *_up_sname = v[1];
-     gchar *_inode_saddr_str = v[2]; 
+     gchar *_inode_addr_str = v[2]; 
      gchar *_timestamp_str = v[3];
      gchar *_log_num_str = v[4];
      gchar *_block_num_str = v[5];
@@ -148,7 +148,7 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
      HLOG_DEBUG("segno str:%s,up sname:%s,inode addr:%s,log num:%s,block num:%s,alive block str:%s",
 	 		     _segno_str,
 	 		     _up_sname,
-	 		     _inode_saddr_str,
+	 		     _inode_addr_str,
 	 		     _log_num_str,
 	 		     _block_num_str,
 	 		     _alive_block_str);
@@ -156,7 +156,7 @@ int load_seg_usage_from_text(struct back_storage *storage,SEG_USAGE_T * seg_usag
      char *endptr = NULL;
      seg_usage->segno = strtoull(_segno_str,&endptr,0);
      strncpy(seg_usage->up_sname,_up_sname,strlen(_up_sname));
-     seg_usage->inode_saddr = strtoull(_inode_saddr_str,&endptr,0);
+     seg_usage->inode_saddr = strtoull(_inode_addr_str,&endptr,0);
      seg_usage->timestamp = strtoull(_timestamp_str,&endptr,0);
      seg_usage->log_num = strtoull(_log_num_str,&endptr,0);
      seg_usage->alive_block_num = strtoull(_alive_block_str,&endptr,0);

@@ -63,37 +63,53 @@ int seg_usage_calc(struct back_storage* storage, uint32_t segment_size,uint32_t 
 {
     HLOG_DEBUG("enter func %s",__func__);
     if(storage == NULL || refer_inode == NULL || SEG_USAGE_T == NULL){
+		HLOG_ERROR("input params failed");
 		return -1;
     }
+	if(segno != seg_usage->segno){
+		HLOG_ERROR("segno not match");
+		return -1;
+	}	
 		
     int ret = 0;
     int log_idx=0;
     int idx;
     uint32_t offset = 0; 
     struct log_header *lh;
-    gchar **v = g_strsplit(segfile,".",2);
-    uint64_t db_mine_storage_addr_segno = atol(v[0]);
-    g_strfreev(v);
+    //gchar **v = g_strsplit(segfile,".",2);
+    // uint64_t db_mine_storage_addr_segno = atol(v[0]);
+    //g_strfreev(v);
 
     GArray *tmp_bit_array;
-    seg_usage->segno = db_mine_storage_addr_segno; 
-    seg_usage->timestamp = latest_inode->ctime;
+    seg_usage->segno = segno; 
+    seg_usage->timestamp = get_current_time();
     HLOG_DEBUG("seg usage's segno:%llu,timestamp:%llu",seg_usage->segno,seg_usage->timestamp);
-    bs_file_t file = storage->bs_file_open(storage,segfile,BS_READONLY);
-    if (NULL == file) {
-        HLOG_ERROR("open segfile:%s failed",segfile);
-        return -1;
-    } 
+
+    char segfile[SEGMENT_FILE_NAME_MAX];
+	build_segfile_name(segno,segfile);
+	char *content = NULL;
+	uing32_t size;
+	if(0!= (ret = file_get_contents(storage,segfile,&contents,&size))){
+	    HLOG_ERROR("read segfile:%s failed",segfile);
+		return -1;
+	}		
+
     tmp_bit_array = g_array_new(FALSE,FALSE,sizeof(gint));
-
+	
+	
+    //bs_file_t file = storage->bs_file_open(storage,segfile,BS_READONLY);
+    //if (NULL == file) {
+    //    HLOG_ERROR("open segfile:%s failed",segfile);
+    //    return -1;
+    //} 
    
-    char *tmp_buf = (char*)g_malloc0(SEGMENT_SIZE); /*  suppose segment size < 64M */
-    int count =storage->bs_file_pread(storage,file,tmp_buf,SEGMENT_SIZE,0);
-    if(count<0){
-        HLOG_ERROR("read content failed");
-    }
+    //char *tmp_buf = (char*)g_malloc0(SEGMENT_SIZE); /*  suppose segment size < 64M */
+    //int count =storage->bs_file_pread(storage,file,tmp_buf,SEGMENT_SIZE,0);
+    //if(count<0){
+    //    HLOG_ERROR("read content failed");
+    //}
 
-    while(offset < count){
+    while(offset < size){
 #if 0
         ret=storage->bs_file_pread(storage,file, (char*)&lh, LOG_HEADER_LENGTH, offset) ;//TODO read 64M once
         g_message("read content len:%d\n",ret);
@@ -113,11 +129,11 @@ int seg_usage_calc(struct back_storage* storage, uint32_t segment_size,uint32_t 
             goto out;
         }
 #endif 
-        lh = (struct log_header*)(tmp_buf + offset);
+        lh = (struct log_header*)(content + offset);
         if(seg_usage->log_num !=0){
             HLOG_DEBUG("this segfile:%s has calc",segfile);
-            idx = log_idx/8;
-            if(!(seg_usage->bitmap[idx] & (1<<(log_idx%8)))){
+            idx = log_idx/sizeof(gint);
+            if(!(seg_usage->bitmap[idx] & (1<<(log_idx%sizeof(gint))))){
                 log_idx++;
                 int x=0;
                 g_array_append_val(tmp_bit_array,x);
@@ -125,31 +141,31 @@ int seg_usage_calc(struct back_storage* storage, uint32_t segment_size,uint32_t 
                 continue;
             }
         }
-        uint64_t orgine_alive_blocks = seg_usage->alive_blocks;
+        uint64_t orgine_alive_block_num = seg_usage->alive_block_num;
         HLOG_DEBUG("start db no:%llu,db num:%d",lh->start_db_no,lh->db_num);
         int i;
-#if 1
+#if 1 /* check refer inode whether still refer to given db in seg */
         for(i=0;i<lh->db_num;i++){
             HLOG_DEBUG("for db:%llu",lh->start_db_no+i);
             uint64_t db_mine_storage_addr = 0;
             uint64_t db_mine_storage_addr_offset = offset+LOG_HEADER_LENGTH+i*block_size;
             set_offset(&db_mine_storage_addr,db_mine_storage_addr_offset);
-            set_segno(&db_mine_storage_addr,db_mine_storage_addr_segno);
-            uint64_t db_cur_storage_addr = get_db_storage_addr_in_inode(storage,latest_inode,
-			    						lh->start_db_no+i,block_size);
+            set_segno (&db_mine_storage_addr,segno);
+            uint64_t db_cur_storage_addr = get_db_storage_addr_in_inode(storage,refer_inode,
+			    						                                lh->start_db_no+i,block_size);
             HLOG_DEBUG("db:%llu's mine storage addr:%llu,cur storage addr:%llu",
 			    	lh->start_db_no+i,db_mine_storage_addr,db_cur_storage_addr);
             if(db_mine_storage_addr != db_cur_storage_addr){
                 HLOG_DEBUG("this is overwrite data block");
-
             }else{
-                seg_usage->alive_blocks++;
-                HLOG_DEBUG("this is used data block :%llu",seg_usage->alive_blocks);
+                seg_usage->alive_block_num++;
+                HLOG_DEBUG("this is used data block :%llu",seg_usage->alive_block_num);
             }
+			seg_usage->block_num++;
         }
 #endif
         //uint32_t alive_blocks = log_usage_calc(storage,latest_inode,&lh,db_mine_storage_addr_segno,offset,block_size);
-        if(orgine_alive_blocks == seg_usage->alive_blocks){
+        if(orgine_alive_block_num == seg_usage->alive_block_num){
             HLOG_DEBUG("log:%d has not any datablock",log_idx);
             //uint32_t bitmap_idx = log_idx / ALIVE_LOG_BITMAP ;
             //seg_usage->alive_log_bitmap[bitmap_idx] &= ~(1 << (log_idx % sizeof(uint64_t)));
@@ -167,18 +183,17 @@ int seg_usage_calc(struct back_storage* storage, uint32_t segment_size,uint32_t 
     int i;
     seg_usage->log_num = tmp_bit_array->len;
     g_free(seg_usage->bitmap);
-    seg_usage->bitmap = (char*)g_malloc0((seg_usage->log_num-1)/8+1);
+    seg_usage->bitmap = (char*)g_malloc0((seg_usage->log_num-1)/sizeof(gint)+1);
     HLOG_DEBUG("size of bitmap:%d",tmp_bit_array->len);
     for(i=0;i<tmp_bit_array->len;i++){
         gint value = g_array_index(tmp_bit_array,gint,i);
-        idx = i/8;
+        idx = i/sizeof(gint);
         if(value==1){
-            //g_message("bitmap idx bit:%d = 1\n",i);
-           seg_usage->bitmap[idx] |= 1<<i%8;
+           //g_message("bitmap idx bit:%d = 1\n",i);
+           seg_usage->bitmap[idx] |= 1<<i%sizeof(gint);
            //g_message("bitmap idx %x\n",seg_usage->bitmap[idx]);
        }
     }
-
     g_array_free(tmp_bit_array,TRUE);
 	HLOG_DEBUG("leave func %s",__func__);
     return 0;

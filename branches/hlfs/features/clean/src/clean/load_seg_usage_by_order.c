@@ -22,7 +22,7 @@ SEG_USAGE_T* load_seg_usage_by_order (struct back_storage *storage, const char *
     	int size =  g_list_length(seg_list);
 		SEG_USAGE_T * seg_usages_buf = (SEG_USAGE_T *)g_malloc0(sizeof(SEG_USAGE_T)*size);
 		int i;
-        for(int = 0;i<size; i++){
+        for(i= 0;i<size; i++){
 		   SEG_USAGE_T * _seg_usage = (SEG_USAGE_T *)g_list_nth_data(seg_list,i);
 		   memcpy(seg_usages_buf+i*sizeof(SEG_USAGE_T),_seg_usage,sizeof(SEG_USAGE_T));
 		   g_free(_seg_usage);

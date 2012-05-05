@@ -210,6 +210,8 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
 		HLOG_ERROR("input params failed");
 		return -1;
     }
+
+    HLOG_DEBUG("hctrl block size:%d",hctrl->sb.block_size);
     int ret = 0;
     const char segfile[SEGMENT_FILE_NAME_MAX];
     build_segfile_name(seg_usage->segno,segfile);
@@ -239,7 +241,7 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
 					   uint64_t db_mine_storage_addr_offset = offset+LOG_HEADER_LENGTH + j*hctrl->sb.block_size;
 					   set_offset(&db_mine_storage_addr,db_mine_storage_addr_offset);
 					   set_segno (&db_mine_storage_addr,seg_usage->segno);
-					   uint64_t db_cur_storage_addr = get_db_storage_addr_in_inode(hctrl->storage,hctrl->inode,
+					   uint64_t db_cur_storage_addr = get_db_storage_addr_in_inode(hctrl->storage,&hctrl->inode,
 			    						                                lh->start_db_no+j,hctrl->sb.block_size);
 					   HLOG_DEBUG("db:%llu's mine storage addr:%llu,cur storage addr:%llu",
 							   lh->start_db_no+i,db_mine_storage_addr,db_cur_storage_addr);
@@ -275,10 +277,10 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
                               hctrl->last_offset = 0;
             			  }
             			  HLOG_DEBUG("last segno:%u last offset:%u", hctrl->last_segno,hctrl->last_offset);
-					  
-            			  ret = append_log(hctrl,lh->data + (db_start - lh->start_db_no)* hctrl->sb.block_size,(uint32_t) db_start, (uint32_t) db_end);
-						  g_assert(ret == 0);
-						  hctrl->last_offset += ret;
+					      uint32_t size; 
+            			  size = append_log(hctrl,lh->data + (db_start - lh->start_db_no)* hctrl->sb.block_size,(uint32_t) db_start, (uint32_t) db_end);
+						  g_assert(size > 0);
+						  hctrl->last_offset += size;
 						  db_start = db_end = -1;
 					   }
 		    }

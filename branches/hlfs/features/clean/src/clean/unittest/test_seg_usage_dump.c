@@ -21,11 +21,11 @@ Fixture fixture;
 void case_setup()
 {
 	system("rm -rf /tmp/testenv");
-	system("mkdir /tmp/testenv -p");
-	system("cd ../../../../ && ./output/bin/mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024 ");
-	system("cd -");
+	system("mkdir /tmp/testenv/testfs -p");
+	//system("cd ../../../../ && ./output/bin/mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024 ");
+	//system("cd -");
 	char * uri = "local:///tmp/testenv/testfs";
-    fixture.storage = deinit_storage_handler(uri);
+    fixture.storage = init_storage_handler(uri);
     g_assert(NULL != fixture.storage);
 }
 

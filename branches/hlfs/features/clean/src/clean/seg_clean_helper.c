@@ -187,38 +187,35 @@ int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
 
 
 
-/*该函数用于根据段号和快照表找到回收使用的参考inode*/
 int get_refer_inode_between_snapshots(struct back_storage *storage,uint64_t segno,GList *snapshot_sorted_list, struct inode ** inode){
     if(storage == NULL || snapshot_sorted_list == NULL){
-	 return -1; 
+        return -1; 
     }
     int num_entries = g_list_length(snapshot_sorted_list);
-    if(num_entries == 1) {
-	 struct snapshot * snapshot = (struct snapshot *)g_list_nth_data(snapshot_sorted_list,0);
-    	 if( segno < get_segno(snapshot->inode_addr)){
-    	      HLOG_DEBUG("noly one snapshot and in first range");	
-    	      *inode =  load_inode(storage,snapshot->inode_addr);
-	         return 0;
-    	 }else {
-             return 1;	        
-    	 }
-    }		
-
+    HLOG_DEBUG("snapshot count :%d",num_entries);	
+    HLOG_DEBUG("segno :%d",segno);	
     struct snapshot * cur_snapshot;
     struct snapshot * pre_snapshot;
-
     cur_snapshot = (struct snapshot *)g_list_nth_data(snapshot_sorted_list,0);
     pre_snapshot = cur_snapshot;
-    int i=0;
+    if( segno < get_segno(cur_snapshot->inode_addr)){
+        HLOG_DEBUG("seg in first range");	
+        *inode =  load_inode(storage,cur_snapshot->inode_addr);
+        return 0;
+    }
+    int i;
     for(i=1;i<num_entries;i++){
-	 if ( segno > get_segno (pre_snapshot->inode_addr) && segno < get_segno(cur_snapshot->inode_addr) ){
-	 	*inode = load_inode(storage,cur_snapshot->inode_addr);
-		return 0;
-	 }
-	 pre_snapshot=cur_snapshot;
-	 cur_snapshot = (struct snapshot *)g_list_nth_data(snapshot_sorted_list,i);
-    }		
-    return 1;
+        HLOG_DEBUG("idx:%d,pre snapshot inode segno:%u,name:%s;cur snapshot inode segno:%u,name:%s",i,get_segno(pre_snapshot->inode_addr),pre_snapshot->sname,get_segno(cur_snapshot->inode_addr),cur_snapshot->sname);	
+        if ( segno > get_segno (pre_snapshot->inode_addr) && segno < get_segno(cur_snapshot->inode_addr) ){
+            *inode = load_inode(storage,cur_snapshot->inode_addr);
+            return 0;
+        }else if (segno == get_segno(cur_snapshot->inode_addr)){
+            return 1;
+        }
+        pre_snapshot=cur_snapshot;
+        cur_snapshot = (struct snapshot *)g_list_nth_data(snapshot_sorted_list,i);
+    }
+    return 2;
 }
 
 int load_all_seg_usage(struct back_storage *storage,

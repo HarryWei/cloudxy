@@ -38,6 +38,7 @@ void case_setup()
     char content[BATCHSIZE];
     for(i=0;i<8192*3;i++){
         hlfs_write(fixture.hctrl,content,BATCHSIZE,offset);
+        hlfs_write(fixture.hctrl,content,BATCHSIZE,offset);
         offset = offset + BATCHSIZE;
         if(offset == 8192*8192){
            ret = hlfs_take_snapshot(fixture.hctrl,"test_snapshot1");  

@@ -20,7 +20,7 @@ Fixture fixture;
 
 void case_setup()
 {
-#if 1
+#if 0
 	system("rm -rf /tmp/testenv");
 	system("mkdir /tmp/testenv -p");
 	system("cd ../../../ && ./output/bin/mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024");
@@ -44,13 +44,11 @@ void case_setup()
            g_assert(ret == 0);
            g_print("take snapshot 1\n");
         }
-
         if(offset == 8192*8192*2){
            ret = hlfs_take_snapshot(fixture.hctrl,"test_snapshot2");  
            g_assert(ret == 0);
            g_print("take snapshot 2\n");
         }
-
         if(offset == 8192*8192*2 + 8192*1){
            ret = hlfs_take_snapshot(fixture.hctrl,"test_snapshot3");  
            g_assert(ret == 0);
@@ -69,15 +67,14 @@ void case_setup()
  */
 
 /*  write trigger wb*/
-void test_get_refer_inode()
+void test_seg_usage_calc()
 {
     char * uri = "local:///tmp/testenv/testfs";
     struct back_storage *storage = init_storage_handler(uri);
-    int ret = 0;
     uint32_t segment_size = 0;
     uint32_t block_size = 0;
     uint32_t max_fs_size = 0;
-    ret = read_fs_meta(storage,&segment_size, &block_size,&max_fs_size);
+    int ret = read_fs_meta(storage,&segment_size, &block_size,&max_fs_size);
     g_assert(ret == 0);
     GHashTable   * ss_hashtable = g_hash_table_new_full(g_str_hash,g_str_equal,NULL,NULL);
     ret = load_all_snapshot(storage,"snapshot.txt",ss_hashtable);
@@ -93,7 +90,26 @@ void test_get_refer_inode()
         struct inode * inode=NULL;
         ret = get_refer_inode_between_snapshots(storage,i,ss_list,&inode);
         printf("segno :%d ret:%d\n",i,ret);
+        if(ret == 0){
+           printf("seg is in snapshots\n");
+           SEG_USAGE_T seg_usage;
+           memset(&seg_usage,0,sizeof(SEG_USAGE_T));
+           ret = seg_usage_calc(storage,block_size,i,inode,&seg_usage);
+           g_assert(ret ==0);
+           char textbuf[4096];
+           memset(textbuf,4096,0);
+           ret = seg_usage2text(&seg_usage,textbuf);
+           g_assert(ret > 0);
+           printf("textbuf is :%s\n",textbuf);
+        }
+        if(ret == 1){
+           printf("seg is on snapshot,do nothing\n");
+        }
+        if(ret == 2){
+           printf("seg is above snapshot,maybe need migrate\n");
+        }
     }
+
 }
 
 
@@ -116,11 +132,11 @@ int main(int argc, char **argv) {
 	}
 	g_test_init(&argc, &argv, NULL);
 #if 1
-	g_test_add("/misc/test_get_refer_inode", 
+	g_test_add("/misc/test_seg_usage_calc", 
 				Fixture, 
 				NULL,
 				case_setup, 
-				test_get_refer_inode, 
+				test_seg_usage_calc, 
 				case_teardown);
 #endif
 #if 0

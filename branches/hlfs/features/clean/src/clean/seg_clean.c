@@ -66,11 +66,12 @@ int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint64_t seg
 		HLOG_ERROR("input params failed");
 		return -1;
     }
-	if(segno != seg_usage->segno){
+#if 0
+	if(seg_usage->bitmap!=0 && segno != seg_usage->segno){
 		HLOG_ERROR("segno not match");
 		return -1;
 	}	
-		
+#endif	
     int ret = 0;
     int log_idx=0;
     int idx;

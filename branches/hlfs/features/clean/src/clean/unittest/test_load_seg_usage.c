@@ -71,6 +71,17 @@ void test_load_seg_usage()
     GHashTable   * seg_usage_hashtable = g_hash_table_new_full(g_direct_hash,g_direct_equal,NULL,NULL);
     ret = load_all_seg_usage(fixture.storage,"SEG_USAGE.TXT",seg_usage_hashtable);
     g_assert(ret == 0);
+    GList* seg_list;
+    ret = sort_all_seg_usage(seg_usage_hashtable,&seg_list);
+    g_assert(ret == 0);
+    g_assert(100 == g_list_length(seg_list));
+    int j = 0;
+    for(j=0;j<100;j++){
+         SEG_USAGE_T * seg_usage = g_list_nth_data(seg_list,j);  
+         printf("seg no:%d\n",seg_usage->segno);
+    }
+
+
 }
 
 

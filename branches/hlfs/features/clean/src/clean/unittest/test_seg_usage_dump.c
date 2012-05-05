@@ -67,6 +67,8 @@ void test_seg_usage_text()
     g_assert(ret == 0);
     g_assert(seg_usage.segno == 10);
     g_assert(seg_usage.inode_addr == 10101010);
+
+
 }
 
 

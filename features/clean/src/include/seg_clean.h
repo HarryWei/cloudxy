@@ -29,6 +29,7 @@ int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint64_t seg
 //int load_seg_usage(struct back_storage * storage,uint32_t segno,const char* segment_usage_file,SEG_USAGE_T * seg_usage);
 int dump_seg_usage(struct back_storage * storage,  const char* seg_usage_file,  SEG_USAGE_T * seg_usage);
 int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage);
+SEG_USAGE_T* load_seg_usage_by_order (struct back_storage *storage, const char *seg_usage_file,int *num_entries);
 
 
 #ifdef __cplusplus 

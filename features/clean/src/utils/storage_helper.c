@@ -315,6 +315,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
     HLOG_DEBUG("enter func %s",__func__);
 	uint64_t cur_storage_addr = 0;
     guint32 BLOCKSIZE = block_size;
+    uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
 	if (is_db_in_level1_index_range(db_no)) {
 		int idx = db_no % 12;
 		cur_storage_addr = inode->blocks[idx];
@@ -326,7 +327,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (NULL == ib) {
 			return -1;
 		}
-		int idx = (db_no - 12) % 1024;
+		int idx = (db_no - 12) % IB_ENTRY_NUM;
 		cur_storage_addr = *(ib + idx);
 		g_free(ib);
 	} else if (is_db_in_level3_index_range(db_no)) {
@@ -337,7 +338,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (NULL == ib) {
 			return -1;
 		}
-		int idx = (db_no - 12 - 1024) / 1024;
+		int idx = (db_no - 12 - IB_ENTRY_NUM) / IB_ENTRY_NUM;
 		if (0 == *(ib + idx)) {
 			return 1;
 		}
@@ -345,7 +346,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (NULL == ib2) {
 			return -1;
 		}
-		uint64_t idx2 = (db_no - 12 - 1024) % 1024;
+		uint64_t idx2 = (db_no - 12 - IB_ENTRY_NUM) % IB_ENTRY_NUM;
 		cur_storage_addr = *(ib2 + idx2);
 		g_free(ib);
 		g_free(ib2);
@@ -357,7 +358,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (NULL == ib) {
 			return -1;
 		}
-		int idx = (db_no - 12 - 1024 - 1024 * 1024) / (1024 * 1024);
+		int idx = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) / (IB_ENTRY_NUM * IB_ENTRY_NUM);
 		if (0 == *(ib + idx)) {
 			return 1;
 		}
@@ -365,7 +366,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (NULL == ib2) {
 			return -1;
 		}
-		uint64_t idx2 = (db_no - 12 - 1024 - 1024 * 1024) / 1024 % 1024;
+		uint64_t idx2 = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) / IB_ENTRY_NUM % IB_ENTRY_NUM;
 		if (0 == *(ib2 + idx2)) {
 			return 1;
 		}
@@ -373,7 +374,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (NULL == ib3) {
 			return -1;
 		}
-		uint64_t idx3 = (db_no - 12 - 1024 - 1024 * 1024) % 1024;
+		uint64_t idx3 = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) % IB_ENTRY_NUM;
 		cur_storage_addr = *(ib3 + idx3);
 		g_free(ib);
 		g_free(ib2);

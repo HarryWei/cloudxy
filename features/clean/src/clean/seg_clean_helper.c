@@ -277,8 +277,6 @@ static int compare_seg_usage(gconstpointer litem,
      return ret;
 }
 
-
-
 int sort_all_seg_usage(GHashTable *su_hashtable,GList **su_list){
     (*su_list) = g_hash_table_get_values(su_hashtable);
     (*su_list) = g_list_sort((*su_list),compare_seg_usage);

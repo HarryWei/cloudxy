@@ -76,6 +76,7 @@ struct hlfs_ctrl {
     //GAsyncQueue * write_rsp_aqueue;
     //struct write_rsp  write_rsp;
     //struct write_req  write_req;
+    uint64_t last_access_timestamp;
     int seg_clean_run;
     CTRL_REGION_T * ctrl_region;
     GMutex * hlfs_access_mutex;

@@ -116,6 +116,7 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
         g_free(block);
     }
     //g_mutex_unlock (ctrl->hlfs_access_mutex);
+    ctrl->last_access_timestamp = get_current_time();
     HLOG_DEBUG("read len %u", offset);
 	HLOG_DEBUG("leave func %s", __func__);
     return offset;

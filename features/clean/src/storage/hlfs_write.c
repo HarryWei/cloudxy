@@ -177,6 +177,7 @@ write_log:;
 #endif /*use async queue*/
 #endif 
     g_free(datablocks);
+	ctrl->last_access_timestamp = get_current_time();
 	HLOG_DEBUG("leave func %s", __func__);
     return write_len;
 }

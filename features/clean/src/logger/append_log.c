@@ -395,7 +395,7 @@ int append_log(struct hlfs_ctrl *hctrl,const char *db_buff,uint32_t db_start,uin
 	}
 	HLOG_DEBUG("last segno:%u last offset:%u", hctrl->last_segno,hctrl->last_offset);
 	uint32_t size; 
-	size = __append_log(hctrl,lh->data + (db_start - lh->start_db_no)* hctrl->sb.block_size,(uint32_t) db_start, (uint32_t) db_end);
+	size = __append_log(hctrl,db_buff,(uint32_t) db_start, (uint32_t) db_end);
 	g_assert(size > 0);
 	hctrl->last_offset += size;
 	return size;

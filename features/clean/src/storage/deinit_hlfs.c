@@ -29,7 +29,7 @@ int deinit_hlfs(struct hlfs_ctrl * ctrl)
        HLOG_DEBUG("-destroy cache-");
        cache_destroy(ctrl->cctrl);
     }
-	ctrl->write_task_run = 0;
+	ctrl->seg_clean_run = 0;
     g_thread_join(ctrl->seg_clean_thread);
     //g_async_queue_unref(ctrl->write_req_aqueue);
     //g_async_queue_unref(ctrl->write_rsp_aqueue);

@@ -99,7 +99,7 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
     					  g_mutex_unlock (hctrl->hlfs_access_mutex);
     				      if(size < 0){
        						 HLOG_ERROR("append log error");
-        					 assert(0);
+        					 g_assert(0);
 							 return -1;
    					      }
 						  #endif 

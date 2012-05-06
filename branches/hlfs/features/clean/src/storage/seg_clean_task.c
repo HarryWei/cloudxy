@@ -46,7 +46,7 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
 				 }
 				 HLOG_DEBUG(" next rond check kick off ");
 				 ret = load_all_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage_hashtable);
-				 assert(ret == 0);
+				 g_assert(ret == 0);
 				 seg_usage_list = g_hash_table_get_values(seg_usage_hashtable);
 				 ret = sort_all_seg_usage(seg_usage_hashtable,seg_usage_list); /*安段号排序*/
 				 seg_idx = 0;
@@ -76,7 +76,7 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
 			   }
 		}while(seg_idx <=  g_list_length(seg_usage_list)); //找到需要可进行强制回收的段
 		
-		if(seg_idx == g_list_length(seg_usage_list){
+		if(seg_idx == g_list_length(seg_usage_list)){
 			     HLOG_DEBUG(" check all seg usage over ! seg_idx:%d",seg_idx);
 				 seg_idx = -1;
 				 continue;

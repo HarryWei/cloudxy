@@ -129,23 +129,20 @@ write_log:;
 	ctrl->inode.atime  = cur_time;
 	HLOG_DEBUG("get_current_time is %llu", ctrl->inode.mtime);
     HLOG_DEBUG("length is %llu", ctrl->inode.length);
-    if(NULL == ctrl->cctrl){
-        int expand_size =  (db_end-db_start + 1)*BLOCKSIZE + 
-            ib_amount(db_start,db_end) * BLOCKSIZE + 
-            LOG_HEADER_LENGTH + 
-            sizeof(struct inode) + 
-            sizeof(struct inode_map_entry);
-        if (expand_size > ctrl->sb.seg_size) {
-            HLOG_ERROR("write length is beyond the limit length!");
-            //g_mutex_unlock (ctrl->hlfs_access_mutex);
-            return -1;
-        }
-        if (ctrl->last_offset + expand_size > ctrl->sb.seg_size) {
-            ctrl->last_segno++;
-            ctrl->last_offset = 0;
-        }
-        HLOG_DEBUG("last segno: %u last offset: %u", ctrl->last_segno, ctrl->last_offset);
-    }
+   
+	if(ctrl->cctrl != NULL){
+	HLOG_DEBUG("use write back mode");
+		int ret = cache_insert_blocks(ctrl->cctrl,w_req->db_start,(w_req->db_end - w_req->db_start + 1),w_req->req_buf); g_assert(ret == 0);
+	}else{
+		HLOG_DEBUG("use write through mode");
+		int size = append_log(ctrl,w_req->req_buf,w_req->db_start,w_req->db_end);
+		if(size < 0){
+		g_message("fail to append log\n");
+		g_free(datablocks);
+		return -1; 
+	}
+
+#if 0
 #if 0 /* use async way */
     int size = append_log(ctrl,datablocks,db_start,db_end);
     if(size < 0){
@@ -176,13 +173,9 @@ write_log:;
         return -1;
 	}
 #endif /*use async queue*/
+#endif 
     g_free(datablocks);
-    if(NULL == ctrl->cctrl){
-        ctrl->last_offset += size;
-	    HLOG_DEBUG("last offset: %u fs length: %lld", ctrl->last_offset, ctrl->inode.length);
-    }
-
-    //g_mutex_unlock (ctrl->hlfs_access_mutex);
+  
 	HLOG_DEBUG("leave func %s", __func__);
     return write_len;
 }

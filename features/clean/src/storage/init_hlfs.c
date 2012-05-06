@@ -95,7 +95,7 @@ init_hlfs(const char *uri)
     }
 
 	ctrl->usage_ref = 0;
-    ctrl->write_task_run = 1;
+    ctrl->seg_clean_run = 1;
 	memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
     GThread * seg_clean_thread = g_thread_create((GThreadFunc)seg_clean_task,ctrl,TRUE,NULL);
     ctrl->seg_clean_thread = seg_clean_thread;

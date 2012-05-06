@@ -13,7 +13,7 @@
 #include "storage_helper.h"
 #include "seg_clean.h"
 
-int log_write_task(struct hlfs_ctrl * ctrl)
+int seg_clean_task(struct hlfs_ctrl * ctrl)
 {
 	HLOG_DEBUG("enter func %s", __func__);
 	if (NULL == ctrl) {
@@ -23,38 +23,12 @@ int log_write_task(struct hlfs_ctrl * ctrl)
     gint seg_idx = 0;
     GHashTable *seg_usage_hashtable = g_hash_table_new_full(g_direct_hash,g_direct_equal,NULL,NULL);//TODO
     GList * seg_usage_list = NULL;
-    struct write_req *w_req = &ctrl->write_req;
-    struct write_rsp *w_rsp = &ctrl->write_rsp;
     GTimeVal expired;
 	seg_idx = 0;
     while(ctrl->write_task_run){
         g_get_current_time(&expired);
-        g_time_val_add(&expired,1000*1000);
-        w_req = (struct write_req*)g_async_queue_timed_pop(ctrl->write_req_aqueue,&expired);
-        if(w_req != NULL){
-            HLOG_DEBUG("real write request comming");
-            int size = 0;
-            if(ctrl->cctrl != NULL){
-               HLOG_DEBUG("use write back mode");
-               int ret = cache_insert_blocks(ctrl->cctrl,w_req->db_start,(w_req->db_end - w_req->db_start + 1),w_req->req_buf); g_assert(ret == 0);
-               size = 0; 
-            }else{
-               HLOG_DEBUG("use write through mode");
-               size = append_log(ctrl,w_req->req_buf,w_req->db_start,w_req->db_end);
-            }
-            //w_rsp = (struct write_rsp*)g_malloc0(sizeof(struct write_rsp));
-            if(size < 0){
-                HLOG_DEBUG("failed to append log");
-                w_rsp->res = -1;
-            }else{
-                w_rsp->res = 0;
-                w_rsp->size = size;
-            }
-            g_async_queue_push(ctrl->write_rsp_aqueue,(gpointer)w_rsp);
-            //g_free(w_req);
-            continue;
-            /*  */
-        }else{
+        g_time_val_add(&expired,1000*1000*5);
+       
         #if 0
             //HLOG_DEBUG("no real write request for expired ,do copy for cleaning");
             if(g_atomic_int_get(&ctrl->ctrl_region->is_start_clean) == 1){
@@ -102,9 +76,9 @@ int log_write_task(struct hlfs_ctrl * ctrl)
             /*  */
 #endif 
         }
-    }
-    if(seg_usage_list!=NULL)
+    if(seg_usage_list!=NULL){
         g_list_free(seg_usage_list);
+    }
     g_hash_table_destroy(seg_usage_hashtable);
     HLOG_DEBUG("leave func %s", __func__);
     return 0;

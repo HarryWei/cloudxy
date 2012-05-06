@@ -49,7 +49,7 @@ struct log_header {
 }__attribute__((packed)); 
 
 #define LOG_HEADER_LENGTH sizeof(struct log_header)
-
+/*
 struct write_req{
     char * req_buf;
     uint32_t db_start;
@@ -59,6 +59,7 @@ struct write_rsp{
     int res;
     uint64_t size;
 };
+*/
 
 /* The control structure in RAM */
 struct hlfs_ctrl {
@@ -71,14 +72,14 @@ struct hlfs_ctrl {
     void *   cur_write_file_handler;
     void *   cur_read_file_handler;
     uint32_t cur_read_segno;
-    GAsyncQueue * write_req_aqueue;
-    GAsyncQueue * write_rsp_aqueue;
-    struct write_rsp  write_rsp;
-    struct write_req  write_req;
-    int write_task_run;
+    //GAsyncQueue * write_req_aqueue;
+    //GAsyncQueue * write_rsp_aqueue;
+    //struct write_rsp  write_rsp;
+    //struct write_req  write_req;
+    int seg_clean_run;
     CTRL_REGION_T * ctrl_region;
     GMutex * hlfs_access_mutex;
-    GThread *log_write_thread;
+    GThread *seg_clean_thread;
     int usage_ref;
 	int rw_inode_flag;
 	char alive_ss_name[MAX_FILE_NAME_LEN];

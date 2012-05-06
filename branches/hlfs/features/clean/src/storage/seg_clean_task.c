@@ -25,7 +25,7 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
     GList * seg_usage_list = NULL;
     GTimeVal expired;
 	seg_idx = 0;
-    while(ctrl->write_task_run){
+    while(ctrl->seg_clean_run){
         g_get_current_time(&expired);
         g_time_val_add(&expired,1000*1000*5);
        

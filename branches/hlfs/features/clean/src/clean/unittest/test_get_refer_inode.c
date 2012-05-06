@@ -91,7 +91,8 @@ void test_get_refer_inode()
     int i;
     for(i=0;i<9;i++){
         struct inode * inode=NULL;
-        ret = get_refer_inode_between_snapshots(storage,i,ss_list,&inode);
+        char *up_sname;
+        ret = get_refer_inode_between_snapshots(storage,i,ss_list,&inode,&up_sname);
         printf("segno :%d ret:%d\n",i,ret);
     }
 }

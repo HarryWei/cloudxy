@@ -18,8 +18,8 @@ int dump_seg_usage(struct back_storage * storage,
     struct segment_usage * seg_usage){
     HLOG_DEBUG("enter func %s",__func__);
     HLOG_DEBUG("enter func %s,seg usage file:%s",__func__,segment_usage_file);
-    char segtextbuf[sizeof(struct segment_usage)*10];
-    memset(segtextbuf,0,sizeof(struct segment_usage)*10);
+    char segtextbuf[4096];
+    memset(segtextbuf,0,0);
     uint32_t len = seg_usage2text(seg_usage,segtextbuf);
     int ret = file_append_contents(storage,segment_usage_file,segtextbuf,len);
     HLOG_DEBUG("leave func %s",__func__);

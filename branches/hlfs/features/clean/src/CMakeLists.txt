@@ -82,7 +82,7 @@ ADD_LIBRARY(hlfs SHARED ${LHFSSRCS})
 # Set linked libs with target.¡¡
 TARGET_LINK_LIBRARIES(hlfs ${LHFLIBS})
 # Set compile property.
-SET_TARGET_PROPERTIES(hlfs PROPERTIES COMPILE_FLAGS "-g")
+SET_TARGET_PROPERTIES(hlfs PROPERTIES COMPILE_FLAGS "-g -U_FORTIFY_SOURCE")
 # Set linked property.
 # SET_TARGET_PROPERTIES(hlfs PROPERTIES LINK_FLAGS "")
 ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)

@@ -575,7 +575,7 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 	}
 	if(*size != storage->bs_file_pread(storage,file,*contents,*size,0))
 	{
-		HLOG_ERROR("Read file snapshot.txt failed\n");
+		HLOG_ERROR("Read file:%s failed",filename);
 		storage->bs_file_close(storage, file);
         g_free(contents);
 		ret = -1;

@@ -9,11 +9,13 @@
 
 static gchar *uri = NULL;
 //static gchar *fsname = NULL;
-static int mode=-1;
+static int start_segno;
+static int end_segno;
 static gboolean verbose = FALSE;
 static GOptionEntry entries[] = {
-	    {"filesystem uri",'u', 0, G_OPTION_ARG_STRING,   &uri, "filesystem storage uri", "FSLOC"},
-    	//{"filesystme name", 'f', 0, G_OPTION_ARG_FILENAME, &fsname, "filesystem name", "NAME"},
+	    {"filesystem uri",'u', 0, G_OPTION_ARG_STRING,   &uri,          "filesystem storage uri", "FSLOC"},
+	    {"start_segno",  's', 0, G_OPTION_ARG_INT,      &start_segno, "start seg no", "START"},
+	    {"end_segno",    'e', 0, G_OPTION_ARG_INT,      &end_segno,   "end seg no",   "END"},
     	{"verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
     	{NULL}
 };
@@ -45,7 +47,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     g_option_context_free(context);
-    g_message("uri is :%s",uri);
+    g_message("uri is :%s,start segno:%d,end segno:%d",uri,start_segno,end_segno);
     //g_message("fsname   is :%s",fsname);
 
 
@@ -68,6 +70,7 @@ int main(int argc, char *argv[])
         SEGMENT_SIZE_SHIFT++;
     }
 #endif
+#if 0
     struct inode * latest_inode = load_latest_inode(storage); 
     g_message("latest inode's timestamp :%llu",latest_inode->ctime);
     int num_entries;
@@ -124,5 +127,60 @@ int main(int argc, char *argv[])
     }
     g_hash_table_destroy(seg_usage_hashtable);
     free(infos);
+#endif
+    GHashTable   *ss_hashtable = g_hash_table_new_full(g_str_hash,g_str_equal,NULL,NULL);
+    ret = load_all_snapshot(storage,SNAPSHOT_FILE,ss_hashtable);
+    printf("snapshot loaded\n"); 
+    g_assert(ret == 0);
+    GList* ss_list = NULL;
+    ret = sort_all_snapshot(ss_hashtable,&ss_list);
+    printf("snapshot sorted\n"); 
+    g_assert(ss_list !=NULL);
+    g_assert(ret == 0);
+    struct inode * latest_inode = load_latest_inode(storage); 
+    int i;
+    for(i=start_segno;i<=end_segno;i++){
+        struct inode * inode=NULL;
+        char *up_sname;
+        ret = get_refer_inode_between_snapshots(storage,i,ss_list,&inode,&up_sname);
+        printf("segno :%d ret:%d\n",i,ret);
+        if(ret == 0){
+           printf("seg is in snapshots\n");
+           SEG_USAGE_T seg_usage;
+           memset(&seg_usage,0,sizeof(SEG_USAGE_T));
+           strncpy(seg_usage.up_sname,up_sname,strlen(up_sname));
+           ret = seg_usage_calc(storage,HBLOCK_SIZE,i,inode,&seg_usage);
+           printf("up sname is:%s\n",seg_usage.up_sname);
+           g_assert(ret ==0);
+           char textbuf[8192];
+           memset(textbuf,0,8192);
+           ret = seg_usage2text(&seg_usage,textbuf);
+           g_assert(ret > 0);
+           printf("textbuf is :%s\n",textbuf);
+           ret = dump_seg_usage(storage,SEGMENTS_USAGE_FILE,&seg_usage);
+           g_assert(ret == 0);
+           printf("dump seg usage over !");
+        }
+        if(ret == 1){
+           printf("seg is on snapshot,do nothing\n");
+        }
+        if(ret == 2){
+           printf("seg is above snapshot,maybe need migrate\n");
+           SEG_USAGE_T seg_usage;
+           memset(&seg_usage,0,sizeof(SEG_USAGE_T));
+           strncpy(seg_usage.up_sname,"_____",strlen("_____"));
+           printf("up sname is:%s\n",seg_usage.up_sname);
+           ret = seg_usage_calc(storage,HBLOCK_SIZE,i,latest_inode,&seg_usage);
+           g_assert(ret ==0);
+           char textbuf[8192];
+           memset(textbuf,0,8192);
+           ret = seg_usage2text(&seg_usage,textbuf);
+           g_assert(ret > 0);
+           printf("textbuf is :%s\n",textbuf);
+           ret = dump_seg_usage(storage,SEGMENTS_USAGE_FILE,&seg_usage);
+           g_assert(ret == 0);
+        }
+    }
+
     return 0;
 }

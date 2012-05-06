@@ -136,7 +136,8 @@ int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
 	    return -1; 
      }
      HLOG_DEBUG("enter func %s",__func__);
-     HLOG_DEBUG("textbuf :%s",textbuf);
+     HLOG_DEBUG("textbuf len:%d",strlen(textbuf));
+     //HLOG_DEBUG("textbuf :%s",textbuf);
      gchar **v = g_strsplit (textbuf," ",1024);
      gchar *_segno_str = v[0]; 
      gchar *_up_sname = v[1];
@@ -187,7 +188,7 @@ int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
 
 
 
-int get_refer_inode_between_snapshots(struct back_storage *storage,uint64_t segno,GList *snapshot_sorted_list, struct inode ** inode){
+int get_refer_inode_between_snapshots(struct back_storage *storage,uint64_t segno,GList *snapshot_sorted_list, struct inode ** inode,char **up_sname){
     if(storage == NULL || snapshot_sorted_list == NULL){
         return -1; 
     }
@@ -201,6 +202,7 @@ int get_refer_inode_between_snapshots(struct back_storage *storage,uint64_t segn
     if( segno < get_segno(cur_snapshot->inode_addr)){
         HLOG_DEBUG("seg in first range");	
         *inode =  load_inode(storage,cur_snapshot->inode_addr);
+        *up_sname = strdup(cur_snapshot->sname);
         return 0;
     }
     int i;
@@ -208,6 +210,7 @@ int get_refer_inode_between_snapshots(struct back_storage *storage,uint64_t segn
         HLOG_DEBUG("idx:%d,pre snapshot inode segno:%u,name:%s;cur snapshot inode segno:%u,name:%s",i,get_segno(pre_snapshot->inode_addr),pre_snapshot->sname,get_segno(cur_snapshot->inode_addr),cur_snapshot->sname);	
         if ( segno > get_segno (pre_snapshot->inode_addr) && segno < get_segno(cur_snapshot->inode_addr) ){
             *inode = load_inode(storage,cur_snapshot->inode_addr);
+            *up_sname = strdup(cur_snapshot->sname);
             return 0;
         }else if (segno == get_segno(cur_snapshot->inode_addr)){
             return 1;
@@ -223,38 +226,41 @@ int load_all_seg_usage(struct back_storage *storage,
 						  GHashTable   * seg_usage_hashtable){
     HLOG_DEBUG("enter func %s",__func__);
 	char *content = NULL;
-	uint32_t size;
-	if(0!= (size = file_get_contents(storage,seg_usage_file,&content,&size))){
+	uint32_t size = 0;
+	if(0!= file_get_contents(storage,seg_usage_file,&content,&size)){
 	    HLOG_ERROR("read segfile:%s failed",seg_usage_file);
 		return -1;
-	}		
-
-    HLOG_DEBUG("===read count %d ,%s",size,content);
+    }		
+    HLOG_DEBUG("read seg usage file size:%u,content len:%d",size,strlen(content));
 #if 1
     gchar ** segs = g_strsplit(content,"\n",0);
     HLOG_DEBUG("there are %d segno in segment usage file",g_strv_length(segs));
     int i;
     for(i=0;i<g_strv_length(segs)-1;i++){
-        SEG_USAGE_T * seg_usage= (SEG_USAGE_T *)g_malloc(sizeof(SEG_USAGE_T));
+        if(strlen(segs[i])<=1){
+           continue; 
+        }
+        HLOG_DEBUG("seg usage content:%s",segs[i]);
+        SEG_USAGE_T * seg_usage= (SEG_USAGE_T *)g_malloc0(sizeof(SEG_USAGE_T));
         seg_usage4text(seg_usage,segs[i]);
         //g_hash_table_insert(seg_usage_hashtable,seg_usage->segno,seg_usage);
         HLOG_DEBUG("segno:%llu",seg_usage->segno);
-	 if(seg_usage->alive_block_num !=0){
-         g_hash_table_insert(seg_usage_hashtable,GINT_TO_POINTER((uint32_t) seg_usage->segno),seg_usage);
-	 }else{
-	     HLOG_DEBUG("segno:%llu can been delete ",seg_usage->segno);
-	     g_free(seg_usage);
-	 }
+        if(seg_usage->alive_block_num !=0){
+            g_hash_table_insert(seg_usage_hashtable,GINT_TO_POINTER((uint32_t) seg_usage->segno),seg_usage);
+        }else{
+            HLOG_DEBUG("segno:%llu can been delete ",seg_usage->segno);
+            g_free(seg_usage);
+        }
     }
     g_strfreev(segs);
 #else 
     char *line = textbuf;
     int offset = 0;
     do{
-      HLOG_DEBUG("........line:%s,len:%d",line,strlen(line));
-      int len = strlen(line);
-      line += len+1;
-      offset += len+1 ;
+        HLOG_DEBUG("........line:%s,len:%d",line,strlen(line));
+        int len = strlen(line);
+        line += len+1;
+        offset += len+1 ;
     }while(offset < count);
 #endif
     HLOG_DEBUG("leave func %s",__func__);

@@ -25,36 +25,45 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
     GList * seg_usage_list = NULL;
     //GTimeVal expired;
     SEG_USAGE_T * seg_usage = NULL;
-	int seg_idx = 0;
+	int seg_idx = -1;
     while(ctrl->seg_clean_run){
         //g_get_current_time(&expired);
         //g_time_val_add(&expired,1000*1000*5);
         //g_usleep(1000*1000*5);
-        if(get_current_time() - ctrl->last_access_timestamp < 1000*1000*5){
+        if(ctrl->last_access_timestamp == 0 || (get_current_time() - ctrl->last_access_timestamp) < 1000*5){
+	       HLOG_DEBUG(" we should do clean in silent period ;access timestamp:%llu,cur timestamp:%llu",ctrl->last_access_timestamp,get_current_time());
 		   g_usleep(1000*1000);
 		   continue;
         }
-		if(seg_idx = -1){ //idx归-1则标识一轮结束
+	    HLOG_DEBUG("do clean in silent period");
+		if(seg_idx == -1){ //idx归-1则标识一轮结束
 				 HLOG_DEBUG(" this rond check over ");
-				 if(seg_usage_hashtable !=NULL){
-				   g_hash_table_destroy  (seg_usage_hashtable);
-				   seg_usage_hashtable = NULL;
-				 }
+				 g_hash_table_destroy  (seg_usage_hashtable);
 				 if(seg_usage_list!=NULL){
-				   g_queue_free(seg_usage_list); 
+				   g_list_free(seg_usage_list); 
 				   seg_usage_list = NULL;
 				 }
 				 HLOG_DEBUG(" next rond check kick off ");
+                 seg_usage_hashtable = g_hash_table_new_full(g_direct_hash,g_direct_equal,NULL,NULL);//TODO
 				 ret = load_all_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage_hashtable);
-				 g_assert(ret == 0);
-				 seg_usage_list = g_hash_table_get_values(seg_usage_hashtable);
-				 ret = sort_all_seg_usage(seg_usage_hashtable,seg_usage_list); /*安段号排序*/
+				 //g_assert(ret == 0);
+                 if(ret != 0){
+				    HLOG_DEBUG(" load seg usage failed");
+                    continue;
+                 }
+				 //seg_usage_list = g_hash_table_get_values(seg_usage_hashtable);
+                 //if(g_list_length(seg_usage_list)){
+				 //   HLOG_DEBUG(" seg_usage empty ?");
+                 //   continue;  
+                 //}
+				 ret = sort_all_seg_usage(seg_usage_hashtable,&seg_usage_list); /*安段号排序*/
 				 seg_idx = 0;
 				 HLOG_DEBUG(" seg usage count:%d ",g_list_length(seg_usage_list));
 		}
 		do{
 			   seg_usage = (SEG_USAGE_T *)g_list_nth_data(seg_usage_list,seg_idx);
-			   if(strlen(seg_usage->up_sname) > 0){
+			   HLOG_DEBUG(" seg usage:%d,up_sname:%s",seg_usage->segno,seg_usage->up_sname);
+			   if(0 != strcmp(seg_usage->up_sname,"_____")){
 			   	  HLOG_DEBUG(" seg usage:%d is in snapshots ",seg_usage->segno);
 				  /*是在快照区间,不进行回收*/
 				  seg_idx++;
@@ -74,7 +83,7 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
 				  		       g_atomic_int_get(&ctrl->ctrl_region->copy_waterlevel));
 				  break;
 			   }
-		}while(seg_idx <=  g_list_length(seg_usage_list)); //找到需要可进行强制回收的段
+		}while(seg_idx <  g_list_length(seg_usage_list)); //找到需要可进行强制回收的段
 		
 		if(seg_idx == g_list_length(seg_usage_list)){
 			     HLOG_DEBUG(" check all seg usage over ! seg_idx:%d",seg_idx);

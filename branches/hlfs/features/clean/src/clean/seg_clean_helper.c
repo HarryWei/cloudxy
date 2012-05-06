@@ -245,11 +245,23 @@ int load_all_seg_usage(struct back_storage *storage,
         seg_usage4text(seg_usage,segs[i]);
         //g_hash_table_insert(seg_usage_hashtable,seg_usage->segno,seg_usage);
         HLOG_DEBUG("segno:%llu",seg_usage->segno);
+#if 0
         if(seg_usage->alive_block_num !=0){
             g_hash_table_insert(seg_usage_hashtable,GINT_TO_POINTER((uint32_t) seg_usage->segno),seg_usage);
         }else{
             HLOG_DEBUG("segno:%llu can been delete ",seg_usage->segno);
+
             g_free(seg_usage);
+        }
+#endif
+        SEG_USAGE_T *_seg_usage = g_hash_table_lookup(seg_usage_hashtable,GINT_TO_POINTER((uint32_t)seg_usage->segno));
+        if(_seg_usage!=NULL){
+           HLOG_DEBUG(" seg usage:%d has exit,replace it ");
+           g_hash_table_replace(seg_usage_hashtable,GINT_TO_POINTER((uint32_t) seg_usage->segno),seg_usage);
+           g_free(_seg_usage->bitmap);
+           g_free(_seg_usage);
+        }else{
+           g_hash_table_replace(seg_usage_hashtable,GINT_TO_POINTER((uint32_t) seg_usage->segno),seg_usage);
         }
     }
     g_strfreev(segs);

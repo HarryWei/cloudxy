@@ -131,15 +131,17 @@ write_log:;
     HLOG_DEBUG("length is %llu", ctrl->inode.length);
    
 	if(ctrl->cctrl != NULL){
-	HLOG_DEBUG("use write back mode");
-		int ret = cache_insert_blocks(ctrl->cctrl,w_req->db_start,(w_req->db_end - w_req->db_start + 1),w_req->req_buf); g_assert(ret == 0);
+	    HLOG_DEBUG("use write back mode");
+		int ret = cache_insert_blocks(ctrl->cctrl,db_start,(db_end - db_start + 1),datablocks);
+        g_assert(ret == 0);
 	}else{
 		HLOG_DEBUG("use write through mode");
-		int size = append_log(ctrl,w_req->req_buf,w_req->db_start,w_req->db_end);
+		int size = append_log(ctrl,datablocks,db_start,db_end);
 		if(size < 0){
 		g_message("fail to append log\n");
 		g_free(datablocks);
-		return -1; 
+		return -1;
+        }
 	}
 
 #if 0
@@ -175,7 +177,6 @@ write_log:;
 #endif /*use async queue*/
 #endif 
     g_free(datablocks);
-  
 	HLOG_DEBUG("leave func %s", __func__);
     return write_len;
 }

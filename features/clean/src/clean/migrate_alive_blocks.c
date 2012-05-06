@@ -72,6 +72,7 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
 						  	 HLOG_DEBUG("do not need to copy this log ....... ");
 							 continue;
 					      }	
+						  #if 0
             			  guint32 BLOCKSIZE = hctrl->sb.block_size;
             			  int expand_size =  (db_end-db_start + 1)*BLOCKSIZE + 
                 		  ib_amount(db_start,db_end) * BLOCKSIZE + 
@@ -91,6 +92,17 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
             			  size = append_log(hctrl,lh->data + (db_start - lh->start_db_no)* hctrl->sb.block_size,(uint32_t) db_start, (uint32_t) db_end);
 						  g_assert(size > 0);
 						  hctrl->last_offset += size;
+						  #else
+						  char *db_buff = lh->data + (db_start - lh->start_db_no)* hctrl->sb.block_size;
+						  g_mutex_lock (hctrl->hlfs_access_mutex);
+    					  int size = append_log(hctrl,db_buff,db_start,db_end);
+    					  g_mutex_unlock (hctrl->hlfs_access_mutex);
+    				      if(size < 0){
+       						 HLOG_ERROR("append log error");
+        					 assert(0);
+							 return -1;
+   					      }
+						  #endif 
 						  db_start = db_end = -1;
 					   }
 		    }

@@ -68,13 +68,12 @@ int main(int argc, char *argv[])
     g_assert(ret = 0);
     ret = sort_all_seg_usage(ctrl->storage,seg_usage_hashtable,&seg_usage_list);
     g_assert(ret !=NULL);
-   
     int i;
     for(i=start_segno;i<=end_segno;i++){
         SEG_USAGE_T *seg_usage = g_hash_table_lookup(seg_usage_hashtable,GINT_TO_POINTER((uint32_t)i));
         if(seg_usage != NULL){
 	     if (seg_usage->alive_block_num == 0){
-		      g_message("seg no:%d no alive block now,delete it");
+		      g_message("seg no:%d no alive block now,delete it",i);
 		      char segfile[128];
 		      build_segfile_name(i, segfile);
 		      ret = ctrl->storage->bs_file_delete(ctrl->storage,segfile);	  
@@ -82,7 +81,7 @@ int main(int argc, char *argv[])
 	     }			
             if(0 == strcmp(seg_usage->up_sname,EMPTY_UP_SNAPSHOT)){
                     g_message("seg no:%d is maybe need to migrate",seg_usage->segno);
-                    (seg_usage->alive_block_num > copy_waterlevel){
+                 if (seg_usage->alive_block_num > copy_waterlevel){
                     g_message("seg no:%d is need to migrate",seg_usage->segno);
                     ret = migrate_alive_blocks(ctrl,seg_usage);
                     g_assert(ret == 0);

@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     g_option_context_add_main_entries(context, entries, NULL);
     g_option_context_set_help_enabled(context, TRUE);
     g_option_group_set_error_hook(g_option_context_get_main_group(context),
-            					(GOptionErrorFunc)error_func);
+            (GOptionErrorFunc)error_func);
     if (!g_option_context_parse(context, &argc, &argv, &error)) {
         g_message("option parsing failed: %s", error->message);
         exit(EXIT_FAILURE);
@@ -62,38 +62,53 @@ int main(int argc, char *argv[])
     ret = hlfs_open(ctrl,1);
     g_message("ctrl open over");
     g_assert(ret == 0);
+    if(0!=ctrl->storage->bs_file_is_exist(ctrl->storage,SEGMENTS_USAGE_FILE)){
+       g_message("seg usage file not exit");
+       goto OUT;
+    }
     GHashTable *seg_usage_hashtable = g_hash_table_new_full(g_direct_hash,g_direct_equal,NULL,NULL);//TODO
     GList* seg_usage_list = NULL;
     ret = load_all_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage_hashtable);
-    g_assert(ret = 0);
-    ret = sort_all_seg_usage(ctrl->storage,seg_usage_hashtable,&seg_usage_list);
-    g_assert(ret !=NULL);
+    g_assert(ret == 0);
+    ret = sort_all_seg_usage(seg_usage_hashtable,&seg_usage_list);
+    g_assert(ret == 0);
     int i;
     for(i=start_segno;i<=end_segno;i++){
         SEG_USAGE_T *seg_usage = g_hash_table_lookup(seg_usage_hashtable,GINT_TO_POINTER((uint32_t)i));
+        char segfile[128];
+        build_segfile_name(i, segfile);
         if(seg_usage != NULL){
-	     if (seg_usage->alive_block_num == 0){
-		      g_message("seg no:%d no alive block now,delete it",i);
-		      char segfile[128];
-		      build_segfile_name(i, segfile);
-		      ret = ctrl->storage->bs_file_delete(ctrl->storage,segfile);	  
-		      //g_assert(ret == 0);
-	     }			
+            g_message("seg no:%d ...",seg_usage->segno);
+            if (seg_usage->alive_block_num == 0){
+                g_message("seg no:%d no alive block now,delete it",i);
+                if(0 == ctrl->storage->bs_file_is_exist(ctrl->storage,segfile)){
+                    ret = ctrl->storage->bs_file_delete(ctrl->storage,segfile);	  
+                    g_assert(ret == 0);
+                }else{
+                    g_message("seg no:%d has delete",i);
+                }
+                continue;
+            }			
             if(0 == strcmp(seg_usage->up_sname,EMPTY_UP_SNAPSHOT)){
-                    g_message("seg no:%d is maybe need to migrate",seg_usage->segno);
-                 if (seg_usage->alive_block_num > copy_waterlevel){
+                g_message("seg no:%d is maybe need to migrate",seg_usage->segno);
+                if (seg_usage->alive_block_num > copy_waterlevel){
                     g_message("seg no:%d is need to migrate",seg_usage->segno);
                     ret = migrate_alive_blocks(ctrl,seg_usage);
                     g_assert(ret == 0);
-                    ret = dump_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage->segno);
+                    seg_usage->alive_block_num =0;
+                    seg_usage->timestamp = get_current_time();
+                    memset(seg_usage->bitmap,0,(seg_usage->log_num-1)/sizeof(gint)+1);
+                    ret = dump_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage);
                     g_free(seg_usage->bitmap);
                     g_free(seg_usage);
+                    ret = ctrl->storage->bs_file_delete(ctrl->storage,segfile);	  
                 }
             }
         }else{
-               g_message("seg no:%d has not yet do seg usage calc",i); 
+            g_message("seg no:%d has not yet do seg usage calc",i); 
         }
     }
+OUT:
     ret = hlfs_close(ctrl);
     g_assert(ret == 0);
     ret = deinit_hlfs(ctrl);

@@ -63,19 +63,26 @@ int main(int argc, char *argv[])
     g_message("ctrl open over");
     g_assert(ret == 0);
     GHashTable *seg_usage_hashtable = g_hash_table_new_full(g_direct_hash,g_direct_equal,NULL,NULL);//TODO
-    //GList* seg_usage_list = NULL;
-    //ret = load_all_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage_hashtable);
-    //g_assert(ret = 0);
-    //ret = sort_all_seg_usage(ctrl->storage,seg_usage_hashtable,&seg_usage_list);
-    //g_assert(ret !=NULL);
-    struct inode * latest_inode = load_latest_inode(ctrl->storage); 
+    GList* seg_usage_list = NULL;
+    ret = load_all_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage_hashtable);
+    g_assert(ret = 0);
+    ret = sort_all_seg_usage(ctrl->storage,seg_usage_hashtable,&seg_usage_list);
+    g_assert(ret !=NULL);
+   
     int i;
     for(i=start_segno;i<=end_segno;i++){
         SEG_USAGE_T *seg_usage = g_hash_table_lookup(seg_usage_hashtable,GINT_TO_POINTER((uint32_t)i));
         if(seg_usage != NULL){
-            if(0 == strcmp(seg_usage->up_sname,"_____")){
-                g_message("seg no:%d is maybe need to migrate",seg_usage->segno);
-                if (seg_usage->alive_block_num > copy_waterlevel){
+	     if (seg_usage->alive_block_num == 0){
+		      g_message("seg no:%d no alive block now,delete it");
+		      char segfile[128];
+		      build_segfile_name(i, segfile);
+		      ret = ctrl->storage->bs_file_delete(ctrl->storage,segfile);	  
+		      //g_assert(ret == 0);
+	     }			
+            if(0 == strcmp(seg_usage->up_sname,EMPTY_UP_SNAPSHOT)){
+                    g_message("seg no:%d is maybe need to migrate",seg_usage->segno);
+                    (seg_usage->alive_block_num > copy_waterlevel){
                     g_message("seg no:%d is need to migrate",seg_usage->segno);
                     ret = migrate_alive_blocks(ctrl,seg_usage);
                     g_assert(ret == 0);
@@ -84,6 +91,8 @@ int main(int argc, char *argv[])
                     g_free(seg_usage);
                 }
             }
+        }else{
+               g_message("seg no:%d has not yet do seg usage calc",i); 
         }
     }
     ret = hlfs_close(ctrl);

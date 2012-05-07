@@ -63,7 +63,7 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
 		do{
 			   seg_usage = (SEG_USAGE_T *)g_list_nth_data(seg_usage_list,seg_idx);
 			   HLOG_DEBUG(" seg usage:%d,up_sname:%s",seg_usage->segno,seg_usage->up_sname);
-			   if(0 != strcmp(seg_usage->up_sname,"_____")){
+			   if(0 != strcmp(seg_usage->up_sname,EMPTY_UP_SNAPSHOT)){
 			   	  HLOG_DEBUG(" seg usage:%d is in snapshots ",seg_usage->segno);
 				  /*是在快照区间,不进行回收*/
 				  seg_idx++;

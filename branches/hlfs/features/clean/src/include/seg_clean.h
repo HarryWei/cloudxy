@@ -19,6 +19,15 @@ typedef struct segment_usage {
 	char *bitmap; 
 }SEG_USAGE_T;
 
+ typedef enum _seg_in_snapshot    
+ 	{
+ 	  IN_SNAPSHOT  = 0, 
+ 	  ABOVE_SNAPSHOT = 1,  
+ 	  ON_SNAPSHOT = 2,
+ 	 }SEG_SNAPSHOT;
+
+ static const char* EMPTY_UP_SNAPSHOT="_____";
+
 #ifdef __cplusplus  
 extern "C" {
 #endif

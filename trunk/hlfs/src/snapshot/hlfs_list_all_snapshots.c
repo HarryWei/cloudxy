@@ -15,6 +15,7 @@
 
 #define MAX_BUFSIZE (4 * 1024)
 
+struct snapshot *__hlfs_get_all_snapshots(struct back_storage *storage,int *num_entries);
 /*
  */
 struct snapshot *hlfs_get_all_snapshots(const char *uri,int *num_entries)
@@ -24,17 +25,29 @@ struct snapshot *hlfs_get_all_snapshots(const char *uri,int *num_entries)
 		HLOG_ERROR("Parameter Error!");
 		return NULL;
 	}
-	char *snapshots_buf = NULL;
-	int ret = 0;
-	GHashTable *ss_hashtable = g_hash_table_new(g_str_hash, g_str_equal);
-    GList *snapshot_list = NULL;
+
 
 	struct back_storage *storage = init_storage_handler(uri);
 	if (NULL == storage) {
 		HLOG_ERROR("init storage handler error!");
-		g_hash_table_destroy(ss_hashtable);
 		return NULL;
 	}
+	struct snapshot * snapshot =  __hlfs_get_all_snapshots(storage,num_entries);
+	deinit_storage_handler(storage);
+	return snapshot;
+}
+
+struct snapshot *__hlfs_get_all_snapshots(struct back_storage *storage,int *num_entries){
+	HLOG_DEBUG("enter func %s", __func__);
+	if (NULL == storage || NULL == num_entries) {
+		HLOG_ERROR("Parameter Error!");
+		return NULL;
+	}
+	char *snapshots_buf = NULL;
+	int ret = 0;
+	GHashTable *ss_hashtable = g_hash_table_new(g_str_hash, g_str_equal);
+    GList *snapshot_list = NULL;
+	
 	ret = load_all_snapshot(storage, SNAPSHOT_FILE, ss_hashtable);
 	if (ret < 0) {
 		HLOG_ERROR("load all ss error: %d", ret);
@@ -70,3 +83,4 @@ out:
 	HLOG_DEBUG("leave func %s", __func__);
 	return (struct snapshot *) snapshots_buf;
 }
+

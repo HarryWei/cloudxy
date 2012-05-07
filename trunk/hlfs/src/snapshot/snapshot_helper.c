@@ -219,7 +219,7 @@ int redump_all_snapshot(struct back_storage *storage,const char* snapshot_file,G
     ss_list = g_list_sort(ss_list,compare_snapshot);
     int i;
     char content[1024*1024];
-uint32_t pos=0;
+    uint32_t pos=0;
     memset(content,0,1024*1024);
     for(i = 0; i < g_list_length(ss_list); i++){
         struct snapshot *ss = g_list_nth_data(ss_list,i);

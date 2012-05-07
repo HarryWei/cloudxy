@@ -92,13 +92,13 @@ int deinit_storage_handler(struct back_storage * storage){
  */
 uint64_t get_last_inode_storage_addr_in_seg( struct back_storage * storage, uint32_t segno) 
 {
-    HLOG_DEBUG("enter func %s",__func__);
+       HLOG_DEBUG("enter func %s",__func__);
 #if 1
 	bs_file_t file = NULL;
 	bs_file_info_t *info = NULL;
 	struct inode_map_entry im;
-    const char segfile[SEGMENT_FILE_NAME_MAX];
-    build_segfile_name(segno,segfile);
+       const char segfile[SEGMENT_FILE_NAME_MAX];
+       build_segfile_name(segno,segfile);
 	if (0 == storage->bs_file_is_exist(storage, segfile)) {
 		if (NULL == (file = storage->bs_file_open(storage, segfile, BS_READONLY))) {
 			HLOG_ERROR("open segfile error!");
@@ -192,7 +192,7 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
     const char* latest_file = NULL;
     uint64_t latest_st_mtime = 0;
     bs_file_info_t * info = infos;
-	bs_file_info_t * __info = NULL;
+    bs_file_info_t * __info = NULL;
     for(i=0;i<num_entries;i++){
         HLOG_DEBUG("7777 file:%s,size:%llu,time:%llu\n",info->name,info->size,info->lmtime);  
         if(g_str_has_suffix(info->name,"seg")){
@@ -238,7 +238,7 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
 #endif
     }
 out:
-	HLOG_DEBUG("leave func %s", __func__);
+    HLOG_DEBUG("leave func %s", __func__);
     free(infos);
     return ret;   
 }
@@ -315,6 +315,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
     HLOG_DEBUG("enter func %s",__func__);
 	uint64_t cur_storage_addr = 0;
     guint32 BLOCKSIZE = block_size;
+    uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
 	if (is_db_in_level1_index_range(db_no)) {
 		int idx = db_no % 12;
 		cur_storage_addr = inode->blocks[idx];
@@ -326,7 +327,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (NULL == ib) {
 			return -1;
 		}
-		int idx = (db_no - 12) % 1024;
+		int idx = (db_no - 12) % IB_ENTRY_NUM;
 		cur_storage_addr = *(ib + idx);
 		g_free(ib);
 	} else if (is_db_in_level3_index_range(db_no)) {
@@ -337,7 +338,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (NULL == ib) {
 			return -1;
 		}
-		int idx = (db_no - 12 - 1024) / 1024;
+		int idx = (db_no - 12 - IB_ENTRY_NUM) / IB_ENTRY_NUM;
 		if (0 == *(ib + idx)) {
 			return 1;
 		}
@@ -345,7 +346,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (NULL == ib2) {
 			return -1;
 		}
-		uint64_t idx2 = (db_no - 12 - 1024) % 1024;
+		uint64_t idx2 = (db_no - 12 - IB_ENTRY_NUM) % IB_ENTRY_NUM;
 		cur_storage_addr = *(ib2 + idx2);
 		g_free(ib);
 		g_free(ib2);
@@ -357,7 +358,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (NULL == ib) {
 			return -1;
 		}
-		int idx = (db_no - 12 - 1024 - 1024 * 1024) / (1024 * 1024);
+		int idx = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) / (IB_ENTRY_NUM * IB_ENTRY_NUM);
 		if (0 == *(ib + idx)) {
 			return 1;
 		}
@@ -365,7 +366,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (NULL == ib2) {
 			return -1;
 		}
-		uint64_t idx2 = (db_no - 12 - 1024 - 1024 * 1024) / 1024 % 1024;
+		uint64_t idx2 = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) / IB_ENTRY_NUM % IB_ENTRY_NUM;
 		if (0 == *(ib2 + idx2)) {
 			return 1;
 		}
@@ -373,7 +374,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (NULL == ib3) {
 			return -1;
 		}
-		uint64_t idx3 = (db_no - 12 - 1024 - 1024 * 1024) % 1024;
+		uint64_t idx3 = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) % IB_ENTRY_NUM;
 		cur_storage_addr = *(ib3 + idx3);
 		g_free(ib);
 		g_free(ib2);
@@ -492,7 +493,7 @@ int load_latest_inode_map_entry(struct back_storage *storage,
        ret = -1;
     }
     storage->bs_file_close(storage,file);
-	HLOG_DEBUG("leave func %s", __func__);
+    HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
 
@@ -505,7 +506,7 @@ int file_append_contents(struct back_storage *storage,const char* filename,const
     }
 	int ret = 0;
 	bs_file_t file = NULL;
-	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage,filename)) {
+	if ( 0!= storage->bs_file_is_exist(storage,filename)) {
 		HLOG_DEBUG("cp file not exist, create file");
 		file = storage->bs_file_create(storage,filename);
 		if (NULL == file) {
@@ -545,7 +546,7 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 	int ret = 0;
 	int i = 0;
 	HLOG_DEBUG("filename is %s", filename);
-	if (EHLFS_NOFILE == storage->bs_file_is_exist(storage,filename)) {
+	if ( 0!= storage->bs_file_is_exist(storage,filename)) {
 		HLOG_ERROR("file is not exist, but may be first start, not error, check it please");
 		ret = -1;
 		goto out;
@@ -574,7 +575,7 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 	}
 	if(*size != storage->bs_file_pread(storage,file,*contents,*size,0))
 	{
-		HLOG_ERROR("Read file snapshot.txt failed\n");
+		HLOG_ERROR("Read file:%s failed",filename);
 		storage->bs_file_close(storage, file);
         g_free(contents);
 		ret = -1;

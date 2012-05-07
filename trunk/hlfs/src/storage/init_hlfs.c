@@ -17,22 +17,7 @@ CTRL_REGION_T CTRL_REGION;
 extern int append_log(struct hlfs_ctrl * ctrl,const char*db_buff,uint32_t db_start,uint32_t db_end);
 int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end){
 	HLOG_DEBUG("enter func %s", __func__);
-    guint32 BLOCKSIZE = ctrl->sb.block_size;
-    int expand_size =  (db_end-db_start + 1)*BLOCKSIZE + 
-        ib_amount(db_start,db_end) * BLOCKSIZE + 
-        LOG_HEADER_LENGTH + 
-        sizeof(struct inode) + 
-        sizeof(struct inode_map_entry);
-    if (expand_size > ctrl->sb.seg_size) {
-        HLOG_ERROR("write length is beyond the limit length!");
-        g_mutex_unlock (ctrl->hlfs_access_mutex);
-        return -1;
-    }
-    if (ctrl->last_offset + expand_size > ctrl->sb.seg_size) {
-        ctrl->last_segno++;
-        ctrl->last_offset = 0;
-    }
-
+   
     HLOG_DEBUG("last segno: %u last offset: %u", ctrl->last_segno, ctrl->last_offset);
     /* todo , use RCU lock instead of mutex */
     g_mutex_lock (ctrl->hlfs_access_mutex);
@@ -42,7 +27,6 @@ int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint3
         HLOG_ERROR("append log error");
         return -1;
     }
-    ctrl->last_offset += size;
 	HLOG_DEBUG("last offset: %u", ctrl->last_offset);
     return size;
 }
@@ -81,8 +65,8 @@ init_hlfs(const char *uri)
 	    HLOG_ERROR("ctrl allocate error!");
 	    return NULL;
     }
-    ctrl->write_req_aqueue = g_async_queue_new();
-    ctrl->write_rsp_aqueue = g_async_queue_new();
+    //ctrl->write_req_aqueue = g_async_queue_new();
+    //ctrl->write_rsp_aqueue = g_async_queue_new();
 
     HLOG_DEBUG("uri %s", uri);
     struct back_storage *storage = init_storage_handler(uri);
@@ -111,10 +95,10 @@ init_hlfs(const char *uri)
     }
 
 	ctrl->usage_ref = 0;
-    ctrl->write_task_run = 1;
+    ctrl->seg_clean_run = 1;
 	memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
-    GThread * log_write_thread = g_thread_create((GThreadFunc) log_write_task,ctrl,TRUE,NULL);
-    ctrl->log_write_thread = log_write_thread;
+    GThread * seg_clean_thread = g_thread_create((GThreadFunc)seg_clean_task,ctrl,TRUE,NULL);
+    ctrl->seg_clean_thread = seg_clean_thread;
     ctrl->ctrl_region = &CTRL_REGION;
     ctrl->hlfs_access_mutex = g_mutex_new();
 

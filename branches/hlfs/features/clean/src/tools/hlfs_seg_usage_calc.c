@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
              g_message("seg is above snapshot,maybe need migrate");
              strncpy(seg_usage.up_sname,EMPTY_UP_SNAPSHOT,strlen(EMPTY_UP_SNAPSHOT));
              g_message("up sname is:%s",seg_usage.up_sname);
-	      inode * latest_inode = load_latest_inode(storage); 
+	      inode  = load_latest_inode(storage); 
         }else{
              g_message("get refer inode failed");
 	      continue;
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
 	 ret = seg_usage_calc(storage,HBLOCK_SIZE,i,inode,&seg_usage);
 	 if(ret != 0){
             //g_assert(ret ==0);
-            g_message("seg_usage_calc failed");
+            g_message("seg_usage_calc failed,maybe has remove ");
             continue;
 	 }
         char textbuf[8192];

@@ -103,7 +103,7 @@ class SegUsageCalcMap: public HadoopPipes::Mapper {
               }
               if(ret == 2){
                   printf("DBG:--seg is above snapshot,maybe need migrate\n");
-                  strncpy(seg_usage.up_sname,"_____",strlen("_____"));
+                  strncpy(seg_usage.up_sname,EMPTY_UP_SNAPSHOT,strlen(EMPTY_UP_SNAPSHOT));
                   printf("DBG:--up sname is:%s\n",seg_usage.up_sname);
 		    inode = load_latest_inode(m_storage); 
                   ret     =  seg_usage_calc(m_storage,m_block_size,segno,inode,&seg_usage);

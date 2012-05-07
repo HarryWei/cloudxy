@@ -202,23 +202,31 @@ int get_refer_inode_between_snapshots(struct back_storage *storage,uint64_t segn
     if( segno < get_segno(cur_snapshot->inode_addr)){
         HLOG_DEBUG("seg in first range");	
         *inode =  load_inode(storage,cur_snapshot->inode_addr);
+	  if(*inode == NULL){
+		   HLOG_DEBUG("load inode failed");
+		   return -1;
+	  }	 		
         *up_sname = strdup(cur_snapshot->sname);
-        return 0;
+        return IN_SNAPSHOT;
     }
     int i;
     for(i=1;i<num_entries;i++){
         HLOG_DEBUG("idx:%d,pre snapshot inode segno:%u,name:%s;cur snapshot inode segno:%u,name:%s",i,get_segno(pre_snapshot->inode_addr),pre_snapshot->sname,get_segno(cur_snapshot->inode_addr),cur_snapshot->sname);	
         if ( segno > get_segno (pre_snapshot->inode_addr) && segno < get_segno(cur_snapshot->inode_addr) ){
-            *inode = load_inode(storage,cur_snapshot->inode_addr);
+            *inode =  load_inode(storage,cur_snapshot->inode_addr);
+	     if(*inode == NULL){
+		   HLOG_DEBUG("load inode failed");
+		   return -1;
+	     }	 	
             *up_sname = strdup(cur_snapshot->sname);
-            return 0;
+            return IN_SNAPSHOT;
         }else if (segno == get_segno(cur_snapshot->inode_addr)){
-            return 1;
+            return ON_SNAPSHOT;
         }
         pre_snapshot=cur_snapshot;
         cur_snapshot = (struct snapshot *)g_list_nth_data(snapshot_sorted_list,i);
     }
-    return 2;
+    return ABOVE_SNAPSHOT;
 }
 
 int load_all_seg_usage(struct back_storage *storage,

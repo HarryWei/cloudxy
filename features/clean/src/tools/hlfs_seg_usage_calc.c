@@ -130,56 +130,58 @@ int main(int argc, char *argv[])
 #endif
     GHashTable   *ss_hashtable = g_hash_table_new_full(g_str_hash,g_str_equal,NULL,NULL);
     ret = load_all_snapshot(storage,SNAPSHOT_FILE,ss_hashtable);
-    printf("snapshot loaded\n"); 
-    g_assert(ret == 0);
+    g_message("snapshot loaded"); 
+    //g_assert(ret == 0);
+    if(ret !=0){
+	  g_message("load snapshot failed"); 
+    }		
     GList* ss_list = NULL;
     ret = sort_all_snapshot(ss_hashtable,&ss_list);
     printf("snapshot sorted\n"); 
-    g_assert(ss_list !=NULL);
+    //g_assert(ss_list !=NULL);
     g_assert(ret == 0);
-    struct inode * latest_inode = load_latest_inode(storage); 
+    struct inode * inode=NULL;
+    SEG_USAGE_T seg_usage;
+    memset(&seg_usage,0,sizeof(SEG_USAGE_T));
     int i;
     for(i=start_segno;i<=end_segno;i++){
         struct inode * inode=NULL;
         char *up_sname;
-        ret = get_refer_inode_between_snapshots(storage,i,ss_list,&inode,&up_sname);
-        printf("segno :%d ret:%d\n",i,ret);
-        if(ret == 0){
-           printf("seg is in snapshots\n");
-           SEG_USAGE_T seg_usage;
-           memset(&seg_usage,0,sizeof(SEG_USAGE_T));
-           strncpy(seg_usage.up_sname,up_sname,strlen(up_sname));
-           ret = seg_usage_calc(storage,HBLOCK_SIZE,i,inode,&seg_usage);
-           printf("up sname is:%s\n",seg_usage.up_sname);
-           g_assert(ret ==0);
-           char textbuf[8192];
-           memset(textbuf,0,8192);
-           ret = seg_usage2text(&seg_usage,textbuf);
-           g_assert(ret > 0);
-           printf("textbuf is :%s\n",textbuf);
-           ret = dump_seg_usage(storage,SEGMENTS_USAGE_FILE,&seg_usage);
-           g_assert(ret == 0);
-           printf("dump seg usage over !");
+	 if(ss_list != NULL){
+              ret = get_refer_inode_between_snapshots(storage,i,ss_list,&inode,&up_sname);
+	 }else{
+	       g_message("not snapshot,so do above snapshot !!!"); 
+	       ret = ABOVE_SNAPSHOT;
+	 }	
+        g_message("segno :%d ret:%d",i,ret);
+        if(ret == ON_SNAPSHOT){
+             g_message("seg is on snapshot,do nothing");
+	      continue;
+        }else if (ret == IN_SNAPSHOT){
+             g_message("seg is in snapshots");
+             strncpy(seg_usage.up_sname,up_sname,strlen(up_sname));
+        } if(ret == ABOVE_SNAPSHOT){
+             g_message("seg is above snapshot,maybe need migrate");
+             strncpy(seg_usage.up_sname,EMPTY_UP_SNAPSHOT,strlen(EMPTY_UP_SNAPSHOT));
+             g_message("up sname is:%s",seg_usage.up_sname);
+	      inode * latest_inode = load_latest_inode(storage); 
+        }else{
+             g_message("get refer inode failed");
+	      continue;
         }
-        if(ret == 1){
-           printf("seg is on snapshot,do nothing\n");
-        }
-        if(ret == 2){
-           printf("seg is above snapshot,maybe need migrate\n");
-           SEG_USAGE_T seg_usage;
-           memset(&seg_usage,0,sizeof(SEG_USAGE_T));
-           strncpy(seg_usage.up_sname,"_____",strlen("_____"));
-           printf("up sname is:%s\n",seg_usage.up_sname);
-           ret = seg_usage_calc(storage,HBLOCK_SIZE,i,latest_inode,&seg_usage);
-           g_assert(ret ==0);
-           char textbuf[8192];
-           memset(textbuf,0,8192);
-           ret = seg_usage2text(&seg_usage,textbuf);
-           g_assert(ret > 0);
-           printf("textbuf is :%s\n",textbuf);
-           ret = dump_seg_usage(storage,SEGMENTS_USAGE_FILE,&seg_usage);
-           g_assert(ret == 0);
-        }
+	 ret = seg_usage_calc(storage,HBLOCK_SIZE,i,inode,&seg_usage);
+	 if(ret != 0){
+            //g_assert(ret ==0);
+            g_message("seg_usage_calc failed");
+            continue;
+	 }
+        char textbuf[8192];
+        memset(textbuf,0,8192);
+        ret = seg_usage2text(&seg_usage,textbuf);
+        g_assert(ret > 0);
+        g_message("textbuf is :%s",textbuf);
+        ret = dump_seg_usage(storage,SEGMENTS_USAGE_FILE,&seg_usage);
+        g_assert(ret == 0);
     }
 
     return 0;

@@ -4,7 +4,6 @@
 #include "TemplateFactory.hh"
 #include "StringUtils.hh"
 #include "SerialUtils.hh"
-
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -15,7 +14,10 @@
 #include "hdfs.h"
 #include "glib.h"
 #include "storage_helper.h"
-#include "segment_cleaner.h"
+#include "seg_clean.h"
+#include "seg_clean_helper.h"
+#include "snapshot_helper.h"
+#include "snapshot.h"
 #include "hlfs_ctrl.h"
 
 #define Swap16(s) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff)) 
@@ -33,25 +35,22 @@
         (((ll) & 0x000000000000ff00) << 40) |\  
         (((ll) << 56)))
 
-//const std::string INPUT_WORDS = "INPUT_WORDS";
-//const std::string OUTPUT_WORDS = "OUTPUT_WORDS";
-//const std::string WORDCOUNT = "WORDCOUNT";
+
 using namespace std;
 
 class SegUsageCalcMap: public HadoopPipes::Mapper {
     public:
         uint32_t m_block_size;
-	    uint32_t m_segment_size;
-        struct inode* m_latest_inode;
+	 uint32_t m_segment_size;
+        //struct inode* m_latest_inode;
         struct back_storage * m_storage; 
         SegUsageCalcMap(HadoopPipes::TaskContext& context) {
             //inputWords = context.getCounter(WORDCOUNT, INPUT_WORDS);
             const HadoopPipes::JobConf* job = context.getJobConf();
             std::string inputDir = job->get("mapred.input.dir");
-            printf("DBG:--inputDir :%s\n",inputDir.c_str());
             const char * uri = inputDir.c_str();
             const char * fs_name = g_basename(inputDir.c_str());
-	        printf("DBG:--fs_name:%s,uri:%s\n",fs_name,uri);
+	     printf("DBG:--input Dir:%s,fs_name:%s,uri:%s\n",inputDir.c_str(),fs_name,uri);
             m_storage = init_storage_handler(uri);
             HADOOP_ASSERT(m_storage != NULL, "failed to init storage handler ");
             uint32_t segment_size;
@@ -59,41 +58,68 @@ class SegUsageCalcMap: public HadoopPipes::Mapper {
             uint32_t max_fs_size;
             int ret = read_fs_meta(m_storage, &segment_size, &block_size,&max_fs_size);
             printf("DBG:--segment size:%u,block size:%u,max fs size%u\n",segment_size,block_size,max_fs_size);
-            m_latest_inode = load_latest_inode(m_storage); 
-     	    HADOOP_ASSERT(m_latest_inode != NULL, "failed to load latest inode ");
+            //m_latest_inode = load_latest_inode(m_storage); 
+     	     HADOOP_ASSERT(m_latest_inode != NULL, "failed to load latest inode ");
             m_block_size = block_size;
         }            
         
-        /* 1 exec segment usage calc
-         * 2 emit (segno,seg_usage_text)
+        /* 
+         * 1.exec segment usage calc
+         * 2.emit (segno,seg_usage_text)
          */
         void map(HadoopPipes::MapContext& context) {
+              int ret = 0;
 		printf("DBG:-- enter func:%s\n",__func__);
-		struct segment_usage seg_usage; 
-		memset(&seg_usage,0,sizeof(struct segment_usage));
 		const char *segfile = context.getInputKey().data();
 		printf("DBG:-- key len :%d ,segfile:%s\n",context.getInputValue().size(),segfile);
-     	HADOOP_ASSERT(segfile != NULL, "failed read segfile ");
-		segment_usage_calc(m_storage,segfile,m_latest_inode,&seg_usage,m_block_size);
-#if 0
-		gchar * segusage_file = g_strconcat(segfile,".usage",NULL);
-		dump_segment_usage(m_storage,segusage_file,&seg_usage);
-		g_free(segusage_file);
-		g_free(seg_usage.bitmap);
-#endif 
-        
+		uint64_t segno = get_segfile_no(segfile);
+     	       HADOOP_ASSERT(segfile != NULL, "failed read segfile ");
+			   
+              GHashTable   *ss_hashtable = g_hash_table_new_full(g_str_hash,g_str_equal,NULL,NULL);
+              ret = load_all_snapshot(storage,SNAPSHOT_FILE,ss_hashtable);
+              printf("DBG:-- snapshot loaded\n"); 
+              g_assert(ret == 0);
+              GList* ss_list = NULL;
+              ret = sort_all_snapshot(ss_hashtable,&ss_list);
+              printf("DBG:--snapshot sorted\n"); 
+              g_assert(ss_list !=NULL);
+              g_assert(ret == 0);
+              //struct inode * latest_inode = load_latest_inode(storage); 
+              struct inode * inode=NULL;
+              char *up_sname;
+              ret = get_refer_inode_between_snapshots(m_storage,ss_list,segno,&inode,&up_sname);
+		SEG_USAGE_T seg_usage;
+		memset(&seg_usage,0,sizeof(SEG_USAGE_T));
+		if(ret == 0){
+                  printf("DBG:--seg is in snapshots\n");
+                  strncpy(seg_usage.up_sname,up_sname,strlen(up_sname));
+                  ret  = seg_usage_calc(m_storage,m_block_size,segno,inode,&seg_usage);
+                  printf("up sname is:%s\n",seg_usage.up_sname);
+                  g_assert(ret ==0);   
+              }
+              if(ret == 1){
+                  printf("DBG:--seg is on snapshot,do nothing\n");
+              }
+              if(ret == 2){
+                  printf("DBG:--seg is above snapshot,maybe need migrate\n");
+                  strncpy(seg_usage.up_sname,"_____",strlen("_____"));
+                  printf("DBG:--up sname is:%s\n",seg_usage.up_sname);
+		    inode = load_latest_inode(m_storage); 
+                  ret     =  seg_usage_calc(m_storage,m_block_size,segno,inode,&seg_usage);
+                  g_assert(ret ==0);
+              }
 #if 1
 
 
-        string key =string(segfile,strlen(segfile));
-        char segtextbuf[sizeof(struct segment_usage)*10];
-        uint32_t len = segment_usage2text(&seg_usage,segtextbuf);
-		printf("DBG:--segtextbuf :%s ..\n",segtextbuf);
-        string value = string(segtextbuf,len);
-		printf("DBG:--send segment usage text to reducer ..\n");
-        context.emit(key,value);
+             string key =string(segfile,strlen(segfile));
+             char segtextbuf[4096];
+             uint32_t len = seg_usage2text(&seg_usage,segtextbuf);
+	      printf("DBG:--segtextbuf :%s ..\n",segtextbuf);
+             string value = string(segtextbuf,len);
+	      printf("DBG:--send segment usage text to reducer ..\n");
+             context.emit(key,value);
 #endif 
-        g_free(seg_usage.bitmap);
+             g_free(seg_usage.bitmap);
 
 	}
 
@@ -104,28 +130,21 @@ class SegUsageCalcMap: public HadoopPipes::Mapper {
 
 class SegUsageCalcReduce: public HadoopPipes::Reducer {
 public:
-  HadoopPipes::TaskContext::Counter* outputWords;
+  //HadoopPipes::TaskContext::Counter* outputWords;
   SegUsageCalcReduce(HadoopPipes::TaskContext& context) {
-    //outputWords = context.getCounter(WORDCOUNT, OUTPUT_WORDS);
     printf("GDB:--enter func%s\n",__func__); 
   }
   void reduce(HadoopPipes::ReduceContext& context) {
-    //int sum = 0;
-    //while (context.nextValue()) {
-    //  sum += HadoopUtils::toInt(context.getInputValue());
-    //}y
-    
     printf("DBG:--enter reduce func ...\n");
     while(context.nextValue()){
           printf("DBG:--key:%s value%s\n",context.getInputKey().c_str(),context.getInputValue().c_str());
     }
     context.emit(context.getInputKey(),context.getInputValue());
     printf("DBG:--exit reduce func ...\n");
-    //context.incrementCounter(outputWords, 1); 
-    //TODO
   }
 };
 
+/* we need seg file name only ,so read a new recordreader for it  */
 class SegUsageCalcReader: public HadoopPipes::RecordReader {
 private:
   int64_t m_bytes_total;
@@ -135,17 +154,16 @@ public:
   
   SegUsageCalcReader(HadoopPipes::MapContext& context) {
 	std::string _filename; 
+	/* FIXIT : hardcore for get segfile name from hadoop proctocol ? */
 	int16_t mysize = *(int16_t*)context.getInputSplit().data();
-	//printf("GDB:-- context2 size:%d\n",Swap16(mysize));
 	_filename = context.getInputSplit().data()+2;
 	printf("GDB:-- filename :%s sizeof:%d\n",_filename.c_str(),_filename.size());
 	uint64_t _offset = *(int64_t*)(context.getInputSplit().data()+ 2 +_filename.size()); 
 	uint64_t offset = Swap64(_offset);
 	uint64_t _len = *(int64_t*)(context.getInputSplit().data()+2+_filename.size()+8); 
 	uint64_t len = Swap64(_len);
-	printf("GDB:-- regon offset:%lld len:%lld\n",offset,len);
-        //std::string filename = _filename.substr(0,_filename.size()-16);
-        std::string filename = _filename.data()+5;
+	printf("GDB:-- seg offset:%lld len:%lld\n",offset,len);
+       std::string filename = _filename.data()+5;
 	printf("GDB:-- filename :%s sizeof:%d\n",filename.c_str(),filename.size());
 	if(TRUE!=g_str_has_suffix(filename.c_str(),"seg")){
 		printf("GDB:-- ignore it \n");
@@ -154,8 +172,8 @@ public:
 	}
 	m_seg_file = g_strdup(g_basename(filename.c_str()));
 	printf("GDB:-- seg file:%s\n",m_seg_file);
-        m_bytes_total = len;
-        m_bytes_read = 0;
+       m_bytes_total = len;
+       m_bytes_read = 0;
   }
 
   /*
@@ -187,7 +205,7 @@ public:
  
 };
 
-
+/* we need write all seg usage text to a SEGMENTS_USAGE_FILE */
 class SegUsageCalcWriter: public HadoopPipes::RecordWriter {
 private:
 
@@ -207,14 +225,14 @@ public:
         HADOOP_ASSERT(m_storage != NULL, "failed to init storage handler ");
     }
     ~SegUsageCalcWriter() {
-		deinit_storage_handler(m_storage);
+	 deinit_storage_handler(m_storage);
     }
 
   void emit(const std::string& key, const std::string& value) {
        printf("DBG:--enter recordwriter's emit\n");
        const char *segtextbuf = value.c_str();
        printf("DBG:--segment usage text :%s\n",segtextbuf);
-       dump_segment_usage_text(m_storage,SEGMENTS_USAGE_FILE,segtextbuf);
+       dump_seg_usage_text(m_storage,SEGMENTS_USAGE_FILE,segtextbuf);
   }
 };
 

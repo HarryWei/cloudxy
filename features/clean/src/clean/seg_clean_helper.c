@@ -168,7 +168,7 @@ int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
 	 
      g_strfreev(v);
      HLOG_DEBUG("segno:%llu,alive_blocks:%u,timestamp:%llu,log_num:%u,block_num:%u",
-		         seg_usage->segno,
+		   seg_usage->segno,
                  seg_usage->alive_block_num,
                  seg_usage->timestamp,
                  seg_usage->log_num,

@@ -19,6 +19,7 @@
 #include "snapshot_helper.h"
 #include "snapshot.h"
 #include "hlfs_ctrl.h"
+#include "misc.h"
 
 #define Swap16(s) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff)) 
 #define Swap32(l) (((l) >> 24) | \  
@@ -59,7 +60,7 @@ class SegUsageCalcMap: public HadoopPipes::Mapper {
             int ret = read_fs_meta(m_storage, &segment_size, &block_size,&max_fs_size);
             printf("DBG:--segment size:%u,block size:%u,max fs size%u\n",segment_size,block_size,max_fs_size);
             //m_latest_inode = load_latest_inode(m_storage); 
-     	     HADOOP_ASSERT(m_latest_inode != NULL, "failed to load latest inode ");
+     	    //HADOOP_ASSERT(m_latest_inode != NULL, "failed to load latest inode ");
             m_block_size = block_size;
         }            
         
@@ -76,7 +77,7 @@ class SegUsageCalcMap: public HadoopPipes::Mapper {
      	       HADOOP_ASSERT(segfile != NULL, "failed read segfile ");
 			   
               GHashTable   *ss_hashtable = g_hash_table_new_full(g_str_hash,g_str_equal,NULL,NULL);
-              ret = load_all_snapshot(storage,SNAPSHOT_FILE,ss_hashtable);
+              ret = load_all_snapshot(m_storage,SNAPSHOT_FILE,ss_hashtable);
               printf("DBG:-- snapshot loaded\n"); 
               g_assert(ret == 0);
               GList* ss_list = NULL;
@@ -87,7 +88,7 @@ class SegUsageCalcMap: public HadoopPipes::Mapper {
               //struct inode * latest_inode = load_latest_inode(storage); 
               struct inode * inode=NULL;
               char *up_sname;
-              ret = get_refer_inode_between_snapshots(m_storage,ss_list,segno,&inode,&up_sname);
+              ret = get_refer_inode_between_snapshots(m_storage,segno,ss_list,&inode,&up_sname);
 		SEG_USAGE_T seg_usage;
 		memset(&seg_usage,0,sizeof(SEG_USAGE_T));
 		if(ret == 0){
@@ -212,7 +213,7 @@ private:
 public:
     struct back_storage * m_storage; 
     SegUsageCalcWriter(HadoopPipes::ReduceContext& context) {
-        printf("GDB:--enter func%s\n",__func__); 
+        printf("DBG:--enter func%s\n",__func__); 
         const HadoopPipes::JobConf* job = context.getJobConf();
         int part = job->getInt("mapred.task.partition");
         std::string outDir = job->get("mapred.work.output.dir");
@@ -228,12 +229,15 @@ public:
 	 deinit_storage_handler(m_storage);
     }
 
-  void emit(const std::string& key, const std::string& value) {
-       printf("DBG:--enter recordwriter's emit\n");
-       const char *segtextbuf = value.c_str();
-       printf("DBG:--segment usage text :%s\n",segtextbuf);
-       dump_seg_usage_text(m_storage,SEGMENTS_USAGE_FILE,segtextbuf);
-  }
+    void emit(const std::string& key, const std::string& value) {
+        printf("DBG:--enter recordwriter's emit\n");
+        const char *segtextbuf = value.c_str();
+        printf("DBG:--segment usage text :%s\n",segtextbuf);
+        //dump_seg_usage_text(m_storage,SEGMENTS_USAGE_FILE,segtextbuf);
+        size_t len = value.size();
+        int  ret = file_append_contents(m_storage,SEGMENTS_USAGE_FILE,segtextbuf,len);
+        g_assert(ret == 0);
+    }
 };
 
 int main(int argc, char *argv[]){ 

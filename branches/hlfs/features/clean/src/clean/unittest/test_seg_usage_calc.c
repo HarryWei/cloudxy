@@ -89,7 +89,8 @@ void test_seg_usage_calc()
     int i;
     for(i=13;i<17;i++){
         struct inode * inode=NULL;
-        ret = get_refer_inode_between_snapshots(storage,i,ss_list,&inode);
+        char *up_sname;
+        ret = get_refer_inode_between_snapshots(storage,i,ss_list,&inode,&up_sname);
         printf("segno :%d ret:%d\n",i,ret);
         if(ret == 0){
            printf("seg is in snapshots\n");

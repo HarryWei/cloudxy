@@ -14,6 +14,7 @@
 
 推模式执行段统计（只能在hdfs之上）：hadoop pipes -D mapred.reduce.tasks=1 -input /tmp/testenv/testfs  -output /output -program /exe/mr_segcalc.hlfs；
 * mr_segcalc.hlfs 通过/src/clean/Mapreducer/下编译而得
+* 我们只需要一个reduce 不要搞错喽。
 }}}
  # 其次进行段回收 —— 段统计之后才可回收
 {{{

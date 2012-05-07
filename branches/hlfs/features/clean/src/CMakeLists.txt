@@ -85,8 +85,8 @@ TARGET_LINK_LIBRARIES(hlfs ${LHFLIBS})
 SET_TARGET_PROPERTIES(hlfs PROPERTIES COMPILE_FLAGS "-g -U_FORTIFY_SOURCE")
 # Set linked property.
 # SET_TARGET_PROPERTIES(hlfs PROPERTIES LINK_FLAGS "")
-ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
-TARGET_LINK_LIBRARIES(hlfs -fprofile-arcs -ftest-coverage)
+#ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+#TARGET_LINK_LIBRARIES(hlfs -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(libhlfs hlfs)
 
 #----------------------- Make tools ---------------------------#
@@ -98,7 +98,7 @@ LINK_DIRECTORIES(
         ${WORK_HOME}/output/lib32)
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 LINK_DIRECTORIES(
-	${LOG_HOME}/lib64
+	    ${LOG_HOME}/lib64
     	${HADOOP_HOME}/lib64
         ${WORK_HOME}/output/lib64)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -115,8 +115,8 @@ SET(TOOLSRCS tools/hlfs_mkfs.c)
 ADD_EXECUTABLE(mkfs.hlfs ${TOOLSRCS})
 TARGET_LINK_LIBRARIES(mkfs.hlfs ${TOOLLIBS})
 SET_TARGET_PROPERTIES(mkfs.hlfs PROPERTIES COMPILE_FLAGS "-g")
-ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
-TARGET_LINK_LIBRARIES(mkfs.hlfs -fprofile-arcs -ftest-coverage)
+#ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+#TARGET_LINK_LIBRARIES(mkfs.hlfs -fprofile-arcs -ftest-coverage)
 #INSTALL(TARGETS mkfs.hlfs RUNTIME DESTINATION bin)
 ADD_DEPENDENCIES(tools mkfs.hlfs)
 
@@ -125,18 +125,18 @@ SET(TOOLSRCS tools/hlfs_seg_usage_calc.c)
 ADD_EXECUTABLE(segcalc.hlfs ${TOOLSRCS})
 TARGET_LINK_LIBRARIES(segcalc.hlfs ${TOOLLIBS})
 SET_TARGET_PROPERTIES(segcalc.hlfs PROPERTIES COMPILE_FLAGS "-g")
-ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
-TARGET_LINK_LIBRARIES(segcalc.hlfs -fprofile-arcs -ftest-coverage)
+#ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+#TARGET_LINK_LIBRARIES(segcalc.hlfs -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(tools segcalc.hlfs)
 
 
 SET(TOOLSRCS tools/hlfs_seg_clean.c)
-ADD_EXECUTABLE(seg.clean ${TOOLSRCS})
-TARGET_LINK_LIBRARIES(seg.clean ${TOOLLIBS})
-SET_TARGET_PROPERTIES(seg.clean PROPERTIES COMPILE_FLAGS "-g")
-ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
-TARGET_LINK_LIBRARIES(seg.clean -fprofile-arcs -ftest-coverage)
-ADD_DEPENDENCIES(tools seg.clean)
+ADD_EXECUTABLE(segclean.hlfs ${TOOLSRCS})
+TARGET_LINK_LIBRARIES(segclean.hlfs ${TOOLLIBS})
+SET_TARGET_PROPERTIES(segclean.hlfs PROPERTIES COMPILE_FLAGS "-g")
+#ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+#TARGET_LINK_LIBRARIES(segclean.hlfs -fprofile-arcs -ftest-coverage)
+ADD_DEPENDENCIES(tools segclean.hlfs)
 
 SET(TOOLSRCS tools/nbd_ops.c)
 ADD_EXECUTABLE(nbd_ops ${TOOLSRCS})

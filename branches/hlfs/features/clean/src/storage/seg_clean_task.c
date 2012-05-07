@@ -31,9 +31,13 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
         //g_time_val_add(&expired,1000*1000*5);
         //g_usleep(1000*1000*5);
         if(ctrl->last_access_timestamp == 0 || (get_current_time() - ctrl->last_access_timestamp) < 1000*5){
-	       HLOG_DEBUG(" we should do clean in silent period ;access timestamp:%llu,cur timestamp:%llu",ctrl->last_access_timestamp,get_current_time());
-		   g_usleep(1000*1000);
-		   continue;
+            HLOG_DEBUG(" we should do clean in silent period ;access timestamp:%llu,cur timestamp:%llu",ctrl->last_access_timestamp,get_current_time());
+            g_usleep(1000*1000);
+            continue;
+        }
+        if(0!=ctrl->storage->bs_file_is_exist(ctrl->storage,SEGMENTS_USAGE_FILE)){
+            g_message("seg usage file not exit");
+            continue;
         }
 	    HLOG_DEBUG("do clean in silent period");
 		if(seg_idx == -1){ //idx归-1则标识一轮结束
@@ -76,7 +80,12 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
 				  /*未到阀值,则不进行回收*/
 				  seg_idx++;
 				  continue;
-			   }else{
+			   }else if(seg_usage->alive_block_num == 0){
+			   	  HLOG_DEBUG(" seg usage:%d is no alive block num ",seg_usage->segno);
+                  seg_idx++;
+                  continue;
+               }
+               else{
 			      HLOG_DEBUG(" seg usage:%d is beyond snapshots and alive block num:%d  reach waterlevel:%d",
 				  	           seg_usage->segno,
 				  		       seg_usage->alive_block_num,
@@ -92,7 +101,10 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
 		}
 		ret = migrate_alive_blocks(ctrl,seg_usage);
 		g_assert(ret == 0);
-		ret = dump_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage->segno);
+        seg_usage->alive_block_num = 0;
+        seg_usage->timestamp = get_current_time();
+        memset(seg_usage->bitmap,0,(seg_usage->log_num-1)/sizeof(gint)+1);
+		ret = dump_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage);
 		g_free(seg_usage->bitmap);
 		g_free(seg_usage);
 		g_assert(ret == 0);

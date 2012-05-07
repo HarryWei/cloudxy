@@ -26,6 +26,9 @@ typedef struct {
 	char *block;
 } block_t;
 
+#ifdef __cplusplus  
+extern "C" {
+#endif
 typedef int (*FLUSH_CB)(void* user_data, char *block_buf, uint32_t start_no,uint32_t end_no);
 typedef struct cache_ctrl {
 	GMutex *cache_mutex; 	//Lock of cache
@@ -67,4 +70,7 @@ gboolean  cache_block_exist(CACHE_CTRL *cache_ctrl, uint64_t block_no);
 int cache_set_write_cb(CACHE_CTRL *cache_ctrl, void *cb_func, void * cb_user_param);
 int cache_destroy(CACHE_CTRL *cache_ctrl);
 int cache_sync(CACHE_CTRL *cache_ctrl);
+#ifdef __cplusplus 
+} 
+#endif 
 #endif

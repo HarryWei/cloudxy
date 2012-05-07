@@ -17,8 +17,13 @@
 }}}
  # 其次进行段回收 —— 段统计之后才可回收
 {{{
-离线模式（当hlfs close后才能是使用): ../../../output/bin/segclean.hlfs -u local:///tmp/testenv/testfs -s 0 -e 100   ; 具体命令参数请 -h 查看
+离线模式（当hlfs close后才能是使用): ../../../output/bin/segclean.hlfs -u local:///tmp/testenv/testfs -s 0 -e 100 -w 1024  ; 具体命令参数请 -h 查看
 在线模式（runtime) : 不需要外部触发，由seg_clean_task后台任务周期执行。
 }}}
+
+= 执行策略 =
+ # 段统计可在任何时刻运行（在线或离线都无妨）；实践中可选择在系统IO比较轻时运行，比如每天夜里运行；触发动作由外部系统给出，如cron。
+ # 段回收或可实时运行（seg_clean_task会避开IO忙时，偷偷逮空运行）；或再离线时按需触发segclean.hlfs执行之；
+
 
 -- 由于测试不很充分，因此难免有一些bug,欢迎指正

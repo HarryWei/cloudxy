@@ -18,7 +18,7 @@ extern "C" {
 typedef struct icache_ctrl {
 	GMutex		*icache_mutex; 	//Lock of cache
 	GTrashStack	*iblock_cache; 	//Stack used to store cache buffers
-	GQueue		*dirty_block; 	//LRU queue of dirty blocks
+	GQueue		*iblock_lru; 	//LRU queue of iblock
 	GHashTable	*iblock_map; 	//Hash Map
 	uint64_t 	       icache_size; 	//Number of cache buffers
 	uint64_t 	       iblock_size; 	//Size of each buffer

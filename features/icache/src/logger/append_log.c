@@ -17,22 +17,7 @@
 
 
 
-int get_layer1_ibno(uint32_t db_no){
-       int ret = 0;
-     uint32_t IB_ENTRY_NUM = HBLOCK_SIZE/sizeof(uint64_t);
-     if(is_db_in_level1_index_range(segno)){
-	    ret = -1;
-     }else if (is_db_in_level2_index_range(segno)){
-           ret =  0;
-     }else if (is_db_in_level3_index_range(segno)){
-           ret =  1;
-     }else if (is_db_in_level4_index_range(segno)){
-           ret =  (1 + IB_ENTRY_NUM) + 1;
-     }else{
-           ret = -2;
-     }
-     return ret;
-}
+
 
 static int update_icache(struct hlfs_ctrl *ctrl,struct log_header *log){
          if(NULL == ctrl->icache){

@@ -7,6 +7,7 @@
 #include "cmd_define.h"
 #include "ctrl_region.h"
 #include "cache.h"
+#include "icache.h"
 
 #define MAX_FILE_NAME_LEN 128
 struct inode {
@@ -68,7 +69,7 @@ struct hlfs_ctrl {
 	struct   inode inode;		
 	uint32_t last_segno;				/* the current segment */
 	uint32_t last_offset;				/* the current offset in current segment */
-    struct   back_storage *storage;
+       struct   back_storage *storage;
     void *   cur_write_file_handler;
     void *   cur_read_file_handler;
     uint32_t cur_read_segno;
@@ -85,6 +86,7 @@ struct hlfs_ctrl {
 	int rw_inode_flag;
 	char alive_ss_name[MAX_FILE_NAME_LEN];
     struct cache_ctrl *cctrl;
+    struct icache_ctrl *icache;
 };
 
 typedef struct hlfs_stat{

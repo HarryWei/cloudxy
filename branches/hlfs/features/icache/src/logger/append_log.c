@@ -20,45 +20,44 @@
 
 
 
-static int update_icache(struct hlfs_ctrl *ctrl,struct log_header *log){
-         if(NULL == ctrl->icache){
-		 return 0;
-         }
-	  uint32_t db_start_no = log->start_db_no;	
-	  guint32 BLOCKSIZE = ctrl->sb.block_size;
-	  guint32 db_data_len = log->db_num * BLOCKSIZE;
-	  guint32 ib_offset = db_data_len + LOG_HEADER_LENGTH;
-	  int i = 0;
-	  int offset= ib_offset;
-         for(i=db_start_no;i<db_start_no+log->db_num;i++){
-		   if(is_db_in_level1_index_range(i)){
-		   }else if(is_db_in_level2_index_range(i)){
-		        int ibno = get_layer1_ibno(i);
-			 icache_insert_iblock(ctrl->icache,ibno,(char*)log + offset);
-			 offset += BLOCKSIZE;
-		   }else if(is_db_in_level3_index_range(i)){
-		        int ibno2 = get_layer2_ibno(i);
-			 icache_insert_iblock(ctrl->icache,ibno2,(char*)log + offset);
-			 offset += BLOCKSIZE;
-			 int ibno1 = get_layer1_ibno(i);
-			 icache_insert_iblock(ctrl->icache,ibno1,(char*)log + offset);
-			 offset += BLOCKSIZE;
-		   }else if(is_db_in_level4_index_range(i)){
-		        int ibno3 = get_layer3_ibno(i);
-			 icache_insert_iblock(ctrl->icache,ibno3,(char*)log + offset);
-			 offset += BLOCKSIZE;
-			 int ibno2 = get_layer2_ibno(i);
-			 icache_insert_iblock(ctrl->icache,ibno2,(char*)log + offset);
-			 offset += BLOCKSIZE;
-			 int ibno1 = get_layer1_ibno(i);
-			 icache_insert_iblock(ctrl->icache,ibno1,(char*)log + offset);
-			 offset += BLOCKSIZE;
-		   }else{
-		      g_assert(0);
-		   }
-         }	 	
-		 
-	  return 0;
+static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_t db_start_no,uint32_t db_num){
+    if(NULL == icctrl){
+        return -1;
+    }
+    guint32 BLOCKSIZE = icctrl->iblock_size;
+
+
+    int offset=0;
+    int i;
+    for(i=db_start_no;i<db_start_no+db_num;i++){
+        if(is_db_in_level1_index_range(i)){
+        }else if(is_db_in_level2_index_range(i)){
+            int ibno = get_layer1_ibno(i);
+            icache_insert_iblock(icctrl,ibno,(char*)log_iblock_buf + offset);
+            offset += BLOCKSIZE;
+        }else if(is_db_in_level3_index_range(i)){
+            int ibno2 = get_layer2_ibno(i);
+            icache_insert_iblock(icctrl,ibno2,(char*)log_iblock_buf + offset);
+            offset += BLOCKSIZE;
+            int ibno1 = get_layer1_ibno(i);
+            icache_insert_iblock(icctrl,ibno1,(char*)log_iblock_buf + offset);
+            offset += BLOCKSIZE;
+        }else if(is_db_in_level4_index_range(i)){
+            int ibno3 = get_layer3_ibno(i);
+            icache_insert_iblock(icctrl,ibno3,(char*)log_iblock_buf + offset);
+            offset += BLOCKSIZE;
+            int ibno2 = get_layer2_ibno(i);
+            icache_insert_iblock(icctrl,ibno2,(char*)log_iblock_buf + offset);
+            offset += BLOCKSIZE;
+            int ibno1 = get_layer1_ibno(i);
+            icache_insert_iblock(icctrl,ibno1,(char*)log_iblock_buf + offset);
+            offset += BLOCKSIZE;
+        }else{
+            g_assert(0);
+        }
+    }	 	
+
+    return 0;
 }
 
 
@@ -133,7 +132,13 @@ out:
     }
 #endif 
     //g_free(segfile_name);
-    update_icache(ctrl,log);
+
+    guint32 db_data_len = log->db_num * ctrl->icache->iblock_size;
+    guint32 ib_offset = db_data_len + LOG_HEADER_LENGTH;
+    if(NULL != ctrl->icache){
+       ret = update_icache(ctrl->icache,(char*)log+ib_offset,log->start_db_no,log->db_num);
+       assert(ret==0);
+    }
     HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }

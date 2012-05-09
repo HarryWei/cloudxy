@@ -200,8 +200,8 @@ init_hlfs_by_config(const char *config_file_path){
               HLOG_ERROR("cache flush_trigger_level can not > 100"); 
               goto out;
            }
-           if(invalidate_once_size * lblock_size * 64 > hlfs_ctrl->sb.seg_size){
-              HLOG_ERROR("flush_once_size can not too much:%llu",flush_once_size); 
+           if(invalidate_once_size * iblock_size * 64 > hlfs_ctrl->sb.seg_size){
+              HLOG_ERROR("flush_once_size can not too much:%llu",invalidate_once_size); 
               goto out;
            }
 
@@ -214,7 +214,7 @@ init_hlfs_by_config(const char *config_file_path){
               goto out;
            }
        }
-   
+   }   
    g_key_file_free (hlfs_conf_keyfile);
    return hlfs_ctrl;
 out:

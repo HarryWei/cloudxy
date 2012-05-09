@@ -26,8 +26,7 @@ typedef struct icache_ctrl {
 	uint64_t		invalidate_once_size; 	//Number of dirty blocks have been written one time 
 	uint64_t 		total_write_count; 
 	uint64_t 		total_read_count;
-       uint64_t 		icache_hit;
-#endif 
+    uint64_t 		icache_hit;
 }ICACHE_CTRL;
 
 ICACHE_CTRL *icache_new();

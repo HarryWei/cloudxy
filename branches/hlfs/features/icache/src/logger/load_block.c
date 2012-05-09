@@ -16,45 +16,43 @@
 #include "storage.h"
 
 
-int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
-     HLOG_DEBUG("enter func %s", __func__);
-     int ret;
-     if(NULL != hctrl->icache){
-	     int ibno = get_layer1_ibno(dbno);
+
+
+int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char **iblock){
+	HLOG_DEBUG("enter func %s", __func__);
+    int ret;
+    if(NULL != hctrl->icache){
+	     int ibno ;
+		 if(layerno == 1){
+		    get_layer1_ibno(dbno);
+		 }else if(layerno == 2){
+		    get_layer2_ibno(dbno);
+         }else if(layerno == 3){
+            get_layer3_ibno(dbno);
+         }else{
+            g_assert(0);
+         }
 	     g_assert(ibno >= 0);
 	     ret =  icache_query_iblock(hctrl->icache,ibno,*iblock);
 	     if(ret == 0){
 		   return -1; 
 	     }
-     }	
-     return -1;	 
+    }	
+    return -1;	
+}
+
+int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
+     return __read_layer_iblock(hctrl,dbno,1,iblock);	
 }	
 int read_layer2_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
      HLOG_DEBUG("enter func %s", __func__);
-     int ret;
-     if(NULL != hctrl->icache){
-	     int ibno = get_layer2_ibno(dbno);
-	     g_assert(ibno >= 0);
-	     ret =  icache_query_iblock(hctrl->icache,ibno,*iblock);
-	     if(ret == 0){
-		   return -1; 
-	     }
-     }	
-     return -1;	
+     return __read_layer_iblock(hctrl,dbno,2,iblock);	
 }	
 int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
      HLOG_DEBUG("enter func %s", __func__);
-     int ret;
-     if(NULL != hctrl->icache){
-	     int ibno = get_layer3_ibno(dbno);
-	     g_assert(ibno >= 0);
-	     ret =  icache_query_iblock(hctrl->icache,ibno,*iblock);
-	     if(ret == 0){
-		   return -1; 
-	     }
-     }	
-     return -1;	
+     return __read_layer_iblock(hctrl,dbno,3,iblock);	
 }	
+
 
 /* 
  *   return -1 mean spce  read fault

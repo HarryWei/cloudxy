@@ -200,19 +200,19 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             //uint64_t * _ib = NULL;
             if(NULL == _ib){
                 if(ctrl->inode.iblock == 0){
-                    _ib = (uint64_t*)g_malloc0(BLOCKSIZE); 
-                    if (NULL == _ib) {
+                    if(NULL == (_ib = (uint64_t*)g_malloc0(BLOCKSIZE))){ 
                         HLOG_ERROR("g_malloc0 error!");
                         g_assert(0);
                         return -1;
                     }
                 }else{
-                    _ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE);
-                    if (NULL == _ib) {
-                        HLOG_ERROR("read block error!");
-                        g_assert(0);
-                        return -1;
-                    }
+                    if(0!=read_layer1_iblock(ctrl,db_cur_no,&_ib)){ 	
+                        if (NULL == (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE))){
+                            HLOG_ERROR("read block error!");
+                            g_assert(0);
+                            return -1;
+                        }
+                   }
                 }
             }
             int  _idx = (db_cur_no - 12)%IB_ENTRY_NUM;
@@ -238,20 +238,20 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             HLOG_DEBUG(" is level3 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
             if(NULL == _ib){
-                if(ctrl->inode.doubly_iblock == 0){
-                    _ib = (uint64_t *)g_malloc0(BLOCKSIZE);
-    		    if (NULL==_ib) {
+               if(ctrl->inode.doubly_iblock == 0){
+                if(NULL == (_ib = (uint64_t *)g_malloc0(BLOCKSIZE))){
 	    		    HLOG_ERROR("allocate error!");
                     g_assert(0);
 	    		    return -1;
-    			}
+    			 }
                 }else{
-                    _ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE);
-    			if (NULL==_ib) {
-	    			HLOG_ERROR("allocate error!");
-                    g_assert(0);
-	    			return -1;
-    			}
+                   if(0!=read_layer1_iblock(ctrl,db_cur_no,&_ib)){ 	
+                     if(NULL == (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE))){
+		    			HLOG_ERROR("allocate error!");
+	                    g_assert(0);
+		    			return -1;
+	    			 }
+                   }
                 }
             }
             int _idx   = (db_cur_no - 12 - IB_ENTRY_NUM) / IB_ENTRY_NUM;
@@ -259,19 +259,19 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             //uint64_t *_ib2 = NULL; 
             if(NULL == _ib2){
                 if(*(_ib+_idx) == 0 ){
-                    _ib2 = (uint64_t*)g_malloc0(BLOCKSIZE);
-    			if (NULL==_ib2) {
+                   if (NULL ==(_ib2 = (uint64_t*)g_malloc0(BLOCKSIZE))){
 	    			HLOG_ERROR("allocate error!");
                     g_assert(0);
 	    			return -1;
-    			}
+    			    }
                 }else{
-                    _ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE);
-    			if (NULL==_ib2) {
-	    			HLOG_ERROR("allocate error!");
-                    g_assert(0);
-	    			return -1;
-    			}
+                 if(0!=read_layer2_iblock(ctrl,db_cur_no,&_ib)){ 	
+                    if (NULL ==_(_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE))){
+		    			HLOG_ERROR("allocate error!");
+	                    g_assert(0);
+		    			return -1;
+    			    }
+                  }
                 }
             }
             int _idx2  = (db_cur_no - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
@@ -306,17 +306,17 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             //uint64_t *_ib = NULL;
             if(NULL == _ib){
                 if(ctrl->inode.triply_iblock == 0){
-                    _ib = (uint64_t *)g_malloc0(BLOCKSIZE);
-    			if (NULL==_ib) {
+                  if (NULL==(_ib = (uint64_t *)g_malloc0(BLOCKSIZE))){
 	    			HLOG_ERROR("allocate error!");
 	    			return -1;
-    			}
+    			  }
                 }else{
-                    _ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE);
-    				if (NULL==_ib) {
+                 if(0!=read_layer1_iblock(ctrl,db_cur_no,&_ib)){ 	
+                    if (NULL== (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE))){
 	    				HLOG_ERROR("allocate error!");
 	    				return -1;
     				}
+                  }
                 }
             }
             int _idx   = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM * IB_ENTRY_NUM);
@@ -324,17 +324,17 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             //uint64_t *_ib2 = NULL; 
             if(NULL == _ib2){
                 	if(*(_ib+_idx) == 0 ){
-                    	_ib2 = (uint64_t*)g_malloc0(BLOCKSIZE);
-    					if (NULL==_ib2) {
+                    	if (NULL == (_ib2 = (uint64_t*)g_malloc0(BLOCKSIZE))){
 	    					HLOG_ERROR("allocate error!");
 	    					return -1;
     					}
                 	}else{
-                    	_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE);
-    					if (NULL==_ib2) {
+                	if(0!=read_layer2_iblock(ctrl,db_cur_no,&_ib)){ 	
+                    	if (NULL==(_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE))){
 	    					HLOG_ERROR("allocate error!");
 	    					return -1;
     					}
+                	}
                 	}
             }
             int _idx2  = (db_cur_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / IB_ENTRY_NUM % IB_ENTRY_NUM;
@@ -342,17 +342,17 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             //uint64_t *_ib3 = NULL; 
             if(NULL == _ib3){
                 if(*(_ib2+_idx2) == 0 ){
-                    _ib3 = (uint64_t*)g_malloc0(BLOCKSIZE);
-    			if (NULL==_ib3) {
-	    			HLOG_ERROR("allocate error!");
-	    			return -1;
-    			}
+                    if (NULL==(_ib3 = (uint64_t*)g_malloc0(BLOCKSIZE))){
+		    			HLOG_ERROR("allocate error!");
+		    			return -1;
+    			    }
                 }else{
-                    _ib3 = (uint64_t *)read_block(ctrl->storage,*(_ib2+_idx2),BLOCKSIZE);
-    			if (NULL==_ib3) {
-	    			HLOG_ERROR("allocate error!");
-	    			return -1;
-    			}
+                	if(0!=read_layer3_iblock(ctrl,db_cur_no,&_ib)){ 	
+                    if (NULL==(_ib3 = (uint64_t *)read_block(ctrl->storage,*(_ib2+_idx2),BLOCKSIZE))){
+		    			HLOG_ERROR("allocate error!");
+		    			return -1;
+    		        }
+                  }
                 }
             }
             int _idx3  = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 

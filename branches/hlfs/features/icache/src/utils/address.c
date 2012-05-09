@@ -141,7 +141,7 @@ int get_layer2_ibno(uint32_t db_no){
      return ret;
 }
 
-int get_layer3_ibno(uint32_t db_no)
+int get_layer3_ibno(uint32_t db_no){
      int ret = 0;
      uint32_t IB_ENTRY_NUM = HBLOCK_SIZE/sizeof(uint64_t);
      if(is_db_in_level1_index_range(segno)){

@@ -16,6 +16,66 @@
 #include "storage.h"
 
 
+
+int get_layer1_ibno(uint32_t db_no){
+       int ret = 0;
+     uint32_t IB_ENTRY_NUM = HBLOCK_SIZE/sizeof(uint64_t);
+     if(is_db_in_level1_index_range(segno)){
+	    ret = -1;
+     }else if (is_db_in_level2_index_range(segno)){
+           ret =  0;
+     }else if (is_db_in_level3_index_range(segno)){
+           ret =  1;
+     }else if (is_db_in_level4_index_range(segno)){
+           ret =  (1 + IB_ENTRY_NUM) + 1;
+     }else{
+           ret = -2;
+     }
+     return ret;
+}
+
+static int update_icache(struct hlfs_ctrl *ctrl,struct log_header *log){
+         if(NULL == ctrl->icache){
+		 return 0;
+         }
+	  uint32_t db_start_no = log->start_db_no;	
+	  guint32 BLOCKSIZE = ctrl->sb.block_size;
+	  guint32_t db_data_len = log->db_num * BLOCKSIZE;
+	  guint32 ib_offset = db_data_len + LOG_HEADER_LENGTH;
+	  int i = 0;
+	  int offset= ib_offset;
+         for(i=db_start_no;i<db_start_no+log->db_num;i++){
+		   if(is_db_in_level1_index_range(i)){
+		   }else if(is_db_in_level2_index_range(i)){
+		        int ibno = get_layer1_ibno(i);
+			 icache_insert(ctrl->icache,ibno,(char*)log + offset);
+			 offset += BLOCKSIZE;
+		   }else if(is_db_in_level3_index_range(i)){
+		        int ibno2 = get_layer2_ibno(i);
+			 icache_insert(ctrl->icache,ibno2,(char*)log + offset);
+			 offset += BLOCKSIZE;
+			 int ibno1 = get_layer1_ibno(i);
+			 icache_insert(ctrl->icache,ibno1,(char*)log + offset);
+			 offset += BLOCKSIZE;
+		   }else if(is_db_in_level4_index_range(i)){
+		        int ibno3 = get_layer3_ibno(i);
+			 icache_insert(ctrl->icache,ibno3,(char*)log + offset);
+			 offset += BLOCKSIZE;
+			 int ibno2 = get_layer2_ibno(i);
+			 icache_insert(ctrl->icache,ibno2,(char*)log + offset);
+			 offset += BLOCKSIZE;
+			 int ibno1 = get_layer1_ibno(i);
+			 icache_insert(ctrl->icache,ibno1,(char*)log + offset);
+			 offset += BLOCKSIZE;
+		   }else{
+		      g_assert(0);
+		   }
+         }	 	
+		 
+	  return 0;
+}
+
+
 //static bs_file_t g_cur_write_file = NULL;
 static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
     HLOG_DEBUG("enter func %s", __func__);

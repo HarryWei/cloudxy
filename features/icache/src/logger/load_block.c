@@ -131,12 +131,15 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
     }else if (is_db_in_level2_index_range(db_no)){
         if(ctrl->inode.iblock == 0){
           return 1;
-        }
-        uint64_t *_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE);
-        if(_ib==NULL) {
-		HLOG_ERROR("read_block error for iblock_addr:%llu",ctrl->inode.iblock);
-		return -1;
-	}
+        }	
+	 uint64_t *_ib;
+	 if(0!=read_layer1_iblock(ctrl,db_no,&(char*)_ib)){
+        	_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE);
+        	if(_ib==NULL) {
+			HLOG_ERROR("read_block error for iblock_addr:%llu",ctrl->inode.iblock);
+			return -1;
+	 	}
+	 }	
         int  _idx = (db_no-12)%IB_ENTRY_NUM;
         storage_address = *(_ib+_idx);
         g_free(_ib);
@@ -144,19 +147,25 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         if(ctrl->inode.doubly_iblock ==0){
             return 1;
         }
-        uint64_t *_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE);
-        if(_ib==NULL) {
+        uint64_t *_ib;
+	 if(0!=read_layer1_iblock(ctrl,db_no,&(char*)_ib)){
+	 	_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE);
+        	if(_ib==NULL) {
 		HLOG_ERROR("read_block error for doubly_iblock_addr:%llu",ctrl->inode.doubly_iblock);
 		return -1;
-	}
+	 	}
+	 }	
         int _idx   = ( db_no - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
         if(*(_ib+_idx) == 0 ){
             return 1;
         }
-        uint64_t *_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE);
-        if(_ib2==NULL) {
-		HLOG_ERROR("read_block error");
-		return -1;
+        uint64_t *_ib2;
+	 if(0!=read_layer2_iblock(ctrl,db_no,&(char*)_ib)){
+		 _ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE);
+        	if(_ib2==NULL) {
+			HLOG_ERROR("read_block error");
+			return -1;
+		}
 	}
         int _idx2  = (db_no - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
         storage_address = *(_ib2 + _idx2);
@@ -166,29 +175,38 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         if(ctrl->inode.triply_iblock == 0){
             return 1;
         }
-        uint64_t *_ib  = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE);
-        if(_ib==NULL) {
-		HLOG_ERROR("read_block error for triply_iblock_addr:%llu",ctrl->inode.triply_iblock);
-		return -1;
-	}
+        uint64_t *_ib ;
+	 if(0!=read_layer1_iblock(ctrl,db_no,&(char*)_ib)){	
+	 	_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE);
+        	if(_ib==NULL) {
+			HLOG_ERROR("read_block error for triply_iblock_addr:%llu",ctrl->inode.triply_iblock);
+			return -1;
+		}
+	 }
         int _idx   = (db_no -12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM*IB_ENTRY_NUM);
         if(*(_ib + _idx) == 0){
             return 1;
         }
-        uint64_t *_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib + _idx),BLOCKSIZE);
-        if(_ib2==NULL) {
-		HLOG_ERROR("read_block error");
-		return -1;
-	}
+        uint64_t *_ib2;
+	 if(0!=read_layer2_iblock(ctrl,db_no,&(char*)_ib)){
+	 	_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib + _idx),BLOCKSIZE);
+        	if(_ib2==NULL) {
+			HLOG_ERROR("read_block error");
+			return -1;
+		}
+	}	
         int _idx2  = (db_no-12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM)/IB_ENTRY_NUM % IB_ENTRY_NUM;
         if(*(_ib2 + _idx2) == 0){
             return 1;
         }
-        uint64_t *_ib3 = (uint64_t *)read_block(ctrl->storage,*(_ib2 + _idx2),BLOCKSIZE);
-        if(_ib3==NULL) {
-		HLOG_ERROR("read_block error");
-		return -1;
-	}
+        uint64_t *_ib3;
+	 if(0!=read_layer3_iblock(ctrl,db_no,&(char*)_ib)){
+	 	_ib3 = (uint64_t *)read_block(ctrl->storage,*(_ib2 + _idx2),BLOCKSIZE);
+        	if(_ib3==NULL) {
+			HLOG_ERROR("read_block error");
+			return -1;
+		}
+	 }
         int _idx3  = (db_no-12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 
         storage_address = *(_ib3 + _idx3);
         g_free(_ib);
@@ -201,8 +219,8 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
     }
     *block = read_block(ctrl->storage,storage_address,BLOCKSIZE);
     if(*block ==NULL){
-	HLOG_ERROR("can not read block for storage address %llu", storage_address);
-       return -1;
+	  HLOG_ERROR("can not read block for storage address %llu", storage_address);
+         return -1;
     }
     HLOG_DEBUG("leave func %s", __func__);
     return 0;
@@ -237,7 +255,7 @@ int load_block_by_no_fast(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         if(_ib==NULL) {
 		HLOG_ERROR("read_block_fast error");
 		return -1;
-	}
+	 }
         int  _idx = (db_no-12)%IB_ENTRY_NUM;
         storage_address = *(_ib+_idx);
         g_free(_ib);
@@ -324,5 +342,45 @@ int load_block_by_addr(struct hlfs_ctrl *ctrl,uint64_t pos,char** block){
     HLOG_DEBUG("leave func %s", __func__);
     return load_block_by_no(ctrl,db_no,block);
 }
+
+int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
+     HLOG_DEBUG("enter func %s", __func__);
+     int ret;
+     if(NULL != hctrl->icache){
+	     int ibno = get_layer1_ibno(dbno);
+	     g_assert(ibno >= 0);
+	     ret =  icache_query(hctrl->icache,ibno,*iblock);
+	     if(ret == 0){
+		   return -1; 
+	     }
+     }	
+     return -1;	 
+}	
+int read_layer2_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
+     HLOG_DEBUG("enter func %s", __func__);
+     int ret;
+     if(NULL != hctrl->icache){
+	     int ibno = get_laye2_ibno(dbno);
+	     g_assert(ibno >= 0);
+	     ret =  icache_query(hctrl->icache,ibno,*iblock);
+	     if(ret == 0){
+		   return -1; 
+	     }
+     }	
+     return -1;	
+}	
+int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
+     HLOG_DEBUG("enter func %s", __func__);
+     int ret;
+     if(NULL != hctrl->icache){
+	     int ibno = get_layer3_ibno(dbno);
+	     g_assert(ibno >= 0);
+	     ret =  icache_query(hctrl->icache,ibno,*iblock);
+	     if(ret == 0){
+		   return -1; 
+	     }
+     }	
+     return -1;	
+}	
 
 

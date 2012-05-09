@@ -212,6 +212,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                             g_assert(0);
                             return -1;
                         }
+						write_layer1_iblock(ctrl,db_cur_no,_ib);	
                     }
                 }
             }
@@ -251,6 +252,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                             g_assert(0);
                             return -1;
                         }
+						write_layer1_iblock(ctrl,db_cur_no,_ib);
                     }
                 }
             }
@@ -271,6 +273,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                             g_assert(0);
                             return -1;
                         }
+						write_layer2_iblock(ctrl,db_cur_no,_ib2);
                     }
                 }
             }
@@ -316,6 +319,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                             HLOG_ERROR("allocate error!");
                             return -1;
                         }
+						write_layer1_iblock(ctrl,db_cur_no,_ib);
                     }
                 }
             }
@@ -334,6 +338,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                             HLOG_ERROR("allocate error!");
                             return -1;
                         }
+						write_layer2_iblock(ctrl,db_cur_no,_ib2);
                     }
                 }
             }
@@ -353,6 +358,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                             return -1;
                         }
                     }
+					write_layer3_iblock(ctrl,db_cur_no,_ib3);
                 }
             }
             int _idx3  = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 

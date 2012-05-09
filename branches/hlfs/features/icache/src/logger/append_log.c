@@ -14,6 +14,7 @@
 #include "misc.h"
 #include "address.h"
 #include "storage.h"
+#include "icache.h"
 
 
 
@@ -132,6 +133,7 @@ out:
     }
 #endif 
     //g_free(segfile_name);
+    update_icache(ctrl,log);
     HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }

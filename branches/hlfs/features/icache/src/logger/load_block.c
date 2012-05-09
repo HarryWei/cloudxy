@@ -24,11 +24,11 @@ int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char *
     if(NULL != hctrl->icache){
 	     int ibno ;
 		 if(layerno == 1){
-		    get_layer1_ibno(dbno);
+		    ibno = get_layer1_ibno(dbno);
 		 }else if(layerno == 2){
-		    get_layer2_ibno(dbno);
+		    ibno = get_layer2_ibno(dbno);
          }else if(layerno == 3){
-            get_layer3_ibno(dbno);
+            ibno = get_layer3_ibno(dbno);
          }else{
             g_assert(0);
          }
@@ -52,6 +52,57 @@ int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
      HLOG_DEBUG("enter func %s", __func__);
      return __read_layer_iblock(hctrl,dbno,3,iblock);	
 }	
+
+
+__write_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char *iblock){
+	HLOG_DEBUG("enter func %s", __func__);
+    int ret;
+    if(NULL != hctrl->icache){
+	     int ibno ;
+		 if(layerno == 1){
+		    ibno = get_layer1_ibno(dbno);
+		 }else if(layerno == 2){
+		    ibno = get_layer2_ibno(dbno);
+         }else if(layerno == 3){
+            ibno = get_layer3_ibno(dbno);
+         }else{
+            g_assert(0);
+         }
+	     g_assert(ibno >= 0);
+	     ret =  icache_insert_iblock(hctrl->icache,ibno,iblock);
+	     if(ret == 0){
+		   return -1; 
+	     }
+    }	
+    return -1;	
+}
+
+int write_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char *iblock){
+     return __write_layer_iblock(hctrl,dbno,1,iblock);	
+}	
+int write_layer2_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char *iblock){
+     HLOG_DEBUG("enter func %s", __func__);
+     return __write_layer_iblock(hctrl,dbno,2,iblock);	
+}	
+int write_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char *iblock){
+     HLOG_DEBUG("enter func %s", __func__);
+     return __write_layer_iblock(hctrl,dbno,3,iblock);	
+}	
+
+
+
+int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
+     return __read_layer_iblock(hctrl,dbno,1,iblock);	
+}	
+int read_layer2_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
+     HLOG_DEBUG("enter func %s", __func__);
+     return __read_layer_iblock(hctrl,dbno,2,iblock);	
+}	
+int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
+     HLOG_DEBUG("enter func %s", __func__);
+     return __read_layer_iblock(hctrl,dbno,3,iblock);	
+}	
+
 
 
 /* 
@@ -171,11 +222,11 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }	
 	 uint64_t *_ib=NULL;
 	 if(0!=read_layer1_iblock(ctrl,db_no,&_ib)){
-        	_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE);
-        	if(_ib==NULL) {
-			HLOG_ERROR("read_block error for iblock_addr:%llu",ctrl->inode.iblock);
-			return -1;
-	 	}
+        	if(NULL == (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE))){
+			   HLOG_ERROR("read_block error for iblock_addr:%llu",ctrl->inode.iblock);
+			   return -1;
+	 	    }
+		    write_layer1_iblock(ctrl,db_no,_ib);	
 	 }	
         int  _idx = (db_no-12)%IB_ENTRY_NUM;
         storage_address = *(_ib+_idx);
@@ -186,11 +237,12 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib=NULL;
 	 if(0!=read_layer1_iblock(ctrl,db_no,&_ib)){
-	 	_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE);
-        	if(_ib==NULL) {
+	 	if(NULL == (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE))){
+        	
 				HLOG_ERROR("read_block error for doubly_iblock_addr:%llu",ctrl->inode.doubly_iblock);
 				return -1;
 		 	}
+			write_layer1_iblock(ctrl,db_no,_ib);	
 	 }	
         int _idx   = ( db_no - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
         if(*(_ib+_idx) == 0 ){
@@ -198,11 +250,11 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib2=NULL;
 	 if(0!=read_layer2_iblock(ctrl,db_no,&_ib2)){
-		 _ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE);
-        	if(_ib2==NULL) {
+		if(NULL == (_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE))){	
 			HLOG_ERROR("read_block error");
 			return -1;
 		}
+		write_layer2_iblock(ctrl,db_no,_ib2);
 	}
         int _idx2  = (db_no - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
         storage_address = *(_ib2 + _idx2);
@@ -214,11 +266,12 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib = NULL;
 	 if(0!=read_layer1_iblock(ctrl,db_no,&_ib)){	
-	 	_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE);
-        	if(_ib==NULL) {
+	 	 if(NULL == (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE))){
+        
 			HLOG_ERROR("read_block error for triply_iblock_addr:%llu",ctrl->inode.triply_iblock);
 			return -1;
 		}
+			write_layer1_iblock(ctrl,db_no,_ib);
 	 }
         int _idx   = (db_no -12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM*IB_ENTRY_NUM);
         if(*(_ib + _idx) == 0){
@@ -226,11 +279,11 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib2 = NULL;
 	 if(0!=read_layer2_iblock(ctrl,db_no,&_ib2)){
-	 	_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib + _idx),BLOCKSIZE);
-        	if(_ib2==NULL) {
+	 	 if(NULL == (_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib + _idx),BLOCKSIZE))){
 			HLOG_ERROR("read_block error");
 			return -1;
 		}
+		write_layer2_iblock(ctrl,db_no,_ib2);	
 	}	
         int _idx2  = (db_no-12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM)/IB_ENTRY_NUM % IB_ENTRY_NUM;
         if(*(_ib2 + _idx2) == 0){
@@ -238,11 +291,11 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         }
         uint64_t *_ib3 = NULL;
 	 if(0!=read_layer3_iblock(ctrl,db_no,&_ib3)){
-	 	_ib3 = (uint64_t *)read_block(ctrl->storage,*(_ib2 + _idx2),BLOCKSIZE);
-        	if(_ib3==NULL) {
+	 	if(NULL == (_ib3 = (uint64_t *)read_block(ctrl->storage,*(_ib2 + _idx2),BLOCKSIZE))){
 			HLOG_ERROR("read_block error");
 			return -1;
 		}
+		write_layer3_iblock(ctrl,db_no,_ib3);	
 	 }
         int _idx3  = (db_no-12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 
         storage_address = *(_ib3 + _idx3);

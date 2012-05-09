@@ -8,7 +8,7 @@ ICACHE_CTRL *icache_new(){
 		HLOG_ERROR("--Error:Apply for mem");
 		return NULL;
 	}
-    return cache_ctrl;
+    return icache_ctrl;
 }
 int icache_init(ICACHE_CTRL *icache_ctrl,
 		uint64_t iblock_size,
@@ -118,7 +118,7 @@ int icache_destroy(ICACHE_CTRL *icache_ctrl){
     if (icache_ctrl->iblock_cache) {
 		int i = 0;
         while (g_trash_stack_height(&icache_ctrl->iblock_cache) != 0) {
-			HLOG_DEBUG("g_trash_stack_height: %d", g_trash_stack_height(&cache_ctrl->iblock_cache));
+			HLOG_DEBUG("g_trash_stack_height: %d", g_trash_stack_height(&icache_ctrl->iblock_cache));
 			iblock_t *_iblock = (iblock_t *)g_trash_stack_pop(&icache_ctrl->iblock_cache);
 			if (_iblock->iblock != NULL) 
 				g_free(_iblock->iblock);
@@ -127,7 +127,7 @@ int icache_destroy(ICACHE_CTRL *icache_ctrl){
 			HLOG_DEBUG("----destroy %d succ", i);
         }
     }
-    g_mutex_clear (icache_ctrl->icache_mutex);
+    g_mutex_free (icache_ctrl->icache_mutex);
   
 	g_free(icache_ctrl);
 	HLOG_DEBUG("--Leaving func %s", __func__);
@@ -141,8 +141,8 @@ int icache_insert_iblock(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no, char *ibl
     HLOG_DEBUG("--enter fun %s", __func__);
 	icache_ctrl->total_write_count++;
     g_mutex_lock(icache_ctrl->icache_mutex);
-	if(g_queue_get_length(icache_ctrl->iblock_lru) =< icache_ctrl->invalidate_once_size)){
-	   int count = icache_ctrl->invalidate_once_size);
+	if(g_queue_get_length(icache_ctrl->iblock_lru) <= icache_ctrl->invalidate_once_size){
+	   int count = icache_ctrl->invalidate_once_size;
 	   while(count --){
 	   	   iblock_t * iblock = g_queue_pop_tail(icache_ctrl->iblock_lru);
 		   g_hash_table_remove(icache_ctrl->iblock_map,GUINT_TO_POINTER(iblock->iblock_no));
@@ -176,12 +176,13 @@ int icache_query_iblock(ICACHE_CTRL *icache_ctrl, uint64_t iblock_no, char *iblo
 	
 	HLOG_DEBUG("--read iblock no:%llu",iblock->iblock_no);
 	g_assert(iblock_no == iblock->iblock_no);
-	memcpy(iblock_buf, iblock->block, (size_t)icache_ctrl->iblock_size);
+	memcpy(iblock_buf, iblock->iblock,(size_t)icache_ctrl->iblock_size);
 	icache_ctrl->icache_hit++;
 	HLOG_DEBUG("--Leaving func %s", __func__);
 	return ret;
 }
 
+#if 0
 gboolean  icache_iblock_exist(ICACHE_CTRL *icache_ctrl, uint64_t iblock_no){
 	HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;
@@ -191,4 +192,5 @@ gboolean  icache_iblock_exist(ICACHE_CTRL *icache_ctrl, uint64_t iblock_no){
     }
     return TRUE;
 }
+#endif
 

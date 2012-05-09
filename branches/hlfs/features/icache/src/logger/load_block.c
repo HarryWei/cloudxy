@@ -188,9 +188,9 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
 	 if(0!=read_layer1_iblock(ctrl,db_no,&_ib)){
 	 	_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE);
         	if(_ib==NULL) {
-		HLOG_ERROR("read_block error for doubly_iblock_addr:%llu",ctrl->inode.doubly_iblock);
-		return -1;
-	 	}
+				HLOG_ERROR("read_block error for doubly_iblock_addr:%llu",ctrl->inode.doubly_iblock);
+				return -1;
+		 	}
 	 }	
         int _idx   = ( db_no - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
         if(*(_ib+_idx) == 0 ){

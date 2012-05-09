@@ -11,8 +11,8 @@ CACHE_CTRL *cache_new()
 		HLOG_ERROR("--Error:Apply for mem");
 		return NULL;
 	}
-	return cache_ctrl;
 	HLOG_DEBUG("--Leaving func %s", __func__);
+    return cache_ctrl;
 }
 
 int cache_init(CACHE_CTRL *cache_ctrl, 

@@ -90,21 +90,6 @@ int write_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char *iblock){
 }	
 
 
-
-int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
-     return __read_layer_iblock(hctrl,dbno,1,iblock);	
-}	
-int read_layer2_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
-     HLOG_DEBUG("enter func %s", __func__);
-     return __read_layer_iblock(hctrl,dbno,2,iblock);	
-}	
-int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
-     HLOG_DEBUG("enter func %s", __func__);
-     return __read_layer_iblock(hctrl,dbno,3,iblock);	
-}	
-
-
-
 /* 
  *   return -1 mean spce  read fault
  *   return 1  mean space has not write yet 

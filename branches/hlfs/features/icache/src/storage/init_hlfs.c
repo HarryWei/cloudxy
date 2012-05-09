@@ -179,6 +179,42 @@ init_hlfs_by_config(const char *config_file_path){
    }else{
        HLOG_DEBUG("do not support cache!"); 
    }
+      if (TRUE == g_key_file_has_group(hlfs_conf_keyfile,"ICACHE")){
+       //gsize length=0;
+       //gchar * keys = g_key_file_get_keys(hlfs_conf_keyfile,"CACHE",&length,NULL);
+       gboolean enable = g_key_file_get_boolean (hlfs_conf_keyfile,"ICACHE","is_enable_icache",NULL);
+       HLOG_DEBUG("enable is :%d",enable); 
+       if(TRUE ==  enable){
+           HLOG_DEBUG("do support cache!"); 
+           uint64_t iblock_size,icache_size,invalidate_trigger_level,invalidate_once_size;
+           iblock_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"ICACHE","iblock_size",NULL);
+           icache_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"ICACHE","icache_size",NULL);
+           invalidate_trigger_level = g_key_file_get_uint64 (hlfs_conf_keyfile,"ICACHE","invalidate_trigger_level",NULL);
+           invalidate_once_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"ICACHE","invalidate_once_size",NULL);
+           /* check .... */
+           if(iblock_size!=hlfs_ctrl->sb.block_size){
+              HLOG_ERROR("cache block size is not equal to block size in superblock"); 
+              goto out;
+           }
+           if(invalidate_once_size > 100){
+              HLOG_ERROR("cache flush_trigger_level can not > 100"); 
+              goto out;
+           }
+           if(invalidate_once_size * lblock_size * 64 > hlfs_ctrl->sb.seg_size){
+              HLOG_ERROR("flush_once_size can not too much:%llu",flush_once_size); 
+              goto out;
+           }
+
+           hlfs_ctrl->icache = icache_new();
+           ret = icache_init(hlfs_ctrl->icache,iblock_size,icache_size,invalidate_trigger_level,invalidate_once_size);
+           if (ret !=0){
+	          HLOG_ERROR("init cache failed");
+              g_free(hlfs_ctrl->icache);
+              hlfs_ctrl->icache=NULL;
+              goto out;
+           }
+       }
+   
    g_key_file_free (hlfs_conf_keyfile);
    return hlfs_ctrl;
 out:

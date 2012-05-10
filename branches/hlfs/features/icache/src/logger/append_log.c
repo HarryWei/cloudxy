@@ -28,49 +28,63 @@ static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_
     }
     int ret;
     guint32 BLOCKSIZE = icctrl->iblock_size;
+    uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
     int offset=0;
     int i;
     for(i=db_start_no;i<db_start_no+db_num;i++){
         if(is_db_in_level1_index_range(i)){
+			
         }else if(is_db_in_level2_index_range(i)){
             int ibno = get_layer1_ibno(i);
 			HLOG_DEBUG("ibno:%d",ibno);
 	        g_assert(ibno>=0);
             ret = icache_insert_iblock(icctrl,ibno,(char*)log_iblock_buf + offset);
 	        g_assert(ret==0);
-            offset += BLOCKSIZE;
+			if((i - 12 + 1) % IB_ENTRY_NUM == 0 || i == db_start_no+db_num){
+               offset += BLOCKSIZE;
+			}   
         }else if(is_db_in_level3_index_range(i)){
             int ibno2 = get_layer2_ibno(i);
 			HLOG_DEBUG("ibno2:%d",ibno);
-	     g_assert(ibno2>0);		
+	        g_assert(ibno2>0);	
             ret = icache_insert_iblock(icctrl,ibno2,(char*)log_iblock_buf + offset);
-	     g_assert(ret==0);
-            offset += BLOCKSIZE;
+	        g_assert(ret==0);
+			if((i -12 - IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || i == db_start_no+db_num){
+            	offset += BLOCKSIZE;
+			}
             int ibno1 = get_layer1_ibno(i);
 			HLOG_DEBUG("ibno1:%d",ibno);
-	     g_assert(ibno1>0);
+	        g_assert(ibno1>0);
             ret = icache_insert_iblock(icctrl,ibno1,(char*)log_iblock_buf + offset);
-	     g_assert(ret==0);		
-            offset += BLOCKSIZE;
+	        g_assert(ret==0);	
+			if((i - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 ||  i == db_start_no+db_num){
+            	offset += BLOCKSIZE;
+			}
         }else if(is_db_in_level4_index_range(i)){
             int ibno3 = get_layer3_ibno(i);
 			HLOG_DEBUG("ibno3:%d",ibno);
-	     g_assert(ibno3>0);		
+	        g_assert(ibno3>0);		
             ret = icache_insert_iblock(icctrl,ibno3,(char*)log_iblock_buf + offset);
-	     g_assert(ret==0);
-            offset += BLOCKSIZE;
+	        g_assert(ret==0);
+			if((i-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 ||i == db_start_no+db_num){
+            	offset += BLOCKSIZE;
+			}
             int ibno2 = get_layer2_ibno(i);
 			HLOG_DEBUG("ibno2:%d",ibno);
-	     g_assert(ibno2>0);		
+	        g_assert(ibno2>0);		
             ret = icache_insert_iblock(icctrl,ibno2,(char*)log_iblock_buf + offset);
-	     g_assert(ret==0);
-            offset += BLOCKSIZE;
+	        g_assert(ret==0);
+			if((i-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM * IB_ENTRY_NUM)  == 0 || i == db_start_no+db_num){
+            	offset += BLOCKSIZE;
+			}
             int ibno1 = get_layer1_ibno(i);
 			HLOG_DEBUG("ibno3:%d",ibno);
-	     g_assert(ibno1>0);
+	        g_assert(ibno1>0);
             ret = icache_insert_iblock(icctrl,ibno1,(char*)log_iblock_buf + offset);
-	     g_assert(ret==0);
-            offset += BLOCKSIZE;
+	        g_assert(ret==0);
+			if((i-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 ||i == db_start_no+db_num){
+            	offset += BLOCKSIZE;
+			}
         }else{
             g_assert(0);
         }
@@ -125,7 +139,7 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
        ret = -1;
        goto out;
     } 
-	guint32 db_data_len = log->db_num * ctrl->icache->iblock_size;
+	guint32 db_data_len = log->db_num * ctrl->sb.block_size;
     guint32 ib_offset   = db_data_len + LOG_HEADER_LENGTH;
     if(NULL != ctrl->icache){
        ret = update_icache(ctrl->icache,(char*)log + ib_offset,log->start_db_no,log->db_num);

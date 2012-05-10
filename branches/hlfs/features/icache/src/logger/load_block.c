@@ -21,8 +21,9 @@
 int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char **iblock){
 	HLOG_DEBUG("enter func %s", __func__);
     int ret;
+	int ibno ;
     if(NULL != hctrl->icache){
-	     int ibno ;
+	    
 		 if(layerno == 1){
 		    ibno = get_layer1_ibno(dbno);
 		 }else if(layerno == 2){
@@ -295,7 +296,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
     }
     *block = read_block(ctrl->storage,storage_address,BLOCKSIZE);
     if(*block ==NULL){
-	  HLOG_ERROR("can not read block for storage address %llu", storage_address);
+	  	 HLOG_ERROR("can not read block for storage address %llu", storage_address);
          return -1;
     }
     HLOG_DEBUG("leave func %s", __func__);

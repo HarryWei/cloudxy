@@ -77,6 +77,27 @@ int main(int argc, char *argv[]){
         offset +=request_size;
         printf("offset:%d\n",offset);
     }
+
+	g_print("again .........................\n");
+    offset = 0;
+    while(offset < total_size){
+        ret = hlfs_write(ctrl,content,request_size,offset);
+        g_assert(ret==request_size);
+        offset +=request_size;
+        printf("offset:%d\n",offset);
+    }
+    g_print("TEST  hlfs write over \n");
+	g_print("test hlfs read\n");
+	sleep(2);
+    offset = 0;
+    while(offset < total_size){
+        ret = hlfs_read(ctrl,content,request_size,offset);
+        g_assert(ret==request_size);
+        offset +=request_size;
+        printf("offset:%d\n",offset);
+    }
+
+
     g_free(content);
 	ret = hlfs_close(ctrl);
     deinit_hlfs(ctrl);

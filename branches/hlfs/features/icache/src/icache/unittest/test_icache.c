@@ -1,5 +1,5 @@
 
-#include <glib.h>
+#include "glib.h"
 #include <stdlib.h>
 #include "cache.h"
 #include "cache_helper.h"
@@ -25,72 +25,83 @@ void case_setup()
 /*  base insert  */
 void test_icache_insert_1()
 {
-	g_message("--enter fun %s", __func__);
-	int ret = 0;
-	char *_iblock_buf = NULL;
-	_iblock_buf = (char *)g_malloc0(IBLOCK_SIZE);
-	sprintf(_block_buf, "hello icache mine");
-	ret = icache_insert_iblock(fixture.icache_ctrl, 1, _iblock_buf);
-       printf("ret is :%d\n", ret);
-	g_assert(ret == 0);
-	sprintf(_iblock_buf, "hello cache you");
-	ret = icache_insert_iblock(fixture.icache_ctrl, 2, _iblock_buf);
-       printf("ret is :%d\n", ret);
-	g_assert(ret == 0);
-	sprintf(_iblock_buf, "hello cache him");
-	ret = icache_insert_iblock(fixture.icache_ctrl, 4, _iblock_buf);
-	g_assert(ret == 0);
+    g_message("--enter fun %s", __func__);
+    int ret = 0;
+    char *_iblock_buf = NULL;
+    _iblock_buf = (char *)g_malloc0(IBLOCK_SIZE);
+    sprintf(_iblock_buf, "hello icache mine");
+    ret = icache_insert_iblock(fixture.icache_ctrl, 1, _iblock_buf);
+    printf("ret is :%d\n", ret);
+    g_assert(ret == 0);
+    sprintf(_iblock_buf, "hello cache you");
+    ret = icache_insert_iblock(fixture.icache_ctrl, 2, _iblock_buf);
+    printf("ret is :%d\n", ret);
+    g_assert(ret == 0);
+    sprintf(_iblock_buf, "hello cache him");
+    ret = icache_insert_iblock(fixture.icache_ctrl, 4, _iblock_buf);
+    g_assert(ret == 0);
 }
 
 void test_icache_insert_2()
 {
-       int i;
+    int ret;
+    int i;
 	char *_iblock_buf = NULL;
 	_iblock_buf = (char *)g_malloc0(IBLOCK_SIZE);
 	for(i=0;i<2048;i++){
-		sprintf(_block_buf, "hello icache mine");
+		sprintf(_iblock_buf, "hello icache mine");
 	       ret = icache_insert_iblock(fixture.icache_ctrl, i, _iblock_buf);
-		a_assert(ret == 0);
+		g_assert(ret == 0);
 	}	
 }
 
 
 void test_icache_query_1()
 {
-       int i;
-	char *_iblock_buf = NULL;
-	_iblock_buf = (char *)g_malloc0(IBLOCK_SIZE);
-	for(i=0;i<1024;i++){
-		sprintf(_block_buf, "hello icache mine");
-	       ret = icache_insert_iblock(fixture.icache_ctrl, i, _iblock_buf);
-		a_assert(ret == 0);
-	}	
-	for(i=0;i<512;i++){
-		sprintf(_block_buf, "hello icache mine");
-	       ret = icache_query_iblock(fixture.icache_ctrl, i, _iblock_buf);
-		a_assert(ret == 0);
-	}
+    int ret =0;
+    int i;
+    char *_iblock_buf = NULL;
+    _iblock_buf = (char *)g_malloc0(IBLOCK_SIZE);
+    for(i=0;i<1024;i++){
+        //printf("ibno:%d\n",i);
+        //printf("size:%d\n",g_queue_get_length(fixture.icache_ctrl->iblock_lru));
+        sprintf(_iblock_buf, "hello icache mine");
+        ret = icache_insert_iblock(fixture.icache_ctrl, i, _iblock_buf);
+        g_assert(ret == 0);
+    }	
+    for(i=0;i<128;i++){
+        ret = icache_query_iblock(fixture.icache_ctrl, i,_iblock_buf);
+        g_assert(ret != 0);
+        printf("iblock :%s\n",_iblock_buf);
+    }
+    for(i=128;i<1024;i++){
+        ret = icache_query_iblock(fixture.icache_ctrl, i,_iblock_buf);
+        g_assert(ret == 0);
+        printf("iblock :%s\n",_iblock_buf);
+    }
+
 }
 
 void test_icache_query_2()
 {
+    int ret = 0;
        int i;
 	char *_iblock_buf = NULL;
 	_iblock_buf = (char *)g_malloc0(IBLOCK_SIZE);
 	for(i=0;i<1024;i++){
-		sprintf(_block_buf, "hello icache mine");
-	       ret = icache_insert_iblock(fixture.icache_ctrl, i, _iblock_buf);
-		a_assert(ret == 0);
+		sprintf(_iblock_buf, "hello icache mine");
+	    ret = icache_insert_iblock(fixture.icache_ctrl, i, _iblock_buf);
+		g_assert(ret == 0);
 	}	
-	for(i=0;i<512;i++){
-		sprintf(_block_buf, "hello icache mine");
-	       ret = icache_query_iblock(fixture.icache_ctrl, i, _iblock_buf);
-		a_assert(ret == 0);
+	for(i=128;i<512;i++){
+		sprintf(_iblock_buf, "hello icache mine");
+	    ret = icache_query_iblock(fixture.icache_ctrl, i, _iblock_buf);
+		g_assert(ret == 0);
 	}
 	for(i=1024;i<2048;i++){
-		sprintf(_block_buf, "hello icache mine");
-	       ret = icache_insert_iblock(fixture.icache_ctrl, i, _iblock_buf);
-		a_assert(ret == 0);
+		sprintf(_iblock_buf, "hello icache mine");
+	    ret = icache_insert_iblock(fixture.icache_ctrl, i, _iblock_buf);
+		g_assert(ret == 0);
 	}	
 }
 

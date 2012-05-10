@@ -34,8 +34,9 @@ int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char *
          }
 	     g_assert(ibno >= 0);
 	     *iblock =  icache_query(hctrl->icache,ibno);
-	     if(ret == 0){
-		   return -1; 
+	     if(NULL == *iblock){
+		 	HLOG_ERROR(" can not find iblock in icache ");
+		    return -1; 
 	     }
     }	
     return -1;	

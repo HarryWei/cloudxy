@@ -24,8 +24,8 @@ int icache_init(ICACHE_CTRL *icache_ctrl,
 	}
 
 	HLOG_DEBUG("--iblock_size:%llu,icache_size:%llu,\
-			invalidate_trigger_level:%llu,invalidate_once_size:%llu,%s", iblock_size, \
-			icache_size,invalidate_trigger_level,invalidate_once_size,__func__);
+		invalidate_trigger_level:%llu,invalidate_once_size:%llu,%s", iblock_size, \
+		icache_size,invalidate_trigger_level,invalidate_once_size,__func__);
     icache_ctrl->iblock_size = iblock_size;
     icache_ctrl->icache_size = icache_size;
     icache_ctrl->invalidate_trigger_level = invalidate_trigger_level;
@@ -135,11 +135,34 @@ int icache_destroy(ICACHE_CTRL *icache_ctrl){
     return 0;
 }
 
+static block_t * icache_query(ICACHE_CTRL *icache_ctrl,uint64_t iblock_no){
+	HLOG_DEBUG("--Entering func %s", __func__);
+	int ret = 0;
+	iblock_t *iblock = NULL;
+	if (lcache_ctrl == NULL) {
+		ret = -EHLFS_PARAM;
+		HLOG_ERROR("param error");
+		return NULL;
+	}
+	HLOG_DEBUG("block_no %llu will be queried",iblock_no);
+       g_mutex_lock(icache_ctrl->icache_mutex);
+	iblock = (iblock_t*)g_hash_table_lookup(icache_ctrl->iblock_map, \
+			GUINT_TO_POINTER(iblock_no));
+    g_mutex_unlock(icache_ctrl->icache_mutex);
+    return iblock;
+}
+
 
 //int icache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_t block_count,char *block_buf);
 int icache_insert_iblock(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no, char *iblock_buf){
     HLOG_DEBUG("--enter fun %s", __func__);
-	icache_ctrl->total_write_count++;
+    icache_ctrl->total_write_count++;
+    iblock_t *iblock = icache_query(icache_ctrl,iblock_no);
+    if(iblock!=NULL){
+        HLOG_DEBUG("--update dirty block--");
+        memcpy(iblock->iblock,iblock_buf,icache_ctrl->iblock_size);  
+	 return 0;
+    }
     g_mutex_lock(icache_ctrl->icache_mutex);
 	if(g_queue_get_length(icache_ctrl->iblock_lru) <= icache_ctrl->invalidate_once_size){
 	   int count = icache_ctrl->invalidate_once_size;
@@ -148,14 +171,14 @@ int icache_insert_iblock(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no, char *ibl
 		   g_hash_table_remove(icache_ctrl->iblock_map,GUINT_TO_POINTER(iblock->iblock_no));
 	       g_trash_stack_push(&icache_ctrl->iblock_cache,iblock);
 	   }
-	}	
+	}
     iblock_t *iblock = g_trash_stack_pop(&icache_ctrl->iblock_cache);
     iblock->iblock_no = iblock_no;
     memcpy(iblock->iblock, iblock_buf , icache_ctrl->iblock_size);
     g_hash_table_insert(icache_ctrl->iblock_map, GUINT_TO_POINTER(iblock->iblock_no),iblock);
-	g_queue_push_head(icache_ctrl->iblock_lru,iblock);
+    g_queue_push_head(icache_ctrl->iblock_lru,iblock);
     g_mutex_unlock(icache_ctrl->icache_mutex);
-	return 0;
+   return 0;
 }
 
 int icache_query_iblock(ICACHE_CTRL *icache_ctrl, uint64_t iblock_no, char *iblock_buf){
@@ -170,9 +193,9 @@ int icache_query_iblock(ICACHE_CTRL *icache_ctrl, uint64_t iblock_no, char *iblo
 		HLOG_ERROR("NO item in hash table");
 		return ret;
 	}
-    g_queue_remove(icache_ctrl->iblock_lru,iblock);
+       g_queue_remove(icache_ctrl->iblock_lru,iblock);
 	g_queue_push_head(icache_ctrl->iblock_lru,iblock);
-    g_mutex_unlock(icache_ctrl->icache_mutex);
+       g_mutex_unlock(icache_ctrl->icache_mutex);
 	
 	HLOG_DEBUG("--read iblock no:%llu",iblock->iblock_no);
 	g_assert(iblock_no == iblock->iblock_no);
@@ -181,6 +204,10 @@ int icache_query_iblock(ICACHE_CTRL *icache_ctrl, uint64_t iblock_no, char *iblo
 	HLOG_DEBUG("--Leaving func %s", __func__);
 	return ret;
 }
+
+
+
+
 
 #if 0
 gboolean  icache_iblock_exist(ICACHE_CTRL *icache_ctrl, uint64_t iblock_no){

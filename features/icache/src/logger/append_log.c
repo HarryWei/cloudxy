@@ -34,33 +34,39 @@ static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_
         if(is_db_in_level1_index_range(i)){
         }else if(is_db_in_level2_index_range(i)){
             int ibno = get_layer1_ibno(i);
+			HLOG_DEBUG("ibno:%d",ibno);
 	        g_assert(ibno>=0);
             ret = icache_insert_iblock(icctrl,ibno,(char*)log_iblock_buf + offset);
 	        g_assert(ret==0);
             offset += BLOCKSIZE;
         }else if(is_db_in_level3_index_range(i)){
             int ibno2 = get_layer2_ibno(i);
+			HLOG_DEBUG("ibno2:%d",ibno);
 	     g_assert(ibno2>0);		
             ret = icache_insert_iblock(icctrl,ibno2,(char*)log_iblock_buf + offset);
 	     g_assert(ret==0);
             offset += BLOCKSIZE;
             int ibno1 = get_layer1_ibno(i);
+			HLOG_DEBUG("ibno1:%d",ibno);
 	     g_assert(ibno1>0);
             ret = icache_insert_iblock(icctrl,ibno1,(char*)log_iblock_buf + offset);
 	     g_assert(ret==0);		
             offset += BLOCKSIZE;
         }else if(is_db_in_level4_index_range(i)){
             int ibno3 = get_layer3_ibno(i);
+			HLOG_DEBUG("ibno3:%d",ibno);
 	     g_assert(ibno3>0);		
             ret = icache_insert_iblock(icctrl,ibno3,(char*)log_iblock_buf + offset);
 	     g_assert(ret==0);
             offset += BLOCKSIZE;
             int ibno2 = get_layer2_ibno(i);
+			HLOG_DEBUG("ibno2:%d",ibno);
 	     g_assert(ibno2>0);		
             ret = icache_insert_iblock(icctrl,ibno2,(char*)log_iblock_buf + offset);
 	     g_assert(ret==0);
             offset += BLOCKSIZE;
             int ibno1 = get_layer1_ibno(i);
+			HLOG_DEBUG("ibno1:%d",ibno);
 	     g_assert(ibno1>0);
             ret = icache_insert_iblock(icctrl,ibno1,(char*)log_iblock_buf + offset);
 	     g_assert(ret==0);

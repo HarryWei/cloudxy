@@ -39,6 +39,10 @@ static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_
 			HLOG_DEBUG("ibno:%d",ibno);
 	        g_assert(ibno>=0);
             ret = icache_insert_iblock(icctrl,ibno,(char*)log_iblock_buf + offset);
+			int  _idx = (db_no-12)%IB_ENTRY_NUM;
+			char * ib=(char*)log_iblock_buf + offset;
+            uint64_t storage_address = *(ib+_idx);
+			HLOG_DEBUG("storage :%llu",storage_address);
 	        g_assert(ret==0);
 			if((i - 12 + 1) % IB_ENTRY_NUM == 0 || i == db_start_no+db_num){
                offset += BLOCKSIZE;

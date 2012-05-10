@@ -7,10 +7,10 @@
 int icache_insert_iblock(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no, char *iblock_buf){
     HLOG_DEBUG("--enter fun %s", __func__);
     icache_ctrl->total_write_count++;
-    iblock_t *iblock = icache_query(icache_ctrl,iblock_no);
-    if(iblock!=NULL){
+    char *_iblock_buf = icache_query(icache_ctrl,iblock_no);
+    if(_iblock_buf!=NULL){
         HLOG_DEBUG("--update exist iblock--");
-        memcpy(iblock->iblock,iblock_buf,icache_ctrl->iblock_size);  
+        memcpy(_iblock_buf,iblock_buf,icache_ctrl->iblock_size);  
 	    return 0;
     }
     g_mutex_lock(icache_ctrl->icache_mutex);
@@ -28,10 +28,10 @@ int icache_insert_iblock(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no, char *ibl
 	   }
        HLOG_DEBUG("now has %d iblock",g_queue_get_length(icache_ctrl->iblock_lru));
 	}
-    iblock = g_trash_stack_pop(&icache_ctrl->iblock_cache);
+    iblock_t *iblock = g_trash_stack_pop(&icache_ctrl->iblock_cache);
     HLOG_DEBUG("--insert iblock_no:%d--",iblock_no);
     iblock->iblock_no = iblock_no;
-    memcpy(iblock->iblock, iblock_buf , icache_ctrl->iblock_size);
+    memcpy(iblock->iblock,iblock_buf, icache_ctrl->iblock_size);
     g_hash_table_insert(icache_ctrl->iblock_map,&(iblock->iblock_no),iblock);
     g_queue_push_head(icache_ctrl->iblock_lru,iblock);
     g_mutex_unlock(icache_ctrl->icache_mutex);

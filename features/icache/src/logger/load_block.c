@@ -18,12 +18,11 @@
 
 
 
-int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char **iblock){
+int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,uint64_t **iblock_buf){
 	HLOG_DEBUG("enter func %s", __func__);
     int ret;
 	int ibno ;
     if(NULL != hctrl->icache){
-	    
 		 if(layerno == 1){
 		    ibno = get_layer1_ibno(dbno);
 		 }else if(layerno == 2){
@@ -33,26 +32,27 @@ int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char *
          }else{
             g_assert(0);
          }
+         HLOG_DEBUG("ibno:%d",ibno);
 	     g_assert(ibno >= 0);
-	     *iblock =  icache_query(hctrl->icache,ibno);
-	     if(NULL == *iblock){
+	     *iblock_buf =  (uint64_t*)icache_query(hctrl->icache,ibno);
+	     if(NULL == *iblock_buf){
 		 	HLOG_ERROR(" can not find iblock in icache ");
 		    return -1; 
 	     }
-    }	
+    }
     return 0;	
 }
 
-int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
-     return __read_layer_iblock(hctrl,dbno,1,iblock);	
+int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,uint64_t **iblock){
+    return __read_layer_iblock(hctrl,dbno,1,iblock);	
 }	
-int read_layer2_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
-     HLOG_DEBUG("enter func %s", __func__);
-     return __read_layer_iblock(hctrl,dbno,2,iblock);	
+int read_layer2_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,uint64_t **iblock){
+    HLOG_DEBUG("enter func %s", __func__);
+    return __read_layer_iblock(hctrl,dbno,2,iblock);	
 }	
-int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
-     HLOG_DEBUG("enter func %s", __func__);
-     return __read_layer_iblock(hctrl,dbno,3,iblock);	
+int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,uint64_t **iblock){
+    HLOG_DEBUG("enter func %s", __func__);
+    return __read_layer_iblock(hctrl,dbno,3,iblock);	
 }	
 
 
@@ -71,12 +71,10 @@ __write_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char *ibl
             g_assert(0);
          }
 	     g_assert(ibno >= 0);
-	     ret =   (hctrl->icache,ibno,iblock);
-	     if(ret == 0){
-		   return -1; 
-	     }
+         HLOG_DEBUG("=====ibno:%d",ibno);
+	     ret = icache_insert_iblock(hctrl->icache,ibno,iblock);
     }	
-    return -1;	
+    return ret;	
 }
 
 int write_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char *iblock){
@@ -183,7 +181,7 @@ out:
 }
 
 int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
-	HLOG_DEBUG("enter func %s", __func__);
+	HLOG_DEBUG("enter func %s,no:%d", __func__,no);
     int ret =0;
     if(ctrl->cctrl!=NULL){
 	   HLOG_DEBUG("read from cache first");
@@ -214,9 +212,11 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
 			   return -1;
 	 	    }
 		    write_layer1_iblock(ctrl,db_no,_ib);	
-	 }	
+	 }
+
         int  _idx = (db_no-12)%IB_ENTRY_NUM;
         storage_address = *(_ib+_idx);
+        HLOG_DEBUG("=====?storage_addr:%llu,_idx:%d",storage_address,_idx);
         g_free(_ib);
     }else if (is_db_in_level3_index_range(db_no)){
         if(ctrl->inode.doubly_iblock ==0){
@@ -290,7 +290,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         g_free(_ib2);
         g_free(_ib3);
     }
-    HLOG_DEBUG("storage_address: %llu", storage_address);
+    HLOG_DEBUG("============storage_address: %llu", storage_address);
     if(storage_address == 0){
         return 1;
     }

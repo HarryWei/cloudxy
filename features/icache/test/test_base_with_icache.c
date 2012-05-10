@@ -67,6 +67,7 @@ int main(int argc, char *argv[]){
         offset +=request_size;
         printf("offset:%d\n",offset);
     }
+
     g_print("TEST  hlfs write over \n");
 	g_print("test hlfs read\n");
 	sleep(2);
@@ -78,6 +79,7 @@ int main(int argc, char *argv[]){
         printf("offset:%d\n",offset);
     }
 
+#if 0
 	g_print("again .........................\n");
     offset = 0;
     while(offset < total_size){
@@ -96,7 +98,7 @@ int main(int argc, char *argv[]){
         offset +=request_size;
         printf("offset:%d\n",offset);
     }
-
+#endif
 
     g_free(content);
 	ret = hlfs_close(ctrl);

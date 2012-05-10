@@ -23,6 +23,7 @@
 static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_t db_start_no,uint32_t db_num){
     HLOG_DEBUG("enter func %s", __func__);
     if(NULL == icctrl){
+        HLOG_DEBUG("icctrl is null");
         return -1;
     }
     int ret;
@@ -33,9 +34,9 @@ static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_
         if(is_db_in_level1_index_range(i)){
         }else if(is_db_in_level2_index_range(i)){
             int ibno = get_layer1_ibno(i);
-	     g_assert(ibno>0);
+	        g_assert(ibno>=0);
             ret = icache_insert_iblock(icctrl,ibno,(char*)log_iblock_buf + offset);
-	     g_assert(ret==0);
+	        g_assert(ret==0);
             offset += BLOCKSIZE;
         }else if(is_db_in_level3_index_range(i)){
             int ibno2 = get_layer2_ibno(i);
@@ -68,7 +69,6 @@ static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_
             g_assert(0);
         }
     }	 	
-
     return 0;
 }
 
@@ -146,9 +146,9 @@ out:
     //g_free(segfile_name);
 
     guint32 db_data_len = log->db_num * ctrl->icache->iblock_size;
-    guint32 ib_offset = db_data_len + LOG_HEADER_LENGTH;
+    guint32 ib_offset   = db_data_len + LOG_HEADER_LENGTH;
     if(NULL != ctrl->icache){
-       ret = update_icache(ctrl->icache,(char*)log+ib_offset,log->start_db_no,log->db_num);
+       ret = update_icache(ctrl->icache,(char*)log + ib_offset,log->start_db_no,log->db_num);
        g_assert(ret==0);
     }
     HLOG_DEBUG("leave func %s", __func__);

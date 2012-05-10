@@ -33,7 +33,7 @@ int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char *
             g_assert(0);
          }
 	     g_assert(ibno >= 0);
-	     ret =  icache_query_iblock(hctrl->icache,ibno,*iblock);
+	     *iblock =  icache_query(hctrl->icache,ibno);
 	     if(ret == 0){
 		   return -1; 
 	     }

@@ -66,7 +66,7 @@ static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_
 	     g_assert(ret==0);
             offset += BLOCKSIZE;
             int ibno1 = get_layer1_ibno(i);
-			HLOG_DEBUG("ibno1:%d",ibno);
+			HLOG_DEBUG("ibno3:%d",ibno);
 	     g_assert(ibno1>0);
             ret = icache_insert_iblock(icctrl,ibno1,(char*)log_iblock_buf + offset);
 	     g_assert(ret==0);
@@ -125,6 +125,13 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
        ret = -1;
        goto out;
     } 
+	guint32 db_data_len = log->db_num * ctrl->icache->iblock_size;
+    guint32 ib_offset   = db_data_len + LOG_HEADER_LENGTH;
+    if(NULL != ctrl->icache){
+       ret = update_icache(ctrl->icache,(char*)log + ib_offset,log->start_db_no,log->db_num);
+       g_assert(ret==0);
+    }
+   
 out:
 #if 0
     if(file != NULL) {
@@ -151,12 +158,6 @@ out:
 #endif 
     //g_free(segfile_name);
 
-    guint32 db_data_len = log->db_num * ctrl->icache->iblock_size;
-    guint32 ib_offset   = db_data_len + LOG_HEADER_LENGTH;
-    if(NULL != ctrl->icache){
-       ret = update_icache(ctrl->icache,(char*)log + ib_offset,log->start_db_no,log->db_num);
-       g_assert(ret==0);
-    }
     HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }

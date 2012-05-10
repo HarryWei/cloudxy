@@ -1,10 +1,10 @@
 #include "glib.h"
 #include "icache.h"
 
-iblock_t * icache_query(ICACHE_CTRL *icache_ctrl,uint64_t iblock_no){
+char * icache_query(ICACHE_CTRL *icache_ctrl,uint64_t iblock_no){
 	HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;
-	iblock_t *iblock = NULL;
+	char *iblock_buf = NULL;
 	if (icache_ctrl == NULL) {
 		ret = -EHLFS_PARAM;
 		HLOG_ERROR("param error");
@@ -12,9 +12,14 @@ iblock_t * icache_query(ICACHE_CTRL *icache_ctrl,uint64_t iblock_no){
 	}
 	HLOG_DEBUG("iblock_no %llu will be queried",iblock_no);
     g_mutex_lock(icache_ctrl->icache_mutex);
-	iblock = (iblock_t*)g_hash_table_lookup(icache_ctrl->iblock_map,&(iblock_no));
+	iblock_t * _iblock = (iblock_t*)g_hash_table_lookup(icache_ctrl->iblock_map,&(iblock_no));
     g_mutex_unlock(icache_ctrl->icache_mutex);
-    return iblock;
+    if(_iblock!=NULL){
+       iblock_buf = (char*)g_malloc0(icache_ctrl->iblock_size);
+       g_assert(iblock_no == _iblock->iblock_no);
+       memcpy(iblock_buf,_iblock->iblock,icache_ctrl->iblock_size);
+    }
+    return iblock_buf;
 }
 
 

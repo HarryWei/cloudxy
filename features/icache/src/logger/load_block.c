@@ -39,7 +39,7 @@ int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char *
 		    return -1; 
 	     }
     }	
-    return -1;	
+    return 0;	
 }
 
 int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){

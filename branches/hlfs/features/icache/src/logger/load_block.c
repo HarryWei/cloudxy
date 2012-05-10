@@ -206,7 +206,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
           return 1;
         }	
 	 uint64_t *_ib=NULL;
-	 if(0!=read_layer1_iblock(ctrl,db_no,&_ib)){
+	 if(0<=read_layer1_iblock(ctrl,db_no,&_ib)){
         	if(NULL == (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE))){
 			   HLOG_ERROR("read_block error for iblock_addr:%llu",ctrl->inode.iblock);
 			   return -1;
@@ -221,7 +221,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
             return 1;
         }
         uint64_t *_ib=NULL;
-	 if(0!=read_layer1_iblock(ctrl,db_no,&_ib)){
+	 if(0<=read_layer1_iblock(ctrl,db_no,&_ib)){
 	 	if(NULL == (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE))){
         	
 				HLOG_ERROR("read_block error for doubly_iblock_addr:%llu",ctrl->inode.doubly_iblock);
@@ -234,7 +234,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
             return 1;
         }
         uint64_t *_ib2=NULL;
-	 if(0!=read_layer2_iblock(ctrl,db_no,&_ib2)){
+	 if(0<=read_layer2_iblock(ctrl,db_no,&_ib2)){
 		if(NULL == (_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE))){	
 			HLOG_ERROR("read_block error");
 			return -1;
@@ -250,7 +250,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
             return 1;
         }
         uint64_t *_ib = NULL;
-	 if(0!=read_layer1_iblock(ctrl,db_no,&_ib)){	
+	 if(0<=read_layer1_iblock(ctrl,db_no,&_ib)){	
 	 	 if(NULL == (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE))){
         
 			HLOG_ERROR("read_block error for triply_iblock_addr:%llu",ctrl->inode.triply_iblock);
@@ -263,7 +263,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
             return 1;
         }
         uint64_t *_ib2 = NULL;
-	 if(0!=read_layer2_iblock(ctrl,db_no,&_ib2)){
+	 if(0<=read_layer2_iblock(ctrl,db_no,&_ib2)){
 	 	 if(NULL == (_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib + _idx),BLOCKSIZE))){
 			HLOG_ERROR("read_block error");
 			return -1;
@@ -275,7 +275,7 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
             return 1;
         }
         uint64_t *_ib3 = NULL;
-	 if(0!=read_layer3_iblock(ctrl,db_no,&_ib3)){
+	 if(0<=read_layer3_iblock(ctrl,db_no,&_ib3)){
 	 	if(NULL == (_ib3 = (uint64_t *)read_block(ctrl->storage,*(_ib2 + _idx2),BLOCKSIZE))){
 			HLOG_ERROR("read_block error");
 			return -1;

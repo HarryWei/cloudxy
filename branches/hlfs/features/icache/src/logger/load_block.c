@@ -69,7 +69,7 @@ __write_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char *ibl
             g_assert(0);
          }
 	     g_assert(ibno >= 0);
-	     ret =  icache_insert_iblock(hctrl->icache,ibno,iblock);
+	     ret =   (hctrl->icache,ibno,iblock);
 	     if(ret == 0){
 		   return -1; 
 	     }

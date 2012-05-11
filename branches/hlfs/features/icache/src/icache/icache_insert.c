@@ -17,7 +17,7 @@ int icache_insert_iblock(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no, char *ibl
     if((icache_ctrl->icache_size - g_queue_get_length(icache_ctrl->iblock_lru)) < icache_ctrl->invalidate_once_size){
        HLOG_DEBUG("--invalidate iblock--");
        int count = icache_ctrl->invalidate_once_size;
-	while(count --){
+	   while(count --){
 	    iblock_t * iblock = g_queue_pop_tail(icache_ctrl->iblock_lru);
            if(iblock == NULL){
                break;

@@ -43,7 +43,6 @@ static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_
 	int  _idx = (i-12)%IB_ENTRY_NUM;
 			uint64_t * ib=(uint64_t*)(log_iblock_buf + offset);
             uint64_t storage_address = *(ib+_idx);
-			HLOG_DEBUG("============offset:%d,storage :%llu,idx:%d,dbno:%d",offset,storage_address,_idx,i);
 	
 
 			if((i - 12 + 1) % IB_ENTRY_NUM == 0 || i == db_start_no+db_num){
@@ -150,11 +149,6 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
     guint32 db_data_len = log->db_num * ctrl->sb.block_size;
     guint32 ib_offset   = db_data_len + LOG_HEADER_LENGTH;
     if(NULL != ctrl->icache){
-        HLOG_DEBUG("========ib_offset:%d",ib_offset);
-        int  _idx = (log->start_db_no-12)%1024;
-        uint64_t * ib=(uint64_t*)((char*)log + ib_offset);
-        uint64_t storage_address = *(ib+_idx);
-        HLOG_DEBUG("============::::,storage :%llu,idx:%d,dbno:%d,log:%p",storage_address,_idx,log->start_db_no,log);
         ret = update_icache(ctrl->icache,(char*)log + ib_offset,log->start_db_no,log->db_num);
         g_assert(ret==0);
     }
@@ -275,7 +269,6 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 set_offset(&ctrl->inode.iblock,ctrl->last_offset + ib_offset);
                 HLOG_DEBUG("-----iblock get segno: %d",get_segno(ctrl->inode.iblock));
                 memcpy((char*)(log_buff + ib_offset),(char*)_ib,BLOCKSIZE);
-                HLOG_DEBUG(" ============== _idx:%u,addr:%llu,ib offset:%d",_idx,*(_ib+_idx),ib_offset);
                 HLOG_DEBUG("-----iblock 2: %lld",ctrl->inode.iblock);                
                 ib_offset +=BLOCKSIZE;
                 g_free(_ib);

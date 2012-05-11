@@ -45,7 +45,7 @@ int cache_destroy(CACHE_CTRL *cache_ctrl)
 			HLOG_DEBUG("----destroy %d succ", i);
         }
     }
-    //g_mutex_clear (cache_ctrl->cache_mutex);
+    g_mutex_free (cache_ctrl->cache_mutex);
     //g_mutex_free(cache_ctrl->cache_mutex);  
     //g_cond_clear(cache_ctrl->flush_waken_cond);
     g_cond_free(cache_ctrl->flush_waken_cond);     

@@ -10,7 +10,7 @@ static int write_cache(CACHE_CTRL *cctrl, uint64_t start_block_no,char *block_bu
     block_t *block = g_trash_stack_pop(&cctrl->block_cache);
     block->block_no = start_block_no;
     memcpy(block->block, block_buf , cctrl->block_size);
-    g_hash_table_insert(cctrl->block_map, &block->block_no, block);
+    g_hash_table_insert(cctrl->block_map, &(block->block_no), block);
     g_queue_push_tail(cctrl->dirty_block, block);
     g_mutex_unlock(cctrl->cache_mutex);
     return 0;
@@ -122,7 +122,7 @@ static block_t * cache_query(CACHE_CTRL *cache_ctrl,uint64_t block_no){
 	HLOG_DEBUG("block_no %llu will be queried",block_no);
     g_mutex_lock(cache_ctrl->cache_mutex);
 	block = (block_t*)g_hash_table_lookup(cache_ctrl->block_map, \
-			(gpointer)&block_no);
+			&(block_no));
     g_mutex_unlock(cache_ctrl->cache_mutex);
     return block;
 }

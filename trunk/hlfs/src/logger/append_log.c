@@ -14,6 +14,90 @@
 #include "misc.h"
 #include "address.h"
 #include "storage.h"
+#include "icache.h"
+
+
+
+
+
+static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_t db_start_no,uint32_t db_num){
+    HLOG_DEBUG("enter func %s", __func__);
+    if(NULL == icctrl){
+        HLOG_DEBUG("icctrl is null");
+        return -1;
+    }
+    int ret;
+    guint32 BLOCKSIZE = icctrl->iblock_size;
+    uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
+    int offset=0;
+    int i;
+    for(i=db_start_no;i<db_start_no+db_num;i++){
+        if(is_db_in_level1_index_range(i)){
+			
+        }else if(is_db_in_level2_index_range(i)){
+            int ibno = get_layer1_ibno(i);
+			HLOG_DEBUG("ibno:%d",ibno);
+	        g_assert(ibno>=0);
+		            ret = icache_insert_iblock(icctrl,ibno,(char*)log_iblock_buf + offset);
+        g_assert(ret==0);
+	int  _idx = (i-12)%IB_ENTRY_NUM;
+			uint64_t * ib=(uint64_t*)(log_iblock_buf + offset);
+            uint64_t storage_address = *(ib+_idx);
+	
+
+			if((i - 12 + 1) % IB_ENTRY_NUM == 0 || i == db_start_no+db_num){
+               offset += BLOCKSIZE;
+			}   
+        }else if(is_db_in_level3_index_range(i)){
+            int ibno2 = get_layer2_ibno(i);
+			HLOG_DEBUG("ibno2:%d",ibno2);
+	        g_assert(ibno2>0);	
+            ret = icache_insert_iblock(icctrl,ibno2,(char*)log_iblock_buf + offset);
+	        g_assert(ret==0);
+			if((i -12 - IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || i == db_start_no+db_num){
+            	offset += BLOCKSIZE;
+			}
+            int ibno1 = get_layer1_ibno(i);
+			HLOG_DEBUG("ibno1:%d",ibno1);
+	        g_assert(ibno1>0);
+            ret = icache_insert_iblock(icctrl,ibno1,(char*)log_iblock_buf + offset);
+	        g_assert(ret==0);	
+			if((i - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 ||  i == db_start_no+db_num){
+            	offset += BLOCKSIZE;
+			}
+        }else if(is_db_in_level4_index_range(i)){
+            int ibno3 = get_layer3_ibno(i);
+			HLOG_DEBUG("ibno3:%d",ibno3);
+	        g_assert(ibno3>0);		
+            ret = icache_insert_iblock(icctrl,ibno3,(char*)log_iblock_buf + offset);
+	        g_assert(ret==0);
+			if((i-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 ||i == db_start_no+db_num){
+            	offset += BLOCKSIZE;
+			}
+            int ibno2 = get_layer2_ibno(i);
+			HLOG_DEBUG("ibno2:%d",ibno2);
+	        g_assert(ibno2>0);		
+            ret = icache_insert_iblock(icctrl,ibno2,(char*)log_iblock_buf + offset);
+	        g_assert(ret==0);
+			if((i-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM * IB_ENTRY_NUM)  == 0 || i == db_start_no+db_num){
+            	offset += BLOCKSIZE;
+			}
+            int ibno1 = get_layer1_ibno(i);
+			HLOG_DEBUG("ibno3:%d",ibno1);
+	        g_assert(ibno1>0);
+            ret = icache_insert_iblock(icctrl,ibno1,(char*)log_iblock_buf + offset);
+	        g_assert(ret==0);
+			if((i-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 ||i == db_start_no+db_num){
+            	offset += BLOCKSIZE;
+			}
+        }else{
+            g_assert(0);
+        }
+    }	 	
+
+    HLOG_DEBUG("exit func %s", __func__);
+    return 0;
+}
 
 
 //static bs_file_t g_cur_write_file = NULL;
@@ -62,6 +146,13 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
        ret = -1;
        goto out;
     } 
+    guint32 db_data_len = log->db_num * ctrl->sb.block_size;
+    guint32 ib_offset   = db_data_len + LOG_HEADER_LENGTH;
+    if(NULL != ctrl->icache){
+        ret = update_icache(ctrl->icache,(char*)log + ib_offset,log->start_db_no,log->db_num);
+        g_assert(ret==0);
+    }
+   
 out:
 #if 0
     if(file != NULL) {
@@ -87,6 +178,7 @@ out:
     }
 #endif 
     //g_free(segfile_name);
+
     HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
@@ -130,44 +222,46 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
         char * cur_log_buff_ptr = log_buff + db_offset;
         HLOG_DEBUG(" db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
         if(is_db_in_level1_index_range(db_cur_no)){
-           HLOG_DEBUG(" is level1 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
-           /*  write db to log buff  */
-           int _idx = db_cur_no % 12;
-           HLOG_DEBUG(" idx:%u",_idx);
-           set_segno (&ctrl->inode.blocks[_idx],ctrl->last_segno);
-           set_offset(&ctrl->inode.blocks[_idx],ctrl->last_offset + db_offset);
-           HLOG_DEBUG("inode.block[%d]'s storage addr:%llu",_idx,ctrl->inode.blocks[_idx]);
-           HLOG_DEBUG("log_buff:%p cur_log_buf:%p db_buff:%p cur_block_ptr:%p",
-			   		log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
-           HLOG_DEBUG("log_buff:%p cur_log_buf:%p db_buff:%p cur_block_ptr:%p",
-			   		log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
-           memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
+            HLOG_DEBUG(" is level1 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
+            /*  write db to log buff  */
+            int _idx = db_cur_no % 12;
+            HLOG_DEBUG(" idx:%u",_idx);
+            set_segno (&ctrl->inode.blocks[_idx],ctrl->last_segno);
+            set_offset(&ctrl->inode.blocks[_idx],ctrl->last_offset + db_offset);
+            HLOG_DEBUG("inode.block[%d]'s storage addr:%llu",_idx,ctrl->inode.blocks[_idx]);
+            HLOG_DEBUG("log_buff:%p cur_log_buf:%p db_buff:%p cur_block_ptr:%p",
+                    log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
+            HLOG_DEBUG("log_buff:%p cur_log_buf:%p db_buff:%p cur_block_ptr:%p",
+                    log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
+            memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
         }else if(is_db_in_level2_index_range(db_cur_no)){
             HLOG_DEBUG(" is level2 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             HLOG_DEBUG("-----iblock 0: %llu",ctrl->inode.iblock);                
             //uint64_t * _ib = NULL;
             if(NULL == _ib){
                 if(ctrl->inode.iblock == 0){
-                    _ib = (uint64_t*)g_malloc0(BLOCKSIZE); 
-                    if (NULL == _ib) {
+                    if(NULL == (_ib = (uint64_t*)g_malloc0(BLOCKSIZE))){ 
                         HLOG_ERROR("g_malloc0 error!");
                         g_assert(0);
                         return -1;
                     }
                 }else{
-                    _ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE);
-                    if (NULL == _ib) {
-                        HLOG_ERROR("read block error!");
-                        g_assert(0);
-                        return -1;
+                    if(0>read_layer1_iblock(ctrl,db_cur_no,&_ib)){ 	
+                        if (NULL == (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE))){
+                            HLOG_ERROR("read block error!");
+                            g_assert(0);
+                            return -1;
+                        }
+						write_layer1_iblock(ctrl,db_cur_no,_ib);	
                     }
                 }
             }
             int  _idx = (db_cur_no - 12)%IB_ENTRY_NUM;
-            HLOG_DEBUG(" idx:%u",_idx);
+
             //uint64_t storage_address = *(_bi + _idx);
             set_segno ((_ib+_idx),ctrl->last_segno);
             set_offset((_ib+_idx),ctrl->last_offset + db_offset);
+
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
             if( (db_cur_no - 12 + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end ){
                 HLOG_DEBUG("set iblock - segno:%u",ctrl->last_segno);
@@ -178,7 +272,6 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 HLOG_DEBUG("-----iblock 2: %lld",ctrl->inode.iblock);                
                 ib_offset +=BLOCKSIZE;
                 g_free(_ib);
-                HLOG_DEBUG("-----iblock 3: %lld",ctrl->inode.iblock);                
                 _ib=NULL;
             }
             //g_free(_ib);
@@ -187,19 +280,20 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             //uint64_t *_ib = NULL;
             if(NULL == _ib){
                 if(ctrl->inode.doubly_iblock == 0){
-                    _ib = (uint64_t *)g_malloc0(BLOCKSIZE);
-    		    if (NULL==_ib) {
-	    		    HLOG_ERROR("allocate error!");
-                    g_assert(0);
-	    		    return -1;
-    			}
+                    if(NULL == (_ib = (uint64_t *)g_malloc0(BLOCKSIZE))){
+                        HLOG_ERROR("allocate error!");
+                        g_assert(0);
+                        return -1;
+                    }
                 }else{
-                    _ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE);
-    			if (NULL==_ib) {
-	    			HLOG_ERROR("allocate error!");
-                    g_assert(0);
-	    			return -1;
-    			}
+                    if(0>read_layer1_iblock(ctrl,db_cur_no,&_ib)){ 	
+                        if(NULL == (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE))){
+                            HLOG_ERROR("allocate error!");
+                            g_assert(0);
+                            return -1;
+                        }
+						write_layer1_iblock(ctrl,db_cur_no,_ib);
+                    }
                 }
             }
             int _idx   = (db_cur_no - 12 - IB_ENTRY_NUM) / IB_ENTRY_NUM;
@@ -207,19 +301,20 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             //uint64_t *_ib2 = NULL; 
             if(NULL == _ib2){
                 if(*(_ib+_idx) == 0 ){
-                    _ib2 = (uint64_t*)g_malloc0(BLOCKSIZE);
-    			if (NULL==_ib2) {
-	    			HLOG_ERROR("allocate error!");
-                    g_assert(0);
-	    			return -1;
-    			}
+                    if (NULL ==(_ib2 = (uint64_t*)g_malloc0(BLOCKSIZE))){
+                        HLOG_ERROR("allocate error!");
+                        g_assert(0);
+                        return -1;
+                    }
                 }else{
-                    _ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE);
-    			if (NULL==_ib2) {
-	    			HLOG_ERROR("allocate error!");
-                    g_assert(0);
-	    			return -1;
-    			}
+                    if(0>read_layer2_iblock(ctrl,db_cur_no,&_ib2)){ 	
+                        if (NULL ==(_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE))){
+                            HLOG_ERROR("allocate error!");
+                            g_assert(0);
+                            return -1;
+                        }
+						write_layer2_iblock(ctrl,db_cur_no,_ib2);
+                    }
                 }
             }
             int _idx2  = (db_cur_no - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
@@ -229,78 +324,81 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
 
             if((db_cur_no -12 - IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end){
-              HLOG_DEBUG(" save ib2");
-              set_segno ((_ib+_idx),ctrl->last_segno);
-              set_offset((_ib+_idx),ctrl->last_offset + ib_offset);
-              memcpy(log_buff + ib_offset,(char*)_ib2,BLOCKSIZE);
-              ib_offset +=BLOCKSIZE;
-              g_free(_ib2);
-              _ib2=NULL;
-           }
+                HLOG_DEBUG(" save ib2");
+                set_segno ((_ib+_idx),ctrl->last_segno);
+                set_offset((_ib+_idx),ctrl->last_offset + ib_offset);
+                memcpy(log_buff + ib_offset,(char*)_ib2,BLOCKSIZE);
+                ib_offset +=BLOCKSIZE;
+                g_free(_ib2);
+                _ib2=NULL;
+            }
 
-           if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == db_end){
-              HLOG_DEBUG(" save ib1");
-              set_segno (&ctrl->inode.doubly_iblock,ctrl->last_segno);
-              set_offset(&ctrl->inode.doubly_iblock,ctrl->last_offset + ib_offset);
-              memcpy(log_buff + ib_offset,(char*)_ib,BLOCKSIZE);
-              ib_offset +=BLOCKSIZE;
-              g_free(_ib);
-              _ib=NULL;
-           }
-           //g_free(_ib);
-           //g_free(_ib2);
+            if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == db_end){
+                HLOG_DEBUG(" save ib1");
+                set_segno (&ctrl->inode.doubly_iblock,ctrl->last_segno);
+                set_offset(&ctrl->inode.doubly_iblock,ctrl->last_offset + ib_offset);
+                memcpy(log_buff + ib_offset,(char*)_ib,BLOCKSIZE);
+                ib_offset +=BLOCKSIZE;
+                g_free(_ib);
+                _ib=NULL;
+            }
+            //g_free(_ib);
+            //g_free(_ib2);
         }else if(is_db_in_level4_index_range(db_cur_no)){
             HLOG_DEBUG(" is level4 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
             if(NULL == _ib){
                 if(ctrl->inode.triply_iblock == 0){
-                    _ib = (uint64_t *)g_malloc0(BLOCKSIZE);
-    			if (NULL==_ib) {
-	    			HLOG_ERROR("allocate error!");
-	    			return -1;
-    			}
+                    if (NULL==(_ib = (uint64_t *)g_malloc0(BLOCKSIZE))){
+                        HLOG_ERROR("allocate error!");
+                        return -1;
+                    }
                 }else{
-                    _ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE);
-    				if (NULL==_ib) {
-	    				HLOG_ERROR("allocate error!");
-	    				return -1;
-    				}
+                    if(0>read_layer1_iblock(ctrl,db_cur_no,&_ib)){ 	
+                        if (NULL== (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE))){
+                            HLOG_ERROR("allocate error!");
+                            return -1;
+                        }
+						write_layer1_iblock(ctrl,db_cur_no,_ib);
+                    }
                 }
             }
             int _idx   = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM * IB_ENTRY_NUM);
             HLOG_DEBUG(" idx:%u",_idx);
             //uint64_t *_ib2 = NULL; 
             if(NULL == _ib2){
-                	if(*(_ib+_idx) == 0 ){
-                    	_ib2 = (uint64_t*)g_malloc0(BLOCKSIZE);
-    					if (NULL==_ib2) {
-	    					HLOG_ERROR("allocate error!");
-	    					return -1;
-    					}
-                	}else{
-                    	_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE);
-    					if (NULL==_ib2) {
-	    					HLOG_ERROR("allocate error!");
-	    					return -1;
-    					}
-                	}
+                if(*(_ib+_idx) == 0 ){
+                    if (NULL == (_ib2 = (uint64_t*)g_malloc0(BLOCKSIZE))){
+                        HLOG_ERROR("allocate error!");
+                        return -1;
+                    }
+                }else{
+                    if(0>read_layer2_iblock(ctrl,db_cur_no,&_ib2)){ 	
+                        if (NULL==(_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE))){
+                            HLOG_ERROR("allocate error!");
+                            return -1;
+                        }
+						write_layer2_iblock(ctrl,db_cur_no,_ib2);
+                    }
+                }
             }
             int _idx2  = (db_cur_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / IB_ENTRY_NUM % IB_ENTRY_NUM;
             HLOG_DEBUG(" idx2:%u",_idx2);
             //uint64_t *_ib3 = NULL; 
             if(NULL == _ib3){
                 if(*(_ib2+_idx2) == 0 ){
-                    _ib3 = (uint64_t*)g_malloc0(BLOCKSIZE);
-    			if (NULL==_ib3) {
-	    			HLOG_ERROR("allocate error!");
-	    			return -1;
-    			}
+                    if (NULL==(_ib3 = (uint64_t*)g_malloc0(BLOCKSIZE))){
+                        HLOG_ERROR("allocate error!");
+                        return -1;
+                    }
                 }else{
-                    _ib3 = (uint64_t *)read_block(ctrl->storage,*(_ib2+_idx2),BLOCKSIZE);
-    			if (NULL==_ib3) {
-	    			HLOG_ERROR("allocate error!");
-	    			return -1;
-    			}
+                    if(0>read_layer3_iblock(ctrl,db_cur_no,&_ib3)){ 	
+                        if (NULL==(_ib3 = (uint64_t *)read_block(ctrl->storage,*(_ib2+_idx2),BLOCKSIZE))){
+                            HLOG_ERROR("allocate error!");
+                            return -1;
+                        }
+                    }
+					write_layer3_iblock(ctrl,db_cur_no,_ib3);
                 }
             }
             int _idx3  = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 
@@ -339,44 +437,44 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             //g_free(_ib2);
             //g_free(_ib3);
         }else{
-           /* over limit size  */
-           HLOG_ERROR("offset is out of limit size(8T)!!!");
-           return -1;   
+            /* over limit size  */
+            HLOG_ERROR("offset is out of limit size(8T)!!!");
+            return -1;   
         }
-   }
-   __inode_create:;
-        HLOG_DEBUG("to update inode ...");
-        int offset = ib_offset;
-        HLOG_DEBUG("to update inode map entry ...");
-        HLOG_DEBUG("last offset:%u , last segno:%u log head len:%d iboffset:%d", ctrl->last_offset,ctrl->last_segno,LOG_HEADER_LENGTH,ib_offset);
-        ctrl->imap_entry.inode_no = HLFS_INODE_NO; 
-        set_segno (&ctrl->imap_entry.inode_addr,ctrl->last_segno);     
-        set_offset(&ctrl->imap_entry.inode_addr,ctrl->last_offset + offset);    
-        HLOG_DEBUG("inode address's offset %llu , give it %u",ctrl->imap_entry.inode_addr,ctrl->last_offset + offset);
-        memcpy(log_buff +  offset,&ctrl->inode,sizeof(struct inode));
-        memcpy(log_buff +  offset + sizeof(struct inode),&ctrl->imap_entry,sizeof(struct inode_map_entry));
-        HLOG_DEBUG("to fill log header ...");
-        struct log_header * lh = (struct log_header *)log_buff;
-        lh->version = 0;
-        lh->header_checksum = 0;
-        lh->data_checksum = 0;
-        lh->log_size = offset + sizeof(struct inode) + sizeof(struct inode_map_entry);
-        lh->ctime = get_current_time();
-        lh->start_db_no = db_start;
-        g_assert(db_data_len%BLOCKSIZE == 0);
-        g_assert((ib_offset-db_data_len-LOG_HEADER_LENGTH)%BLOCKSIZE == 0);
-        lh->db_num = db_data_len/BLOCKSIZE;
-        lh->ib_num = (ib_offset - db_data_len - LOG_HEADER_LENGTH)/BLOCKSIZE;
-        HLOG_DEBUG("log size:%d,log header:%d,inode:%d,inode map:%d,db:%d,ib:%d",lh->log_size,sizeof(struct log_header),sizeof(struct inode),sizeof(struct inode_map_entry),lh->db_num*BLOCKSIZE,lh->ib_num*BLOCKSIZE); 
-        if(0!=dump_log(ctrl,lh)){
-           HLOG_ERROR("log dump failed");
-           g_assert(0);
-        }
-        int size = lh->log_size;
-        HLOG_DEBUG("return log size :%d",lh->log_size);
-        g_free(log_buff);
-    	HLOG_DEBUG("leave func %s", __func__);
-        return size;
+    }
+__inode_create:;
+               HLOG_DEBUG("to update inode ...");
+               int offset = ib_offset;
+               HLOG_DEBUG("to update inode map entry ...");
+               HLOG_DEBUG("last offset:%u , last segno:%u log head len:%d iboffset:%d", ctrl->last_offset,ctrl->last_segno,LOG_HEADER_LENGTH,ib_offset);
+               ctrl->imap_entry.inode_no = HLFS_INODE_NO; 
+               set_segno (&ctrl->imap_entry.inode_addr,ctrl->last_segno);     
+               set_offset(&ctrl->imap_entry.inode_addr,ctrl->last_offset + offset);    
+               HLOG_DEBUG("inode address's offset %llu , give it %u",ctrl->imap_entry.inode_addr,ctrl->last_offset + offset);
+               memcpy(log_buff +  offset,&ctrl->inode,sizeof(struct inode));
+               memcpy(log_buff +  offset + sizeof(struct inode),&ctrl->imap_entry,sizeof(struct inode_map_entry));
+               HLOG_DEBUG("to fill log header ...");
+               struct log_header * lh = (struct log_header *)log_buff;
+               lh->version = 0;
+               lh->header_checksum = 0;
+               lh->data_checksum = 0;
+               lh->log_size = offset + sizeof(struct inode) + sizeof(struct inode_map_entry);
+               lh->ctime = get_current_time();
+               lh->start_db_no = db_start;
+               g_assert(db_data_len%BLOCKSIZE == 0);
+               g_assert((ib_offset-db_data_len-LOG_HEADER_LENGTH)%BLOCKSIZE == 0);
+               lh->db_num = db_data_len/BLOCKSIZE;
+               lh->ib_num = (ib_offset - db_data_len - LOG_HEADER_LENGTH)/BLOCKSIZE;
+               HLOG_DEBUG("log size:%d,log header:%d,inode:%d,inode map:%d,db:%d,ib:%d",lh->log_size,sizeof(struct log_header),sizeof(struct inode),sizeof(struct inode_map_entry),lh->db_num*BLOCKSIZE,lh->ib_num*BLOCKSIZE); 
+               if(0!=dump_log(ctrl,lh)){
+                   HLOG_ERROR("log dump failed");
+                   g_assert(0);
+               }
+               int size = lh->log_size;
+               HLOG_DEBUG("return log size :%d",lh->log_size);
+               g_free(log_buff);
+               HLOG_DEBUG("leave func %s", __func__);
+               return size;
 }
 
 int append_log(struct hlfs_ctrl *hctrl,const char *db_buff,uint32_t db_start,uint32_t db_end){

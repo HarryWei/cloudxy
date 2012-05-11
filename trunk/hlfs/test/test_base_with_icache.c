@@ -9,7 +9,7 @@ static gint request_size = 0;
 static gint total_size = 0;
 static gboolean verbose = FALSE;
 static GOptionEntry entries[] = {
-	    {"filesystem location",'u', 0, G_OPTION_ARG_STRING,   &uri, "filesystem storage uri/conf", "FSLOC"},
+	{"filesystem location",'u', 0, G_OPTION_ARG_STRING,   &uri, "filesystem storage uri/conf", "FSLOC"},
     	{"filesystem request size", 'r', 0, G_OPTION_ARG_INT, &request_size, "test request size", "REQUESTSIZE"},
     	{"filesystem tatal size", 'a', 0, G_OPTION_ARG_INT, &total_size, "test total request size", "TOTALSIZE"},
     	{"verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
@@ -27,7 +27,7 @@ error_func(GOptionContext *context, GOptionGroup *group,
         exit(EXIT_FAILURE);
     }
 }
-#if 1
+
 /*
  * ./test -u uri -r request_size -a total_size
  * uri: /tmp/testenv/testfs
@@ -49,17 +49,16 @@ int main(int argc, char *argv[]){
         g_message("option parsing failed: %s", error->message);
         exit(EXIT_FAILURE);
     }
-	g_option_context_free(context);
+    g_option_context_free(context);
     g_print("TEST: uri is %s, request size is %d, total size is %d\n", uri, request_size, total_size);
     char *content = (char*)g_malloc0(request_size);
-    HLFS_CTRL * ctrl = init_hlfs(uri);
+    HLFS_CTRL * ctrl = init_hlfs_by_config(uri);
     g_assert(ctrl != NULL);
     uint64_t ret = 0;
     ret = hlfs_open(ctrl,1);
     g_assert(ret == 0);
     g_print("TEST  hlfs open over \n");
 	g_print("test hlfs write\n");
-	sleep(2);
     int offset = 0;
     while(offset < total_size){
         ret = hlfs_write(ctrl,content,request_size,offset);
@@ -67,9 +66,9 @@ int main(int argc, char *argv[]){
         offset +=request_size;
         printf("offset:%d\n",offset);
     }
+
     g_print("TEST  hlfs write over \n");
 	g_print("test hlfs read\n");
-	sleep(2);
     offset = 0;
     while(offset < total_size){
         ret = hlfs_read(ctrl,content,request_size,offset);
@@ -78,7 +77,8 @@ int main(int argc, char *argv[]){
         printf("offset:%d\n",offset);
     }
 
-	g_print("again ------------------------\n");
+#if 1
+	g_print("again .........................\n");
     offset = 0;
     while(offset < total_size){
         ret = hlfs_write(ctrl,content,request_size,offset);
@@ -88,7 +88,6 @@ int main(int argc, char *argv[]){
     }
     g_print("TEST  hlfs write over \n");
 	g_print("test hlfs read\n");
-	sleep(2);
     offset = 0;
     while(offset < total_size){
         ret = hlfs_read(ctrl,content,request_size,offset);
@@ -96,10 +95,10 @@ int main(int argc, char *argv[]){
         offset +=request_size;
         printf("offset:%d\n",offset);
     }
+#endif
 
     g_free(content);
 	ret = hlfs_close(ctrl);
     deinit_hlfs(ctrl);
     return 0;
 }
-#endif

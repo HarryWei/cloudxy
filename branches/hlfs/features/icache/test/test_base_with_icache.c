@@ -59,7 +59,6 @@ int main(int argc, char *argv[]){
     g_assert(ret == 0);
     g_print("TEST  hlfs open over \n");
 	g_print("test hlfs write\n");
-	sleep(2);
     int offset = 0;
     while(offset < total_size){
         ret = hlfs_write(ctrl,content,request_size,offset);
@@ -70,7 +69,6 @@ int main(int argc, char *argv[]){
 
     g_print("TEST  hlfs write over \n");
 	g_print("test hlfs read\n");
-	sleep(2);
     offset = 0;
     while(offset < total_size){
         ret = hlfs_read(ctrl,content,request_size,offset);
@@ -90,7 +88,6 @@ int main(int argc, char *argv[]){
     }
     g_print("TEST  hlfs write over \n");
 	g_print("test hlfs read\n");
-	sleep(2);
     offset = 0;
     while(offset < total_size){
         ret = hlfs_read(ctrl,content,request_size,offset);

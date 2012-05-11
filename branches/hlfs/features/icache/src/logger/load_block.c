@@ -19,32 +19,33 @@
 
 
 int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,uint64_t **iblock_buf){
-	HLOG_DEBUG("enter func %s", __func__);
+    HLOG_DEBUG("enter func %s", __func__);
     int ret;
-	int ibno ;
+    int ibno ;
     if(NULL != hctrl->icache){
-		 if(layerno == 1){
-		    ibno = get_layer1_ibno(dbno);
-		 }else if(layerno == 2){
-		    ibno = get_layer2_ibno(dbno);
-         }else if(layerno == 3){
+        if(layerno == 1){
+            ibno = get_layer1_ibno(dbno);
+        }else if(layerno == 2){
+            ibno = get_layer2_ibno(dbno);
+        }else if(layerno == 3){
             ibno = get_layer3_ibno(dbno);
-         }else{
+        }else{
             g_assert(0);
-         }
-         HLOG_DEBUG("ibno:%d",ibno);
-	     g_assert(ibno >= 0);
-	     if(TRUE == icache_iblock_exist(hctrl->icache,ibno)}{
-		  *iblock_buf = g_malloc0(hctrl->iblock_size);	
-	         ret =  icache_query_iblock(hctrl->icache,ibno,*iblock_buf);
-	         if(0 != ret){
-			    HLOG_ERROR(" can not find iblock in icache ");
-			    return -1; 
-	         }
-	     }else{
-	     	  return -1;   
-	     }
-    return 0;	
+        }
+        HLOG_DEBUG("ibno:%d",ibno);
+        g_assert(ibno >= 0);
+        if(TRUE == icache_iblock_exist(hctrl->icache,ibno)){
+            *iblock_buf = g_malloc0(hctrl->icache->iblock_size);	
+            ret =  icache_query_iblock(hctrl->icache,ibno,(char*)*iblock_buf);
+            if(0 != ret){
+                HLOG_ERROR(" can not find iblock in icache ");
+                return -1; 
+            }
+        }else{
+            return -1;   
+        }
+        return 0;	
+    }
 }
 
 int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,uint64_t **iblock){

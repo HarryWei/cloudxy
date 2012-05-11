@@ -7,7 +7,7 @@
 int icache_insert_iblock(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no, char *iblock_buf){
     HLOG_DEBUG("--enter fun %s", __func__);
     icache_ctrl->total_write_count++;
-    block_t *_iblock = icache_query(icache_ctrl,iblock_no);
+    iblock_t *_iblock = icache_query(icache_ctrl,iblock_no);
     if(_iblock!= NULL){
         HLOG_DEBUG("--update exist iblock--");
         memcpy(_iblock->iblock,iblock_buf,icache_ctrl->iblock_size);  

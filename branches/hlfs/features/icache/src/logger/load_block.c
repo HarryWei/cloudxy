@@ -34,12 +34,16 @@ int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,uint64
          }
          HLOG_DEBUG("ibno:%d",ibno);
 	     g_assert(ibno >= 0);
-	     *iblock_buf =  (uint64_t*)icache_query(hctrl->icache,ibno);
-	     if(NULL == *iblock_buf){
-		 	HLOG_ERROR(" can not find iblock in icache ");
-		    return -1; 
+	     if(TRUE == icache_iblock_exist(hctrl->icache,ibno)}{
+		  *iblock_buf = g_malloc0(hctrl->iblock_size);	
+	         ret =  icache_query_iblock(hctrl->icache,ibno,*iblock_buf);
+	         if(0 != ret){
+			    HLOG_ERROR(" can not find iblock in icache ");
+			    return -1; 
+	         }
+	     }else{
+	     	  return -1;   
 	     }
-    }
     return 0;	
 }
 
@@ -185,19 +189,20 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
     int ret =0;
     if(ctrl->cctrl!=NULL){
 	   HLOG_DEBUG("read from cache first");
-       *block = g_malloc0(ctrl->cctrl->block_size);
-       ret = cache_query_block(ctrl->cctrl,no,*block);
-       if(ret == 0 ){
-	      HLOG_DEBUG("read from cache!");
+          *block = g_malloc0(ctrl->cctrl->block_size);
+          ret = cache_query_block(ctrl->cctrl,no,*block);
+         if(ret == 0 ){
+	        HLOG_DEBUG("read from cache!");
           return 0;
-       }
-       g_free(*block);
-	   HLOG_DEBUG("not find in cache!");
+         }
+         g_free(*block);
+	  HLOG_DEBUG("not find in cache!");
     }
     uint64_t storage_address ;
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     uint32_t db_no = no;
     uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
+    
     if(is_db_in_level1_index_range(db_no)){
         int _idx = db_no % 12;
         storage_address = ctrl->inode.blocks[_idx];

@@ -76,7 +76,6 @@ __write_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char *ibl
             g_assert(0);
          }
 	     g_assert(ibno >= 0);
-         HLOG_DEBUG("=====ibno:%d",ibno);
 	     ret = icache_insert_iblock(hctrl->icache,ibno,iblock);
     }	
     return ret;	
@@ -222,7 +221,6 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
 
         int  _idx = (db_no-12)%IB_ENTRY_NUM;
         storage_address = *(_ib+_idx);
-        HLOG_DEBUG("=====?storage_addr:%llu,_idx:%d",storage_address,_idx);
         g_free(_ib);
     }else if (is_db_in_level3_index_range(db_no)){
         if(ctrl->inode.doubly_iblock ==0){
@@ -296,7 +294,6 @@ int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
         g_free(_ib2);
         g_free(_ib3);
     }
-    HLOG_DEBUG("============storage_address: %llu", storage_address);
     if(storage_address == 0){
         return 1;
     }

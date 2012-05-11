@@ -77,7 +77,7 @@ int main(int argc, char *argv[]){
         printf("offset:%d\n",offset);
     }
 
-#if 0
+#if 1
 	g_print("again .........................\n");
     offset = 0;
     while(offset < total_size){

@@ -25,13 +25,13 @@ int hlfs_close(struct hlfs_ctrl *ctrl){
 	    return -1;
     }
     int ret =0;
-    if(ctrl->cur_write_file_handler!=NULL){
-       ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->cur_write_file_handler);
-	   ctrl->cur_write_file_handler = NULL;
+    if(ctrl->last_wsegfile_handler!=NULL){
+       ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler);
+	   ctrl->last_wsegfile_handler = NULL;
     }
-    if(ctrl->cur_read_file_handler!=NULL){
-       ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->cur_read_file_handler);
-	   ctrl->cur_read_file_handler = NULL;
+    if(ctrl->last_rsegfile_handler!=NULL){
+       ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_rsegfile_handler);
+	   ctrl->last_rsegfile_handler = NULL;
     }
     ctrl->usage_ref--;
     if(ctrl->cctrl!=NULL){

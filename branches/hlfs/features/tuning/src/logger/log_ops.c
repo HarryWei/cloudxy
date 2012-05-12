@@ -110,38 +110,38 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
     build_segfile_name(ctrl->last_segno,segfile_name);
     //char *segfile_path = g_build_filename(path,segfile_name,NULL);
     if(ctrl->last_offset==0){
-        if(ctrl->cur_write_file_handler!=NULL){
-	        if(0!=ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->cur_write_file_handler)){
+        if(ctrl->last_wsegfile_handler!=NULL){
+	        if(0!=ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler)){
                HLOG_ERROR("close file failed");
                ret = -1;
                goto out;
             }
-            ctrl->cur_write_file_handler ==NULL;
+            ctrl->last_wsegfile_handler ==NULL;
         }
         HLOG_DEBUG("need make a new segment:%d file",ctrl->last_segno);
-        ctrl->cur_write_file_handler = (void*)ctrl->storage->bs_file_create(ctrl->storage,segfile_name);
+        ctrl->last_wsegfile_handler = (void*)ctrl->storage->bs_file_create(ctrl->storage,segfile_name);
     }else{
-        if(ctrl->cur_write_file_handler==NULL){
+        if(ctrl->last_wsegfile_handler==NULL){
             /*  open a exist file */
             HLOG_DEBUG("open a exist file............................");
-            ctrl->cur_write_file_handler = (void*)ctrl->storage->bs_file_open(ctrl->storage,segfile_name,BS_WRITEABLE);
+            ctrl->last_wsegfile_handler = (void*)ctrl->storage->bs_file_open(ctrl->storage,segfile_name,BS_WRITEABLE);
         }else{
 	    	HLOG_DEBUG("...........");
         }
         HLOG_DEBUG("open a exist segment:%d file",ctrl->last_segno);
     }
 
-    HLOG_DEBUG("cur write handler %p",ctrl->cur_write_file_handler);
-    if(ctrl->cur_write_file_handler==NULL){
+    HLOG_DEBUG("cur write handler %p",ctrl->last_wsegfile_handler);
+    if(ctrl->last_wsegfile_handler==NULL){
         HLOG_ERROR("fail to open segment file %s",segfile_name);
         ret = -1;
         goto out;
     }
-    int size = ctrl->storage->bs_file_append(ctrl->storage,(bs_file_t)ctrl->cur_write_file_handler,(char*)log,log->log_size);
+    int size = ctrl->storage->bs_file_append(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler,(char*)log,log->log_size);
     HLOG_DEBUG("write to filewrite size %d  expect size %d",size,log->log_size);
     if(size != log->log_size){
        HLOG_ERROR("write to file:%s failed, write size %d  expect size %d # ",
-		       segfile_name,size,log->log_size,ctrl->cur_write_file_handler);
+		       segfile_name,size,log->log_size,ctrl->last_wsegfile_handler);
        HLOG_ERROR("bs_file_append error");
        ret = -1;
        goto out;
@@ -163,17 +163,17 @@ out:
         }
     }
 #else
-    if(ctrl->cur_write_file_handler!=NULL){
-        if (0!=ctrl->storage->bs_file_flush(ctrl->storage,(bs_file_t)ctrl->cur_write_file_handler)){
+    if(ctrl->last_wsegfile_handler!=NULL){
+        if (0!=ctrl->storage->bs_file_flush(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler)){
             HLOG_ERROR("storage flush failed");
             ret =-1;
         }
 #if 0
-        if (0!=ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->cur_write_file_handler)){
+        if (0!=ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler)){
             g_message("storage close failed");
             ret =-1;
         }
-        ctrl->cur_write_file_handler=NULL;
+        ctrl->last_wsegfile_handler=NULL;
 #endif 
     }
 #endif 

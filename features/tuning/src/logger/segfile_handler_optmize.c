@@ -18,7 +18,7 @@
 #include "icache.h"
 
 
-int prev_open_read_segfile(struct hlfs_ctrl *ctrl,uint32_t segno){
+int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
 	HLOG_DEBUG("enter func %s", __func__);
     if(NULL == ctrl->last_rsegfile_handler){
        HLOG_DEBUG("need open cur read file handler for ,no:%d",segno);
@@ -63,7 +63,7 @@ int prev_open_read_segfile(struct hlfs_ctrl *ctrl,uint32_t segno){
 
 
 
-int prev_open_write_segfile(struct hlfs_ctrl *ctrl){
+int prev_open_wsegfile(struct hlfs_ctrl *ctrl){
 	HLOG_DEBUG("enter func %s", __func__);
 	HLOG_DEBUG("ctrl last segno %d,offset:%d",ctrl->last_segno,ctrl->last_offset);
 	if( 0 == ctrl->last_offset){

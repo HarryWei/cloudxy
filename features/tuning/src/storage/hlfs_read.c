@@ -34,7 +34,7 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
 		HLOG_DEBUG("only need to read one block: %llu", pos / BLOCKSIZE);
         char *block = NULL;
         g_mutex_lock (ctrl->hlfs_access_mutex);
-        ret=load_block_by_addr(ctrl,pos,&block);
+        ret=load_block_by_addr_fast(ctrl,pos,&block);
         g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(-1 == ret ){
 			HLOG_ERROR("fail to load block for addr %llu", pos);
@@ -57,7 +57,7 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
 		HLOG_DEBUG("need to read first block", __func__);
         char *block = NULL;
         g_mutex_lock (ctrl->hlfs_access_mutex);
-        ret=load_block_by_addr(ctrl,pos,&block);
+        ret=load_block_by_addr_fast(ctrl,pos,&block);
         g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(-1 == ret){
             HLOG_ERROR("fail to load block for addr %llu", pos);
@@ -81,7 +81,7 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
     for(i = start_db; i < end_db;i++){
         char *block = NULL;
         g_mutex_lock (ctrl->hlfs_access_mutex);
-        ret=load_block_by_no(ctrl,i,&block);
+        ret=load_block_by_no_fast(ctrl,i,&block);
         g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(-1 == ret){
             HLOG_ERROR("fail to load block for no %d", i);
@@ -100,7 +100,7 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
         HLOG_DEBUG("need to read last block", __func__);
         char *block = NULL;
         g_mutex_lock (ctrl->hlfs_access_mutex);
-        ret=load_block_by_addr(ctrl,pos+read_len,&block);
+        ret=load_block_by_addr_fast(ctrl,pos+read_len,&block);
         g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(-1 == ret){
             HLOG_ERROR("fail to load block for addr %llu", pos + read_len);

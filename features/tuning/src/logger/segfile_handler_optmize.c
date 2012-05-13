@@ -96,3 +96,38 @@ int prev_open_wsegfile(struct hlfs_ctrl *ctrl){
 
 
 
+char *read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address)
+{
+	HLOG_DEBUG("enter func %s", __func__);
+    int ret = 0;
+    int write_size = 0;
+    uint32_t offset = get_offset(storage_address);
+    uint32_t segno = get_segno(storage_address);
+	HLOG_DEBUG("offset :%u,segno:%u",offset,segno);
+	uint32_t block_size = ctrl->sb.block_size;
+    if(0!=pre_open_read_segfile(ctrl,segno)){
+	   HLOG_ERROR("can not pre open read segfile:%u",segno);
+       return NULL; 
+    }
+    char * block = (char*)g_malloc0(block_size);
+    if (NULL == block) {
+	    HLOG_ERROR("Allocate Error!");
+	    block = NULL;
+	    goto out;
+    }
+    do{
+        //if(block_size != (write_size = ctrl->storage->bs_file_pread(ctrl->storage,ctrl->last_rsegfile_handler,block,block_size,offset))){
+        write_size = ctrl->storage->bs_file_pread(ctrl->storage,ctrl->last_rsegfile_handler,block,block_size,offset);
+        if(write_size!=block_size){
+            HLOG_ERROR("can not read block from seg:%u#%u :ret :%d",segno,offset,write_size);
+            sleep(1);
+        }
+    }while(write_size < block_size);
+out:
+    //pre_close_read_segfile(ctrl,segno);
+	HLOG_DEBUG("leave func %s", __func__);
+    return block;
+}
+
+
+

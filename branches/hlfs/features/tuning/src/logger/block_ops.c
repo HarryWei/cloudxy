@@ -14,53 +14,55 @@
 #include "misc.h"
 #include "address.h"
 #include "storage.h"
+#include "logger.h"
 
 
 
-int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,uint64_t **iblock_buf){
+int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char **iblock_buf){
     HLOG_DEBUG("enter func %s", __func__);
     int ret;
     int ibno ;
-    if(NULL != hctrl->icache){
-        if(layerno == 1){
-            ibno = get_layer1_ibno(dbno);
-        }else if(layerno == 2){
-            ibno = get_layer2_ibno(dbno);
-        }else if(layerno == 3){
-            ibno = get_layer3_ibno(dbno);
-        }else{
-            g_assert(0);
-        }
-        HLOG_DEBUG("ibno:%d",ibno);
-        g_assert(ibno >= 0);
-        if(TRUE == icache_iblock_exist(hctrl->icache,ibno)){
-            *iblock_buf = g_malloc0(hctrl->icache->iblock_size);	
-            ret =  icache_query_iblock(hctrl->icache,ibno,(char*)*iblock_buf);
-            if(0 != ret){
-                HLOG_ERROR(" can not find iblock in icache ");
-                return -1; 
-            }
-        }else{
-            return -1;   
-        }
-        return 0;	
+    if(NULL == hctrl->icache){
+        return -1;
     }
+    if(layerno == 1){
+        ibno = get_layer1_ibno(dbno);
+    }else if(layerno == 2){
+        ibno = get_layer2_ibno(dbno);
+    }else if(layerno == 3){
+        ibno = get_layer3_ibno(dbno);
+    }else{
+        g_assert(0);
+    }
+    HLOG_DEBUG("ibno:%d",ibno);
+    g_assert(ibno >= 0);
+    if(TRUE == icache_iblock_exist(hctrl->icache,ibno)){
+        *iblock_buf = g_malloc0(hctrl->icache->iblock_size);	
+        ret =  icache_query_iblock(hctrl->icache,ibno,(char*)*iblock_buf);
+        if(0 != ret){
+            HLOG_ERROR(" can not find iblock in icache ");
+            return -1; 
+        }
+    }else{
+        return -1;   
+    }
+    return 0;	
 }
 
-int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,uint64_t **iblock){
+int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
     return __read_layer_iblock(hctrl,dbno,1,iblock);	
 }	
-int read_layer2_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,uint64_t **iblock){
+int read_layer2_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
     HLOG_DEBUG("enter func %s", __func__);
     return __read_layer_iblock(hctrl,dbno,2,iblock);	
 }	
-int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,uint64_t **iblock){
+int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock){
     HLOG_DEBUG("enter func %s", __func__);
     return __read_layer_iblock(hctrl,dbno,3,iblock);	
 }	
 
 
-__write_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char *iblock){
+int __write_layer_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,int layerno,char *iblock){
 	HLOG_DEBUG("enter func %s", __func__);
     int ret;
     if(NULL != hctrl->icache){
@@ -103,7 +105,7 @@ static char *read_block_raw(struct hlfs_ctrl *ctrl,uint64_t storage_address)
 }
 
 
-typedef char (*READ_BLOCK_FUN)(struct hlfs_ctrl *ctrl,uint64_t storage_address);
+typedef char *(*READ_BLOCK_FUN)(struct hlfs_ctrl *ctrl,uint64_t storage_address);
 static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,READ_BLOCK_FUN RB_FUN,char **block){
 	HLOG_DEBUG("enter func %s,no:%d", __func__,no);
     int ret =0;
@@ -214,6 +216,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,READ_BLOCK_FUN 
         g_free(_ib2);
         g_free(_ib3);
     }
+	HLOG_DEBUG("storage address:%llu",storage_address);
     if(storage_address == 0){
         return 1;
     }
@@ -231,14 +234,14 @@ int load_block_by_no_fast(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
     HLOG_DEBUG("enter func %s", __func__);
     int ret = __load_block_by_no(ctrl,no,read_block_fast,block);
     HLOG_DEBUG("leave func %s", __func__);
-    return 0;
+    return ret;
 }
 
 int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char **block){
     HLOG_DEBUG("enter func %s", __func__);
     int ret = __load_block_by_no(ctrl,no,read_block_raw,block);
     HLOG_DEBUG("leave func %s", __func__);
-    return 0;
+    return ret;
 }
 
 

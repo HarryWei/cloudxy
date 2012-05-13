@@ -112,8 +112,8 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
     int size = ctrl->storage->bs_file_append(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler,(char*)log,log->log_size);
     HLOG_DEBUG("write to filewrite size %d  expect size %d",size,log->log_size);
     if(size != log->log_size){
-       HLOG_ERROR("write to file:%s failed, write size %d  expect size %d # ",
-		       segfile_name,size,log->log_size,ctrl->last_wsegfile_handler);
+       HLOG_ERROR("write to seg:%d failed, write size %d  expect size %d # ",
+		       ctrl->last_segno,size,log->log_size,ctrl->last_wsegfile_handler);
        HLOG_ERROR("bs_file_append error");
        ret = -1;
        goto out;

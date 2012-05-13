@@ -33,7 +33,7 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
        ctrl->last_rsegfile_handler = file;
 	   ctrl->last_rsegfile_offset = ctrl->last_offset;
 	   ctrl->last_read_segno =segno;
-    }else if(ctrl->last_read_segno != segno || (ctrl->last_read_segno == segno && ctrl->last_rsegfile_offset ! = ctrl->last_offset)){
+    }else if(ctrl->last_read_segno != segno || (ctrl->last_read_segno == segno && ctrl->last_rsegfile_offset != ctrl->last_offset)){
        HLOG_DEBUG("cur segno:%d is ,last segno no:%d, last rsegfile offset:%d,last offset:%d - need close old and open new segfile",
 	   	           segno,ctrl->last_read_segno,ctrl->last_rsegfile_offset,ctrl->last_offset);
        /* close last seg file handler...  */
@@ -60,37 +60,35 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
     HLOG_DEBUG("leave func %s", __func__);
     return 0;
 }
-
-
-
 int prev_open_wsegfile(struct hlfs_ctrl *ctrl){
-	HLOG_DEBUG("enter func %s", __func__);
-	HLOG_DEBUG("ctrl last segno %d,offset:%d",ctrl->last_segno,ctrl->last_offset);
-	if( 0 == ctrl->last_offset){
-		   if(ctrl->last_wsegfile_handler!=NULL){
-			   if(0!=ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler)){
-				  HLOG_ERROR("close segfile:%d failed",ctrl->last_segno-1);
-                  return -1;
-			   }
-		   }
-		   HLOG_DEBUG("need make a new segment:%d file",ctrl->last_segno);
-		   if(NULL == (ctrl->last_wsegfile_handler = (void*)ctrl->storage->bs_file_create(ctrl->storage,segfile_name))){
-		   	      HLOG_ERROR("creat segfile:%d failed,ctrl->last_segno");
-		   	      return -1;
-		   }
-	}else{
-		   if(ctrl->last_wsegfile_handler==NULL){
-			   /*  open a exist file */
-			   HLOG_DEBUG("open a exist file............................");
-			   if(NULL == (ctrl->last_wsegfile_handler = (void*)ctrl->storage->bs_file_open(ctrl->storage,segfile_name,BS_WRITEABLE))){
-			   	   HLOG_ERROR("open segfile:%d failed,ctrl->last_segno");
-		   	       return -1;
-			   }
-		   }else{
-		   	   HLOG_DEBUG("open a exist segment:%d file",ctrl->last_segno);
-		   }
-	}
-	HLOG_DEBUG("leave func %s", __func__);
+    HLOG_DEBUG("enter func %s", __func__);
+    HLOG_DEBUG("ctrl last segno %d,offset:%d",ctrl->last_segno,ctrl->last_offset);
+    char segfile_name[SEGMENT_FILE_NAME_MAX];
+    build_segfile_name(ctrl->last_segno,segfile_name);if( 0 == ctrl->last_offset){
+        if(ctrl->last_wsegfile_handler!=NULL){
+            if(0!=ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler)){
+                HLOG_ERROR("close segfile:%d failed",ctrl->last_segno-1);
+                return -1;
+            }
+        }
+        HLOG_DEBUG("need make a new segment:%d file",ctrl->last_segno);
+        if(NULL == (ctrl->last_wsegfile_handler = (void*)ctrl->storage->bs_file_create(ctrl->storage,segfile_name))){
+            HLOG_ERROR("creat segfile:%d failed,ctrl->last_segno");
+            return -1;
+        }
+    }else{
+        if(ctrl->last_wsegfile_handler==NULL){
+            /*  open a exist file */
+            HLOG_DEBUG("open a exist file............................");
+            if(NULL == (ctrl->last_wsegfile_handler = (void*)ctrl->storage->bs_file_open(ctrl->storage,segfile_name,BS_WRITEABLE))){
+                HLOG_ERROR("open segfile:%d failed,ctrl->last_segno");
+                return -1;
+            }
+        }else{
+            HLOG_DEBUG("open a exist segment:%d file",ctrl->last_segno);
+        }
+    }
+    HLOG_DEBUG("leave func %s", __func__);
     return 0;
 }
 
@@ -105,7 +103,7 @@ char *read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address)
     uint32_t segno = get_segno(storage_address);
 	HLOG_DEBUG("offset :%u,segno:%u",offset,segno);
 	uint32_t block_size = ctrl->sb.block_size;
-    if(0!=pre_open_read_segfile(ctrl,segno)){
+    if(0!=prev_open_rsegfile(ctrl,segno)){
 	   HLOG_ERROR("can not pre open read segfile:%u",segno);
        return NULL; 
     }

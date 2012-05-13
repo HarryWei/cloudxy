@@ -43,7 +43,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
         HLOG_DEBUG("only need to write part in one block:%llu", pos / BLOCKSIZE);
         char *block=NULL;
         g_mutex_lock (ctrl->hlfs_access_mutex);
-        ret = load_block_by_addr(ctrl,pos,&block);
+        ret = load_block_by_addr_fast(ctrl,pos,&block);
         g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(1==ret){
             HLOG_DEBUG("fail to load block for addr! %llu", pos);
@@ -72,7 +72,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
         HLOG_DEBUG("to load first block!");
         char *first_block = NULL;
         g_mutex_lock (ctrl->hlfs_access_mutex);
-        ret = load_block_by_addr(ctrl,pos,&first_block);
+        ret = load_block_by_addr_fast(ctrl,pos,&first_block);
         g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(1==ret){
             HLOG_DEBUG("fail to load first block");
@@ -98,7 +98,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
         HLOG_DEBUG("to load last block");
         char *last_block = NULL;
         g_mutex_lock (ctrl->hlfs_access_mutex);
-        ret=load_block_by_addr(ctrl, pos + write_len, &last_block);
+        ret=load_block_by_addr_fast(ctrl, pos + write_len, &last_block);
         g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(1==ret){
             HLOG_DEBUG("fail to load last block");

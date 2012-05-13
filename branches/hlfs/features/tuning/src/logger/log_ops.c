@@ -104,39 +104,11 @@ static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_
 static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
     HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
-    //gchar * path = (gchar*)ctrl->storage_handler;
-    HLOG_DEBUG("ctrl last segno %d,offset:%d",ctrl->last_segno,ctrl->last_offset);
-    const char segfile_name[SEGMENT_FILE_NAME_MAX];
-    build_segfile_name(ctrl->last_segno,segfile_name);
-    //char *segfile_path = g_build_filename(path,segfile_name,NULL);
-    if(ctrl->last_offset==0){
-        if(ctrl->last_wsegfile_handler!=NULL){
-	        if(0!=ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler)){
-               HLOG_ERROR("close file failed");
-               ret = -1;
-               goto out;
-            }
-            ctrl->last_wsegfile_handler ==NULL;
-        }
-        HLOG_DEBUG("need make a new segment:%d file",ctrl->last_segno);
-        ctrl->last_wsegfile_handler = (void*)ctrl->storage->bs_file_create(ctrl->storage,segfile_name);
-    }else{
-        if(ctrl->last_wsegfile_handler==NULL){
-            /*  open a exist file */
-            HLOG_DEBUG("open a exist file............................");
-            ctrl->last_wsegfile_handler = (void*)ctrl->storage->bs_file_open(ctrl->storage,segfile_name,BS_WRITEABLE);
-        }else{
-	    	HLOG_DEBUG("...........");
-        }
-        HLOG_DEBUG("open a exist segment:%d file",ctrl->last_segno);
-    }
-
-    HLOG_DEBUG("cur write handler %p",ctrl->last_wsegfile_handler);
-    if(ctrl->last_wsegfile_handler==NULL){
-        HLOG_ERROR("fail to open segment file %s",segfile_name);
+	if( 0 != prev_open_wsegfile(ctrl)){
+		HLOG_ERROR("fail do pre open segfile");
         ret = -1;
         goto out;
-    }
+	}
     int size = ctrl->storage->bs_file_append(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler,(char*)log,log->log_size);
     HLOG_DEBUG("write to filewrite size %d  expect size %d",size,log->log_size);
     if(size != log->log_size){
@@ -154,31 +126,12 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
     }
    
 out:
-#if 0
-    if(file != NULL) {
-	    if(0!=ctrl->storage->bs_file_flush(ctrl->storage,file) ||
-	        0!=ctrl->storage->bs_file_close(ctrl->storage,file)){
-            g_message("storage flush failed");
-            ret =-1;
-        }
-    }
-#else
     if(ctrl->last_wsegfile_handler!=NULL){
         if (0!=ctrl->storage->bs_file_flush(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler)){
             HLOG_ERROR("storage flush failed");
             ret =-1;
         }
-#if 0
-        if (0!=ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler)){
-            g_message("storage close failed");
-            ret =-1;
-        }
-        ctrl->last_wsegfile_handler=NULL;
-#endif 
     }
-#endif 
-    //g_free(segfile_name);
-
     HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
@@ -247,7 +200,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                     }
                 }else{
                     if(0>read_layer1_iblock(ctrl,db_cur_no,&_ib)){ 	
-                        if (NULL == (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.iblock,BLOCKSIZE))){
+                        if (NULL == (_ib = (uint64_t *)read_block_fast(ctrl,ctrl->inode.iblock,BLOCKSIZE))){
                             HLOG_ERROR("read block error!");
                             g_assert(0);
                             return -1;
@@ -287,7 +240,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                     }
                 }else{
                     if(0>read_layer1_iblock(ctrl,db_cur_no,&_ib)){ 	
-                        if(NULL == (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.doubly_iblock,BLOCKSIZE))){
+                        if(NULL == (_ib = (uint64_t *)read_block_fast(ctrl,ctrl->inode.doubly_iblock,BLOCKSIZE))){
                             HLOG_ERROR("allocate error!");
                             g_assert(0);
                             return -1;
@@ -308,7 +261,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                     }
                 }else{
                     if(0>read_layer2_iblock(ctrl,db_cur_no,&_ib2)){ 	
-                        if (NULL ==(_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE))){
+                        if (NULL ==(_ib2 = (uint64_t *)read_block_fast(ctrl,*(_ib+_idx),BLOCKSIZE))){
                             HLOG_ERROR("allocate error!");
                             g_assert(0);
                             return -1;
@@ -355,7 +308,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                     }
                 }else{
                     if(0>read_layer1_iblock(ctrl,db_cur_no,&_ib)){ 	
-                        if (NULL== (_ib = (uint64_t *)read_block(ctrl->storage,ctrl->inode.triply_iblock,BLOCKSIZE))){
+                        if (NULL== (_ib = (uint64_t *)read_block_fast(ctrl,ctrl->inode.triply_iblock,BLOCKSIZE))){
                             HLOG_ERROR("allocate error!");
                             return -1;
                         }
@@ -374,7 +327,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                     }
                 }else{
                     if(0>read_layer2_iblock(ctrl,db_cur_no,&_ib2)){ 	
-                        if (NULL==(_ib2 = (uint64_t *)read_block(ctrl->storage,*(_ib+_idx),BLOCKSIZE))){
+                        if (NULL==(_ib2 = (uint64_t *)read_block_fast(ctrl,*(_ib+_idx),BLOCKSIZE))){
                             HLOG_ERROR("allocate error!");
                             return -1;
                         }
@@ -393,7 +346,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                     }
                 }else{
                     if(0>read_layer3_iblock(ctrl,db_cur_no,&_ib3)){ 	
-                        if (NULL==(_ib3 = (uint64_t *)read_block(ctrl->storage,*(_ib2+_idx2),BLOCKSIZE))){
+                        if (NULL==(_ib3 = (uint64_t *)read_block_fast(ctrl,*(_ib2+_idx2),BLOCKSIZE))){
                             HLOG_ERROR("allocate error!");
                             return -1;
                         }

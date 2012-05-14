@@ -27,12 +27,11 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
     }
     uint32_t BLOCKSIZE = block_size;
     uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
-    uint32_t db_offset		= last_offset;
-
-    uint32_t start_db	= log->start_db_no;
-    uint32_t db_num	= log->db_num;
-    uint32_t end_db	= start_db + db_num - 1;
-    uint32_t ib_offset    = db_offset + db_num * BLOCKSIZE ;
+    uint32_t db_offset		= last_offset + LOG_HEADER_LENGTH;
+    uint32_t start_db	    = log->start_db_no;
+    uint32_t db_num	        = log->db_num;
+    uint32_t end_db	        = start_db + db_num - 1;
+    uint32_t ib_offset      = db_offset + db_num * BLOCKSIZE ;
     guint32  db_cur_no = 0;
     guint32  i=0;
     for(db_cur_no = start_db; db_cur_no <= end_db; db_cur_no++,i++){
@@ -42,15 +41,16 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
             int _idx = db_cur_no % 12;
             HLOG_DEBUG(" idx:%u",_idx);
 #if 1
-            set_segno (inode->blocks[_idx],last_segno);
-            set_offset (inode->blocks[_idx],last_offset + db_offset);
+            set_segno (&inode->blocks[_idx],last_segno);
+            set_offset (&inode->blocks[_idx],last_offset + db_offset);
+
 #endif
             db_offset += BLOCKSIZE;
         }else if (is_db_in_level2_index_range(db_cur_no)){
             if( (db_cur_no - 12 + 1) % IB_ENTRY_NUM == 0 || db_cur_no == end_db){ 
 #if 1
-                set_segno (inode->iblock,last_segno);
-                set_offset (inode->iblock,last_offset + ib_offset);
+                set_segno (&inode->iblock, last_segno);
+                set_offset (&inode->iblock, last_offset + ib_offset);
 #endif
                 ib_offset +=BLOCKSIZE;
             }
@@ -58,16 +58,16 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
             if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == end_db){
                 HLOG_DEBUG(" save ib1");
 #if 1
-                set_segno (inode->doubly_iblock,last_segno);
-                set_offset(inode->doubly_iblock,last_offset + ib_offset);
+                set_segno (&inode->doubly_iblock,last_segno);
+                set_offset(&inode->doubly_iblock,last_offset + ib_offset);
 #endif
                 ib_offset +=BLOCKSIZE;
             }
         }else if (is_db_in_level4_index_range(db_cur_no)){
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == end_db){
 #if 1
-                set_segno (inode->triply_iblock,last_segno);
-                set_offset(inode->triply_iblock,last_offset + ib_offset);
+                set_segno (&inode->triply_iblock,last_segno);
+                set_offset(&inode->triply_iblock,last_offset + ib_offset);
 #endif
                 ib_offset +=BLOCKSIZE;
             }
@@ -187,9 +187,9 @@ out:
           		ret = update_icache(ctrl->icache,(char*)log + ib_offset,log->start_db_no,log->db_num);
           		g_assert(ret==0);
     	     }
-	     g_mutex_lock (ctrl->hlfs_access_mutex);
+	     //g_mutex_lock (ctrl->hlfs_access_mutex);
 	     update_inode_index(&ctrl->inode,log,ctrl->last_segno,ctrl->last_offset,ctrl->sb.block_size);
-	     g_mutex_unlock (ctrl->hlfs_access_mutex);
+	     //g_mutex_unlock (ctrl->hlfs_access_mutex);
         }		 	
     }
     HLOG_DEBUG("leave func %s", __func__);

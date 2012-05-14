@@ -20,9 +20,9 @@ int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint3
    
     HLOG_DEBUG("last segno: %u last offset: %u", ctrl->last_segno, ctrl->last_offset);
     /* todo , use RCU lock instead of mutex */
-    g_mutex_lock (ctrl->hlfs_access_mutex);
+    //g_mutex_lock (ctrl->hlfs_access_mutex);
     int size = append_log(ctrl,db_buff,db_start,db_end);
-    g_mutex_unlock (ctrl->hlfs_access_mutex);
+    //g_mutex_unlock (ctrl->hlfs_access_mutex);
     if(size < 0){
         HLOG_ERROR("append log error");
         return -1;

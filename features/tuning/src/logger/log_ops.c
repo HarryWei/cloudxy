@@ -49,8 +49,8 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
         }else if (is_db_in_level2_index_range(db_cur_no)){
             if( (db_cur_no - 12 + 1) % IB_ENTRY_NUM == 0 || db_cur_no == end_db){ 
 #if 1
-                set_segno (inode->doubly_iblock, last_segno);
-                set_offset (inode->doubly_iblock, last_offset + ib_offset);
+                set_segno (inode->iblock,last_segno);
+                set_offset (inode->iblock,last_offset + ib_offset);
 #endif
                 ib_offset +=BLOCKSIZE;
             }
@@ -260,7 +260,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                             g_assert(0);
                             return -1;
                         }
-			 write_layer1_iblock(ctrl,db_cur_no,_ib);	
+			         write_layer1_iblock(ctrl,db_cur_no,_ib);	
                     }
                 }
             }

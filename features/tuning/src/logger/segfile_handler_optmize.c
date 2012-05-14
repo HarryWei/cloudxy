@@ -113,14 +113,16 @@ char *read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address)
 	    block = NULL;
 	    goto out;
     }
+    int retry_time = 3;
     do{
         //if(block_size != (write_size = ctrl->storage->bs_file_pread(ctrl->storage,ctrl->last_rsegfile_handler,block,block_size,offset))){
         write_size = ctrl->storage->bs_file_pread(ctrl->storage,ctrl->last_rsegfile_handler,block,block_size,offset);
         if(write_size!=block_size){
             HLOG_ERROR("can not read block from seg:%u#%u :ret :%d",segno,offset,write_size);
-            sleep(1);
+            g_usleep(2000);
+            retry_time--;
         }
-    }while(write_size < block_size);
+    }while(write_size < block_size && retry_time >0);
 out:
     //pre_close_read_segfile(ctrl,segno);
 	HLOG_DEBUG("leave func %s", __func__);

@@ -31,7 +31,7 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
         //g_time_val_add(&expired,1000*1000*5);
         //g_usleep(1000*1000*5);
         if(ctrl->last_write_timestamp == 0 || (get_current_time() - ctrl->last_write_timestamp) < 1000*5){
-            HLOG_DEBUG(" we should do clean in silent period ;access timestamp:%llu,cur timestamp:%llu",ctrl->last_access_timestamp,get_current_time());
+            HLOG_DEBUG(" we should do clean in silent period ;access timestamp:%llu,cur timestamp:%llu",ctrl->last_write_timestamp,get_current_time());
             g_usleep(1000*1000);
             continue;
         }

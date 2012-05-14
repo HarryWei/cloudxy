@@ -20,58 +20,60 @@
 
 
 static int update_inode_index(struct inode *inode, struct log_header * log,uint32_t last_segno,uint32_t last_offset,uint32_t block_size){
-     HLOG_DEBUG("enter func %s", __func__);
-     if(NULL == inode || NULL == log){
-          HLOG_DEBUG("params is error");
-          return -1;
+    HLOG_DEBUG("enter func %s", __func__);
+    if(NULL == inode || NULL == log){
+        HLOG_DEBUG("params is error");
+        return -1;
     }
     uint32_t BLOCKSIZE = block_size;
     uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
     uint32_t db_offset		= last_offset;
-   
+
     uint32_t start_db	= log->start_db_no;
     uint32_t db_num	= log->db_num;
     uint32_t end_db	= start_db + db_num - 1;
     uint32_t ib_offset    = db_offset + db_num * BLOCKSIZE ;
     guint32  db_cur_no = 0;
     guint32  i=0;
-    HLOG_DEBUG(" db_data_len:%d ib_data_len:%d BLOCKSIZE:%d",db_data_len,ib_data_len,BLOCKSIZE);
-    for(db_cur_no = start_db,i=0; db_cur_no <= end_db; db_cur_no++,i++){
-         if (is_db_in_level1_index_range(db_cur_no)){
-	            HLOG_DEBUG(" is level1 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
-	            /*  write db to log buff  */
-	            int _idx = db_cur_no % 12;
-	            HLOG_DEBUG(" idx:%u",_idx);
-		     #if 1
-	            set_segno (inode.blocks[_idx],last_segno);
-	            set_offset (inode.blocks[_idx],last_offset + offset);
-		     #endif
-		     db_offset += BLOCKSIZE;
-         }else if (is_db_in_level2_index_range(db_cur_no)){
-  	       if( (db_cur_no - 12 + 1) % IB_ENTRY_NUM == 0 || db_cur_no ==     if (is_db_in_level1_index_range(db_cur_no)){ 
-		     #if 1
-	            set_segno (inode.doubly_iblock, last_segno);
-	            set_offset (inode.doubly_iblock, last_offset + ib_offset);
-		     #endif
-	             ib_offset +=BLOCKSIZE;
-	  }else if (is_db_in_level3_index_range(db_cur_no)){
-	       if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == end_db){
-	                HLOG_DEBUG(" save ib1");
-			  #if 1
-	                set_segno (inode.doubly_iblock,last_segno);
-	                set_offset(inode.doubly_iblock,last_offset + ib_offset);
-			  #endif
-	                ib_offset +=BLOCKSIZE;
-               }
-         }else if (is_db_in_level4_index_range(db_cur_no)){
-            if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == end_db){
-		  #if 1
-                set_segno (inode.triply_iblock,last_segno);
-                set_offset(inode.triply_iblock,last_offset + ib_offset);
-		  #endif
+    for(db_cur_no = start_db; db_cur_no <= end_db; db_cur_no++,i++){
+        if (is_db_in_level1_index_range(db_cur_no)){
+            HLOG_DEBUG(" is level1 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
+            /*  write db to log buff  */
+            int _idx = db_cur_no % 12;
+            HLOG_DEBUG(" idx:%u",_idx);
+#if 1
+            set_segno (inode->blocks[_idx],last_segno);
+            set_offset (inode->blocks[_idx],last_offset + db_offset);
+#endif
+            db_offset += BLOCKSIZE;
+        }else if (is_db_in_level2_index_range(db_cur_no)){
+            if( (db_cur_no - 12 + 1) % IB_ENTRY_NUM == 0 || db_cur_no == end_db){ 
+#if 1
+                set_segno (inode->doubly_iblock, last_segno);
+                set_offset (inode->doubly_iblock, last_offset + ib_offset);
+#endif
                 ib_offset +=BLOCKSIZE;
             }
-     return 0;		 
+        }else if (is_db_in_level3_index_range(db_cur_no)){
+            if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == end_db){
+                HLOG_DEBUG(" save ib1");
+#if 1
+                set_segno (inode->doubly_iblock,last_segno);
+                set_offset(inode->doubly_iblock,last_offset + ib_offset);
+#endif
+                ib_offset +=BLOCKSIZE;
+            }
+        }else if (is_db_in_level4_index_range(db_cur_no)){
+            if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == end_db){
+#if 1
+                set_segno (inode->triply_iblock,last_segno);
+                set_offset(inode->triply_iblock,last_offset + ib_offset);
+#endif
+                ib_offset +=BLOCKSIZE;
+            }
+        }
+    }
+    return 0;		 
 }
 
 static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_t db_start_no,uint32_t db_num){
@@ -87,8 +89,6 @@ static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_
     int i;
     for(i=db_start_no;i<db_start_no+db_num;i++){
         if(is_db_in_level1_index_range(i)){
-	      set_segno(&ctrl->inode.blocks[_idx],ctrl->last_segno);
-             set_offset(&ctrl->inode.blocks[_idx],ctrl->last_offset + db_offset);
         }else if(is_db_in_level2_index_range(i)){
             int ibno = get_layer1_ibno(i);
 			HLOG_DEBUG("ibno:%d",ibno);

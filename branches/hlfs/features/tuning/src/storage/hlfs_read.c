@@ -65,7 +65,7 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
             return -1;
         }else if(1 == ret){
             HLOG_DEBUG("fail to load block for not write yet");
-            memset(block,0,BLOCKSIZE);
+            memset(first_block,0,BLOCKSIZE);
         }
         memcpy(read_buf,first_block + pos%BLOCKSIZE, BLOCKSIZE - pos%BLOCKSIZE);
         offset += BLOCKSIZE - pos%BLOCKSIZE;
@@ -109,7 +109,7 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
             return -1;
         }else if (1==ret){
             HLOG_DEBUG("fail to load block for not write yet");
-            memset(block,0,BLOCKSIZE);
+            memset(last_block,0,BLOCKSIZE);
         }
         memcpy(read_buf + offset , last_block , (pos + read_len)%BLOCKSIZE );
         offset +=(pos+read_len)%BLOCKSIZE;

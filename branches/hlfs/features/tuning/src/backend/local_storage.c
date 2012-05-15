@@ -34,7 +34,11 @@ static gchar *build_local_path(const char *uri,const char *path){
 static void build_local_path(char *full_path,const char* dir,const char * fs_name,const char* path){
 	   HLOG_DEBUG("local -- enter func %s", __func__);
 	   memset(full_path,0,256);
-	   sprintf(full_path,"%s/%s/%s",dir,fs_name,path);
+	   if(NULL != path){
+	   	  sprintf(full_path,"%s/%s/%s",dir,fs_name,path);
+	   }else{
+	      sprintf(full_path,"%s/%s",dir,fs_name);
+	   }
 	   HLOG_DEBUG("path:%s,full path:%s",path,full_path);
 	   HLOG_DEBUG("local -- leave func %s", __func__);
 	   return ;

@@ -25,6 +25,8 @@ struct back_storage
 {   
    char* storage_name;
    const char* uri;
+   const char* dir;
+   const char* fs_name;
 //   const char* fs_location;
    char* user;
    uint32_t port;

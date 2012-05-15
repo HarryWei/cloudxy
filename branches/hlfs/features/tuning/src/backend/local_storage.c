@@ -48,16 +48,13 @@ static void build_local_path(char *full_path,const char* dir,const char * fs_nam
 int local_connect(struct back_storage *storage,const char* uri){
 	HLOG_DEBUG("local -- enter func %s", __func__);
   
-    //storage->fs_name  = g_basename(uri);
-    //g_free(hostname);
-	//g_free(head);
 	HLOG_DEBUG("local -- leave func %s", __func__);
     return 0;
 }
 
 int local_disconnect(struct back_storage * storage){
 	HLOG_DEBUG("local -- enter func %s", __func__);
-    //g_free((gchar*)storage->fs_handler);
+  
 	HLOG_DEBUG("local -- leave func %s", __func__);
     return 0;
 }

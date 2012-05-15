@@ -33,7 +33,7 @@ static gchar *build_local_path(const char *uri,const char *path){
 #else
 static void build_local_path(char *full_path,const char* dir,const char * fs_name,const char* path){
 	   HLOG_DEBUG("local -- enter func %s", __func__);
-       memset(full_path,0,256);
+	   memset(full_path,0,256);
 	   sprintf(full_path,"%s/%s/%s",dir,fs_name,path);
 	   HLOG_DEBUG("path:%s,full path:%s",path,full_path);
 	   HLOG_DEBUG("local -- leave func %s", __func__);
@@ -43,22 +43,10 @@ static void build_local_path(char *full_path,const char* dir,const char * fs_nam
 
 int local_connect(struct back_storage *storage,const char* uri){
 	HLOG_DEBUG("local -- enter func %s", __func__);
-    char *head=NULL;
-    char *hostname=NULL;
-    char *dir=NULL;
-    char *fs_name = NULL;
-    int port;
-    int ret = parse_from_uri(uri,&head,&hostname,&dir,&fs_name,&port);
-    if(ret !=0){
-	     HLOG_ERROR("parse_from_uri error!");
-        return -1;
-    }
-    storage->uri = uri;
-	storage->dir = dir;
-	storage->fs_name = fs_name;
+  
     //storage->fs_name  = g_basename(uri);
-    g_free(hostname);
-	g_free(head);
+    //g_free(hostname);
+	//g_free(head);
 	HLOG_DEBUG("local -- leave func %s", __func__);
     return 0;
 }

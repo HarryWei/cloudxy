@@ -33,7 +33,7 @@ struct back_storage* init_storage_handler(const char* uri)
     }
     gchar *fs_path = g_build_filename(dir,fs_name,NULL);
     HLOG_DEBUG("loc [fs:%s], [path:%s]\n",fs_name,fs_path);
-    if (0==g_strcmp0(head,"local")){
+    if (0 == g_strcmp0(head,"local")){
         storage=get_local_storage_ops();
     }else if(0 == g_strcmp0(head,"hdfs")){
         storage = get_hdfs_storage_ops();
@@ -49,11 +49,14 @@ struct back_storage* init_storage_handler(const char* uri)
         HLOG_ERROR("connect filesystem failed");
         return NULL;
     }
+	storage->dir = dir;
+	storage->fs_name = fs_name;
+	storage->uri = strdup(uri);
 out:
     g_free(fs_path);
     g_free(head);
     g_free(hostname);
-    g_free(dir);
+    //g_free(dir);
     if(ret !=0){
         free(storage);
 		HLOG_ERROR("ret is not 0, so error happened");

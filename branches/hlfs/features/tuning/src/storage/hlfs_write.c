@@ -137,10 +137,10 @@ write_log:;
         g_assert(ret == 0);
 	}else{
 		HLOG_DEBUG("use write through mode");
-		g_mutex_lock  (hctrl->hlfs_access_mutex);
+		g_mutex_lock  (ctrl->hlfs_access_mutex);
 		ctrl->last_write_timestamp = get_current_time();
 		int size = append_log(ctrl,datablocks,db_start,db_end);
-		g_mutex_unlock  (hctrl->hlfs_access_mutex);
+		g_mutex_unlock  (ctrl->hlfs_access_mutex);
 		if(size < 0){
 		g_message("fail to append log\n");
 		g_free(datablocks);

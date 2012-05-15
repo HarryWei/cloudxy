@@ -34,7 +34,7 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
 		HLOG_DEBUG("only need to read one block: %llu", pos / BLOCKSIZE);
         char *block = (char*)alloca(BLOCKSIZE);
         //g_mutex_lock (ctrl->hlfs_access_mutex);
-        ret=load_block_by_addr_fast(ctrl,pos,&block);
+        ret=load_block_by_addr_fast(ctrl,pos,block);
         //g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(-1 == ret ){
 			HLOG_ERROR("fail to load block for addr %llu", pos);
@@ -45,7 +45,7 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
             memset(block,0,BLOCKSIZE);
         }
         memcpy(read_buf,block + pos%BLOCKSIZE,read_len);
-        g_free(block);
+        //g_free(block);
         //g_mutex_unlock (ctrl->hlfs_access_mutex);
         HLOG_DEBUG("read len %u", read_len);
         return read_len;

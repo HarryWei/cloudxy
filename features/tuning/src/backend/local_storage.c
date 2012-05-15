@@ -197,7 +197,7 @@ bs_file_info_t*
 local_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num_entries){
 	HLOG_DEBUG("local -- enter func %s", __func__);
     char full_path[256];
-    build_local_path(full_path,storage->dir,storage->fs_name,path);
+    build_local_path(full_path,storage->dir,storage->fs_name,dir_path);
     GDir * dir = g_dir_open(full_path,0,NULL);
     if(dir==NULL){
 	    HLOG_ERROR("g_dir_open error");

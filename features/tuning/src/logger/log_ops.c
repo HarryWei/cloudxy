@@ -253,11 +253,10 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             HLOG_DEBUG(" is level2 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             HLOG_DEBUG("-----iblock 0: %llu",ctrl->inode.iblock);                
             //uint64_t * _ib = NULL;
-            if(FALSE == ib1_flag){
-                if(ctrl->inode.iblock == 0){
+           if(FALSE == ib1_flag && ctrl->inode.iblock == 0){
                     memset(ib1,0,BLOCKSIZE);
 					ib1_flag = TRUE;
-                }else{
+           }else{
                     if(0>read_layer1_iblock(ctrl,db_cur_no,ib1)){ 	
                         if (0 != read_block_fast(ctrl,ctrl->inode.iblock,BLOCKSIZE,ib1)){
                             HLOG_ERROR("read block error!");
@@ -266,7 +265,6 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                         }
 			            write_layer1_iblock(ctrl,db_cur_no,ib1);	
                     }
-                }
             }
             int  _idx = (db_cur_no - 12)%IB_ENTRY_NUM;
             //uint64_t storage_address = *(_bi + _idx);
@@ -290,8 +288,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
         }else if(is_db_in_level3_index_range(db_cur_no)){
             HLOG_DEBUG(" is level3 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
-            if(FALSE == ib1_flag){
-                if(ctrl->inode.doubly_iblock == 0){
+                if(FALSE == ib1_flag && ctrl->inode.doubly_iblock == 0){
                     memset(ib1,0,BLOCKSIZE);
 					ib1_flag = TRUE;
                 }else{
@@ -304,12 +301,11 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 			   		write_layer1_iblock(ctrl,db_cur_no,ib1);
                     }
                 }
-            }
+       
             int _idx   = (db_cur_no - 12 - IB_ENTRY_NUM) / IB_ENTRY_NUM;
             HLOG_DEBUG(" idx:%u",_idx);
             //uint64_t *_ib2 = NULL; 
-            if(FALSE == ib2_flag){
-                if(*(ib1+_idx) == 0 ){
+                if(FALSE == ib2_flag && *(ib1+_idx) == 0 ){
                     memset(ib2,0,BLOCKSIZE);
 					ib2_flag = TRUE;
                 }else{
@@ -322,7 +318,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 			   		write_layer2_iblock(ctrl,db_cur_no,ib2);
                     }
                 }
-            }
+          
             int _idx2  = (db_cur_no - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
             HLOG_DEBUG(" idx2:%u",_idx2);
             set_segno ((ib2+_idx2),ctrl->last_segno);
@@ -355,8 +351,8 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
         }else if(is_db_in_level4_index_range(db_cur_no)){
             HLOG_DEBUG(" is level4 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
-            if(FALSE == ib1_flag){
-                if(ctrl->inode.triply_iblock == 0){
+     
+                if(FALSE == ib1_flag && ctrl->inode.triply_iblock == 0){
                      memset(ib1,0,BLOCKSIZE);
 					 ib1_flag = TRUE;
                 }else{
@@ -368,12 +364,12 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 			        write_layer1_iblock(ctrl,db_cur_no,ib1);
                     }
                 }
-            }
+ 
             int _idx   = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM * IB_ENTRY_NUM);
             HLOG_DEBUG(" idx:%u",_idx);
             //uint64_t *_ib2 = NULL; 
-            if(FALSE == ib2_flag){
-                if(*(ib1+_idx) == 0 ){
+ 
+                if(FALSE == ib2_flag && *(ib1+_idx) == 0 ){
                      memset(ib2,0,BLOCKSIZE);
 					 ib2_flag = TRUE;
                 }else{
@@ -385,12 +381,11 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 			   		    write_layer2_iblock(ctrl,db_cur_no,ib2);
                     }
                 }
-            }
             int _idx2  = (db_cur_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / IB_ENTRY_NUM % IB_ENTRY_NUM;
             HLOG_DEBUG(" idx2:%u",_idx2);
             //uint64_t *_ib3 = NULL; 
-            if(FALSE == ib3_flag){
-                if(*(ib2+_idx2) == 0 ){
+   
+                if(FALSE == ib3_flag && *(ib2+_idx2) == 0 ){
                      memset(ib3,0,BLOCKSIZE);
 					 ib1_flag = TRUE;
                 }else{
@@ -402,13 +397,11 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                     }
 		      		write_layer3_iblock(ctrl,db_cur_no,ib3);
                 }
-            }
             int _idx3  = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 
             HLOG_DEBUG(" idx3:%u",_idx3);
             set_segno ((ib3+_idx3),ctrl->last_segno);
             set_offset((ib3+_idx3),ctrl->last_offset + db_offset);
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
-
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end){
                 set_segno ((ib2+_idx2),ctrl->last_segno);
                 set_offset ((ib2+_idx2),ctrl->last_offset + ib_offset);

@@ -238,7 +238,7 @@ local_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num
 int local_file_mkdir(struct back_storage * storage,const char *dir_path){
 	HLOG_DEBUG("local -- enter func %s", __func__);
     char full_path[256];
-    build_local_path(full_path,storage->dir,storage->fs_name,path);
+    build_local_path(full_path,storage->dir,storage->fs_name,dir_path);
     HLOG_DEBUG("full path is %s",full_path);
     if(0!=g_mkdir(full_path,00700)){
 	   HLOG_ERROR("g_mkdir error");

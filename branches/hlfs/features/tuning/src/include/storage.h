@@ -27,8 +27,9 @@ struct back_storage
    const char* uri;
    const char* dir;
    const char* fs_name;
-//   const char* fs_location;
+   const char *head;
    char* user;
+   const char* hostname;
    uint32_t port;
    bs_fs_t     fs_handler;
    int        (*bs_fs_connect)(struct back_storage *storage,const char* uri); 

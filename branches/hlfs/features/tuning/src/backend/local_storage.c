@@ -33,8 +33,9 @@ static gchar *build_local_path(const char *uri,const char *path){
 #else
 static void build_local_path(char *full_path,const char* dir,const char * fs_name,const char* path){
 	   HLOG_DEBUG("local -- enter func %s", __func__);
+       memset(full_path,0,256);
 	   sprintf(full_path,"%s/%s/%s",dir,fs_name,path);
-	   HLOG_DEBUG("full path is %s",full_path);
+	   HLOG_DEBUG("path:%s,full path:%s",path,full_path);
 	   HLOG_DEBUG("local -- leave func %s", __func__);
 	   return ;
 }
@@ -113,7 +114,7 @@ int local_file_is_exist(struct back_storage * storage,const char *path){
 	HLOG_DEBUG("local -- enter func %s", __func__);
 	char full_path[256];
     build_local_path(full_path,storage->dir,storage->fs_name,path);
-    HLOG_DEBUG("full path %s",full_path);
+    HLOG_DEBUG("path:%sfull path %s",path,full_path);
     if (!g_file_test(full_path,G_FILE_TEST_EXISTS)){
         return -1;
     }

@@ -16,7 +16,7 @@
 #include "address.h"
 #include "storage.h"
 #include "icache.h"
-
+#include <errno.h>
 
 int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
 	HLOG_DEBUG("enter func %s", __func__);
@@ -101,7 +101,7 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
     int write_size = 0;
     uint32_t offset = get_offset(storage_address);
     uint32_t segno = get_segno(storage_address);
-	HLOG_DEBUG("offset :%u,segno:%u",offset,segno);
+	HLOG_DEBUG("offset :%u,segno:%u,last_offset:%u,last_rsegfile_offset:%u",offset,segno,ctrl->last_offset,ctrl->last_rsegfile_offset);
 	uint32_t block_size = ctrl->sb.block_size;
     if(0!=prev_open_rsegfile(ctrl,segno)){
 	   HLOG_ERROR("can not pre open read segfile:%u",segno);
@@ -123,6 +123,7 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
             retry_time--;
 			ret = -1;
         }else{
+            HLOG_DEBUG("read block from seg:%u#%u size:%d",segno,offset,write_size);
             ret = 0;
         }
     }while(write_size < block_size && retry_time >0);

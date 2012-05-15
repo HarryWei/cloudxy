@@ -130,7 +130,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,READ_BLOCK_FUN 
         int _idx = db_no % 12;
         storage_address = ctrl->inode.blocks[_idx];
     }else if (is_db_in_level2_index_range(db_no)){
-        HLOG_DEBUG("inode.iblock :%llu",inode.iblock);	
+        HLOG_DEBUG("inode.iblock :%llu",ctrl->inode.iblock);	
         if(ctrl->inode.iblock == 0){
 		  HLOG_DEBUG("inode.iblock zero");	
           return 1;

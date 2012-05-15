@@ -22,7 +22,7 @@ int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint3
     g_mutex_lock (ctrl->hlfs_access_mutex);
     ctrl->last_write_timestamp = get_current_time();
     int size = append_log(ctrl,db_buff,db_start,db_end);
-    //g_mutex_unlock (ctrl->hlfs_access_mutex);
+    g_mutex_unlock (ctrl->hlfs_access_mutex);
     if(size < 0){
         HLOG_ERROR("append log error");
         return -1;

@@ -48,7 +48,7 @@ static void build_hdfs_path(char *full_path,const char* dir,const char * fs_name
 #endif 
 int hdfs_connect(struct back_storage *storage,const char* uri){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
-    hdfsFS fs = hdfsConnect(hostname,port); // for local test
+    hdfsFS fs = hdfsConnect(storage->hostname,storage->port); // for local test
     if(NULL==fs){
 	     HLOG_ERROR("fs is null, hdfsConnect error!");
         return -1;

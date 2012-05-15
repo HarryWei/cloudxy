@@ -31,8 +31,8 @@ struct back_storage* init_storage_handler(const char* uri)
 	    HLOG_ERROR("parse_from_uri happened error");
         return NULL;
     }
-    gchar *fs_path = g_build_filename(dir,fs_name,NULL);
-    HLOG_DEBUG("loc [fs:%s], [path:%s]\n",fs_name,fs_path);
+    //gchar *fs_path = g_build_filename(dir,fs_name,NULL);
+    //HLOG_DEBUG("loc [fs:%s], [path:%s]\n",fs_name,fs_path);
     if (0 == g_strcmp0(head,"local")){
         storage=get_local_storage_ops();
     }else if(0 == g_strcmp0(head,"hdfs")){
@@ -42,26 +42,30 @@ struct back_storage* init_storage_handler(const char* uri)
         ret = -1;
         goto out;
     }
-
+    storage->uri = strdup(uri);
+	storage->head = head;
+	storage->dir = dir;
+	storage->fs_name = fs_name;
+	storage->hostname = hostname;
+    storage->port = port;
+	storage->user = g_strdup("kanghua");
+	
     if(0!=storage->bs_fs_connect(storage,uri)){
         ret = -1;
         goto out;
         HLOG_ERROR("connect filesystem failed");
         return NULL;
     }
-	storage->uri = strdup(uri);
-	storage->dir = dir;
-	storage->fs_name = fs_name;
-    storage->port = port;
-	storage->user = g_strdup("kanghua");
-   
 out:
-    g_free(fs_path);
-    g_free(head);
-    g_free(hostname);
-    //g_free(dir);
+    //g_free(fs_path);
     if(ret !=0){
-        free(storage);
+		g_free(storage->uri);
+	    g_free(storage->head);
+		g_free(storage->dir);
+		g_free(storage->fs_name);
+		g_free(storage->hostname);
+		g_free(storage->user);
+        g_free(storage);
 		HLOG_ERROR("ret is not 0, so error happened");
         storage = NULL;
     }

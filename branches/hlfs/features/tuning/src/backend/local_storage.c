@@ -25,7 +25,7 @@ static gchar *build_local_path(const char *uri,const char *path){
      g_free(head);
      g_free(hostname);
      g_free(dir);
-	HLOG_DEBUG("local -- leave func %s", __func__);
+	 HLOG_DEBUG("local -- leave func %s", __func__);
      return full_path;
 }
 

@@ -49,9 +49,12 @@ struct back_storage* init_storage_handler(const char* uri)
         HLOG_ERROR("connect filesystem failed");
         return NULL;
     }
+	storage->uri = strdup(uri);
 	storage->dir = dir;
 	storage->fs_name = fs_name;
-	storage->uri = strdup(uri);
+    storage->port = port;
+	storage->user = g_strdup("kanghua");
+   
 out:
     g_free(fs_path);
     g_free(head);

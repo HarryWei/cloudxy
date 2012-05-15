@@ -16,7 +16,7 @@
 #include "address.h"
 #include "storage.h"
 #include "icache.h"
-
+#include <errno.h>
 
 int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
 	HLOG_DEBUG("enter func %s", __func__);
@@ -94,25 +94,25 @@ int prev_open_wsegfile(struct hlfs_ctrl *ctrl){
 
 
 
-char *read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address)
+int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
 {
 	HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
     int write_size = 0;
     uint32_t offset = get_offset(storage_address);
     uint32_t segno = get_segno(storage_address);
-	HLOG_DEBUG("offset :%u,segno:%u",offset,segno);
+	HLOG_DEBUG("offset :%u,segno:%u,last_offset:%u,last_rsegfile_offset:%u",offset,segno,ctrl->last_offset,ctrl->last_rsegfile_offset);
 	uint32_t block_size = ctrl->sb.block_size;
     if(0!=prev_open_rsegfile(ctrl,segno)){
 	   HLOG_ERROR("can not pre open read segfile:%u",segno);
-       return NULL; 
+       return -1; 
     }
-    char * block = (char*)g_malloc0(block_size);
-    if (NULL == block) {
-	    HLOG_ERROR("Allocate Error!");
-	    block = NULL;
-	    goto out;
-    }
+    //char * block = (char*)g_malloc0(block_size);
+    //if (NULL == block) {
+	//    HLOG_ERROR("Allocate Error!");
+	//    block = NULL;
+	//    goto out;
+    //}
     int retry_time = 3;
     do{
         //if(block_size != (write_size = ctrl->storage->bs_file_pread(ctrl->storage,ctrl->last_rsegfile_handler,block,block_size,offset))){
@@ -121,12 +121,16 @@ char *read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address)
             HLOG_ERROR("can not read block from seg:%u#%u :ret :%d",segno,offset,write_size);
             g_usleep(2000);
             retry_time--;
+			ret = -1;
+        }else{
+            HLOG_DEBUG("read block from seg:%u#%u size:%d",segno,offset,write_size);
+            ret = 0;
         }
     }while(write_size < block_size && retry_time >0);
 out:
     //pre_close_read_segfile(ctrl,segno);
 	HLOG_DEBUG("leave func %s", __func__);
-    return block;
+    return ret;
 }
 
 

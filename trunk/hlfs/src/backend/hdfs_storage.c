@@ -11,25 +11,9 @@
 #include "hlfs_log.h"
 
 /* FIX IT */
+#if 0
 static gchar * build_hdfs_path(const char *uri,const char *path){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
-#if 0
-     gchar **v  = g_strsplit(uri,"://",2);
-     if (0!=g_strcmp0(v[0],"hdfs")){
-        g_strfreev(v);
-        return NULL;
-     }
-     gchar *full_path;
-     if(v[1][0] != '/'){
-        gchar **_v = g_strsplit(v[1],"/",2);  
-        full_path = g_build_filename("/",_v[1],fs_name,path,NULL);
-        //g_strfreev(v);
-     }else{
-        full_path = g_build_filename(v[1],fs_name,path,NULL);
-     }
-     //g_strfreev(v);
-     return full_path;
-#endif 
      char *head=NULL;
      char *hostname=NULL;
      char *dir=NULL;
@@ -44,35 +28,32 @@ static gchar * build_hdfs_path(const char *uri,const char *path){
      HLOG_DEBUG("full path is %s",full_path);
      g_free(head);
      g_free(hostname);
-     g_free(dir);
+     //g_free(dir);
 	 HLOG_DEBUG("hdfs -- leave func %s", __func__);
      return full_path;
 }
-
+#else
+static void build_hdfs_path(char *full_path,const char* dir,const char * fs_name,const char* path){
+	   HLOG_DEBUG("local -- enter func %s", __func__);
+	   memset(full_path,0,256);
+	   if(NULL != path){
+	   	  sprintf(full_path,"%s/%s/%s",dir,fs_name,path);
+	   }else{
+	      sprintf(full_path,"%s/%s",dir,fs_name);
+	   }
+	   HLOG_DEBUG("path:%s,full path:%s",path,full_path);
+	   HLOG_DEBUG("local -- leave func %s", __func__);
+	   return ;
+}
+#endif 
 int hdfs_connect(struct back_storage *storage,const char* uri){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
-    char *head=NULL;
-    char *hostname=NULL;
-    char *dir=NULL;
-    char *fs_name = NULL;
-    int port;
-    int ret = parse_from_uri(uri,&head,&hostname,&dir,&fs_name,&port);
-    if(ret !=0){
-	     HLOG_ERROR("parse_from_uri error!");
-        return -1;
-    }
-    //hdfsFS fs = hdfsConnect("default",0); // for local test
-    hdfsFS fs = hdfsConnect(hostname,port); // for local test
-    g_free(head);
-    g_free(hostname);
-    g_free(dir);
+    hdfsFS fs = hdfsConnect(storage->hostname,storage->port); // for local test
     if(NULL==fs){
 	     HLOG_ERROR("fs is null, hdfsConnect error!");
         return -1;
     }
-    storage->uri = uri; 
-    storage->user = g_strdup("kanghua");
-    storage->port = port;
+    //storage->uri = uri; 
     storage->fs_handler = (bs_fs_t)fs;
 	HLOG_DEBUG("hdfs -- leave func %s", __func__);
     return 0;
@@ -95,15 +76,15 @@ int hdfs_file_close(struct back_storage *storage,bs_file_t file){
 
 int hdfs_file_is_exist(struct back_storage * storage,const char *path){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
-    gchar * full_path = build_hdfs_path(storage->uri,path);
+    char full_path[256];
+    build_hdfs_path(full_path,storage->dir,storage->fs_name,path);
     HLOG_DEBUG("hdfs full path %s",full_path);
-
     if(0!=hdfsExists((hdfsFS)storage->fs_handler,full_path)){
-        g_free(full_path);
+       
 	HLOG_ERROR("hdfsExists error");
         return -1;
     }
-    g_free(full_path);
+  
 	HLOG_DEBUG("hdfs -- leave func %s", __func__);
     return 0;
 }
@@ -138,9 +119,9 @@ int hdfs_file_flush(struct back_storage *storage,bs_file_t file){
 
 int hdfs_file_delete(struct back_storage *storage,const char* path){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
-    gchar * full_path = build_hdfs_path(storage->uri,path);
+    char full_path[256];
+    build_hdfs_path(full_path,storage->dir,storage->fs_name,path);
     int ret = hdfsDelete((hdfsFS)storage->fs_handler,full_path);
-    g_free(full_path);
 	HLOG_DEBUG("hdfs -- leave func %s", __func__);
     return ret;
 }
@@ -148,7 +129,8 @@ int hdfs_file_delete(struct back_storage *storage,const char* path){
 bs_file_info_t * 
 hdfs_file_info(struct back_storage *storage,const char* path){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
-    gchar * full_path = build_hdfs_path(storage->uri,path);
+    char full_path[256];
+    build_hdfs_path(full_path,storage->dir,storage->fs_name,path);
     hdfsFileInfo *hinfo = hdfsGetPathInfo((hdfsFS)storage->fs_handler,full_path);
     if(NULL == hinfo){
 	    HLOG_ERROR("hdfsGetPathInfo error");
@@ -164,7 +146,6 @@ hdfs_file_info(struct back_storage *storage,const char* path){
     info->size = hinfo->mSize;
     info->lmtime = hinfo->mLastMod;
     free(hinfo);
-    g_free(full_path);
 	HLOG_DEBUG("hdfs -- leave func %s", __func__);
     return info;
 }
@@ -173,7 +154,8 @@ hdfs_file_info(struct back_storage *storage,const char* path){
 bs_file_info_t*
 hdfs_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num_entries){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
-    gchar * full_path = build_hdfs_path(storage->uri,dir_path);
+    char full_path[256];
+    build_hdfs_path(full_path,storage->dir,storage->fs_name,dir_path);
     int num;
     hdfsFileInfo *hinfos  = hdfsListDirectory((hdfsFS)storage->fs_handler,full_path,&num);
     if(NULL == hinfos){
@@ -181,7 +163,7 @@ hdfs_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num_
        return NULL; 
     }
     hdfsFileInfo *hinfo = hinfos;
-    bs_file_info_t *infos = (bs_file_info_t*)g_malloc0(sizeof(bs_file_info_t)*4096);
+    bs_file_info_t *infos = (bs_file_info_t*)g_malloc0(sizeof(bs_file_info_t)*8192);
     if (NULL == infos) {
 	    HLOG_ERROR("Allocate Error!");
 	    return NULL;
@@ -197,7 +179,6 @@ hdfs_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num_
         hinfo++;
     }
     free(hinfos);
-    g_free(full_path);
     *num_entries = num;
 	HLOG_DEBUG("hdfs -- leave func %s", __func__);
     return infos;
@@ -205,25 +186,24 @@ hdfs_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num_
 
 int hdfs_file_mkdir(struct back_storage * storage,const char *dir_path){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
-    gchar * full_path = build_hdfs_path(storage->uri,dir_path);
+    char full_path[256];
+    build_hdfs_path(full_path,storage->dir,storage->fs_name,dir_path);
     HLOG_DEBUG("hdfs mkdir:%s",full_path);
     if(0==hdfsExists((hdfsFS)storage->fs_handler,full_path)){
-        g_free(full_path);
         return -1;
     }
     if(0 != hdfsCreateDirectory((hdfsFS)storage->fs_handler,full_path)){
 	HLOG_DEBUG("hdfsCreateDirectory error");
-       g_free(full_path);
        return -1;
     }
-    g_free(full_path);
 	HLOG_DEBUG("hdfs -- leave func %s", __func__);
     return 0;
 }
 
 static bs_file_t  __hlfs_file_open(struct back_storage *storage,const char*path,int flags){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
-    gchar * full_path = build_hdfs_path(storage->uri,path);
+    char full_path[256];
+    build_hdfs_path(full_path,storage->dir,storage->fs_name,path);
     HLOG_DEBUG("hdfs full path %s",full_path);
     hdfsFile file = NULL;
     file =  hdfsOpenFile((hdfsFS)storage->fs_handler,full_path,flags, 0, 0, 0);

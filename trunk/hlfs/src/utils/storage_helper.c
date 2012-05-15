@@ -31,9 +31,9 @@ struct back_storage* init_storage_handler(const char* uri)
 	    HLOG_ERROR("parse_from_uri happened error");
         return NULL;
     }
-    gchar *fs_path = g_build_filename(dir,fs_name,NULL);
-    HLOG_DEBUG("loc [fs:%s], [path:%s]\n",fs_name,fs_path);
-    if (0==g_strcmp0(head,"local")){
+    //gchar *fs_path = g_build_filename(dir,fs_name,NULL);
+    //HLOG_DEBUG("loc [fs:%s], [path:%s]\n",fs_name,fs_path);
+    if (0 == g_strcmp0(head,"local")){
         storage=get_local_storage_ops();
     }else if(0 == g_strcmp0(head,"hdfs")){
         storage = get_hdfs_storage_ops();
@@ -42,7 +42,14 @@ struct back_storage* init_storage_handler(const char* uri)
         ret = -1;
         goto out;
     }
-
+    storage->uri = strdup(uri);
+	storage->head = head;
+	storage->dir = dir;
+	storage->fs_name = fs_name;
+	storage->hostname = hostname;
+    storage->port = port;
+	storage->user = g_strdup("kanghua");
+	
     if(0!=storage->bs_fs_connect(storage,uri)){
         ret = -1;
         goto out;
@@ -50,12 +57,15 @@ struct back_storage* init_storage_handler(const char* uri)
         return NULL;
     }
 out:
-    g_free(fs_path);
-    g_free(head);
-    g_free(hostname);
-    g_free(dir);
+    //g_free(fs_path);
     if(ret !=0){
-        free(storage);
+		g_free(storage->uri);
+	    g_free(storage->head);
+		g_free(storage->dir);
+		g_free(storage->fs_name);
+		g_free(storage->hostname);
+		g_free(storage->user);
+        g_free(storage);
 		HLOG_ERROR("ret is not 0, so error happened");
         storage = NULL;
     }
@@ -323,62 +333,63 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (0 == inode->iblock) {
 			return 1;
 		}
-		uint64_t *ib = (uint64_t *)read_block(storage, inode->iblock, BLOCKSIZE);
-		if (NULL == ib) {
+
+		uint64_t *ib = (uint64_t*)alloca(BLOCKSIZE);
+	    if( 0!= read_block(storage, inode->iblock, BLOCKSIZE,ib)){
 			return -1;
 		}
 		int idx = (db_no - 12) % IB_ENTRY_NUM;
 		cur_storage_addr = *(ib + idx);
-		g_free(ib);
+		//g_free(ib);
 	} else if (is_db_in_level3_index_range(db_no)) {
 		if(0 == inode->doubly_iblock) {
 			return 1;
 		}
-		uint64_t *ib = (uint64_t *)read_block(storage, inode->doubly_iblock, BLOCKSIZE);
-		if (NULL == ib) {
+		uint64_t *ib = (uint64_t*)alloca(BLOCKSIZE);
+		if( 0!= read_block(storage, inode->doubly_iblock, BLOCKSIZE,ib)){
 			return -1;
 		}
 		int idx = (db_no - 12 - IB_ENTRY_NUM) / IB_ENTRY_NUM;
 		if (0 == *(ib + idx)) {
 			return 1;
 		}
-		uint64_t *ib2 = (uint64_t *)read_block(storage, *(ib + idx), BLOCKSIZE);
-		if (NULL == ib2) {
+		uint64_t *ib2 = (uint64_t*)alloca(BLOCKSIZE);
+		if( 0 != read_block(storage, *(ib + idx), BLOCKSIZE,ib2)){
 			return -1;
 		}
 		uint64_t idx2 = (db_no - 12 - IB_ENTRY_NUM) % IB_ENTRY_NUM;
 		cur_storage_addr = *(ib2 + idx2);
-		g_free(ib);
-		g_free(ib2);
+		//g_free(ib);
+		//g_free(ib2);
 	} else if (is_db_in_level4_index_range(db_no)) {
 		if(0 == inode->triply_iblock) {
 			return 1;
 		}
-		uint64_t *ib = (uint64_t *)read_block(storage,inode->triply_iblock, BLOCKSIZE);
-		if (NULL == ib) {
+		uint64_t *ib = (uint64_t*)alloca(BLOCKSIZE);
+		if( 0!=read_block(storage,inode->triply_iblock, BLOCKSIZE,ib)){
 			return -1;
 		}
 		int idx = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) / (IB_ENTRY_NUM * IB_ENTRY_NUM);
 		if (0 == *(ib + idx)) {
 			return 1;
 		}
-		uint64_t *ib2 = (uint64_t *)read_block(storage, *(ib + idx), BLOCKSIZE);
-		if (NULL == ib2) {
+		uint64_t *ib2 =(uint64_t*)alloca(BLOCKSIZE);
+		if( 0 != read_block(storage, *(ib + idx), BLOCKSIZE,ib2)){
 			return -1;
 		}
 		uint64_t idx2 = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) / IB_ENTRY_NUM % IB_ENTRY_NUM;
 		if (0 == *(ib2 + idx2)) {
 			return 1;
 		}
-		uint64_t *ib3 = (uint64_t *)read_block(storage, *(ib2 + idx2), BLOCKSIZE);
-		if (NULL == ib3) {
+		uint64_t *ib3 = (uint64_t*)alloca(BLOCKSIZE);
+		if( 0!= read_block(storage, *(ib2 + idx2), BLOCKSIZE,ib3)){
 			return -1;
 		}
 		uint64_t idx3 = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) % IB_ENTRY_NUM;
 		cur_storage_addr = *(ib3 + idx3);
-		g_free(ib);
-		g_free(ib2);
-		g_free(ib3);
+		//g_free(ib);
+		//g_free(ib2);
+		//g_free(ib3);
 	} else {
 		HLOG_ERROR("index error!");
 		return -1;

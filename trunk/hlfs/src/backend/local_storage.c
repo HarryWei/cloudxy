@@ -8,6 +8,7 @@
 #include "misc.h"
 #include "hlfs_log.h"
 
+#if 0
 static gchar *build_local_path(const char *uri,const char *path){
 	HLOG_DEBUG("local -- enter func %s", __func__);
      char *head=NULL;
@@ -29,38 +30,39 @@ static gchar *build_local_path(const char *uri,const char *path){
      return full_path;
 }
 
+#else
+static void build_local_path(char *full_path,const char* dir,const char * fs_name,const char* path){
+	   HLOG_DEBUG("local -- enter func %s,dir:%s,fs:%s,path:%s", __func__,dir,fs_name,path);
+	   memset(full_path,0,256);
+	   if(NULL != path){
+	   	  sprintf(full_path,"%s/%s/%s",dir,fs_name,path);
+	   }else{
+	      sprintf(full_path,"%s/%s",dir,fs_name);
+	   }
+	   HLOG_DEBUG("path:%s,full path:%s",path,full_path);
+	   HLOG_DEBUG("local -- leave func %s", __func__);
+	   return ;
+}
+#endif
 
 int local_connect(struct back_storage *storage,const char* uri){
 	HLOG_DEBUG("local -- enter func %s", __func__);
-    //gchar **v  = g_strsplit(uri,"://",2);
-    //if (0!=g_strcmp0(v[0],"local")){
-    //   g_strfreev(v);
-    //   return NULL;   
-    //}
-    //gchar * fs_path = g_build_filename(v[1],fs_name,NULL);
-    //g_strfreev(v);
-    //g_free(fs_path);
-    //storage->fs_handler = fs_path;
-    storage->uri = uri; 
-    //storage->fs_name  = g_basename(uri);
+  
 	HLOG_DEBUG("local -- leave func %s", __func__);
     return 0;
 }
 
 int local_disconnect(struct back_storage * storage){
 	HLOG_DEBUG("local -- enter func %s", __func__);
-    //g_free((gchar*)storage->fs_handler);
+  
 	HLOG_DEBUG("local -- leave func %s", __func__);
     return 0;
 }
 
 bs_file_t local_file_open(struct back_storage *storage,const char *path,int flags){
 	HLOG_DEBUG("local -- enter func %s", __func__);
-    gchar * full_path = build_local_path(storage->uri,path);
-    if (NULL == full_path) {
-	    HLOG_ERROR("build local path error!");
-	    return NULL;
-    }
+	char full_path[256];
+    build_local_path(full_path,storage->dir,storage->fs_name,path);
     HLOG_DEBUG("full path %s", full_path);
     int fd=0;
     if(flags == BS_READONLY){
@@ -71,8 +73,7 @@ bs_file_t local_file_open(struct back_storage *storage,const char *path,int flag
        HLOG_DEBUG("open with error flags:%d",flags);
     }
     if(fd == -1){
-	    HLOG_ERROR("open file error");
-       g_free(full_path);
+	   HLOG_ERROR("open file error");
        return NULL;
     }
 #if 0
@@ -85,7 +86,6 @@ bs_file_t local_file_open(struct back_storage *storage,const char *path,int flag
     *(int*)file = fd;
 #endif 
     bs_file_t file = (bs_file_t)GINT_TO_POINTER(fd); 
-    g_free(full_path);
 	HLOG_DEBUG("local -- leave func %s", __func__);
     return file;
 }
@@ -101,17 +101,12 @@ int local_file_close(struct back_storage *storage,bs_file_t file){
 
 int local_file_is_exist(struct back_storage * storage,const char *path){
 	HLOG_DEBUG("local -- enter func %s", __func__);
-    gchar * full_path = build_local_path(storage->uri,path);
-    if (NULL == full_path) {
-	    HLOG_ERROR("build local path error!");
-	    return -1;
-    }
-    HLOG_DEBUG("full path %s",full_path);
+	char full_path[256];
+    build_local_path(full_path,storage->dir,storage->fs_name,path);
+    HLOG_DEBUG("path:%sfull path %s",path,full_path);
     if (!g_file_test(full_path,G_FILE_TEST_EXISTS)){
-        g_free(full_path);
         return -1;
     }
-    g_free(full_path);
 	HLOG_DEBUG("local -- leave func %s", __func__);
     return 0;
 }
@@ -158,11 +153,8 @@ int local_file_flush(struct back_storage *storage,bs_file_t file){
 
 int local_file_delete(struct back_storage *storage,const char* path){
 	HLOG_DEBUG("local -- enter func %s", __func__);
-    gchar * full_path = build_local_path(storage->uri,path);
-    if (NULL == full_path) {
-	    HLOG_ERROR("build local path error!");
-	    return -1;
-    }
+	char full_path[256];
+    build_local_path(full_path,storage->dir,storage->fs_name,path);
     int ret = remove(full_path);
     g_free(full_path);
 	HLOG_DEBUG("local -- leave func %s", __func__);
@@ -172,17 +164,13 @@ int local_file_delete(struct back_storage *storage,const char* path){
 bs_file_info_t * 
 local_file_info(struct back_storage *storage,const char* path){
 	HLOG_DEBUG("local -- enter func %s", __func__);
-    gchar * full_path = build_local_path(storage->uri,path);
-    if (NULL == full_path) {
-	    HLOG_ERROR("build local path error!");
-	    return NULL;
-    }
+	char full_path[256];
+    build_local_path(full_path,storage->dir,storage->fs_name,path);
     struct stat buf;
     int res=lstat(full_path,&buf);
     bs_file_info_t *info = NULL;
     if(res != 0){
-	    HLOG_ERROR("lstat error");
-       g_free(full_path);
+	   HLOG_ERROR("lstat error");
        return NULL;
     }
     info = (bs_file_info_t*)g_malloc0(sizeof(bs_file_info_t));
@@ -190,7 +178,6 @@ local_file_info(struct back_storage *storage,const char* path){
     info->is_dir = g_file_test (full_path, G_FILE_TEST_IS_DIR);
     info->size = buf.st_size;
     info->lmtime = buf.st_mtime;
-    g_free(full_path);
 	HLOG_DEBUG("local -- leave func %s", __func__);
     return info;
 }
@@ -199,21 +186,16 @@ local_file_info(struct back_storage *storage,const char* path){
 bs_file_info_t*
 local_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num_entries){
 	HLOG_DEBUG("local -- enter func %s", __func__);
-    gchar * full_path = build_local_path(storage->uri,dir_path);
-    if (NULL == full_path) {
-	    HLOG_ERROR("build local path error!");
-	    return NULL;
-    }
+    char full_path[256];
+    build_local_path(full_path,storage->dir,storage->fs_name,dir_path);
     GDir * dir = g_dir_open(full_path,0,NULL);
     if(dir==NULL){
 	    HLOG_ERROR("g_dir_open error");
-        g_free(full_path);
         return NULL;
     }
     struct stat buf;
-    bs_file_info_t * infos = (bs_file_info_t*)g_malloc0(sizeof(bs_file_info_t)*4096);
+    bs_file_info_t * infos = (bs_file_info_t*)g_malloc0(sizeof(bs_file_info_t)*8192);
     if (NULL == infos) {
-	    g_free(full_path);
 	    HLOG_ERROR("build local path error!");
 	    return NULL;
     }
@@ -224,7 +206,6 @@ local_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num
         gchar *file_path = g_build_filename(full_path,filename,NULL);
         int res=lstat(file_path,&buf);
 		if (0 != res) {
-			g_free(full_path);
 			g_free(file_path);
 			g_free(infos);
 			g_dir_close(dir);
@@ -237,10 +218,8 @@ local_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num
         info->lmtime = buf.st_mtime;
         info++;
         idx++;
-        g_free(file_path);
     }
     *num_entries = idx;
-    g_free(full_path);
     g_dir_close(dir);
 	HLOG_DEBUG("local -- leave func %s", __func__);
     return infos;
@@ -248,32 +227,23 @@ local_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num
 
 int local_file_mkdir(struct back_storage * storage,const char *dir_path){
 	HLOG_DEBUG("local -- enter func %s", __func__);
-    gchar * full_path = build_local_path(storage->uri,dir_path);
-    if (NULL == full_path) {
-	    HLOG_ERROR("build local path error!");
-	    return -1;
-    }
+    char full_path[256];
+    build_local_path(full_path,storage->dir,storage->fs_name,dir_path);
     HLOG_DEBUG("full path is %s",full_path);
     if(0!=g_mkdir(full_path,00700)){
-	    HLOG_ERROR("g_mkdir error");
-       g_free(full_path);
+	   HLOG_ERROR("g_mkdir error");
        return -1;
     }
-    g_free(full_path);
 	HLOG_DEBUG("local -- leave func %s", __func__);
     return 0;
 }
 
 bs_file_t local_file_create(struct back_storage *storage,const char *path){
 	HLOG_DEBUG("local -- enter func %s", __func__);
-    gchar * full_path = build_local_path(storage->uri,path);
-    if (NULL == full_path) {
-	    HLOG_ERROR("build local path error!");
-	    return NULL;
-    }
+    char full_path[256];
+    build_local_path(full_path,storage->dir,storage->fs_name,path);
     HLOG_DEBUG("full path:%s", full_path);
     int fd = g_creat(full_path,00700);
-    g_free(full_path);
 #if 0
     bs_file_t file = (bs_file_t)g_malloc0(sizeof(int));
     if (NULL == file) {

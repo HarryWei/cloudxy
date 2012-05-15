@@ -76,42 +76,46 @@ uint32_t get_segfile_no(const char * segfile)
 }
 
 
-char *read_block(struct back_storage *storage ,uint64_t storage_address,uint32_t block_size)
+int read_block(struct back_storage *storage ,uint64_t storage_address,uint32_t block_size,char *block_buf)
 {
     HLOG_DEBUG("enter func %s", __func__);
+	if(NULL == storage || NULL == block_buf){
+		return -1;
+	}
     int ret = 0;
     uint32_t offset = get_offset(storage_address); 
     const char segfile_name[SEGMENT_FILE_NAME_MAX];
     ret = build_segfile_name(get_segno(storage_address), (char *) segfile_name);
     if (-1 == ret) {
         HLOG_ERROR("build_segfile_name error");
-        return NULL;
+        ret = -1;
+		goto out;
     }
 
     bs_file_t file = storage->bs_file_open(storage,segfile_name,BS_READONLY); 
     if(file==NULL){
         HLOG_ERROR("can not open segment file %s",segfile_name);
-        return NULL;
+        ret = -1;
+		goto out;
     }
-
-    char * block = (char*)g_malloc0(block_size);
-    if (NULL == block) {
-        HLOG_ERROR("Allocate Error!");
-        block = NULL;
-	    goto out;
-    }
+	
+    //char * block = (char*)g_malloc0(block_size);
+    //if (NULL == block) {
+    //    HLOG_ERROR("Allocate Error!");
+    //    block = NULL;
+	//    goto out;
+    //}
     uint32_t read_size;
-    if(block_size != (read_size = storage->bs_file_pread(storage,file,block,block_size,offset))){
+    if(block_size != (read_size = storage->bs_file_pread(storage,file,block_buf,block_size,offset))){
 	    HLOG_ERROR("bs_file_pread's size:%d is not equal to block_size:%d, at offset:%u",read_size,block_size,offset);
-        g_free(block);
-        block = NULL;
+        ret = -1;
         goto out;
     }
 
 out:
     storage->bs_file_close(storage,file);
 	HLOG_DEBUG("leave func %s", __func__);
-    return block;
+    return ret;
 }
 
 /* 

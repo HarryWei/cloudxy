@@ -199,12 +199,19 @@ out:
 
 int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end){
     HLOG_DEBUG("entry func: %s",__func__);
-    uint64_t* _ib  = NULL;
-    uint64_t* _ib2 = NULL;
-    uint64_t* _ib3 = NULL;
+    gboolean ib1_flag  = FALSE;
+    gboolean ib2_flag  = FALSE;
+    gboolean ib3_flag  = FALSE;
+	guint32 BLOCKSIZE = ctrl->sb.block_size;
+	uint64_t*  ib1 = (uint64_t*)alloca(BLOCKSIZE);
+	uint64_t*  ib2 = (uint64_t*)alloca(BLOCKSIZE);
+	uint64_t*  ib3 = (uint64_t*)alloca(BLOCKSIZE);
+	g_assert(NULL != ib1);
+	g_assert(NULL != ib2);
+	g_assert(NULL != ib3);
     guint32  ib_cur_offset = 0;
     guint32  db_offset = 0;
-    guint32 BLOCKSIZE = ctrl->sb.block_size;
+   
     uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
     guint32 db_data_len ;
     guint32 ib_data_len ;
@@ -246,28 +253,25 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             HLOG_DEBUG(" is level2 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             HLOG_DEBUG("-----iblock 0: %llu",ctrl->inode.iblock);                
             //uint64_t * _ib = NULL;
-            if(NULL == _ib){
+            if(FALSE == ib1_flag){
                 if(ctrl->inode.iblock == 0){
-                    if(NULL == (_ib = (uint64_t*)g_malloc0(BLOCKSIZE))){ 
-                        HLOG_ERROR("g_malloc0 error!");
-                        g_assert(0);
-                        return -1;
-                    }
+                    memset(ib1,0,BLOCKSIZE);
+					ib1_flag = TRUE;
                 }else{
-                    if(0>read_layer1_iblock(ctrl,db_cur_no,&_ib)){ 	
-                        if (NULL == (_ib = (uint64_t *)read_block_fast(ctrl,ctrl->inode.iblock,BLOCKSIZE))){
+                    if(0>read_layer1_iblock(ctrl,db_cur_no,ib1)){ 	
+                        if (0 != read_block_fast(ctrl,ctrl->inode.iblock,BLOCKSIZE,ib1)){
                             HLOG_ERROR("read block error!");
                             g_assert(0);
                             return -1;
                         }
-			         write_layer1_iblock(ctrl,db_cur_no,_ib);	
+			            write_layer1_iblock(ctrl,db_cur_no,ib1);	
                     }
                 }
             }
             int  _idx = (db_cur_no - 12)%IB_ENTRY_NUM;
             //uint64_t storage_address = *(_bi + _idx);
-            set_segno ((_ib+_idx),ctrl->last_segno);
-            set_offset ((_ib+_idx),ctrl->last_offset + db_offset);
+            set_segno ((ib1+_idx),ctrl->last_segno);
+            set_offset ((ib1+_idx),ctrl->last_offset + db_offset);
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
             if( (db_cur_no - 12 + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end ){
                 HLOG_DEBUG("set iblock - segno:%u",ctrl->last_segno);
@@ -279,66 +283,60 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 memcpy((char*)(log_buff + ib_offset),(char*)_ib,BLOCKSIZE);
                 HLOG_DEBUG("-----iblock 2: %lld",ctrl->inode.iblock);                
                 ib_offset +=BLOCKSIZE;
-                g_free(_ib);
-                _ib=NULL;
+                //g_free(_ib);
+                ib1_flag=FALSE;
             }
             //g_free(_ib);
         }else if(is_db_in_level3_index_range(db_cur_no)){
             HLOG_DEBUG(" is level3 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
-            if(NULL == _ib){
+            if(FALSE == ib1_flag){
                 if(ctrl->inode.doubly_iblock == 0){
-                    if(NULL == (_ib = (uint64_t *)g_malloc0(BLOCKSIZE))){
-                        HLOG_ERROR("allocate error!");
-                        g_assert(0);
-                        return -1;
-                    }
+                    memset(ib1,0,BLOCKSIZE);
+					ib1_flag = TRUE;
                 }else{
-                    if(0>read_layer1_iblock(ctrl,db_cur_no,&_ib)){ 	
-                        if(NULL == (_ib = (uint64_t *)read_block_fast(ctrl,ctrl->inode.doubly_iblock,BLOCKSIZE))){
+                    if(0>read_layer1_iblock(ctrl,db_cur_no,ib1)){ 	
+                        if(0 != read_block_fast(ctrl,ctrl->inode.doubly_iblock,BLOCKSIZE,ib1)){
                             HLOG_ERROR("allocate error!");
                             g_assert(0);
                             return -1;
                         }
-			   write_layer1_iblock(ctrl,db_cur_no,_ib);
+			   		write_layer1_iblock(ctrl,db_cur_no,ib1);
                     }
                 }
             }
             int _idx   = (db_cur_no - 12 - IB_ENTRY_NUM) / IB_ENTRY_NUM;
             HLOG_DEBUG(" idx:%u",_idx);
             //uint64_t *_ib2 = NULL; 
-            if(NULL == _ib2){
-                if(*(_ib+_idx) == 0 ){
-                    if (NULL ==(_ib2 = (uint64_t*)g_malloc0(BLOCKSIZE))){
-                        HLOG_ERROR("allocate error!");
-                        g_assert(0);
-                        return -1;
-                    }
+            if(FALSE == ib2_flag){
+                if(*(ib1+_idx) == 0 ){
+                    memset(ib2,0,BLOCKSIZE);
+					ib2_flag = TRUE;
                 }else{
-                    if(0>read_layer2_iblock(ctrl,db_cur_no,&_ib2)){ 	
-                        if (NULL ==(_ib2 = (uint64_t *)read_block_fast(ctrl,*(_ib+_idx),BLOCKSIZE))){
+                    if(0>read_layer2_iblock(ctrl,db_cur_no,ib2)){ 	
+                        if ( 0!=read_block_fast(ctrl,*(ib1+_idx),BLOCKSIZE,ib2)){
                             HLOG_ERROR("allocate error!");
                             g_assert(0);
                             return -1;
                         }
-			   write_layer2_iblock(ctrl,db_cur_no,_ib2);
+			   		write_layer2_iblock(ctrl,db_cur_no,ib2);
                     }
                 }
             }
             int _idx2  = (db_cur_no - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
             HLOG_DEBUG(" idx2:%u",_idx2);
-            set_segno ((_ib2+_idx2),ctrl->last_segno);
-            set_offset((_ib2+_idx2),ctrl->last_offset + db_offset);
+            set_segno ((ib2+_idx2),ctrl->last_segno);
+            set_offset((ib2+_idx2),ctrl->last_offset + db_offset);
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
 
             if((db_cur_no -12 - IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end){
                 HLOG_DEBUG(" save ib2");
-                set_segno ((_ib+_idx),ctrl->last_segno);
-                set_offset((_ib+_idx),ctrl->last_offset + ib_offset);
-                memcpy(log_buff + ib_offset,(char*)_ib2,BLOCKSIZE);
+                set_segno ((ib1+_idx),ctrl->last_segno);
+                set_offset((ib1+_idx),ctrl->last_offset + ib_offset);
+                memcpy(log_buff + ib_offset,(char*)ib2,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-                g_free(_ib2);
-                _ib2=NULL;
+                //g_free(_ib2);
+                ib2_flag=FALSE;
             }
 
             if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == db_end){
@@ -347,74 +345,68 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 set_segno (&ctrl->inode.doubly_iblock,ctrl->last_segno);
                 set_offset(&ctrl->inode.doubly_iblock,ctrl->last_offset + ib_offset);
 		  #endif
-                memcpy(log_buff + ib_offset,(char*)_ib,BLOCKSIZE);
+                memcpy(log_buff + ib_offset,(char*)ib1,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-                g_free(_ib);
-                _ib=NULL;
+                //g_free(_ib);
+                ib1_flag=FALSE;
             }
             //g_free(_ib);
             //g_free(_ib2);
         }else if(is_db_in_level4_index_range(db_cur_no)){
             HLOG_DEBUG(" is level4 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
-            if(NULL == _ib){
+            if(FALSE == ib1_flag){
                 if(ctrl->inode.triply_iblock == 0){
-                    if (NULL==(_ib = (uint64_t *)g_malloc0(BLOCKSIZE))){
-                        HLOG_ERROR("allocate error!");
-                        return -1;
-                    }
+                     memset(ib1,0,BLOCKSIZE);
+					 ib1_flag = TRUE;
                 }else{
-                    if(0>read_layer1_iblock(ctrl,db_cur_no,&_ib)){ 	
-                        if (NULL== (_ib = (uint64_t *)read_block_fast(ctrl,ctrl->inode.triply_iblock,BLOCKSIZE))){
+                    if(0>read_layer1_iblock(ctrl,db_cur_no,&ib1)){ 	
+                        if ( 0 != read_block_fast(ctrl,ctrl->inode.triply_iblock,BLOCKSIZE,ib1))){
                             HLOG_ERROR("allocate error!");
                             return -1;
                         }
-			   write_layer1_iblock(ctrl,db_cur_no,_ib);
+			        write_layer1_iblock(ctrl,db_cur_no,ib1);
                     }
                 }
             }
             int _idx   = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM * IB_ENTRY_NUM);
             HLOG_DEBUG(" idx:%u",_idx);
             //uint64_t *_ib2 = NULL; 
-            if(NULL == _ib2){
-                if(*(_ib+_idx) == 0 ){
-                    if (NULL == (_ib2 = (uint64_t*)g_malloc0(BLOCKSIZE))){
-                        HLOG_ERROR("allocate error!");
-                        return -1;
-                    }
+            if(FALSE == ib2_flag){
+                if(*(ib1+_idx) == 0 ){
+                     memset(ib2,0,BLOCKSIZE);
+					 ib2_flag = TRUE;
                 }else{
-                    if(0>read_layer2_iblock(ctrl,db_cur_no,&_ib2)){ 	
-                        if (NULL==(_ib2 = (uint64_t *)read_block_fast(ctrl,*(_ib+_idx),BLOCKSIZE))){
+                    if(0>read_layer2_iblock(ctrl,db_cur_no,ib2)){ 	
+                        if (0 != read_block_fast(ctrl,*(ib1+_idx),BLOCKSIZE,ib2)){
                             HLOG_ERROR("allocate error!");
                             return -1;
                         }
-			   write_layer2_iblock(ctrl,db_cur_no,_ib2);
+			   		    write_layer2_iblock(ctrl,db_cur_no,ib2);
                     }
                 }
             }
             int _idx2  = (db_cur_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / IB_ENTRY_NUM % IB_ENTRY_NUM;
             HLOG_DEBUG(" idx2:%u",_idx2);
             //uint64_t *_ib3 = NULL; 
-            if(NULL == _ib3){
-                if(*(_ib2+_idx2) == 0 ){
-                    if (NULL==(_ib3 = (uint64_t*)g_malloc0(BLOCKSIZE))){
-                        HLOG_ERROR("allocate error!");
-                        return -1;
-                    }
+            if(FALSE == ib3_flag){
+                if(*(ib2+_idx2) == 0 ){
+                     memset(ib3,0,BLOCKSIZE);
+					 ib1_flag = TRUE;
                 }else{
-                    if(0>read_layer3_iblock(ctrl,db_cur_no,&_ib3)){ 	
-                        if (NULL==(_ib3 = (uint64_t *)read_block_fast(ctrl,*(_ib2+_idx2),BLOCKSIZE))){
+                    if(0>read_layer3_iblock(ctrl,db_cur_no,ib3)){ 	
+                        if ( 0!= read_block_fast(ctrl,*(ib2+_idx2),BLOCKSIZE,ib3))){
                             HLOG_ERROR("allocate error!");
                             return -1;
                         }
                     }
-		      write_layer3_iblock(ctrl,db_cur_no,_ib3);
+		      		write_layer3_iblock(ctrl,db_cur_no,ib3);
                 }
             }
             int _idx3  = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 
             HLOG_DEBUG(" idx3:%u",_idx3);
-            set_segno ((_ib3+_idx3),ctrl->last_segno);
-            set_offset((_ib3+_idx3),ctrl->last_offset + db_offset);
+            set_segno ((ib3+_idx3),ctrl->last_segno);
+            set_offset((ib3+_idx3),ctrl->last_offset + db_offset);
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
 
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end){
@@ -422,8 +414,8 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 set_offset ((_ib2+_idx2),ctrl->last_offset + ib_offset);
                 memcpy(log_buff + ib_offset,(char*)_ib3,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-                g_free(_ib3);
-                _ib3=NULL;
+                //g_free(_ib3);
+                ib3_flag = FALSE;
             }
 
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM * IB_ENTRY_NUM)  == 0 || db_cur_no == db_end){
@@ -431,8 +423,8 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 set_offset ((_ib+_idx),ctrl->last_offset + ib_offset);
                 memcpy(log_buff + ib_offset,(char*)_ib2,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-                g_free(_ib2);
-                _ib2=NULL;
+                //g_free(_ib2);
+				ib2_flag = FALSE;
             }
 
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == db_end){
@@ -442,8 +434,8 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		  #endif
                 memcpy(log_buff + ib_offset,(char*)_ib,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-                g_free(_ib);
-                _ib=NULL;
+                //g_free(_ib);
+				ib1_flag = FALSE;
             }
             //g_free(_ib);
             //g_free(_ib2);

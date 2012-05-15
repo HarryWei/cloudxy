@@ -345,7 +345,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if(0 == inode->doubly_iblock) {
 			return 1;
 		}
-		uint64_t *ib =  = (uint64_t*)alloca(BLOCKSIZE);
+		uint64_t *ib = (uint64_t*)alloca(BLOCKSIZE);
 		if( 0!= read_block(storage, inode->doubly_iblock, BLOCKSIZE,ib)){
 			return -1;
 		}
@@ -354,7 +354,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 			return 1;
 		}
 		uint64_t *ib2 = (uint64_t*)alloca(BLOCKSIZE);
-		if( 0! = read_block(storage, *(ib + idx), BLOCKSIZE,ib2)){
+		if( 0 != read_block(storage, *(ib + idx), BLOCKSIZE,ib2)){
 			return -1;
 		}
 		uint64_t idx2 = (db_no - 12 - IB_ENTRY_NUM) % IB_ENTRY_NUM;
@@ -374,7 +374,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 			return 1;
 		}
 		uint64_t *ib2 =(uint64_t*)alloca(BLOCKSIZE);
-		if( 0!=read_block(storage, *(ib + idx), BLOCKSIZE,ib2)){
+		if( 0 != read_block(storage, *(ib + idx), BLOCKSIZE,ib2)){
 			return -1;
 		}
 		uint64_t idx2 = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) / IB_ENTRY_NUM % IB_ENTRY_NUM;

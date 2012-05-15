@@ -199,7 +199,7 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
              if(latest_st_mtime < info->lmtime){
                 latest_st_mtime = info->lmtime;
                 latest_file = info->name;
-		__info = info;
+				__info = info;
                 //*offset = info->size;
 #if 0
                 if(info->size == 0){

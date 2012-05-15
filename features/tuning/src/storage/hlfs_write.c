@@ -119,7 +119,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
         g_free(last_block);
     }
 write_log:;
-       ctrl->last_write_timestamp = get_current_time();
+     
 	HLOG_DEBUG("db_start: %u db_end: %u", db_start, db_end);
 	if(ctrl->inode.length < (pos + write_len)){ 
 		ctrl->inode.length = pos + write_len;
@@ -134,10 +134,13 @@ write_log:;
 	if(ctrl->cctrl != NULL){
 	    HLOG_DEBUG("use write back mode");
 		int ret = cache_insert_blocks(ctrl->cctrl,db_start,(db_end - db_start + 1),datablocks);
-              g_assert(ret == 0);
+        g_assert(ret == 0);
 	}else{
 		HLOG_DEBUG("use write through mode");
+		g_mutex_lock  (hctrl->hlfs_access_mutex);
+		ctrl->last_write_timestamp = get_current_time();
 		int size = append_log(ctrl,datablocks,db_start,db_end);
+		g_mutex_unlock  (hctrl->hlfs_access_mutex);
 		if(size < 0){
 		g_message("fail to append log\n");
 		g_free(datablocks);
@@ -177,7 +180,7 @@ write_log:;
 	}
 #endif /*use async queue*/
 #endif 
-       g_free(datablocks);
+    g_free(datablocks);
 	//ctrl->last_access_timestamp = get_current_time();
 	HLOG_DEBUG("leave func %s", __func__);
     return write_len;

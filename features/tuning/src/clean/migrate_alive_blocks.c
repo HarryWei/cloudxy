@@ -94,15 +94,17 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
 						  g_assert(size > 0);
 						  hctrl->last_offset += size;
 						  #else
+						   char *db_buff = lh->data + (db_start - lh->start_db_no)* hctrl->sb.block_size;
+						   g_mutex_lock  (hctrl->hlfs_access_mutex);
 						   if(_last_inode_write_timestamp != hctrl->last_write_timestamp){
-						   	  HLOG_DEBUG("inode maybe has change, redo check again");
+						   	  HLOG_DEBUG("inode maybe has change, for safe reason,redo check again");
+							  i--;
+							  g_mutex_unlock (hctrl->hlfs_access_mutex);
 							  continue;
 						   }	
-						   char *db_buff = lh->data + (db_start - lh->start_db_no)* hctrl->sb.block_size;
-						   //g_mutex_lock (hctrl->hlfs_access_mutex);
-    					  	   int size = append_log(hctrl,db_buff,db_start,db_end);
-    					  	   //g_mutex_unlock (hctrl->hlfs_access_mutex);
-    				      if(size < 0){
+    					   int size = append_log(hctrl,db_buff,db_start,db_end);
+    					   g_mutex_unlock (hctrl->hlfs_access_mutex);
+    				       if(size < 0){
        						 HLOG_ERROR("append log error");
         					 g_assert(0);
 							 return -1;

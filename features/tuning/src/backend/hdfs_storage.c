@@ -77,7 +77,7 @@ int hdfs_file_close(struct back_storage *storage,bs_file_t file){
 int hdfs_file_is_exist(struct back_storage * storage,const char *path){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
     char full_path[256];
-    build_local_path(full_path,storage->dir,storage->fs_name,path);
+    build_hdfs_path(full_path,storage->dir,storage->fs_name,path);
     HLOG_DEBUG("hdfs full path %s",full_path);
     if(0!=hdfsExists((hdfsFS)storage->fs_handler,full_path)){
        
@@ -120,7 +120,7 @@ int hdfs_file_flush(struct back_storage *storage,bs_file_t file){
 int hdfs_file_delete(struct back_storage *storage,const char* path){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
     char full_path[256];
-    build_local_path(full_path,storage->dir,storage->fs_name,path);
+    build_hdfs_path(full_path,storage->dir,storage->fs_name,path);
     int ret = hdfsDelete((hdfsFS)storage->fs_handler,full_path);
 	HLOG_DEBUG("hdfs -- leave func %s", __func__);
     return ret;
@@ -130,7 +130,7 @@ bs_file_info_t *
 hdfs_file_info(struct back_storage *storage,const char* path){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
     char full_path[256];
-    build_local_path(full_path,storage->dir,storage->fs_name,path);
+    build_hdfs_path(full_path,storage->dir,storage->fs_name,path);
     hdfsFileInfo *hinfo = hdfsGetPathInfo((hdfsFS)storage->fs_handler,full_path);
     if(NULL == hinfo){
 	    HLOG_ERROR("hdfsGetPathInfo error");
@@ -155,7 +155,7 @@ bs_file_info_t*
 hdfs_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num_entries){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
     char full_path[256];
-    build_local_path(full_path,storage->dir,storage->fs_name,dir_path);
+    build_hdfs_path(full_path,storage->dir,storage->fs_name,dir_path);
     int num;
     hdfsFileInfo *hinfos  = hdfsListDirectory((hdfsFS)storage->fs_handler,full_path,&num);
     if(NULL == hinfos){
@@ -187,7 +187,7 @@ hdfs_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num_
 int hdfs_file_mkdir(struct back_storage * storage,const char *dir_path){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
     char full_path[256];
-    build_local_path(full_path,storage->dir,storage->fs_name,dir_path);
+    build_hdfs_path(full_path,storage->dir,storage->fs_name,dir_path);
     HLOG_DEBUG("hdfs mkdir:%s",full_path);
     if(0==hdfsExists((hdfsFS)storage->fs_handler,full_path)){
         return -1;
@@ -203,7 +203,7 @@ int hdfs_file_mkdir(struct back_storage * storage,const char *dir_path){
 static bs_file_t  __hlfs_file_open(struct back_storage *storage,const char*path,int flags){
 	HLOG_DEBUG("hdfs -- enter func %s", __func__);
     char full_path[256];
-    build_local_path(full_path,storage->dir,storage->fs_name,path);
+    build_hdfs_path(full_path,storage->dir,storage->fs_name,path);
     HLOG_DEBUG("hdfs full path %s",full_path);
     hdfsFile file = NULL;
     file =  hdfsOpenFile((hdfsFS)storage->fs_handler,full_path,flags, 0, 0, 0);

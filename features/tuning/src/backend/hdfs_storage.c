@@ -70,7 +70,7 @@ int hdfs_connect(struct back_storage *storage,const char* uri){
 	     HLOG_ERROR("fs is null, hdfsConnect error!");
         return -1;
     }
-    storage->uri = uri; 
+    //storage->uri = uri; 
     storage->user = g_strdup("kanghua");
     storage->port = port;
     storage->fs_handler = (bs_fs_t)fs;

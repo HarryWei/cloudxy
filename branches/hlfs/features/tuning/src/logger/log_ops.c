@@ -51,6 +51,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 #if 1
                 set_segno (&inode->iblock, last_segno);
                 set_offset (&inode->iblock, last_offset + ib_offset);
+				HLOG_DEBUG("-----iblock : %lld",ctrl->inode.iblock);                
 #endif
                 ib_offset +=BLOCKSIZE;
             }

@@ -31,7 +31,7 @@ static gchar *build_local_path(const char *uri,const char *path){
 }
 
 #else
-static void build_local_path(const char *full_path;const char* dir,const char * fs_name,const char* path){
+static void build_local_path(const char *full_path,const char* dir,const char * fs_name,const char* path){
 	   HLOG_DEBUG("local -- enter func %s", __func__);
 	   sprintf(full_path,"%s/%s/%s",dir,fs_name,path);
 	   HLOG_DEBUG("full path is %s",full_path);
@@ -42,17 +42,22 @@ static void build_local_path(const char *full_path;const char* dir,const char * 
 
 int local_connect(struct back_storage *storage,const char* uri){
 	HLOG_DEBUG("local -- enter func %s", __func__);
-    //gchar **v  = g_strsplit(uri,"://",2);
-    //if (0!=g_strcmp0(v[0],"local")){
-    //   g_strfreev(v);
-    //   return NULL;   
-    //}
-    //gchar * fs_path = g_build_filename(v[1],fs_name,NULL);
-    //g_strfreev(v);
-    //g_free(fs_path);
-    //storage->fs_handler = fs_path;
-    storage->uri = uri; 
+    char *head=NULL;
+    char *hostname=NULL;
+    char *dir=NULL;
+    char *fs_name = NULL;
+    int port;
+    int ret = parse_from_uri(uri,&head,&hostname,&dir,&fs_name,&port);
+    if(ret !=0){
+	     HLOG_ERROR("parse_from_uri error!");
+        return -1;
+    }
+    storage->uri = uri;
+	storage->dir = dir;
+	storage->fs_name = fs_name;
     //storage->fs_name  = g_basename(uri);
+    g_free(hostname);
+	g_free(head);
 	HLOG_DEBUG("local -- leave func %s", __func__);
     return 0;
 }

@@ -333,6 +333,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		if (0 == inode->iblock) {
 			return 1;
 		}
+
 		uint64_t *ib = (uint64_t *)read_block(storage, inode->iblock, BLOCKSIZE);
 		if (NULL == ib) {
 			return -1;

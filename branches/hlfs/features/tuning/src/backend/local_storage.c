@@ -32,7 +32,7 @@ static gchar *build_local_path(const char *uri,const char *path){
 
 #else
 static void build_local_path(char *full_path,const char* dir,const char * fs_name,const char* path){
-	   HLOG_DEBUG("local -- enter func %s", __func__);
+	   HLOG_DEBUG("local -- enter func %s,dir:%s,fs:%s,path:%s", __func__,dir,fs_name,path);
 	   memset(full_path,0,256);
 	   if(NULL != path){
 	   	  sprintf(full_path,"%s/%s/%s",dir,fs_name,path);

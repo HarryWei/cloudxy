@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <glib.h>
 #include <string.h>
+#include <alloca.h>
 #include "hlfs_ctrl.h"
 #include "hlfs_log.h"
 #include "comm_define.h"
@@ -41,47 +42,37 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
     HLOG_DEBUG("write offset:%llu,write len:%d", pos,write_len);
     if(db_start == db_end){
         HLOG_DEBUG("only need to write part in one block:%llu", pos / BLOCKSIZE);
-        char *block=NULL;
+        char *block= (char*)alloca(BLOCKSIZE);
+		g_assert(block!=NULL);
         //g_mutex_lock (ctrl->hlfs_access_mutex);
-        ret = load_block_by_addr_fast(ctrl,pos,&block);
+        ret = load_block_by_addr_fast(ctrl,pos,block);
         //g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(1==ret){
-            HLOG_DEBUG("fail to load block for addr! %llu", pos);
-            block = (char*)g_malloc0(BLOCKSIZE);
-            if (!block) {
-                HLOG_ERROR("# -- allocate error!");
-                //g_mutex_unlock (ctrl->hlfs_access_mutex);
-                return -1;
-            }
+            HLOG_DEBUG("fail to load block for addr! %llu for not write yet", pos);
+            memset(block,0,BLOCKSIZE);
         }else if(-1 == ret){
             HLOG_ERROR("can not read logic block: %llu", pos / BLOCKSIZE);
             //g_mutex_unlock (ctrl->hlfs_access_mutex);
             return -1;
         }
-
-
         memcpy(datablocks,block,pos%BLOCKSIZE);
         memcpy(datablocks + pos%BLOCKSIZE,write_buf,write_len);
         memcpy(datablocks + pos%BLOCKSIZE + write_len, 
                block + pos%BLOCKSIZE + write_len,
                BLOCKSIZE-(pos%BLOCKSIZE+write_len));
-        g_free(block);
+        //g_free(block);
         goto write_log;
     }
     if(pos % BLOCKSIZE != 0 ){
         HLOG_DEBUG("to load first block!");
-        char *first_block = NULL;
+        char *first_block = (char*)alloca(BLOCKSIZE);
+		g_assert(first_block!=NULL);
         //g_mutex_lock (ctrl->hlfs_access_mutex);
-        ret = load_block_by_addr_fast(ctrl,pos,&first_block);
+        ret = load_block_by_addr_fast(ctrl,pos,first_block);
         //g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(1==ret){
-            HLOG_DEBUG("fail to load first block");
-            first_block = (char*)g_malloc0(BLOCKSIZE);
-            if (!first_block) {
-            	HLOG_ERROR("allocate error!");
-                //g_mutex_unlock(ctrl->hlfs_access_mutex);
-                return -1;
-            }
+            HLOG_DEBUG("fail to load first block for not write yet");
+            memset(first_block,0,BLOCKSIZE);
         }else if(ret == -1){
             HLOG_ERROR("can not read logic block: %llu", pos / BLOCKSIZE);
             //g_mutex_unlock (ctrl->hlfs_access_mutex);
@@ -89,25 +80,20 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
         }
         memcpy(datablocks,first_block,BLOCKSIZE);
         memcpy(datablocks+pos%BLOCKSIZE,write_buf,write_len);
-        g_free(first_block);
+        //g_free(first_block);
     }else{
         HLOG_DEBUG("do not need load first block");
         memcpy(datablocks, write_buf, write_len);
     }
     if((pos +write_len)%BLOCKSIZE !=0){
         HLOG_DEBUG("to load last block");
-        char *last_block = NULL;
+        char *last_block = (char*)alloca(BLOCKSIZE);
         //g_mutex_lock (ctrl->hlfs_access_mutex);
-        ret=load_block_by_addr_fast(ctrl, pos + write_len, &last_block);
+        ret=load_block_by_addr_fast(ctrl, pos + write_len, last_block);
         //g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(1==ret){
-            HLOG_DEBUG("fail to load last block");
-            last_block = (char*)g_malloc0(BLOCKSIZE);
-            if (!last_block) {
-            HLOG_ERROR("allocate error!");
-                //g_mutex_unlock (ctrl->hlfs_access_mutex);
-                return -1;
-            }
+            HLOG_DEBUG("fail to load last block for not write yet");
+            memset(last_block,0,BLOCKSIZE);
         }else if(-1==ret){
             //g_mutex_unlock (ctrl->hlfs_access_mutex);
             HLOG_ERROR("can not read logic block: %llu", pos / BLOCKSIZE);
@@ -116,7 +102,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
         memcpy(datablocks+pos%BLOCKSIZE + write_len,
                 last_block+(write_len+pos)%BLOCKSIZE,
                 BLOCKSIZE-(write_len+pos)%BLOCKSIZE);
-        g_free(last_block);
+        //g_free(last_block);
     }
 write_log:;
      

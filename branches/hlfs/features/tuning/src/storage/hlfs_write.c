@@ -40,7 +40,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
         }
 
     HLOG_DEBUG("write offset:%llu,write len:%d", pos,write_len);
-    if(db_start == db_end){
+    if(db_start == db_end && (db_start %BLOCKSIZE != 0 || db_end %BLOCKSIZE != 0) ){
         HLOG_DEBUG("only need to write part in one block:%llu", pos / BLOCKSIZE);
         char *block= (char*)alloca(BLOCKSIZE);
 		g_assert(block!=NULL);

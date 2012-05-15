@@ -10,14 +10,14 @@
 extern "C" {
 #endif
 int seg_clean_task(struct hlfs_ctrl *ctrl);
-int load_block_by_addr(struct hlfs_ctrl *ctrl,uint64_t pos,char** block);
-int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char** block);
-int load_block_by_addr_fast(struct hlfs_ctrl *ctrl,uint64_t pos,char** block);
-int load_block_by_no_fast(struct hlfs_ctrl *ctrl,uint64_t no,char** block);
+int load_block_by_addr(struct hlfs_ctrl *ctrl,uint64_t pos,char* block);
+int load_block_by_no(struct hlfs_ctrl *ctrl,uint64_t no,char* block);
+int load_block_by_addr_fast(struct hlfs_ctrl *ctrl,uint64_t pos,char* block);
+int load_block_by_no_fast(struct hlfs_ctrl *ctrl,uint64_t no,char* block);
 
-int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock);	
-int read_layer2_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock);
-int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char **iblock);
+int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char *iblock);	
+int read_layer2_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char *iblock);
+int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char *iblock);
 int write_layer1_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char *iblock);
 int write_layer2_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char *iblock);
 int write_layer3_iblock(struct hlfs_ctrl *hctrl,uint64_t dbno,char *iblock);

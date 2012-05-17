@@ -1,4 +1,4 @@
-D#include "cache.h"
+#include "cache.h"
 
 int cache_destroy(CACHE_CTRL *cache_ctrl)
 {

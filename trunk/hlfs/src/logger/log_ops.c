@@ -236,9 +236,9 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 	     #endif
             //HLOG_DEBUG("inode.block[%d]'s storage addr:%llu",_idx,ctrl->inode.blocks[_idx]);
             //HLOG_DEBUG("log_buff:%p cur_log_buf:%p db_buff:%p cur_block_ptr:%p",
-            log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
+            //log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
             //HLOG_DEBUG("log_buff:%p cur_log_buf:%p db_buff:%p cur_block_ptr:%p",
-            log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
+            //log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
         }else if(is_db_in_level2_index_range(db_cur_no)){
             //HLOG_DEBUG(" is level2 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);

@@ -12,14 +12,14 @@
 
 uint64_t get_current_time(void)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
 	struct timeval t;
 
 	if (gettimeofday(&t, NULL)) {
 		HLOG_ERROR("Get current time error!");
 		return -1;
 	}
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
 	return (uint64_t) t.tv_sec * 1000 + t.tv_usec / 1000;	
 }
 #if 0
@@ -42,43 +42,43 @@ char *build_segfile_name_by_address(uint64_t storage_address)
 #endif 
 int  build_segfile_name(uint32_t segno, const char *segfile_name)
 {
-    HLOG_DEBUG("enter func %s", __func__);
+    //HLOG_DEBUG("enter func %s", __func__);
     if(segfile_name==NULL){
         HLOG_ERROR("segfile_name is null");
         return -1;
     }
     snprintf((char *) segfile_name,SEGMENT_FILE_NAME_MAX,"%u%s%s",segno,".","seg");
-    HLOG_DEBUG("leave func %s", __func__);
+    //HLOG_DEBUG("leave func %s", __func__);
     return 0;
 }
 
 int  build_segfile_name_by_address(uint64_t storage_address, const char*segfile_name)
 {
-    HLOG_DEBUG("enter func %s", __func__);
+    //HLOG_DEBUG("enter func %s", __func__);
     if(segfile_name==NULL){
         return -1;
     }
     uint32_t segno  = get_segno(storage_address);
     snprintf((char *) segfile_name,SEGMENT_FILE_NAME_MAX,"%u%s%s",segno,".","seg");
-    HLOG_DEBUG("leave func %s", __func__);
+    //HLOG_DEBUG("leave func %s", __func__);
     return 0;
 }
 
 uint32_t get_segfile_no(const char * segfile)
 {
-    HLOG_DEBUG("enter func %s", __func__);
+    //HLOG_DEBUG("enter func %s", __func__);
     const gchar *basename = g_basename(segfile);
     gchar **v = g_strsplit(basename,".",2);
     uint32_t segno = atol(v[0]);
     g_strfreev(v);
-    HLOG_DEBUG("leave func %s", __func__);
+    //HLOG_DEBUG("leave func %s", __func__);
     return segno;
 }
 
 
 int read_block(struct back_storage *storage ,uint64_t storage_address,uint32_t block_size,char *block_buf)
 {
-    HLOG_DEBUG("enter func %s", __func__);
+    //HLOG_DEBUG("enter func %s", __func__);
 	if(NULL == storage || NULL == block_buf){
 		return -1;
 	}
@@ -114,7 +114,7 @@ int read_block(struct back_storage *storage ,uint64_t storage_address,uint32_t b
 
 out:
     storage->bs_file_close(storage,file);
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
 
@@ -128,7 +128,7 @@ out:
  * */
 int parse_from_uri(const char *uri, char ** head, char** hostname ,char** dir,char** fs_name,int* port)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
     gchar **v=NULL;
     gchar **v1=NULL;
     gchar **v2=NULL;
@@ -143,7 +143,7 @@ int parse_from_uri(const char *uri, char ** head, char** hostname ,char** dir,ch
     *head = g_strdup(v[0]);
         
     if( v[1][0] == '/' ){
-        HLOG_DEBUG("default localhost for hostname\n");
+        //HLOG_DEBUG("default localhost for hostname\n");
         *hostname = g_strdup("default");
         *dir = g_strdup(v[1]);
         *port = 0; 
@@ -174,6 +174,6 @@ int parse_from_uri(const char *uri, char ** head, char** hostname ,char** dir,ch
     g_strfreev(v);
     g_strfreev(v1);
     g_strfreev(v2);
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
     return 0;
 }

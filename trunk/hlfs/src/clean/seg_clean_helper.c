@@ -26,7 +26,7 @@ int seg_usage2text(SEG_USAGE_T * seg_usage,char *textbuf){
 		       seg_usage->log_num,
 		       seg_usage->block_num,
 		       seg_usage->alive_block_num);
-       HLOG_DEBUG("textbuf init:%s, n:%d",textbuf,n);
+       //HLOG_DEBUG("textbuf init:%s, n:%d",textbuf,n);
 	   int m=0;
        int i,j;
 	   for(i=0;i<((seg_usage->log_num-1)/sizeof(gint))+1;i++){
@@ -39,7 +39,7 @@ int seg_usage2text(SEG_USAGE_T * seg_usage,char *textbuf){
            m += sprintf(textbuf+n+m,"%hhx#",seg_usage->bitmap[i]);
 	   }
        sprintf(textbuf+n+m,"\n");
-       HLOG_DEBUG("leave func %s",__func__);
+       //HLOG_DEBUG("leave func %s",__func__);
 	   return n+m+1;
 }
 
@@ -135,8 +135,8 @@ int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
      if(seg_usage == NULL || textbuf == NULL){
 	    return -1; 
      }
-     HLOG_DEBUG("enter func %s",__func__);
-     HLOG_DEBUG("textbuf len:%d",strlen(textbuf));
+     //HLOG_DEBUG("enter func %s",__func__);
+     //HLOG_DEBUG("textbuf len:%d",strlen(textbuf));
      //HLOG_DEBUG("textbuf :%s",textbuf);
      gchar **v = g_strsplit (textbuf," ",1024);
      gchar *_segno_str = v[0]; 
@@ -168,7 +168,7 @@ int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
 	 
      g_strfreev(v);
      HLOG_DEBUG("segno:%llu,alive_blocks:%u,timestamp:%llu,log_num:%u,block_num:%u",
-		   seg_usage->segno,
+		   		 seg_usage->segno,
                  seg_usage->alive_block_num,
                  seg_usage->timestamp,
                  seg_usage->log_num,
@@ -181,7 +181,7 @@ int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
          seg_usage->bitmap[i] = strtoul(v[i],&endptr,16);
      }
      g_strfreev(v);
-     HLOG_DEBUG("leave func %s",__func__);
+     //HLOG_DEBUG("leave func %s",__func__);
      return 0;
 }
 

@@ -2,6 +2,7 @@
 #include "icache.h"
 
 int icache_destroy(ICACHE_CTRL *icache_ctrl){
+	//
 	HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0, i = 0;
 	if (icache_ctrl == NULL) {
@@ -37,13 +38,13 @@ int icache_destroy(ICACHE_CTRL *icache_ctrl){
 				g_free(_iblock->iblock);
 			g_free(_iblock);
 			i++;
-			HLOG_DEBUG("----destroy %d succ", i);
+			//HLOG_DEBUG("----destroy %d succ", i);
         }
     }
     g_mutex_free (icache_ctrl->icache_mutex);
   
 	g_free(icache_ctrl);
-	HLOG_DEBUG("--Leaving func %s", __func__);
+	//HLOG_DEBUG("--Leaving func %s", __func__);
 	return ret;
 }
 

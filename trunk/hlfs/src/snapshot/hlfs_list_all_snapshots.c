@@ -20,7 +20,7 @@ struct snapshot *__hlfs_get_all_snapshots(struct back_storage *storage,int *num_
  */
 struct snapshot *hlfs_get_all_snapshots(const char *uri,int *num_entries)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
 	if (NULL == uri || NULL == num_entries) {
 		HLOG_ERROR("Parameter Error!");
 		return NULL;
@@ -38,7 +38,7 @@ struct snapshot *hlfs_get_all_snapshots(const char *uri,int *num_entries)
 }
 
 struct snapshot *__hlfs_get_all_snapshots(struct back_storage *storage,int *num_entries){
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
 	if (NULL == storage || NULL == num_entries) {
 		HLOG_ERROR("Parameter Error!");
 		return NULL;
@@ -80,7 +80,7 @@ out:
     if(snapshot_list!=NULL){
         g_list_free(snapshot_list);
     }
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
 	return (struct snapshot *) snapshots_buf;
 }
 

@@ -35,7 +35,7 @@ get_iaddr_bytime_in_seg(struct back_storage *storage,
 		ret = -1;
 		goto out;
 	}
-	HLOG_DEBUG("SEGMENT SIZE is %d", _SEGMENT_SIZE);
+	//HLOG_DEBUG("SEGMENT SIZE is %d", _SEGMENT_SIZE);
 	char *tmp_buf = (char *)g_malloc0(_SEGMENT_SIZE);
 	if (NULL == tmp_buf) {
 		HLOG_ERROR("%s -- allocate error", __func__);
@@ -48,7 +48,7 @@ get_iaddr_bytime_in_seg(struct back_storage *storage,
 		ret = -1;
 		goto out;
 	}
-	HLOG_DEBUG("count is %d", count);
+	//HLOG_DEBUG("count is %d", count);
 	int offset = 0;
 	int first_inode_flag = 0;
 //	uint64_t tmp_time = 0;
@@ -153,7 +153,7 @@ hlfs_find_inode_before_time(const char *uri,
 		goto out;
 	}
 	info_list = g_list_sort(info_list,sort_finfo_with_time);
-	HLOG_DEBUG("list length is %d", g_list_length(info_list));
+	//HLOG_DEBUG("list length is %d", g_list_length(info_list));
     for(i = 0; i < g_list_length(info_list); i++){
         info = g_list_nth_data(info_list,i);
         if(info->lmtime >= timestamp){

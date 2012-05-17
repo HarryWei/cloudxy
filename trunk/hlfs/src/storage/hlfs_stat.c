@@ -10,7 +10,7 @@
 #include "storage_helper.h"
 
 int hlfs_lstat(const char*uri,HLFS_STAT_T *stat){
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
     if(NULL == uri|| NULL == stat){
 	   HLOG_ERROR("param error");
@@ -42,12 +42,12 @@ out:
     if(storage!=NULL){
        deinit_storage_handler(storage);
     }
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
     return ret;   
 }
 
 int hlfs_stat(struct hlfs_ctrl* ctrl,HLFS_STAT_T *stat){
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
     if(NULL == ctrl || NULL == stat){
 	   HLOG_ERROR("param error");
@@ -59,6 +59,6 @@ int hlfs_stat(struct hlfs_ctrl* ctrl,HLFS_STAT_T *stat){
     g_strlcpy(stat->fsname,ctrl->sb.fsname,MAX_FILE_NAME_LEN);
     stat->last_segno  = ctrl->last_segno;
     stat->last_offset = ctrl->last_offset;
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
     return ret;   
 }

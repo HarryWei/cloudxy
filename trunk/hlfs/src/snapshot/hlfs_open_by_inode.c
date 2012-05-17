@@ -17,7 +17,7 @@
 int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 					uint64_t inode_addr,
 					int flag) {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
 	if(ctrl->usage_ref > 0){
 		HLOG_DEBUG("This fs has opened by other,can not use it"); 
@@ -63,7 +63,7 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
     	}
     	g_free(_ss);
 	} else {
-		HLOG_DEBUG("do not need read alive snapshot file");
+		//HLOG_DEBUG("do not need read alive snapshot file");
 		memset(ss.up_sname, 0, MAX_FILE_NAME_LEN);
 	}
 	memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);

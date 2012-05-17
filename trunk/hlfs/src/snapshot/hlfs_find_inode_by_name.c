@@ -29,6 +29,6 @@ int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_
 	}
 	*inode_addr = ss->inode_addr;
 out:
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
 	return ret;
 }

@@ -10,7 +10,7 @@ int flush_work(gpointer data){
 	char* tmp_buf = (char*)g_malloc0(cctrl->block_size * cctrl->flush_once_size);
 	g_assert(tmp_buf);
     while (!cctrl->flush_worker_should_exit) {
-         HLOG_DEBUG("--flush worker doing--");
+         HLOG_DEBUG("-- flush worker doing --");
          g_get_current_time(&expired);
          g_time_val_add(&expired, cctrl->flush_interval*1000*1000);
          g_mutex_lock(cctrl->cache_mutex);
@@ -18,8 +18,9 @@ int flush_work(gpointer data){
          gboolean res = g_cond_timed_wait(cctrl->flush_waken_cond, \
 				 cctrl->cache_mutex, &expired);
          g_mutex_unlock(cctrl->cache_mutex); //?
-         HLOG_DEBUG(" res for cond is :%d\n",res);
+         HLOG_DEBUG(" time wait res for cond is :%d\n",res);
          if(cctrl->flush_worker_should_exit){
+		 	 HLOG_INFO("-- flush worker should exit --");
              break;
          }
    
@@ -39,7 +40,7 @@ int flush_work(gpointer data){
                 continue;
             }
             if(NULL==cctrl->write_callback_func){
-                HLOG_ERROR("--not given flush callback func--");
+                HLOG_WARN("--not given flush callback func--");
                 break;
             }
             //char* tmp_buf = g_malloc0(buff_len);
@@ -57,8 +58,9 @@ int flush_work(gpointer data){
                 }
                 memcpy(tmp_buf + i * cctrl->block_size, block->block, cctrl->block_size);
             }
-            HLOG_DEBUG("--tmp_buf:%p",tmp_buf);
+            //HLOG_DEBUG("--tmp_buf:%p",tmp_buf);
             ret = cctrl->write_callback_func(cctrl->write_callback_user_param,tmp_buf,start_no,end_no);
+			g_assert(ret >= 0);
             //g_free(tmp_buf);
             if (ret >=0 ) {
                 HLOG_DEBUG("--signal write thread--");
@@ -68,10 +70,10 @@ int flush_work(gpointer data){
                 g_cond_signal(cctrl->writer_waken_cond);
                 g_mutex_unlock(cctrl->cache_mutex);
                 g_slist_free(continue_blocks);
-                HLOG_DEBUG("--return blocks to cache over--");
+                //HLOG_DEBUG("--return blocks to cache over--");
             }
          } while (get_cache_free_size(cctrl) < cctrl->flush_trigger_level * cctrl->cache_size / 100);
     }
-    HLOG_WARN("--flush worker exit--");
+    HLOG_INFO("--flush worker exit--");
     return 0;
 }

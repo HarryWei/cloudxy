@@ -16,9 +16,9 @@
 CTRL_REGION_T CTRL_REGION;
 extern int append_log(struct hlfs_ctrl * ctrl,const char*db_buff,uint32_t db_start,uint32_t db_end);
 int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end){
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
    
-    HLOG_DEBUG("last segno: %u last offset: %u", ctrl->last_segno, ctrl->last_offset);
+    //HLOG_DEBUG("last segno: %u last offset: %u", ctrl->last_segno, ctrl->last_offset);
     g_mutex_lock (ctrl->hlfs_access_mutex);
     ctrl->last_write_timestamp = get_current_time();
     int size = append_log(ctrl,db_buff,db_start,db_end);
@@ -27,21 +27,21 @@ int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint3
         HLOG_ERROR("append log error");
         return -1;
     }
-	HLOG_DEBUG("last offset: %u", ctrl->last_offset);
+	//HLOG_DEBUG("last offset: %u", ctrl->last_offset);
     return size;
 }
 
 
 int read_fs_superblock(struct back_storage *storage,struct super_block *sb)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
 	if ((NULL == storage) || (NULL == sb)) {
 		HLOG_ERROR("read fs superblock error");
 		return -1;
 	}
     int ret = read_fs_meta(storage,&(sb->seg_size),&(sb->block_size),&(sb->max_fs_size));
     g_strlcpy(sb->fsname,g_basename(storage->uri),MAX_FILE_NAME_LEN);
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
 
@@ -53,9 +53,9 @@ int read_fs_superblock(struct back_storage *storage,struct super_block *sb)
 struct hlfs_ctrl *
 init_hlfs(const char *uri)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
     if(uri == NULL){
-	HLOG_ERROR("uri is null");
+	  HLOG_ERROR("uri is null");
       return NULL;  
     }
     g_thread_init(NULL);
@@ -68,14 +68,14 @@ init_hlfs(const char *uri)
     //ctrl->write_req_aqueue = g_async_queue_new();
     //ctrl->write_rsp_aqueue = g_async_queue_new();
 
-    HLOG_DEBUG("uri %s", uri);
+    //HLOG_DEBUG("uri %s", uri);
     struct back_storage *storage = init_storage_handler(uri);
     if( storage == NULL){
         HLOG_ERROR("[uri:%s] can not accessable", uri);
         g_free(ctrl);
         return NULL;
     }
-    HLOG_DEBUG("storage name:%s,uri %s\n", (char *) storage->storage_name,storage->uri);
+    //HLOG_DEBUG("storage name:%s,uri %s\n", (char *) storage->storage_name,storage->uri);
     ctrl->storage = storage;
     if(0!= read_fs_superblock(ctrl->storage,&ctrl->sb)){
             HLOG_ERROR("[uri:%s] read superblock failed",uri);
@@ -84,7 +84,7 @@ init_hlfs(const char *uri)
             goto out;
     }
 
-    HLOG_DEBUG("superblock read over\n");
+    //HLOG_DEBUG("superblock read over\n");
     uint32_t segno=0;
     uint32_t offset = 0;
 
@@ -113,17 +113,17 @@ init_hlfs(const char *uri)
         }
     }
 out:
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
     return ctrl;
 } 
 
 struct hlfs_ctrl *
 init_hlfs_by_config(const char *config_file_path){
-   HLOG_DEBUG("enter func %s", __func__);
+   //HLOG_DEBUG("enter func %s", __func__);
    int ret = 0;
    GKeyFile * hlfs_conf_keyfile = g_key_file_new();
 
-   HLOG_DEBUG("config path:%s",config_file_path);
+   //HLOG_DEBUG("config path:%s",config_file_path);
    gboolean res = g_key_file_load_from_file (hlfs_conf_keyfile,config_file_path,G_KEY_FILE_NONE,NULL);
    if(res == FALSE){
 	  HLOG_ERROR("parse config file error", __func__);
@@ -143,7 +143,7 @@ init_hlfs_by_config(const char *config_file_path){
        //gsize length=0;
        //gchar * keys = g_key_file_get_keys(hlfs_conf_keyfile,"CACHE",&length,NULL);
        gboolean enable = g_key_file_get_boolean (hlfs_conf_keyfile,"CACHE","is_enable_cache",NULL);
-       HLOG_DEBUG("enable is :%d",enable); 
+       //HLOG_DEBUG("enable is :%d",enable); 
        if(TRUE ==  enable){
            HLOG_DEBUG("do support cache!"); 
            uint64_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
@@ -183,7 +183,7 @@ init_hlfs_by_config(const char *config_file_path){
        //gsize length=0;
        //gchar * keys = g_key_file_get_keys(hlfs_conf_keyfile,"CACHE",&length,NULL);
        gboolean enable = g_key_file_get_boolean (hlfs_conf_keyfile,"ICACHE","is_enable_icache",NULL);
-       HLOG_DEBUG("enable is :%d",enable); 
+       //HLOG_DEBUG("enable is :%d",enable); 
        if(TRUE ==  enable){
            HLOG_DEBUG("do support cache!"); 
            uint64_t iblock_size,icache_size,invalidate_trigger_level,invalidate_once_size;

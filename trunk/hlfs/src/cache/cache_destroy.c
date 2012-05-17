@@ -1,8 +1,8 @@
-#include "cache.h"
+D#include "cache.h"
 
 int cache_destroy(CACHE_CTRL *cache_ctrl)
 {
-	HLOG_DEBUG("--Entering func %s", __func__);
+	//HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0, i = 0;
 	if (cache_ctrl == NULL) {
 		ret = -EHLFS_PARAM;
@@ -36,13 +36,13 @@ int cache_destroy(CACHE_CTRL *cache_ctrl)
     if (cache_ctrl->block_cache) {
 		int i = 0;
         while (g_trash_stack_height(&cache_ctrl->block_cache) != 0) {
-			HLOG_DEBUG("g_trash_stack_height: %d", g_trash_stack_height(&cache_ctrl->block_cache));
+			//HLOG_DEBUG("g_trash_stack_height: %d", g_trash_stack_height(&cache_ctrl->block_cache));
 			block_t *_block = (block_t *)g_trash_stack_pop(&cache_ctrl->block_cache);
 			if (_block->block != NULL) 
 				g_free(_block->block);
 			g_free(_block);
 			i++;
-			HLOG_DEBUG("----destroy %d succ", i);
+			//HLOG_DEBUG("----destroy %d succ", i);
         }
     }
     g_mutex_free (cache_ctrl->cache_mutex);
@@ -53,6 +53,6 @@ int cache_destroy(CACHE_CTRL *cache_ctrl)
     g_cond_free(cache_ctrl->writer_waken_cond);     
     /* do not free write callback user param */ 
 	g_free(cache_ctrl);
-	HLOG_DEBUG("--Leaving func %s", __func__);
+	//HLOG_INFO("-- Data Block Cache Destroy Over --");
 	return ret;
 }

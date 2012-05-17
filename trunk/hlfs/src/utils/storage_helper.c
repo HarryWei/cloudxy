@@ -322,7 +322,7 @@ struct inode * load_latest_inode(struct back_storage *storage)
 uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 			struct inode *inode, uint64_t db_no,uint32_t block_size) 
 {
-    HLOG_DEBUG("enter func %s",__func__);
+    //HLOG_DEBUG("enter func %s",__func__);
 	uint64_t cur_storage_addr = 0;
     guint32 BLOCKSIZE = block_size;
     uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
@@ -394,7 +394,7 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		HLOG_ERROR("index error!");
 		return -1;
 	}
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
 	return cur_storage_addr;
 }
 #if 1

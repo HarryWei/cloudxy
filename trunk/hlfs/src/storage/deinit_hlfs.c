@@ -16,7 +16,7 @@
 
 int deinit_hlfs(struct hlfs_ctrl * ctrl)
 {
-	HLOG_DEBUG("enter func:%s",__func__);
+	//HLOG_DEBUG("enter func:%s",__func__);
 	if (NULL == ctrl) {
 		HLOG_ERROR("ctrl is null");
 		return -1;
@@ -26,11 +26,11 @@ int deinit_hlfs(struct hlfs_ctrl * ctrl)
        	return -1; 
     }
     if(ctrl->cctrl!=NULL){
-       HLOG_DEBUG("-destroy cache-");
+       //HLOG_DEBUG("-destroy cache-");
        cache_destroy(ctrl->cctrl);
     }
     if(ctrl->icache!=NULL){
-       HLOG_DEBUG("-destroy icache-");
+       //HLOG_DEBUG("-destroy icache-");
        icache_destroy(ctrl->icache);
     }
 	ctrl->seg_clean_run = 0;
@@ -41,6 +41,6 @@ int deinit_hlfs(struct hlfs_ctrl * ctrl)
     /* fix it :we do not free ctrl_region now */
     g_free(ctrl->storage);
     g_free(ctrl);
-    HLOG_DEBUG("leave func:%s",__func__);
+    //HLOG_DEBUG("leave func:%s",__func__);
     return 0;
 } 

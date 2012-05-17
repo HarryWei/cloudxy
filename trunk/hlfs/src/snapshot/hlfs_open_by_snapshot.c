@@ -17,7 +17,7 @@
 int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,
 					const char* snapshot,
 					int flag) {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
 	if (NULL == ctrl || NULL == snapshot) {
 		HLOG_ERROR("Parameter Error!");
 		return -1;
@@ -65,6 +65,6 @@ int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,
     g_free(ss);
 	ctrl->usage_ref += 1;
 out:
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
 	return ret;
 }

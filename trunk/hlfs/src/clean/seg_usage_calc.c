@@ -15,7 +15,7 @@
 
 int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint64_t segno,struct inode *refer_inode,SEG_USAGE_T *seg_usage)
 {
-    HLOG_DEBUG("enter func %s",__func__);
+    //HLOG_DEBUG("enter func %s",__func__);
     if(storage == NULL || refer_inode == NULL || seg_usage == NULL){
 		HLOG_ERROR("input params failed");
 		return -1;
@@ -74,7 +74,7 @@ int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint64_t seg
 #endif 
         lh = (struct log_header*)(content + offset);
         if(seg_usage->log_num !=0){
-            HLOG_DEBUG("this segfile:%s has calc",segfile);
+            //HLOG_DEBUG("this segfile:%s has calc",segfile);
             idx = log_idx/sizeof(gint);
             if(!(seg_usage->bitmap[idx] & (1<<(log_idx%sizeof(gint))))){
                 log_idx++;
@@ -85,11 +85,11 @@ int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint64_t seg
             }
         }
         uint64_t orgine_alive_block_num = seg_usage->alive_block_num;
-        HLOG_DEBUG("start db no:%llu,db num:%d",lh->start_db_no,lh->db_num);
+        //HLOG_DEBUG("start db no:%llu,db num:%d",lh->start_db_no,lh->db_num);
         int i;
 #if 1 /* check refer inode whether still refer to given db in seg */
         for(i=0;i<lh->db_num;i++){
-            HLOG_DEBUG("for db:%llu",lh->start_db_no+i);
+            //HLOG_DEBUG("for db:%llu",lh->start_db_no+i);
             uint64_t db_mine_storage_addr = 0;
             uint64_t db_mine_storage_addr_offset = offset + LOG_HEADER_LENGTH+i*block_size;
             set_offset(&db_mine_storage_addr,db_mine_storage_addr_offset);
@@ -127,7 +127,7 @@ int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint64_t seg
     seg_usage->log_num = tmp_bit_array->len;
     g_free(seg_usage->bitmap);
     seg_usage->bitmap = (char*)g_malloc0((seg_usage->log_num-1)/sizeof(gint)+1);
-    HLOG_DEBUG("size of bitmap:%d",tmp_bit_array->len);
+    //HLOG_DEBUG("size of bitmap:%d",tmp_bit_array->len);
     for(i=0;i<tmp_bit_array->len;i++){
         gint value = g_array_index(tmp_bit_array,gint,i);
         idx = i/sizeof(gint);
@@ -138,7 +138,7 @@ int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint64_t seg
        }
     }
     g_array_free(tmp_bit_array,TRUE);
-	HLOG_DEBUG("leave func %s",__func__);
+	//HLOG_DEBUG("leave func %s",__func__);
     return 0;
 }
 

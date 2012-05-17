@@ -19,7 +19,7 @@
  * return: 0 is returned on success, else -1 is returned.
  */
 int hlfs_close(struct hlfs_ctrl *ctrl){
-    HLOG_DEBUG("enter func:%s",__func__);
+    //HLOG_DEBUG("enter func:%s",__func__);
     if (NULL == ctrl) {
 	    HLOG_ERROR("hlfs_close error!");
 	    return -1;
@@ -35,10 +35,10 @@ int hlfs_close(struct hlfs_ctrl *ctrl){
     }
     ctrl->usage_ref--;
     if(ctrl->cctrl!=NULL){
-       HLOG_DEBUG("before close hlfs,sync all dirty block");
+       //HLOG_DEBUG("before close hlfs,sync all dirty block");
        cache_sync(ctrl->cctrl); 
     }
-    HLOG_DEBUG("leave func:%s",__func__);
+    //HLOG_DEBUG("leave func:%s",__func__);
     return ret;
 }        
 

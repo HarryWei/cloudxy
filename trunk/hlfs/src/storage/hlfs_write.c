@@ -15,7 +15,7 @@
 
 int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint64_t pos)
 {
-    HLOG_DEBUG("enter func %s", __func__);
+    //HLOG_DEBUG("enter func %s", __func__);
     if ((NULL == ctrl) || (NULL == write_buf) || (0 == write_len) || (ctrl->sb.seg_size < write_len)) {
 		HLOG_ERROR("hlfs_write error");
 		return -1;
@@ -40,7 +40,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
     //        return -1;
     //    }
 
-    HLOG_DEBUG("write offset:%llu,write len:%d", pos,write_len);
+    //HLOG_DEBUG("write offset:%llu,write len:%d", pos,write_len);
     if(db_start == db_end && (db_start %BLOCKSIZE != 0 || db_end %BLOCKSIZE != 0) ){
         HLOG_DEBUG("only need to write part in one block:%llu", pos / BLOCKSIZE);
         char *block= (char*)alloca(BLOCKSIZE);
@@ -68,7 +68,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
     }
 
     if(pos % BLOCKSIZE != 0 ){
-        HLOG_DEBUG("to load first block!");
+        //HLOG_DEBUG("to load first block!");
         char *first_block = (char*)alloca(BLOCKSIZE);
 		g_assert(first_block!=NULL);
         //g_mutex_lock (ctrl->hlfs_access_mutex);
@@ -88,7 +88,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
         memcpy(datablocks+pos%BLOCKSIZE,write_buf,write_len);
         //g_free(first_block);
     }else{
-        HLOG_DEBUG("do not need load first block");
+        //HLOG_DEBUG("do not need load first block");
         if( (pos+write_len)%BLOCKSIZE != 0){
              datablocks = (char*)g_malloc0(write_blocks_size);
              g_assert(datablocks != NULL);
@@ -100,13 +100,13 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
         }
     }
     if((pos +write_len)%BLOCKSIZE !=0){
-        HLOG_DEBUG("to load last block");
+        //HLOG_DEBUG("to load last block");
         char *last_block = (char*)alloca(BLOCKSIZE);
         //g_mutex_lock (ctrl->hlfs_access_mutex);
         ret=load_block_by_addr_fast(ctrl, pos + write_len, last_block);
         //g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(1==ret){
-            HLOG_DEBUG("fail to load last block for not write yet");
+            //HLOG_DEBUG("fail to load last block for not write yet");
             memset(last_block,0,BLOCKSIZE);
         }else if(-1==ret){
             //g_mutex_unlock (ctrl->hlfs_access_mutex);
@@ -120,7 +120,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
         //g_free(last_block);
     }
 write_log:;
-	HLOG_DEBUG("db_start: %u db_end: %u", db_start, db_end);
+	//HLOG_DEBUG("db_start: %u db_end: %u", db_start, db_end);
 	if(ctrl->inode.length < (pos + write_len)){ 
 		ctrl->inode.length = pos + write_len;
 	}
@@ -128,15 +128,15 @@ write_log:;
 	ctrl->inode.mtime  = cur_time;
 	ctrl->inode.ctime  = cur_time;
 	ctrl->inode.atime  = cur_time;
-	HLOG_DEBUG("get_current_time is %llu", ctrl->inode.mtime);
-       HLOG_DEBUG("length is %llu", ctrl->inode.length);
+	//HLOG_DEBUG("get_current_time is %llu", ctrl->inode.mtime);
+    //HLOG_DEBUG("length is %llu", ctrl->inode.length);
    
 	if(ctrl->cctrl != NULL){
 	    HLOG_DEBUG("use write back mode");
         int ret = cache_insert_blocks(ctrl->cctrl,db_start,(db_end - db_start + 1),datablocks);
         g_assert(ret == 0);
     }else{
-        HLOG_DEBUG("use write through mode");
+        //HLOG_DEBUG("use write through mode");
         g_mutex_lock  (ctrl->hlfs_access_mutex);
         ctrl->last_write_timestamp = get_current_time();
         int size = append_log(ctrl,datablocks,db_start,db_end);
@@ -186,6 +186,6 @@ out:
         g_free(datablocks);
     }
 	//ctrl->last_access_timestamp = get_current_time();
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
     return write_len;
 }

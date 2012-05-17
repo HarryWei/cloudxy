@@ -4,14 +4,14 @@ extern int flush_work(gpointer data);
 
 CACHE_CTRL *cache_new()
 {
-	HLOG_DEBUG("--Entering func %s", __func__);
+	//HLOG_DEBUG("--Entering func %s", __func__);
 	struct cache_ctrl *cache_ctrl = NULL;
 	if (NULL == (cache_ctrl = (struct cache_ctrl *)g_malloc0(sizeof(struct \
 						cache_ctrl)))) {
 		HLOG_ERROR("--Error:Apply for mem");
 		return NULL;
 	}
-	HLOG_DEBUG("--Leaving func %s", __func__);
+	//HLOG_DEBUG("--Leaving func %s", __func__);
     return cache_ctrl;
 }
 
@@ -22,7 +22,7 @@ int cache_init(CACHE_CTRL *cache_ctrl,
 		uint64_t flush_trigger_level, \
 		uint64_t flush_once_size)
 {
-	HLOG_DEBUG("--Entering func %s", __func__);
+	//HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;
 	
 	if (NULL == cache_ctrl) {
@@ -30,9 +30,9 @@ int cache_init(CACHE_CTRL *cache_ctrl,
 		return -EHLFS_PARAM;
 	}
 
-	HLOG_DEBUG("--block_size:%llu,cache_size:%llu,flush_interval:%llu, \
-			flush_trigger_level:%llu,flush_once_size:%llu,%s", block_size, \
-			cache_size,flush_interval,flush_trigger_level,flush_once_size,__func__);
+	//HLOG_DEBUG("--block_size:%llu,cache_size:%llu,flush_interval:%llu, \
+	//		flush_trigger_level:%llu,flush_once_size:%llu,%s", block_size, \
+	//		cache_size,flush_interval,flush_trigger_level,flush_once_size,__func__);
 
     cache_ctrl->block_size = block_size;
     cache_ctrl->cache_size = cache_size;
@@ -55,20 +55,20 @@ int cache_init(CACHE_CTRL *cache_ctrl,
         g_assert(_block->block != NULL);
         g_trash_stack_push(&cache_ctrl->block_cache,_block);
     }
-    HLOG_DEBUG("--cache container init over!--");
+    //HLOG_DEBUG("--cache container init over!--");
 	
 	if (NULL == (cache_ctrl->dirty_block = 	g_queue_new())) {
 		HLOG_ERROR("--Error:Apply for LRU queue");
 		ret = -EHLFS_MEM;
 		goto err;
     }	
-    HLOG_DEBUG("--dirty block queue init over!--");
+    //HLOG_DEBUG("--dirty block queue init over!--");
 	if (NULL == (cache_ctrl->block_map = g_hash_table_new(g_int64_hash,g_int64_equal))) {
 		HLOG_ERROR("--Error:Apply for block_map");
 		ret = -EHLFS_MEM;
 		goto err;
     }
-    HLOG_DEBUG("--dirty block_map init over!--");
+    //HLOG_DEBUG("--dirty block_map init over!--");
     
 	g_thread_init(NULL);
     if (NULL == (cache_ctrl->cache_mutex = g_mutex_new())) {
@@ -81,8 +81,8 @@ int cache_init(CACHE_CTRL *cache_ctrl,
     cache_ctrl->flush_worker_should_exit = 0;
     cache_ctrl->flush_worker = g_thread_create((GThreadFunc)flush_work, cache_ctrl, TRUE, NULL);
     g_assert(cache_ctrl->flush_worker);
-    HLOG_DEBUG("--flush worker init over!--");
-	HLOG_DEBUG("--Leaving func %s", __func__);
+    //HLOG_DEBUG("--flush worker init over!--");
+	//HLOG_DEBUG("--Leaving func %s", __func__);
     return ret;
 err:
     if (cache_ctrl->cache_mutex)
@@ -104,6 +104,6 @@ err:
         }
     }
 	g_free(cache_ctrl);
-	HLOG_DEBUG("--Leaving func %s", __func__);
+	//HLOG_DEBUG("--Leaving func %s", __func__);
 	return ret;
 }

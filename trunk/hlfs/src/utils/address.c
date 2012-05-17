@@ -72,8 +72,8 @@ uint32_t ib_amount(uint32_t db_start, uint32_t db_end)
        uint32_t db_cur_no = 0;
        uint32_t IB_ENTRY_NUM = HBLOCK_SIZE/sizeof(uint64_t);
 	
-       HLOG_DEBUG("ib_amount db_start is %d", db_start);
-       HLOG_DEBUG("ib_amount db_end is %d", db_end);
+       //HLOG_DEBUG("ib_amount db_start is %d", db_start);
+       //HLOG_DEBUG("ib_amount db_end is %d", db_end);
        for (db_cur_no = db_start; db_cur_no <= db_end; db_cur_no++) {
                if (is_db_in_level1_index_range(db_cur_no)) {
                        ;

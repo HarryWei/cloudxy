@@ -14,7 +14,7 @@
 
 int 
 hlfs_rm_snapshot(const char *uri,const char *ssname) {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
     struct snapshot *ss = NULL;
     bs_file_t file = NULL;
@@ -28,11 +28,11 @@ hlfs_rm_snapshot(const char *uri,const char *ssname) {
 		ret = EHLFS_SSNOTEXIST;
 		goto out;
 	}
-	HLOG_DEBUG("99 before dump ret is %d", ret);
+	//HLOG_DEBUG("99 before dump ret is %d", ret);
     if (0!= (ret=dump_snapshot_delmark(storage,SNAPSHOT_FILE,ss->sname))){
         goto out;
     }
-	HLOG_DEBUG("99 after dump ret is %d", ret);
+	//HLOG_DEBUG("99 after dump ret is %d", ret);
     
 out:
 	if (NULL != file) {
@@ -41,6 +41,6 @@ out:
     if(ss!=NULL){
        g_free(ss); 
     }
-    HLOG_DEBUG("leave func %s", __func__);
+    //HLOG_DEBUG("leave func %s", __func__);
 	return ret;
 }

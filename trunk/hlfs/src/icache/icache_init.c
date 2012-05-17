@@ -2,7 +2,7 @@
 #include "icache.h"
 
 ICACHE_CTRL *icache_new(){
-    HLOG_DEBUG("--Entering func %s", __func__);
+    //HLOG_DEBUG("--Entering func %s", __func__);
 	struct icache_ctrl *icache_ctrl = NULL;
 	if (NULL == (icache_ctrl = (struct icache_ctrl *)g_malloc0(sizeof(struct \
 						icache_ctrl)))) {
@@ -16,7 +16,7 @@ int icache_init(ICACHE_CTRL *icache_ctrl,
 		uint64_t icache_size,
 		uint64_t invalidate_trigger_level,
 		uint64_t invalidate_once_size){
-    HLOG_DEBUG("--Entering func %s", __func__);
+    //HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;
 	
 	if (NULL == icache_ctrl) {
@@ -47,27 +47,27 @@ int icache_init(ICACHE_CTRL *icache_ctrl,
         g_assert(_iblock->iblock != NULL);
         g_trash_stack_push(&icache_ctrl->iblock_cache,_iblock);
     }
-    HLOG_DEBUG("--cache container init over!--");
+    //HLOG_DEBUG("--cache container init over!--");
 	
 	if (NULL == (icache_ctrl->iblock_lru = 	g_queue_new())) {
 		HLOG_ERROR("--Error:Apply for LRU queue");
 		ret = -EHLFS_MEM;
 		goto err;
     }	
-    HLOG_DEBUG("--lru block queue init over!--");
+    //HLOG_DEBUG("--lru block queue init over!--");
 	if (NULL == (icache_ctrl->iblock_map = g_hash_table_new(g_int64_hash,g_int64_equal))) {
 		HLOG_ERROR("--Error:Apply for block_map");
 		ret = -EHLFS_MEM;
 		goto err;
     }
-    HLOG_DEBUG("--iblock_map init over!--");
+    //HLOG_DEBUG("--iblock_map init over!--");
     g_thread_init(NULL);
     if (NULL == (icache_ctrl->icache_mutex = g_mutex_new())) {
         HLOG_ERROR("--Error:Apply for mutext");
         ret = -EHLFS_MEM;
         goto err;
     }
-	HLOG_DEBUG("--Leaving func %s", __func__);
+	//HLOG_DEBUG("--Leaving func %s", __func__);
     return ret;
 err:
     if (icache_ctrl->icache_mutex)
@@ -85,7 +85,7 @@ err:
         }
     }
 	g_free(icache_ctrl);
-	HLOG_DEBUG("--Leaving func %s", __func__);
+	//HLOG_DEBUG("--Leaving func %s", __func__);
 	return ret;
 }
 

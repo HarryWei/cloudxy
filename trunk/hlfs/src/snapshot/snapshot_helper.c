@@ -13,7 +13,7 @@
 
 static int snapshot2text(const struct snapshot *snapshot, char *textbuf) 
 {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
 	const char *sep = SS_ITEM_SEP;
 	memset(textbuf, 0, strlen(textbuf));
 	int n = sprintf(textbuf, "+%s%s%llu%s%llu%s%s\n", 
@@ -21,14 +21,14 @@ static int snapshot2text(const struct snapshot *snapshot, char *textbuf)
 					snapshot->timestamp, sep,
 					snapshot->inode_addr, sep,
 					snapshot->up_sname);
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
 	return n;
 }
 
 int dump_snapshot(struct back_storage *storage, 
 					const char *snapshot_file, 
 					struct snapshot *snapshot) {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
     if(snapshot_file == NULL || snapshot == NULL || storage == NULL) {
 		HLOG_ERROR("Parameter error!");
         return -1;
@@ -37,24 +37,24 @@ int dump_snapshot(struct back_storage *storage,
     char snapshot_text[1024];
     memset(snapshot_text, 0, 1024);
 	int len = snapshot2text(snapshot, snapshot_text);
-	HLOG_DEBUG("ss text is %s", snapshot_text);
+	//HLOG_DEBUG("ss text is %s", snapshot_text);
     ret = file_append_contents(storage,snapshot_file,snapshot_text,len);
     return ret;
 }
 
 static int snapshot_delmark2text(const char *ssname, char *textbuf) {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
 	const char *sep = SS_ITEM_SEP;
 	memset(textbuf, 0, 128);
 	int n = sprintf(textbuf, "-%s%s\n", ssname, sep);
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
 	return n;
 }
 
 int dump_snapshot_delmark(struct back_storage *storage, 
 							const char *snapshot_file, 
 							const char *ssname){
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
     if (snapshot_file == NULL || ssname == NULL || storage == NULL) {
 		HLOG_ERROR("Parameter Error!");
         return -1;
@@ -63,7 +63,7 @@ int dump_snapshot_delmark(struct back_storage *storage,
     char snapshot_delmark_text[128];
     memset(snapshot_delmark_text, 0, 128);
 	int len = snapshot_delmark2text(ssname, snapshot_delmark_text);
-	HLOG_DEBUG("cp text is %s", snapshot_delmark_text);
+	//HLOG_DEBUG("cp text is %s", snapshot_delmark_text);
     ret = file_append_contents(storage,snapshot_file,snapshot_delmark_text,len);
 	return ret;
 }
@@ -95,7 +95,7 @@ static void revise_snapshot_relation(GHashTable *ss_hashtable,GList *remove_list
 
 static int load_snapshot_from_text(struct snapshot **ss, const char *buf, int *flag)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
 	const char *sep = SS_ITEM_SEP;
     gchar **v = g_strsplit(buf, sep, 2);
     if ('+' == v[0][0]) {
@@ -141,7 +141,7 @@ static int load_snapshot_from_text(struct snapshot **ss, const char *buf, int *f
 
 int load_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHashTable *ss_hashtable)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
     char *contents = NULL;
     uint32_t size;
@@ -152,7 +152,7 @@ int load_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHa
     }
 	gchar **lines = g_strsplit(contents, "\n", 0);
     g_free(contents);
-	HLOG_DEBUG("g strv length:%d:", g_strv_length(lines));
+	//HLOG_DEBUG("g strv length:%d:", g_strv_length(lines));
     GList *to_remove_ss_list = NULL;
     int i;
 	for (i = 0; i < g_strv_length(lines) - 1; i++) {
@@ -180,7 +180,7 @@ int load_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHa
 out:
 	g_strfreev(lines);
     if(to_remove_ss_list!=NULL) g_list_free(to_remove_ss_list);
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("leave func %s", __func__);
 	return ret;
 }
 
@@ -209,7 +209,7 @@ int sort_all_snapshot(GHashTable *ss_hashtable,GList **ss_list){
 
 /*  order by timestamp */
 int redump_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHashTable *ss_hashtable){
- 	HLOG_DEBUG("enter func %s", __func__);
+ 	//HLOG_DEBUG("enter func %s", __func__);
     if(storage == NULL || snapshot_file == NULL || ss_hashtable == NULL) {
 		HLOG_ERROR("Parameter error!");
         return -1;
@@ -249,7 +249,7 @@ int load_snapshot_by_name(struct back_storage *storage,
 						struct snapshot **ss, 
 						const char *ss_name)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
 	struct snapshot *_ss = NULL;
 	GHashTable *ss_hashtable = g_hash_table_new(g_str_hash, g_str_equal);
@@ -261,34 +261,34 @@ int load_snapshot_by_name(struct back_storage *storage,
 	}
 	_ss = g_hash_table_lookup(ss_hashtable, ss_name);
     if(_ss == NULL){
-		HLOG_DEBUG("Can not find this snapshot name");
+	   HLOG_DEBUG("Can not find this snapshot name");
        ret = EHLFS_SSNOTEXIST;
 	   goto out;
     }
-	HLOG_DEBUG("9999 ss_name is %s", ss_name);
+	//HLOG_DEBUG("9999 ss_name is %s", ss_name);
 	ret = 0;
-	HLOG_DEBUG("99 dbg");
+	//HLOG_DEBUG("99 dbg");
     (*ss) = (struct snapshot*)g_malloc0(sizeof(struct snapshot));
 	if (NULL == (*ss)) {
 		HLOG_ERROR("Allocate error!");
 		return -1;
 	}
-	HLOG_DEBUG("9999 dbg");
+	//HLOG_DEBUG("9999 dbg");
 	(*ss)->timestamp = _ss->timestamp;	
     sprintf((*ss)->sname, "%s", _ss->sname);
 	sprintf((*ss)->up_sname, "%s", _ss->up_sname);
 	(*ss)->inode_addr = _ss->inode_addr;
 out:
 	g_hash_table_destroy(ss_hashtable);
-	HLOG_DEBUG("99 dbg");
-	HLOG_DEBUG("leave func %s", __func__);
+	//HLOG_DEBUG("99 dbg");
+	//HLOG_DEBUG("leave func %s", __func__);
 	return ret;
 }
 
 
 static int load_all_alive_snapshot(struct back_storage *storage,const char* alive_snapshot_file,GList **alive_ss_list)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
     char *contents = NULL;
     uint32_t size;
@@ -300,7 +300,7 @@ static int load_all_alive_snapshot(struct back_storage *storage,const char* aliv
 	gchar **lines = g_strsplit(contents, "\n", 0);
     g_free(contents);
     int i = 0;
-	HLOG_DEBUG("999 lines length is %d", g_strv_length(lines));
+	//HLOG_DEBUG("999 lines length is %d", g_strv_length(lines));
 	for (i = 0; i < g_strv_length(lines) - 1; i++) {
         struct snapshot *ss = NULL;
         int flag=0;
@@ -310,7 +310,7 @@ static int load_all_alive_snapshot(struct back_storage *storage,const char* aliv
         }
         (*alive_ss_list) = g_list_append((*alive_ss_list),ss);
     }
-	HLOG_DEBUG("9999 leave func %s", __func__);
+	//HLOG_DEBUG("9999 leave func %s", __func__);
 	return ret;
 }
 
@@ -329,7 +329,7 @@ int find_latest_alive_snapshot_before_time(struct back_storage *storage,
 										const char* alive_snapshot_file, 
 										struct snapshot **ss,
 										uint64_t timestamp){
-    HLOG_DEBUG("enter func %s", __func__);
+    //HLOG_DEBUG("enter func %s", __func__);
     if(snapshot_file == NULL || alive_snapshot_file == NULL || storage == NULL) {
 		HLOG_ERROR("Parameter error!");
         return -1;
@@ -348,8 +348,8 @@ int find_latest_alive_snapshot_before_time(struct back_storage *storage,
     }
     gboolean flag = FALSE;
     int i;
-	HLOG_DEBUG("99 timestamp is %llu", timestamp);
-	HLOG_DEBUG("99 list length is %d", g_list_length(alive_snapshot_list));
+	//HLOG_DEBUG("99 timestamp is %llu", timestamp);
+	//HLOG_DEBUG("99 list length is %d", g_list_length(alive_snapshot_list));
 	if (0 == g_list_length(alive_snapshot_list)) {
 		HLOG_ERROR("alive snapshot list is nil");
 		ret = -1;
@@ -372,7 +372,7 @@ int find_latest_alive_snapshot_before_time(struct back_storage *storage,
             }
         }
     }
-	HLOG_DEBUG("99 *ss addr %p", (*ss));
+	//HLOG_DEBUG("99 *ss addr %p", (*ss));
     if(flag==FALSE){
        ret = -1;
     }
@@ -381,7 +381,7 @@ out:
        free_all_list(alive_snapshot_list);
     }
 //    g_hash_table_destroy(ss_hashtable);
-    HLOG_DEBUG("9999 leave func %s", __func__);
+    //HLOG_DEBUG("9999 leave func %s", __func__);
     return ret;
 }
 #if 0

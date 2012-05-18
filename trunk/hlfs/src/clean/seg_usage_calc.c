@@ -13,7 +13,7 @@
 #include "seg_clean.h"
 
 
-int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint64_t segno,struct inode *refer_inode,SEG_USAGE_T *seg_usage)
+int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint32_t segno,struct inode *refer_inode,SEG_USAGE_T *seg_usage)
 {
     //HLOG_DEBUG("enter func %s",__func__);
     if(storage == NULL || refer_inode == NULL || seg_usage == NULL){
@@ -84,14 +84,14 @@ int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint64_t seg
                 continue;
             }
         }
-        uint64_t orgine_alive_block_num = seg_usage->alive_block_num;
+        uint32_t orgine_alive_block_num = seg_usage->alive_block_num;
         //HLOG_DEBUG("start db no:%llu,db num:%d",lh->start_db_no,lh->db_num);
         int i;
 #if 1 /* check refer inode whether still refer to given db in seg */
         for(i=0;i<lh->db_num;i++){
             //HLOG_DEBUG("for db:%llu",lh->start_db_no+i);
             uint64_t db_mine_storage_addr = 0;
-            uint64_t db_mine_storage_addr_offset = offset + LOG_HEADER_LENGTH+i*block_size;
+            uint32_t db_mine_storage_addr_offset = offset + LOG_HEADER_LENGTH+i*block_size;
             set_offset(&db_mine_storage_addr,db_mine_storage_addr_offset);
             set_segno (&db_mine_storage_addr,segno);
             uint64_t db_cur_storage_addr = get_db_storage_addr_in_inode(storage,refer_inode,

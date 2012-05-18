@@ -11,7 +11,7 @@
 
 /* segment usage structure for cleaning task */
 typedef struct segment_usage {
-	uint64_t segno;	
+	uint32_t segno;	
 	char up_sname[HLFS_FILE_NAME_MAX];
 	uint64_t inode_addr; /* up snapshot's inode address between snapshot region;if in non-shapshot region,it is pre seg last inode address */
 	uint64_t timestamp;   /* create time */

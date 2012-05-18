@@ -45,8 +45,8 @@ int flush_work(gpointer data){
             }
             //char* tmp_buf = g_malloc0(buff_len);
             //g_assert(tmp_buf!=NULL);
-            uint64_t start_no;
-            uint64_t end_no; 
+            uint32_t start_no;
+            uint32_t end_no; 
             int i = 0;
             for (i = 0; i < blocks_count; i++) {
                 block_t *block =  g_slist_nth_data(continue_blocks, i);

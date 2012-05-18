@@ -16,11 +16,11 @@ CACHE_CTRL *cache_new()
 }
 
 int cache_init(CACHE_CTRL *cache_ctrl, 
-		uint64_t block_size, \
-		uint64_t cache_size, \
-		uint64_t flush_interval, \
-		uint64_t flush_trigger_level, \
-		uint64_t flush_once_size)
+		uint32_t block_size, \
+		uint32_t cache_size, \
+		uint32_t flush_interval, \
+		uint32_t flush_trigger_level, \
+		uint32_t flush_once_size)
 {
 	//HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;
@@ -63,7 +63,7 @@ int cache_init(CACHE_CTRL *cache_ctrl,
 		goto err;
     }	
     //HLOG_DEBUG("--dirty block queue init over!--");
-	if (NULL == (cache_ctrl->block_map = g_hash_table_new(g_int64_hash,g_int64_equal))) {
+	if (NULL == (cache_ctrl->block_map = g_hash_table_new(g_int32_hash,g_int32_equal))) {
 		HLOG_ERROR("--Error:Apply for block_map");
 		ret = -EHLFS_MEM;
 		goto err;

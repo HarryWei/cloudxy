@@ -48,7 +48,7 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
 				          uint64_t _last_inode_write_timestamp = hctrl->last_write_timestamp;
 					   //HLOG_DEBUG("for db:%llu",lh->start_db_no+i);
 					   uint64_t db_mine_storage_addr = 0;
-					   uint64_t db_mine_storage_addr_offset = offset+LOG_HEADER_LENGTH + j*hctrl->sb.block_size;
+					   uint32_t db_mine_storage_addr_offset = offset+LOG_HEADER_LENGTH + j*hctrl->sb.block_size;
 					   set_offset(&db_mine_storage_addr,db_mine_storage_addr_offset);
 					   set_segno (&db_mine_storage_addr,seg_usage->segno);
 					   uint64_t db_cur_storage_addr = get_db_storage_addr_in_inode(hctrl->storage,&hctrl->inode,

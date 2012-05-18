@@ -188,7 +188,7 @@ int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
 
 
 
-int get_refer_inode_between_snapshots(struct back_storage *storage,uint64_t segno,GList *snapshot_sorted_list, struct inode ** inode,char **up_sname){
+int get_refer_inode_between_snapshots(struct back_storage *storage,uint32_t segno,GList *snapshot_sorted_list, struct inode ** inode,char **up_sname){
     if(storage == NULL || snapshot_sorted_list == NULL){
         return -1; 
     }

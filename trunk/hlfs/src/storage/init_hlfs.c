@@ -127,7 +127,7 @@ init_hlfs(const char *uri )
         if(NULL == hlfs_ctrl){
 		 return NULL;
         }			
-	 uint64_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
+	 uint32_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
         block_size = hlfs_ctrl->sb.block_size;
         cache_size  		 = DEF_CACHE_SIZE;
         flush_interval 	 = DEF_FLUSH_INTERVAL;
@@ -157,7 +157,7 @@ init_hlfs(const char *uri )
         }
         cache_set_write_cb(hlfs_ctrl->cctrl,flush_log,hlfs_ctrl);
         //HLOG_DEBUG("do support cache!"); 
-        uint64_t iblock_size,icache_size,invalidate_trigger_level,invalidate_once_size;
+        uint32_t iblock_size,icache_size,invalidate_trigger_level,invalidate_once_size;
         iblock_size =  hlfs_ctrl->sb.block_size;
         icache_size = DEF_ICACHE_SIZE;
         invalidate_trigger_level = DEF_INVALIDATE_TRIGGER_LEVEL;
@@ -225,12 +225,12 @@ init_hlfs_by_config(const char *config_file_path){
        //HLOG_DEBUG("enable is :%d",enable); 
        if(TRUE ==  enable){
            HLOG_DEBUG("do support cache!"); 
-           uint64_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
-           block_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","block_size",NULL);
-           cache_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","cache_size",NULL);
-           flush_interval = g_key_file_get_uint64(hlfs_conf_keyfile,"CACHE","flush_interval",NULL);
-           flush_trigger_level = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","flush_trigger_level",NULL);
-           flush_once_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"CACHE","flush_once_size",NULL);
+           uint32_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
+           block_size = g_key_file_get_uint32 (hlfs_conf_keyfile,"CACHE","block_size",NULL);
+           cache_size = g_key_file_get_uint32 (hlfs_conf_keyfile,"CACHE","cache_size",NULL);
+           flush_interval = g_key_file_get_uint32(hlfs_conf_keyfile,"CACHE","flush_interval",NULL);
+           flush_trigger_level = g_key_file_get_uint32 (hlfs_conf_keyfile,"CACHE","flush_trigger_level",NULL);
+           flush_once_size = g_key_file_get_uint32 (hlfs_conf_keyfile,"CACHE","flush_once_size",NULL);
            /* check .... */
            if(block_size!=hlfs_ctrl->sb.block_size){
               HLOG_ERROR("cache block size is not equal to block size in superblock"); 
@@ -264,10 +264,10 @@ init_hlfs_by_config(const char *config_file_path){
        if(TRUE ==  enable){
            HLOG_DEBUG("do support cache!"); 
            uint64_t iblock_size,icache_size,invalidate_trigger_level,invalidate_once_size;
-           iblock_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"ICACHE","iblock_size",NULL);
-           icache_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"ICACHE","icache_size",NULL);
-           invalidate_trigger_level = g_key_file_get_uint64 (hlfs_conf_keyfile,"ICACHE","invalidate_trigger_level",NULL);
-           invalidate_once_size = g_key_file_get_uint64 (hlfs_conf_keyfile,"ICACHE","invalidate_once_size",NULL);
+           iblock_size = g_key_file_get_uint32 (hlfs_conf_keyfile,"ICACHE","iblock_size",NULL);
+           icache_size = g_key_file_get_uint32 (hlfs_conf_keyfile,"ICACHE","icache_size",NULL);
+           invalidate_trigger_level = g_key_file_get_uint32 (hlfs_conf_keyfile,"ICACHE","invalidate_trigger_level",NULL);
+           invalidate_once_size = g_key_file_get_uint32 (hlfs_conf_keyfile,"ICACHE","invalidate_once_size",NULL);
            /* check .... */
            if(iblock_size!=hlfs_ctrl->sb.block_size){
               HLOG_ERROR("cache block size is not equal to block size in superblock"); 

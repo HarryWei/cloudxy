@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-int write_cache(CACHE_CTRL *cctrl, uint64_t start_block_no,char *block_buf);
+int write_cache(CACHE_CTRL *cctrl, uint32_t start_block_no,char *block_buf);
 uint32_t __get_cache_free_size(CACHE_CTRL *cctrl);
 uint32_t get_cache_free_size(CACHE_CTRL *cctrl);
 void __free_from_cache(CACHE_CTRL *cctrl, GSList *free_list);

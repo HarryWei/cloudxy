@@ -22,7 +22,7 @@
 #include "comm_define.h"
 
 typedef struct {
-	uint64_t block_no;
+	uint32_t block_no;
 	char *block;
 } block_t;
 
@@ -43,16 +43,16 @@ typedef struct cache_ctrl {
 	GQueue *dirty_block; 	//LRU queue of dirty blocks
 	GHashTable *block_map; 	//Hash Map
 	GThread *flush_worker; 	//Back end flush thread 
-    uint32_t flush_worker_should_exit;
+       uint32_t flush_worker_should_exit;
 	GCond *flush_waken_cond; 	//The condition of Writer thread awaking flush thread
 	GCond *writer_waken_cond; 	//The condition of flush thread awaking writer thread
 	FLUSH_CB write_callback_func; 	//
 	void *write_callback_user_param;//
-	uint64_t cache_size; 	//Number of cache buffers
-	uint64_t block_size; 	//Size of each buffer
-	uint64_t flush_interval; 
-	uint64_t flush_trigger_level; 	//Percentage 
-	uint64_t flush_once_size; 	//Number of dirty blocks have been written one time 
+	uint32_t cache_size; 	//Number of cache buffers
+	uint32_t block_size; 	//Size of each buffer
+	uint32_t flush_interval; 
+	uint32_t flush_trigger_level; 	//Percentage 
+	uint32_t flush_once_size; 	//Number of dirty blocks have been written one time 
 	uint64_t total_write_count; 
 	uint64_t total_read_count;
 #if 0
@@ -65,14 +65,14 @@ typedef struct cache_ctrl {
 
 CACHE_CTRL *cache_new();
 int cache_init(CACHE_CTRL *cache_ctrl,
-		uint64_t block_size,
-		uint64_t cache_size,
-		uint64_t flush_interval,
-		uint64_t flush_trigger_level,
-		uint64_t flush_once_size);
+		uint32_t block_size,
+		uint32_t cache_size,
+		uint32_t flush_interval,
+		uint32_t flush_trigger_level,
+		uint32_t flush_once_size);
 int cache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_t block_count,char *block_buf);
 int cache_insert_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf);
-int cache_query_block(CACHE_CTRL *cache_ctrl, uint64_t block_no, char *block_buf);
+int cache_query_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf);
 gboolean  cache_block_exist(CACHE_CTRL *cache_ctrl, uint64_t block_no);
 int cache_set_write_cb(CACHE_CTRL *cache_ctrl, void *cb_func, void * cb_user_param);
 int cache_destroy(CACHE_CTRL *cache_ctrl);

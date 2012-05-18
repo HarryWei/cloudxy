@@ -1,6 +1,6 @@
 #include "cache.h"
 
-int write_cache(CACHE_CTRL *cctrl, uint64_t start_block_no,char *block_buf) {
+int write_cache(CACHE_CTRL *cctrl, uint32_t start_block_no,char *block_buf) {
 	//HLOG_DEBUG("--enter fun %s", __func__);
     g_mutex_lock(cctrl->cache_mutex);
     block_t *block = g_trash_stack_pop(&cctrl->block_cache);
@@ -99,7 +99,7 @@ int get_continues_blocks(CACHE_CTRL *cctrl, GSList **continue_block_list){
     return 0;
 }
 
-block_t * cache_query(CACHE_CTRL *cache_ctrl,uint64_t block_no){
+block_t * cache_query(CACHE_CTRL *cache_ctrl,uint32_t block_no){
 	//HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;
 	block_t *block = NULL;

@@ -1,7 +1,7 @@
 #include "cache.h"
 #include "cache_helper.h"
 
-int cache_query_block(CACHE_CTRL *cache_ctrl, uint64_t block_no, char *block_buf){
+int cache_query_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf){
 	//HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;
     cache_ctrl->total_read_count++;
@@ -19,7 +19,7 @@ int cache_query_block(CACHE_CTRL *cache_ctrl, uint64_t block_no, char *block_buf
 	return ret;
 
 }
-gboolean  cache_block_exist(CACHE_CTRL *cache_ctrl, uint64_t block_no){
+gboolean  cache_block_exist(CACHE_CTRL *cache_ctrl, uint32_t block_no){
 	//HLOG_DEBUG("--Entering func %s", __func__);
     block_t * block = cache_query(cache_ctrl,block_no);
     if(block==NULL){

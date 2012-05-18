@@ -28,8 +28,8 @@ Fixture fixture;
 char *hlfs_path = "local:///tmp/testenv/testfs";
 
 int gen_conf_file(char *path, gboolean enable, char *storage_uri, uint64_t block_size, \
-		uint64_t cache_size, uint64_t flush_interval, uint64_t flush_trigger_level, \
-		uint64_t flush_once_size)
+		uint32_t cache_size, uint32_t flush_interval, uint32_t flush_trigger_level, \
+		uint32_t flush_once_size)
 {
 	g_message("enter func : %s", __func__);
 
@@ -44,11 +44,11 @@ int gen_conf_file(char *path, gboolean enable, char *storage_uri, uint64_t block
 	GKeyFile *key_file = g_key_file_new();
     g_key_file_set_string(key_file, "STORAGE", "storage_uri", storage_uri);
     g_key_file_set_boolean(key_file, "CACHE", "is_enable_cache", enable);
-    g_key_file_set_uint64(key_file, "CACHE", "block_size", block_size);
-    g_key_file_set_uint64(key_file, "CACHE", "cache_size", cache_size);
-	g_key_file_set_uint64(key_file, "CACHE", "flush_interval", flush_interval);
-	g_key_file_set_uint64(key_file, "CACHE", "flush_trigger_level", flush_trigger_level);
-	g_key_file_set_uint64(key_file, "CACHE", "flush_once_size", flush_once_size);
+    g_key_file_set_uint32(key_file, "CACHE", "block_size", block_size);
+    g_key_file_set_uint32(key_file, "CACHE", "cache_size", cache_size);
+	g_key_file_set_uint32(key_file, "CACHE", "flush_interval", flush_interval);
+	g_key_file_set_uint32(key_file, "CACHE", "flush_trigger_level", flush_trigger_level);
+	g_key_file_set_uint32(key_file, "CACHE", "flush_once_size", flush_once_size);
 	gchar *data = g_key_file_to_data(key_file, NULL, NULL);
 	g_message("path:%s", path);
 	int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);

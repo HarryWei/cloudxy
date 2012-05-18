@@ -320,7 +320,7 @@ struct inode * load_latest_inode(struct back_storage *storage)
  * @return: right return particular db's address, error return -1.
  */
 uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
-			struct inode *inode, uint64_t db_no,uint32_t block_size) 
+			struct inode *inode, uint32_t db_no,uint32_t block_size) 
 {
     //HLOG_DEBUG("enter func %s",__func__);
 	uint64_t cur_storage_addr = 0;

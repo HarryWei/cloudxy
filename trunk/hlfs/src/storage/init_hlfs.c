@@ -41,7 +41,7 @@ int read_fs_superblock(struct back_storage *storage,struct super_block *sb)
 	}
     int ret = read_fs_meta(storage,&(sb->seg_size),&(sb->block_size),&(sb->max_fs_size));
     g_strlcpy(sb->fsname,g_basename(storage->uri),MAX_FILE_NAME_LEN);
-	//HLOG_DEBUG("leave func %s", __func__);
+    //HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
 
@@ -51,15 +51,14 @@ int read_fs_superblock(struct back_storage *storage,struct super_block *sb)
  * @return Return a handle to the lhdfs
  */
 struct hlfs_ctrl *
-init_hlfs(const char *uri)
+__init_hlfs(const char *uri, uint32_t seg_clean_check_period)
 {
 	//HLOG_DEBUG("enter func %s", __func__);
-    if(uri == NULL){
+    if(uri == NULL || seg_clean_check_period == 0){
 	  HLOG_ERROR("uri is null");
-      return NULL;  
+         return NULL;  
     }
     g_thread_init(NULL);
-
     struct hlfs_ctrl *ctrl = (struct hlfs_ctrl*)g_malloc0(sizeof(struct hlfs_ctrl));
     if (NULL == ctrl) {
 	    HLOG_ERROR("ctrl allocate error!");
@@ -94,27 +93,100 @@ init_hlfs(const char *uri)
         goto out;
     }
 
-	ctrl->usage_ref = 0;
+    ctrl->usage_ref = 0;
     ctrl->seg_clean_run = 1;
-	memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
+    memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
     GThread * seg_clean_thread = g_thread_create((GThreadFunc)seg_clean_task,ctrl,TRUE,NULL);
     ctrl->seg_clean_thread = seg_clean_thread;
     ctrl->ctrl_region = &CTRL_REGION;
     ctrl->hlfs_access_mutex = g_mutex_new();
-
     ctrl->last_segno = segno;
     ctrl->last_offset = offset;
     if(ctrl->last_segno != 0 || ctrl->last_offset != 0){
         if(0!=load_latest_inode_map_entry(ctrl->storage,ctrl->last_segno,ctrl->last_offset,&ctrl->imap_entry)){
             HLOG_ERROR("load inode map entry failed");
-			g_free(ctrl);
-			ctrl = NULL;
+	     g_free(ctrl);
+	     ctrl = NULL;
             goto out;
         }
     }
+    ctrl->io_nonactive_period = seg_clean_check_period;
 out:
 	//HLOG_DEBUG("leave func %s", __func__);
     return ctrl;
+} 
+
+
+struct hlfs_ctrl *
+init_hlfs(const char *uri )
+{      
+        int ret = 0;
+        uint64_t seg_clean_check_period = DEF_IO_NONACTIVE_PERIOD;
+	 struct hlfs_ctrl * hlfs_ctrl = __init_hlfs(uri,seg_clean_check_period);
+        if(NULL == hlfs_ctrl){
+		 return NULL;
+        }			
+	 uint64_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
+        block_size = hlfs_ctrl->sb.block_size;
+        cache_size  		 = DEF_CACHE_SIZE;
+        flush_interval 	 = DEF_FLUSH_INTERVAL;
+        flush_trigger_level  = DEF_FLUSH_TRIGGER_LEVEL;
+        flush_once_size 	 =  DEF_FLUSH_ONCE_SIZE;
+        /* check .... */
+        if(block_size!=hlfs_ctrl->sb.block_size){
+              HLOG_ERROR("cache block size is not equal to block size in superblock"); 
+              goto out;
+           }
+        if(flush_trigger_level > 100){
+              HLOG_ERROR("cache flush_trigger_level can not > 100"); 
+              goto out;
+           }
+        if(flush_once_size * block_size * 64 > hlfs_ctrl->sb.seg_size){
+              HLOG_ERROR("flush_once_size can not too much:%llu",flush_once_size); 
+              goto out;
+           }
+
+        hlfs_ctrl->cctrl = cache_new();
+        ret = cache_init(hlfs_ctrl->cctrl,block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size);
+        if (ret !=0){
+	          HLOG_ERROR("init cache failed");
+              g_free(hlfs_ctrl->cctrl);
+              hlfs_ctrl->cctrl=NULL;
+              goto out;
+        }
+        cache_set_write_cb(hlfs_ctrl->cctrl,flush_log,hlfs_ctrl);
+        //HLOG_DEBUG("do support cache!"); 
+        uint64_t iblock_size,icache_size,invalidate_trigger_level,invalidate_once_size;
+        iblock_size =  hlfs_ctrl->sb.block_size;
+        icache_size = DEF_ICACHE_SIZE;
+        invalidate_trigger_level = DEF_INVALIDATE_TRIGGER_LEVEL;
+        invalidate_once_size = DEF_INVALIDATE_ONCE_SIZE;
+           /* check .... */
+        if(iblock_size!=hlfs_ctrl->sb.block_size){
+              HLOG_ERROR("cache block size is not equal to block size in superblock"); 
+              goto out;
+           }
+        if(invalidate_once_size > 100){
+              HLOG_ERROR("cache flush_trigger_level can not > 100"); 
+              goto out;
+           }
+        if(invalidate_once_size * iblock_size * 64 > hlfs_ctrl->sb.seg_size){
+              HLOG_ERROR("flush_once_size can not too much:%llu",invalidate_once_size); 
+              goto out;
+           }
+
+        hlfs_ctrl->icache = icache_new();
+        ret = icache_init(hlfs_ctrl->icache,iblock_size,icache_size,invalidate_trigger_level,invalidate_once_size);
+        if (ret !=0){
+	          HLOG_ERROR("init cache failed");
+              g_free(hlfs_ctrl->icache);
+              hlfs_ctrl->icache=NULL;
+              goto out;
+        }
+	 return hlfs_ctrl;
+out:
+     deinit_hlfs(hlfs_ctrl);
+     return NULL;	
 } 
 
 struct hlfs_ctrl *
@@ -131,14 +203,20 @@ init_hlfs_by_config(const char *config_file_path){
    }
    if (FALSE == g_key_file_has_group(hlfs_conf_keyfile,"STORAGE")){
 	  HLOG_ERROR("not find STORAGE option");
-      return NULL;
+        return NULL;
    }
    const char * uri = g_key_file_get_string (hlfs_conf_keyfile,"STORAGE","storage_uri",NULL);
-   struct hlfs_ctrl * hlfs_ctrl = init_hlfs(uri);
+   struct hlfs_ctrl * hlfs_ctrl = __init_hlfs(uri,seg_clean_check_period);
+   uint64_t seg_clean_check_period = g_key_file_get_uint64 (hlfs_conf_keyfile,"STORAGE","seg_clean_check_period",NULL);
+   if(seg_clean_check_period == 0){
+   	   seg_clean_check_period = DEF_IO_NONACTIVE_PERIOD;
+   }
+   
    if(hlfs_ctrl == NULL){
 	  HLOG_ERROR("init hlfs failed");
-      return NULL;
+         return NULL;
    }
+   
    if (TRUE == g_key_file_has_group(hlfs_conf_keyfile,"CACHE")){
        //gsize length=0;
        //gchar * keys = g_key_file_get_keys(hlfs_conf_keyfile,"CACHE",&length,NULL);
@@ -176,8 +254,6 @@ init_hlfs_by_config(const char *config_file_path){
            }
            cache_set_write_cb(hlfs_ctrl->cctrl,flush_log,hlfs_ctrl);
        }
-   }else{
-       HLOG_DEBUG("do not support cache!"); 
    }
       if (TRUE == g_key_file_has_group(hlfs_conf_keyfile,"ICACHE")){
        //gsize length=0;
@@ -209,9 +285,9 @@ init_hlfs_by_config(const char *config_file_path){
            ret = icache_init(hlfs_ctrl->icache,iblock_size,icache_size,invalidate_trigger_level,invalidate_once_size);
            if (ret !=0){
 	          HLOG_ERROR("init cache failed");
-              g_free(hlfs_ctrl->icache);
-              hlfs_ctrl->icache=NULL;
-              goto out;
+                 g_free(hlfs_ctrl->icache);
+                 hlfs_ctrl->icache=NULL;
+                 goto out;
            }
        }
    }   

@@ -11,13 +11,13 @@
 
 #define MAX_FILE_NAME_LEN 128
 struct inode {
-	    int64_t length;
-    	int32_t uid;
-    	int32_t gid;
-    	int32_t mode;
+	int64_t length;
+    	//int32_t uid;
+    	//int32_t gid;
+    	//int32_t mode;
     	uint64_t ctime;               /* time of last status change */
-    	uint64_t mtime;               /* time of last modification */
-    	uint64_t atime;               /* time of last access */
+    	//uint64_t mtime;               /* time of last modification */
+    	//uint64_t atime;               /* time of last access */
     	int64_t blocks[12];         /* the first 8KB*12=96KB */
     	int64_t iblock;             /* the next 8KB/8*8KB=8MB */
     	int64_t doubly_iblock;      /* the next 8K/8*8K/8*8K=8GB */
@@ -38,12 +38,12 @@ struct super_block {
 
 //#pragma pack (4)
 struct log_header {
-    int32_t  version;
-    int64_t  header_checksum;
-    int64_t  data_checksum;
+    //int32_t  version;
+    //int64_t  header_checksum;
+    //int64_t  data_checksum;
     uint32_t log_size;
-    uint64_t ctime;       /* create time */
-    uint64_t start_db_no; /* log first db no*/
+    uint64_t ctime;           /* create time */
+    uint32_t start_db_no;  /* log first db no*/
     uint32_t db_num;	  /* db amounts */
     uint32_t ib_num;	  /* ib amount */
     char data[0];
@@ -85,10 +85,11 @@ struct hlfs_ctrl {
     GMutex * hlfs_access_mutex;
     GThread *seg_clean_thread;
     int usage_ref;
-	int rw_inode_flag;
-	char alive_ss_name[MAX_FILE_NAME_LEN];
+    int rw_inode_flag;
+    char alive_ss_name[MAX_FILE_NAME_LEN];
     struct cache_ctrl *cctrl;
     struct icache_ctrl *icache;
+    uint32_t io_nonactive_period;
 };
 
 typedef struct hlfs_stat{

@@ -6,6 +6,9 @@
 #include "hlfs_ctrl.h"
 #include "storage.h"
 
+#define DEF_IO_NONACTIVE_PERIOD 5
+#define DEF_SC_CHECK_PERIOD 1
+
 /* segment usage structure for cleaning task */
 typedef struct segment_usage {
 	uint64_t segno;	

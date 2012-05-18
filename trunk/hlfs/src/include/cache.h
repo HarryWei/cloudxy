@@ -26,6 +26,13 @@ typedef struct {
 	char *block;
 } block_t;
 
+
+ #define DEF_CACHE_SIZE      4096
+ #define DEF_FLUSH_INTERVAL  5
+ #define DEF_FLUSH_TRIGGER_LEVEL  80
+ #define DEF_FLUSH_ONCE_SIZE   64
+
+
 #ifdef __cplusplus  
 extern "C" {
 #endif

@@ -126,10 +126,10 @@ write_log:;
 	}
 	cur_time = get_current_time();
 	ctrl->inode.mtime  = cur_time;
-	ctrl->inode.ctime  = cur_time;
-	ctrl->inode.atime  = cur_time;
+	//ctrl->inode.ctime  = cur_time;
+	//ctrl->inode.atime  = cur_time;
 	//HLOG_DEBUG("get_current_time is %llu", ctrl->inode.mtime);
-    //HLOG_DEBUG("length is %llu", ctrl->inode.length);
+       //HLOG_DEBUG("length is %llu", ctrl->inode.length);
    
 	if(ctrl->cctrl != NULL){
 	    HLOG_DEBUG("use write back mode");

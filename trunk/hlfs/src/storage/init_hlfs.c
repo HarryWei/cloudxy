@@ -11,6 +11,7 @@
 #include "storage.h"
 #include "storage_helper.h"
 #include "bs_local.h"
+#include "seg_clean.h"
 #include "logger.h"
 
 CTRL_REGION_T CTRL_REGION;
@@ -206,12 +207,12 @@ init_hlfs_by_config(const char *config_file_path){
         return NULL;
    }
    const char * uri = g_key_file_get_string (hlfs_conf_keyfile,"STORAGE","storage_uri",NULL);
-   struct hlfs_ctrl * hlfs_ctrl = __init_hlfs(uri,seg_clean_check_period);
+
    uint64_t seg_clean_check_period = g_key_file_get_uint64 (hlfs_conf_keyfile,"STORAGE","seg_clean_check_period",NULL);
    if(seg_clean_check_period == 0){
    	   seg_clean_check_period = DEF_IO_NONACTIVE_PERIOD;
    }
-   
+   struct hlfs_ctrl * hlfs_ctrl = __init_hlfs(uri,seg_clean_check_period);
    if(hlfs_ctrl == NULL){
 	  HLOG_ERROR("init hlfs failed");
          return NULL;

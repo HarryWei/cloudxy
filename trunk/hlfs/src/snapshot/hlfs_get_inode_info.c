@@ -14,7 +14,7 @@
 int
 hlfs_get_inode_info(const char *uri,
 					uint64_t inode_addr,
-					uint64_t *ctime,
+					uint64_t *mtime,
 					uint64_t *length) {
 	int ret = 0;
 	struct back_storage *storage = init_storage_handler(uri);
@@ -29,7 +29,7 @@ hlfs_get_inode_info(const char *uri,
 		ret = -1;
 		goto out;
 	}
-	*ctime = inode->ctime;
+	*mtime = inode->mtime;
 	*length = inode->length;
 out:
 	g_free(storage);

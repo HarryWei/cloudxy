@@ -15,8 +15,8 @@ struct inode {
     	//int32_t uid;
     	//int32_t gid;
     	//int32_t mode;
-    	uint64_t ctime;               /* time of last status change */
-    	//uint64_t mtime;               /* time of last modification */
+    	//uint64_t ctime;               /* time of last status change */
+    	uint64_t mtime;               /* time of last modification */
     	//uint64_t atime;               /* time of last access */
     	int64_t blocks[12];         /* the first 8KB*12=96KB */
     	int64_t iblock;             /* the next 8KB/8*8KB=8MB */

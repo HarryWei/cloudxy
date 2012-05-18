@@ -54,7 +54,7 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
     	ret = find_latest_alive_snapshot_before_time(ctrl->storage, 
 													SNAPSHOT_FILE, 
 													ALIVE_SNAPSHOT_FILE, 
-													&_ss,inode->ctime);
+													&_ss,inode->mtime);
     	if(ret !=0){
        		ret = -1;
 			goto out;

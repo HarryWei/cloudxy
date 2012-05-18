@@ -445,7 +445,7 @@ __inode_create:;
                memcpy(log_buff +  offset + sizeof(struct inode),&ctrl->imap_entry,sizeof(struct inode_map_entry));
                HLOG_DEBUG("to fill log header ...");
                struct log_header * lh = (struct log_header *)log_buff;
-               lh->version = 0;
+               //lh->version = 0;
                //lh->header_checksum = 0;
                //lh->data_checksum = 0;
                lh->log_size = offset + sizeof(struct inode) + sizeof(struct inode_map_entry);

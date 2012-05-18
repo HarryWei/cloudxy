@@ -89,8 +89,8 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
         HLOG_DEBUG("create new fs inode !");
         ctrl->inode.length = 0;
         ctrl->inode.mtime = get_current_time();
-        ctrl->inode.ctime = get_current_time();
-        ctrl->inode.atime = get_current_time();
+        //ctrl->inode.ctime = get_current_time();
+        //ctrl->inode.atime = get_current_time();
 	} else { /* exist inode */
 		//HLOG_DEBUG("open exist fs %s", ctrl->sb.fsname);
 		if (0 != load_latest_inode(ctrl)) { /* get the lastest inode structure */ 

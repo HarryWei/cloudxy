@@ -102,7 +102,7 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
 		HLOG_INFO("Migrate seg:%d,alive_block_count:%d,timestamp:%lu",
 			              seg_usage->segno,
 			              seg_usage->alive_block_num,
-			              get_current_time();
+			              get_current_time());
 		ret = migrate_alive_blocks(ctrl,seg_usage);
 		g_assert(ret == 0);
               seg_usage->alive_block_num = 0;

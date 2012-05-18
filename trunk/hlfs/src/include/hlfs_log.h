@@ -8,7 +8,7 @@
 #include "glib.h"
 
 static GStaticMutex mutex = G_STATIC_MUTEX_INIT;
-#define LOG_LEN				8192
+#define LOG_LEN				2048
 static char __msg_log[LOG_LEN];
 static log4c_category_t *__mycat;
 static char *__hlog_path = NULL;
@@ -19,7 +19,7 @@ static int __is_init_log_path = 0;
 	if (0 == __is_init_log_path) {																\
 		__hlog_path = g_get_current_dir();														\
 		setenv("LOG4C_RCPATH", __hlog_path, 1);													\
-		sprintf(log4cfile, "%s/%s", __hlog_path, "log4crc");										\
+		sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");										\
 		g_free(__hlog_path);																		\
 		__is_init_log_path = 1;																	\
 	}																							\
@@ -42,7 +42,7 @@ static int __is_init_log_path = 0;
 	if (0 == __is_init_log_path) {																\
 		__hlog_path = g_get_current_dir();														\
 		setenv("LOG4C_RCPATH", __hlog_path, 1);													\
-		sprintf(log4cfile, "%s/%s", __hlog_path, "log4crc");										\
+		sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");										\
 		g_free(__hlog_path);																		\
 		__is_init_log_path = 1;																	\
 	}																							\
@@ -54,7 +54,7 @@ static int __is_init_log_path = 0;
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_TRACE, __msg_log, ##args);		\
-        g_static_mutex_unlock (&mutex);                                                           \
+        g_static_mutex_unlock (&mutex);                                                         \
 	} else {																					\
 		printf(msg, ##args);																	\
 		printf("\n");																			\

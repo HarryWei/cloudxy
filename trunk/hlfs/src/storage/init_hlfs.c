@@ -31,7 +31,7 @@ int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint3
         HLOG_ERROR("append log error");
         return -1;
     }
-    HLOG_TRACE("Append Log Exec Succ . filesize:%llu,last_segno:%u, last_offset:%u,log size:%u,start_dbno:%u,end_dbno:%u",
+    HLOG_TRACE("Append Log Exec Succ . file_size:%llu,last_segno:%u,last_offset:%u,log_size:%u,start_dbno:%u,end_dbno:%u",
 	 	                                                ctrl->inode.length,
 		                                                ctrl->last_segno,
 		                                                ctrl->last_offset,
@@ -62,7 +62,7 @@ int read_fs_superblock(struct back_storage *storage,struct super_block *sb)
  * @return Return a handle to the lhdfs
  */
 struct hlfs_ctrl *
-__init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_period,uint32_t copy_waterlevel,)
+__init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_period,uint32_t copy_waterlevel)
 {
 	//HLOG_DEBUG("enter func %s", __func__);
     if(uri == NULL || seg_clean_check_period == 0){
@@ -105,7 +105,7 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
     }
 
     ctrl->usage_ref = 0;
-    ctrl->seg_clean_run = 1;
+    //ctrl->seg_clean_run = 1;
     memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
     GThread * seg_clean_thread = g_thread_create((GThreadFunc)seg_clean_task,ctrl,TRUE,NULL);
     ctrl->seg_clean_thread = seg_clean_thread;

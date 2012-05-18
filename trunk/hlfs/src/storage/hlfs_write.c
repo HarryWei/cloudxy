@@ -17,15 +17,21 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
 {
     //HLOG_DEBUG("enter func %s", __func__);
     if ((NULL == ctrl) || (NULL == write_buf) || (0 == write_len) || (ctrl->sb.seg_size < write_len)) {
-		HLOG_ERROR("hlfs_write error");
+		HLOG_ERROR("Params Error");
 		return -1;
     }
     //g_mutex_lock (ctrl->hlfs_access_mutex);
     if(ctrl->rw_inode_flag == 0){
-        HLOG_ERROR("only read!");
-        //g_mutex_unlock (ctrl->hlfs_access_mutex);
-        return -1;
+          HLOG_ERROR("your config only allow read request!");
+          //g_mutex_unlock (ctrl->hlfs_access_mutex);
+          return -1;
     }
+
+    if(ctrl->sb.max_fs_size < pos+write_len){
+          HLOG_ERROR("your config only allow write beyond :%d",ctrl->sb.max_fs_size);
+          //g_mutex_unlock (ctrl->hlfs_access_mutex);
+          return -1;
+    }		
     int ret = 0;
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     uint64_t cur_time;
@@ -44,12 +50,12 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
     if(db_start == db_end && (db_start %BLOCKSIZE != 0 || db_end %BLOCKSIZE != 0) ){
         HLOG_DEBUG("only need to write part in one block:%llu", pos / BLOCKSIZE);
         char *block= (char*)alloca(BLOCKSIZE);
-		g_assert(block!=NULL);
+	 g_assert(block!=NULL);
         //g_mutex_lock (ctrl->hlfs_access_mutex);
         ret = load_block_by_addr_fast(ctrl,pos,block);
         //g_mutex_unlock (ctrl->hlfs_access_mutex);
-        if(1==ret){
-            HLOG_DEBUG("fail to load block for addr! %llu for not write yet", pos);
+        if( 1==ret ) {
+            //HLOG_DEBUG("fail to load block for addr! %llu for not write yet", pos);
             memset(block,0,BLOCKSIZE);
         }else if(-1 == ret){
             HLOG_ERROR("can not read logic block: %llu", pos / BLOCKSIZE);
@@ -75,7 +81,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
         ret = load_block_by_addr_fast(ctrl,pos,first_block);
         //g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(1==ret){
-            HLOG_DEBUG("fail to load first block for not write yet");
+            //HLOG_DEBUG("fail to load first block for not write yet");
             memset(first_block,0,BLOCKSIZE);
         }else if(ret == -1){
             HLOG_ERROR("can not read logic block: %llu", pos / BLOCKSIZE);
@@ -94,7 +100,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
              g_assert(datablocks != NULL);
              memcpy(datablocks, write_buf, write_len);
         }else{
-             HLOG_DEBUG("do not need alloc any buffer");
+             HLOG_DEBUG("Do not need alloc any buffer");
              datablocks = write_buf;
              goto write_log;
         }
@@ -115,8 +121,8 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
             goto out;
         }
         memcpy(datablocks+pos%BLOCKSIZE + write_len,
-                last_block+(write_len+pos)%BLOCKSIZE,
-                BLOCKSIZE-(write_len+pos)%BLOCKSIZE);
+                     last_block+(write_len+pos)%BLOCKSIZE,
+                     BLOCKSIZE-(write_len+pos)%BLOCKSIZE);
         //g_free(last_block);
     }
 write_log:;
@@ -132,21 +138,28 @@ write_log:;
        //HLOG_DEBUG("length is %llu", ctrl->inode.length);
    
 	if(ctrl->cctrl != NULL){
-	    HLOG_DEBUG("use write back mode");
-        int ret = cache_insert_blocks(ctrl->cctrl,db_start,(db_end - db_start + 1),datablocks);
-        g_assert(ret == 0);
+	 	HLOG_DEBUG("we use write back mode !");
+        	int ret = cache_insert_blocks(ctrl->cctrl,db_start,(db_end - db_start + 1),datablocks);
+        	g_assert(ret == 0);
     }else{
-        //HLOG_DEBUG("use write through mode");
+        HLOG_DEBUG("we use write through mode !");
         g_mutex_lock  (ctrl->hlfs_access_mutex);
         ctrl->last_write_timestamp = get_current_time();
         int size = append_log(ctrl,datablocks,db_start,db_end);
         g_mutex_unlock  (ctrl->hlfs_access_mutex);
         if(size < 0){
-            g_message("fail to append log\n");
+            HLOG_ERROR("Append Log Error");
             //g_free(datablocks);
             ret =  -1;
             goto out;
         }
+	 HLOG_TRACE("Append Log Exec Succ . filesize:%llu,last_segno:%u, last_offset:%u,log size:%u,start_dbno:%u,end_dbno:%u",
+	 	                                                ctrl->inode.length,
+		                                                ctrl->last_segno,
+		                                                ctrl->last_offset,
+		                                                size,
+		                                                db_start,
+		                                                db_end)
     }
 
 #if 0

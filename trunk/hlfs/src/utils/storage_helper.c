@@ -403,7 +403,7 @@ uint64_t  SEGMENT_SIZE_MASK = 0;
 uint64_t  SEGMENT_SIZE_SHIFT = 0;
 uint32_t  HBLOCK_SIZE;
 #endif
-int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint32_t *max_fs_size)
+int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size)
 {
 	HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
@@ -437,7 +437,7 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
     gchar * _uri =  g_key_file_get_string(sb_keyfile,"METADATA","uri",NULL);
     guint32 _seg_size = g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL);
     guint32 _block_size = g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);
-    guint32 _max_fs_size = g_key_file_get_integer(sb_keyfile,"METADATA","max_fs_size",NULL);
+    guint64 _max_fs_size = g_key_file_get_int64(sb_keyfile,"METADATA","max_fs_size",NULL);
     if(_uri==NULL || _seg_size == 0 || _block_size ==0 || _max_fs_size == 0){
        HLOG_ERROR("superblock parse error");
        g_free(_uri);

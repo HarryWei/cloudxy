@@ -74,7 +74,7 @@ void test_seg_usage_calc()
     struct back_storage *storage = init_storage_handler(uri);
     uint32_t segment_size = 0;
     uint32_t block_size = 0;
-    uint32_t max_fs_size = 0;
+    uint64_t max_fs_size = 0;
     int ret = read_fs_meta(storage,&segment_size, &block_size,&max_fs_size);
     g_assert(ret == 0);
     GHashTable   * ss_hashtable = g_hash_table_new_full(g_str_hash,g_str_equal,NULL,NULL);

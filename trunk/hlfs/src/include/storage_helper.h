@@ -14,7 +14,7 @@ struct inode * load_latest_inode(struct back_storage *storage);
 //struct back_storage* init_storage_handler(const char* uri,const char *fs_name);
 struct back_storage* init_storage_handler(const char* uri);
 struct inode *load_inode(struct back_storage * storage,uint64_t inode_storage_addr);
-int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint32_t *max_fs_size);
+int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size);
 uint64_t get_last_inode_storage_addr_in_seg( struct back_storage * storage, uint32_t segno);
 int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,uint32_t *offset);
 uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,struct inode *inode, uint32_t db_no,uint32_t block_size);

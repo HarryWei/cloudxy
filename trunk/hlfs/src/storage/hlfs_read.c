@@ -22,9 +22,15 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
 {
 	//HLOG_DEBUG("enter func %s", __func__);
     if((NULL == read_buf) || (NULL == ctrl) || (0 == read_len)){
-	HLOG_ERROR("hlfs_read error");
+	    HLOG_ERROR("Params Error");
            return -1;
     }
+
+    if(ctrl->sb.max_fs_size < pos+read_len){
+          HLOG_ERROR("your config only allow write beyond :%d",ctrl->sb.max_fs_size);
+          //g_mutex_unlock (ctrl->hlfs_access_mutex);
+          return -1;
+    }		
     //g_mutex_lock (ctrl->hlfs_access_mutex);
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     //HLOG_DEBUG("read offset:%llu,read len:%d", pos,read_len);
@@ -37,7 +43,7 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
         ret=load_block_by_addr_fast(ctrl,pos,block);
         //g_mutex_unlock (ctrl->hlfs_access_mutex);
         if(-1 == ret ){
-			HLOG_ERROR("fail to load block for addr %llu", pos);
+	     HLOG_ERROR("fail to load block for addr %llu", pos);
             //g_mutex_unlock (ctrl->hlfs_access_mutex);
             return -1;
         }else if(1==ret){
@@ -54,7 +60,7 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
     //HLOG_DEBUG("need to read muti block", __func__);
     uint32_t offset=0; 
     if( pos % BLOCKSIZE != 0 ){
-		//HLOG_DEBUG("need to read first block", __func__);
+	 //HLOG_DEBUG("need to read first block", __func__);
         char *first_block = (char*)alloca(BLOCKSIZE);
         //g_mutex_lock (ctrl->hlfs_access_mutex);
         ret=load_block_by_addr_fast(ctrl,pos,first_block);

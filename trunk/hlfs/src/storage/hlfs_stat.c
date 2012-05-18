@@ -14,23 +14,24 @@ int hlfs_lstat(const char*uri,HLFS_STAT_T *stat){
     int ret = 0;
     if(NULL == uri|| NULL == stat){
 	   HLOG_ERROR("param error");
-       return -1; 
+          return -1; 
     }
     struct back_storage *storage = init_storage_handler(uri);
     if(storage == NULL){
        ret = -1;
        goto out;
     }
-    uint32_t seg_size,block_size,max_fs_size,last_segno,last_offset;
+    uint32_t seg_size,block_size,last_segno,last_offset;
+    uint64_t max_fs_size;
     ret = read_fs_meta(storage,&seg_size,&block_size,&max_fs_size);
     if(ret != 0){
-       HLOG_ERROR("can not read fs meta data");
-       goto out;
+         HLOG_ERROR("can not read fs meta data");
+         goto out;
     }
     ret =get_cur_latest_segment_info(storage,&last_segno,&last_offset);
     if(ret !=0){
-       HLOG_ERROR("can not read fs meta data");
-       goto out;
+         HLOG_ERROR("can not read fs meta data");
+         goto out;
     }
     stat->seg_size    = seg_size;
     stat->block_size  = block_size;
@@ -58,7 +59,7 @@ int hlfs_stat(struct hlfs_ctrl* ctrl,HLFS_STAT_T *stat){
     stat->max_fs_size = ctrl->sb.max_fs_size;
     g_strlcpy(stat->fsname,ctrl->sb.fsname,MAX_FILE_NAME_LEN);
     stat->last_segno  = ctrl->last_segno;
-    stat->last_offset = ctrl->last_offset;
+    stat->last_offset  = ctrl->last_offset;
 	//HLOG_DEBUG("leave func %s", __func__);
     return ret;   
 }

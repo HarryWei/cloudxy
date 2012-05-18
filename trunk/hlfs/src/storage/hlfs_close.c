@@ -21,23 +21,24 @@
 int hlfs_close(struct hlfs_ctrl *ctrl){
     //HLOG_DEBUG("enter func:%s",__func__);
     if (NULL == ctrl) {
-	    HLOG_ERROR("hlfs_close error!");
+	    HLOG_ERROR("Params Error");
 	    return -1;
     }
     int ret =0;
     if(ctrl->last_wsegfile_handler!=NULL){
-       ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler);
+          ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler);
 	   ctrl->last_wsegfile_handler = NULL;
     }
     if(ctrl->last_rsegfile_handler!=NULL){
-       ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_rsegfile_handler);
+          ret = ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_rsegfile_handler);
 	   ctrl->last_rsegfile_handler = NULL;
     }
     ctrl->usage_ref--;
     if(ctrl->cctrl!=NULL){
        //HLOG_DEBUG("before close hlfs,sync all dirty block");
-       cache_sync(ctrl->cctrl); 
+          cache_sync(ctrl->cctrl); 
     }
+    HLOG_INFO("hlfs close over !");
     //HLOG_DEBUG("leave func:%s",__func__);
     return ret;
 }        

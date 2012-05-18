@@ -25,14 +25,14 @@ struct inode {
 }__attribute__((packed));  
 
 struct inode_map_entry {
-	uint64_t inode_no;	        /* inode number */
-    uint64_t inode_addr;		/* inode's DISK address */ 
+	uint64_t inode_no;	              /* inode number */
+       uint64_t inode_addr;		/* inode's DISK address */ 
 }__attribute__((packed)); 
 
 struct super_block {
     uint32_t seg_size;					/* max segment size */
     uint32_t block_size;		        /* max data block size */
-    uint32_t max_fs_size;               /* max filesystem size */
+    uint64_t max_fs_size;               /* max filesystem size */
     char fsname[MAX_FILE_NAME_LEN];		/* record the file's name */
 };
 
@@ -80,7 +80,7 @@ struct hlfs_ctrl {
     //struct write_req  write_req;
     uint64_t last_write_timestamp;
     uint64_t last_read_timestamp;
-    int seg_clean_run;
+    //int seg_clean_run;
     CTRL_REGION_T * ctrl_region;
     GMutex * hlfs_access_mutex;
     GThread *seg_clean_thread;
@@ -95,7 +95,7 @@ struct hlfs_ctrl {
 typedef struct hlfs_stat{
        uint32_t seg_size;					/* max segment size */
        uint32_t block_size;		        /* max data block size */
-       uint32_t max_fs_size;               /* max filesystem size */
+       uint64_t max_fs_size;               /* max filesystem size */
        char fsname[MAX_FILE_NAME_LEN];		/* record the file's name */
        uint32_t last_segno;
        uint32_t last_offset;

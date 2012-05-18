@@ -25,8 +25,8 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
     GList * seg_usage_list = NULL;
     //GTimeVal expired;
     SEG_USAGE_T * seg_usage = NULL;
-	int seg_idx = -1;
-    while(ctrl->seg_clean_run){
+    int seg_idx = -1;
+    while(ctrl->ctrl_region->is_start_clean){
         //g_get_current_time(&expired);
         //g_time_val_add(&expired,1000*1000*5);
         //g_usleep(1000*1000*5);
@@ -36,7 +36,7 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
             continue;
         }
         if(0!=ctrl->storage->bs_file_is_exist(ctrl->storage,SEGMENTS_USAGE_FILE)){
-            g_message("seg usage file not exit");
+            HLOG_DEBUG("seg usage file not exit");
             continue;
         }
 	    //HLOG_DEBUG("do clean in silent period");
@@ -49,11 +49,11 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
 				 }
 				 //HLOG_DEBUG(" next rond check kick off ");
                  seg_usage_hashtable = g_hash_table_new_full(g_direct_hash,g_direct_equal,NULL,NULL);//TODO
-				 ret = load_all_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage_hashtable);
+		   ret = load_all_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage_hashtable);
 				 //g_assert(ret == 0);
                  if(ret != 0){
-				    HLOG_DEBUG(" load seg usage failed");
-                    continue;
+				 HLOG_WARN(" load seg usage failed");
+                    		 continue;
                  }
 				 //seg_usage_list = g_hash_table_get_values(seg_usage_hashtable);
                  //if(g_list_length(seg_usage_list)){
@@ -68,15 +68,15 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
 			   seg_usage = (SEG_USAGE_T *)g_list_nth_data(seg_usage_list,seg_idx);
 			   //HLOG_DEBUG(" seg usage:%d,up_sname:%s",seg_usage->segno,seg_usage->up_sname);
 			   if(0 != strcmp(seg_usage->up_sname,EMPTY_UP_SNAPSHOT)){
-			   	  HLOG_DEBUG(" seg usage:%d is in snapshots ",seg_usage->segno);
+			   	  HLOG_DEBUG(" seg usage:%d is in snapshots ,do not migrate",seg_usage->segno);
 				  /*是在快照区间,不进行回收*/
 				  seg_idx++;
 				  continue;
 			   }else if(seg_usage->alive_block_num > g_atomic_int_get(&ctrl->ctrl_region->copy_waterlevel)){
-			      HLOG_DEBUG(" seg usage:%d is beyond snapshots but alive block num:%d not reach waterlevel:%d ",
-				  		       seg_usage->segno,
-				  		       seg_usage->alive_block_num,
-				  		       g_atomic_int_get(&ctrl->ctrl_region->copy_waterlevel));
+			         HLOG_DEBUG(" seg usage:%d is beyond snapshots but alive block num:%d not reach waterlevel:%d ",
+				  		            seg_usage->segno,
+				  		            seg_usage->alive_block_num,
+				  		            g_atomic_int_get(&ctrl->ctrl_region->copy_waterlevel));
 				  /*未到阀值,则不进行回收*/
 				  seg_idx++;
 				  continue;
@@ -87,7 +87,7 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
                }
                else{
 			      HLOG_DEBUG(" seg usage:%d is beyond snapshots and alive block num:%d  reach waterlevel:%d",
-				  	           seg_usage->segno,
+				  	              seg_usage->segno,
 				  		       seg_usage->alive_block_num,
 				  		       g_atomic_int_get(&ctrl->ctrl_region->copy_waterlevel));
 				  break;
@@ -99,24 +99,29 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
 				 seg_idx = -1;
 				 continue;
 		}
+		HLOG_INFO("Migrate seg:%d,alive_block_count:%d,timestamp:%lu",
+			              seg_usage->segno,
+			              seg_usage->alive_block_num,
+			              get_current_time();
 		ret = migrate_alive_blocks(ctrl,seg_usage);
 		g_assert(ret == 0);
-        seg_usage->alive_block_num = 0;
-        seg_usage->timestamp = get_current_time();
-        memset(seg_usage->bitmap,0,(seg_usage->log_num-1)/sizeof(gint)+1);
+              seg_usage->alive_block_num = 0;
+              seg_usage->timestamp = get_current_time();
+              memset(seg_usage->bitmap,0,(seg_usage->log_num-1)/sizeof(gint)+1);
 		ret = dump_seg_usage(ctrl->storage,SEGMENTS_USAGE_FILE,seg_usage);
 		g_free(seg_usage->bitmap);
 		g_free(seg_usage);
 		g_assert(ret == 0);
+		
 		seg_idx++; //*每回收一个之后就要去重新检查是否有用户写请求
     }
 	
     if(seg_usage_list!=NULL){
         g_list_free(seg_usage_list);
     }
-	if(seg_usage_hashtable!=NULL){
+   if(seg_usage_hashtable!=NULL){
     	g_hash_table_destroy(seg_usage_hashtable);
-	}
-    //HLOG_DEBUG("leave func %s", __func__);
+    }
+    HLOG_INFO("leave func %s", __func__);
     return 0;
 }

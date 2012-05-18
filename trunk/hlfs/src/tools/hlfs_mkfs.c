@@ -9,14 +9,14 @@ static gchar *uri = NULL;
 //static gchar *fsname = NULL;
 static gint block_size = 0;
 static gint seg_size = 0;
-static gint max_fs_size = 0;
+static int64_t max_fs_size = 0;
 static gboolean verbose = FALSE;
 static GOptionEntry entries[] = {
 	    {"filesystem location",'u', 0, G_OPTION_ARG_STRING,   &uri, "filesystem storage uri", "FSLOC"},
    //	{"filesystme name", 'f', 0, G_OPTION_ARG_FILENAME, &fsname, "filesystem name", "NAME"},
     	{"filesystem block size", 'b', 0, G_OPTION_ARG_INT, &block_size, "filesystem block size", "BLOCKSIZE"},
     	{"filesystem segment size", 's', 0, G_OPTION_ARG_INT, &seg_size, "filesystem segment size", "SEGSIZE"},
-    	{"filesystem max size", 'm', 0, G_OPTION_ARG_INT, &max_fs_size, "filesystem  max size(M)", "FS MAX SIZE"},
+    	{"filesystem max size", 'm', 0, G_OPTION_ARG_INT64, &max_fs_size, "filesystem  max size(M)", "FS MAX SIZE"},
     	{"verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
     	{NULL}
 };
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     g_key_file_set_string(sb_keyfile,"METADATA","uri",uri);
     g_key_file_set_integer(sb_keyfile,"METADATA","block_size",block_size);
     g_key_file_set_integer(sb_keyfile,"METADATA","segment_size",seg_size);
-    g_key_file_set_integer(sb_keyfile,"METADATA","max_fs_size",max_fs_size);
+    g_key_file_set_uint64(sb_keyfile,"METADATA","max_fs_size",max_fs_size);
     gchar *data = g_key_file_to_data(sb_keyfile,NULL,NULL);
     g_message("key file data :%s",data);
     char *head,*hostname,*dir,*fs_name;

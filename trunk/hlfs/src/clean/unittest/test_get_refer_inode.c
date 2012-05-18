@@ -76,7 +76,7 @@ void test_get_refer_inode()
     int ret = 0;
     uint32_t segment_size = 0;
     uint32_t block_size = 0;
-    uint32_t max_fs_size = 0;
+    uint64_t max_fs_size = 0;
     ret = read_fs_meta(storage,&segment_size, &block_size,&max_fs_size);
     g_assert(ret == 0);
     GHashTable   * ss_hashtable = g_hash_table_new_full(g_str_hash,g_str_equal,NULL,NULL);

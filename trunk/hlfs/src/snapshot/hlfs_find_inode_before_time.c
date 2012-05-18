@@ -21,7 +21,7 @@ get_iaddr_bytime_in_seg(struct back_storage *storage,
 						uint64_t *inode_addr) {
     uint32_t segment_size = 0;
 	uint32_t block_size = 0;
-	uint32_t max_fs_size = 0;
+	uint64_t max_fs_size = 0;
 	int ret = read_fs_meta(storage,&segment_size, &block_size,&max_fs_size);
 	if (0 != ret) {
 		HLOG_ERROR("read fs meta data error!");

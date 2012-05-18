@@ -23,7 +23,7 @@ static int load_latest_inode(struct hlfs_ctrl *ctrl)
 {
 	//HLOG_DEBUG("enter func %s", __func__);
     if (NULL == ctrl) {
-        HLOG_ERROR("input parameter error");
+        HLOG_ERROR("Params Error");
         return -1;
     }
     int ret = 0; 
@@ -34,9 +34,7 @@ static int load_latest_inode(struct hlfs_ctrl *ctrl)
         HLOG_ERROR("can not open segment file %s",segfile_name);
         goto out; 
     }
-    uint64_t inode_pos = ctrl->last_offset - 
-        sizeof(struct inode_map_entry) -
-        sizeof(struct inode);
+    uint64_t inode_pos = ctrl->last_offset - sizeof(struct inode_map_entry) -sizeof(struct inode);
     //HLOG_DEBUG("inode pos  %llu",inode_pos);
     if(sizeof(struct inode) != ctrl->storage->bs_file_pread(ctrl->storage,
 				file,(char*)&ctrl->inode, sizeof(struct inode), inode_pos)){

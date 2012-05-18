@@ -55,7 +55,7 @@ int icache_init(ICACHE_CTRL *icache_ctrl,
 		goto err;
     }	
     //HLOG_DEBUG("--lru block queue init over!--");
-	if (NULL == (icache_ctrl->iblock_map = g_hash_table_new(g_int32_hash,g_int32_equal))) {
+	if (NULL == (icache_ctrl->iblock_map = g_hash_table_new(g_int_hash,g_int_equal))) {
 		HLOG_ERROR("--Error:Apply for block_map");
 		ret = -EHLFS_MEM;
 		goto err;

@@ -63,7 +63,7 @@ int cache_init(CACHE_CTRL *cache_ctrl,
 		goto err;
     }	
     //HLOG_DEBUG("--dirty block queue init over!--");
-	if (NULL == (cache_ctrl->block_map = g_hash_table_new(g_int32_hash,g_int32_equal))) {
+	if (NULL == (cache_ctrl->block_map = g_hash_table_new(g_int_hash,g_int_equal))) {
 		HLOG_ERROR("--Error:Apply for block_map");
 		ret = -EHLFS_MEM;
 		goto err;

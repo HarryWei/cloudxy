@@ -37,11 +37,14 @@ LOG的内容显然必须包含被写入的数据块，还需要包含对应的�
  # Inode          更新   （每个inode对应一个文件，如果只支持单一文件，则只用一个inode)
  # Inode map      更新    ( 单一文件则只有一个映射项）
  LOG 的布局为 ： *A (data）| B (meta-data block log) | C (inode log) | D(inode_map log)*。
+
 http://cloudxy.googlecode.com/svn/wiki/images/log-struct.png
+
 ====数据检索====
   读取文件最新数据时：需要通过找到最新的inode map位置，再进而找到所需文件对应inode，再进而找到文件逻辑地址对应的数据块的物理地址（段号+offset)，再进而读取数据。
   最新Inode map位置按理应记录在checkpoint文件中（见错误恢复部分），HDFS初始化加载时读入；如果运行中则该inode map 驻留于内存数据结构中。
   * 注意，文件块大小是可变的（可配置），比如8k。对于不足一个块的修改，一定会伴随先读出完整块再修改，再追加这一过程。
+http://cloudxy.googlecode.com/svn/wiki/images/block-address.png
 ===空间管理 - 段=== 
   * 分段 —— 为了空间管理和回收的目的，我们必须对存储空间进行分段：每个段大小并不需要固定，而且具体大小也没有硬性规定；
    ** 每个HLFS的段被映射成一个Hadoop Dfs文件，比如大小为64M（可配置）；segment文件名字格式为segno.seg，其中segno从0开始递增；
@@ -52,7 +55,7 @@ http://cloudxy.googlecode.com/svn/wiki/images/log-struct.png
   # 第二步对活跃块小于水平线的段（水平线可设置）执行删除或者copy and remove动作，来回收空间。
   * “段使用统计“由外部工具程序实现，产生的段使用计数存放到segment_usage.txt中。我们可以从hlfs客户端所在的机器以"拉模式下"（将段读入到本地）执行段统计任务；也可以采用"推模式下"(map/reduce 方式就近计算）并行执行段统计任务。
   * “段回收”工作则由hlfs唯一的写入线程执行，从而避免元数据(inode)并发修改带来的问题，另外回收作为低优先级任务，会首先让路给正常的写入任务，只有在当前没有写入任务时才会开始执行段回收任务。
-http://cloudxy.googlecode.com/svn/wiki/images/block-address.png
+
 ===快照实现 ===
    在log structure filesystem 上实现快照功能是先天具备的特性。
    我们每次写入的log（凡是没有被回收的log)都可作为一个快照点，也就是说都可以恢复当时的数据，具体做法非常简单，只需要载入快照所在时刻那个log中的inode即可。所以原则上我们的数据可以回滚到任何一次写入时刻。不过，我们一般不会保留所有数据，因此建议用户为自己认为重要的数据状态做一个标记，这样就可以得到一个永久快照，这个永久快照将被写入到checkpoint.txt文件中（记录快照时刻的inode地址、时间、名称即可），这个快照所在inode的数据不被回收。

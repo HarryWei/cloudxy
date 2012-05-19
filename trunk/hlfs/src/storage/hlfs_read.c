@@ -20,7 +20,7 @@
 
 int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_t pos)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+	
     if((NULL == read_buf) || (NULL == ctrl) || (0 == read_len)){
 	    HLOG_ERROR("Params Error");
            return -1;
@@ -32,6 +32,12 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
           return -1;
     }		
     //g_mutex_lock (ctrl->hlfs_access_mutex);
+    HLOG_TRACE("Hlfs Read Req pos:%llu,read_len:%d,last_segno:%d,last_offset:%d,cur_file_len:%d",
+    						      pos,
+    						      read_len,
+    						      ctrl->last_segno,
+    						      ctrl->last_offset,
+    						      ctrl->inode.length);
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     HLOG_DEBUG("read offset:%llu,read len:%d", pos,read_len);
     int ret = 0;
@@ -119,13 +125,11 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
         }
         memcpy(read_buf + offset , last_block , (pos + read_len)%BLOCKSIZE );
         offset +=(pos+read_len)%BLOCKSIZE;
-        //HLOG_DEBUG("last offset: %u", offset);
         //g_free(block);
     }
     //g_mutex_unlock (ctrl->hlfs_access_mutex);
     //ctrl->last_access_timestamp = get_current_time();
     ctrl->last_read_timestamp = get_current_time();
-    //HLOG_DEBUG("read len %u", offset);
     HLOG_DEBUG("leave func %s", __func__);
     return offset;
 }

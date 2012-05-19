@@ -249,11 +249,9 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             //log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
         }else if(is_db_in_level2_index_range(db_cur_no)){
-            HLOG_DEBUG("is level2 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
-            HLOG_DEBUG("ib1_flag:%d-----iblock 0: %llu",ib1_flag,ctrl->inode.iblock);                
-            //uint64_t * _ib = NULL;
+            //HLOG_DEBUG("is level2 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
            if(FALSE == ib1_flag && ctrl->inode.iblock == 0){
-                    HLOG_DEBUG("---------------set iblock zero---------------------");
+                    //HLOG_DEBUG("---------------set iblock zero---------------------");
                     memset(ib1,0,BLOCKSIZE);
 					ib1_flag = TRUE;
            }else if( FALSE == ib1_flag && ctrl->inode.iblock != 0){
@@ -271,7 +269,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             //uint64_t storage_address = *(_bi + _idx);
             set_segno ((ib1+_idx),ctrl->last_segno);
             set_offset ((ib1+_idx),ctrl->last_offset + db_offset);
-            HLOG_DEBUG("-- cur_dbno:%d,idx:%d,storage address:%llu",db_cur_no,_idx,*(ib1+_idx));
+            //HLOG_DEBUG("-- cur_dbno:%d,idx:%d,storage address:%llu",db_cur_no,_idx,*(ib1+_idx));
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
             if( (db_cur_no - 12 + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end ){
                 HLOG_DEBUG("set iblock - segno:%u ???",ctrl->last_segno);
@@ -279,15 +277,10 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 set_segno(&ctrl->inode.iblock,ctrl->last_segno);
                 set_offset(&ctrl->inode.iblock,ctrl->last_offset + ib_offset);
 		  #endif
-                //HLOG_DEBUG("-----iblock get segno: %d",get_segno(ctrl->inode.iblock));
-                memcpy((char*)log_buff + ib_offset,(char*)ib1,BLOCKSIZE);
-                HLOG_DEBUG("log_ibuf:%p,ib_offset:%d",log_buff,ib_offset);
-                //HLOG_DEBUG("-----iblock 2: %lld",ctrl->inode.iblock);                
+                memcpy((char*)log_buff + ib_offset,(char*)ib1,BLOCKSIZE);      
                 ib_offset +=BLOCKSIZE;
-                //g_free(_ib);
                 ib1_flag=FALSE;
             }
-            //g_free(_ib);
         }else if(is_db_in_level3_index_range(db_cur_no)){
             HLOG_DEBUG(" is level3 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
@@ -325,7 +318,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             }
           
             int _idx2  = (db_cur_no - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
-            //HLOG_DEBUG(" idx2:%u",_idx2);
+            
             set_segno ((ib2+_idx2),ctrl->last_segno);
             set_offset((ib2+_idx2),ctrl->last_offset + db_offset);
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
@@ -336,23 +329,21 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 set_offset((ib1+_idx),ctrl->last_offset + ib_offset);
                 memcpy((char*)log_buff + ib_offset,(char*)ib2,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-                //g_free(_ib2);
                 ib2_flag=FALSE;
             }
 
             if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == db_end){
-                //HLOG_DEBUG(" save ib1");
+              
 		  #if 0
                 set_segno (&ctrl->inode.doubly_iblock,ctrl->last_segno);
                 set_offset(&ctrl->inode.doubly_iblock,ctrl->last_offset + ib_offset);
 		  #endif
                 memcpy((char*)log_buff + ib_offset,(char*)ib1,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-                //g_free(_ib);
+      
                 ib1_flag=FALSE;
             }
-            //g_free(_ib);
-            //g_free(_ib2);
+
         }else if(is_db_in_level4_index_range(db_cur_no)){
             HLOG_DEBUG(" is level4 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
@@ -372,8 +363,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 }
  
             int _idx   = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM * IB_ENTRY_NUM);
-            //HLOG_DEBUG(" idx:%u",_idx);
-            //uint64_t *_ib2 = NULL; 
+           
  
                 if(FALSE == ib2_flag && *(ib1+_idx) == 0 ){
                      memset(ib2,0,BLOCKSIZE);
@@ -389,8 +379,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 					ib2_flag = TRUE;
                 }
             int _idx2  = (db_cur_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / IB_ENTRY_NUM % IB_ENTRY_NUM;
-            //HLOG_DEBUG(" idx2:%u",_idx2);
-            //uint64_t *_ib3 = NULL; 
+ 
    
                 if(FALSE == ib3_flag && *(ib2+_idx2) == 0 ){
                      memset(ib3,0,BLOCKSIZE);
@@ -406,7 +395,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                     ib3_flag = TRUE;
                 }
             int _idx3  = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 
-            //HLOG_DEBUG(" idx3:%u",_idx3);
+    
             set_segno ((ib3+_idx3),ctrl->last_segno);
             set_offset((ib3+_idx3),ctrl->last_offset + db_offset);
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
@@ -415,7 +404,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 set_offset ((ib2+_idx2),ctrl->last_offset + ib_offset);
                 memcpy((char*)log_buff + ib_offset,(char*)ib3,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-                //g_free(_ib3);
+
                 ib3_flag = FALSE;
             }
 
@@ -424,7 +413,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 set_offset ((ib1+_idx),ctrl->last_offset + ib_offset);
                 memcpy((char*)log_buff + ib_offset,(char*)ib2,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-                //g_free(_ib2);
+       
 				ib2_flag = FALSE;
             }
 
@@ -435,12 +424,10 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		  #endif
                 memcpy((char*)log_buff + ib_offset,(char*)ib1,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-                //g_free(_ib);
+   
 				ib1_flag = FALSE;
             }
-            //g_free(_ib);
-            //g_free(_ib2);
-            //g_free(_ib3);
+  
         }else{
             /* over limit size  */
             HLOG_ERROR("offset is out of limit size(8T)!!!");

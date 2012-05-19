@@ -73,6 +73,8 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
             }
         }
     }
+	//memcpy(log + ib_offset,inode,sizeof(struct inode));
+	//g_assert(ib_offset == log->size - sizeof(struct inode_map_entry));
     return 0;		 
 }
 
@@ -436,12 +438,11 @@ __inode_create:;
                //HLOG_DEBUG("to update inode map entry ...");
                HLOG_DEBUG("last offset:%u , last segno:%u log head len:%d iboffset:%d", ctrl->last_offset,ctrl->last_segno,LOG_HEADER_LENGTH,ib_offset);
                ctrl->imap_entry.inode_no = HLFS_INODE_NO; 
-		 #if 1
+		    #if 1
                set_segno (&ctrl->imap_entry.inode_addr,ctrl->last_segno);     
                set_offset(&ctrl->imap_entry.inode_addr,ctrl ->last_offset + offset);    
                HLOG_DEBUG("inode address's offset %llu , give it %u",ctrl->imap_entry.inode_addr,ctrl->last_offset + offset);
 	        #endif 
-               memcpy(log_buff +  offset,&ctrl->inode,sizeof(struct inode));
                memcpy(log_buff +  offset + sizeof(struct inode),&ctrl->imap_entry,sizeof(struct inode_map_entry));
                HLOG_DEBUG("to fill log header ...");
                struct log_header * lh = (struct log_header *)log_buff;
@@ -455,6 +456,14 @@ __inode_create:;
                g_assert((ib_offset-db_data_len-LOG_HEADER_LENGTH)%BLOCKSIZE == 0);
                lh->db_num = db_data_len/BLOCKSIZE;
                lh->ib_num = (ib_offset - db_data_len - LOG_HEADER_LENGTH)/BLOCKSIZE;
+
+ 			   #if 1  /* modify inode in log's ib,but not yet modify in ctrl */
+			   struct inode _inode;
+			   memcpy(_inode,&ctrl->inode,sizeof(struct inode));
+			   update_inode_index(_inode,lh,ctrl->last_segno,ctrl->last_offset,ctrl->sb.block_size);
+               memcpy(log_buff + ib_offset,&_inode,sizeof(struct inode));
+			   #endif
+			   
                HLOG_DEBUG("log size:%d,log header:%d,inode:%d,inode map:%d,db:%d,ib:%d",lh->log_size,sizeof(struct log_header),sizeof(struct inode),sizeof(struct inode_map_entry),lh->db_num*BLOCKSIZE,lh->ib_num*BLOCKSIZE); 
                if(0 >= dump_log(ctrl,lh)){
                    HLOG_ERROR("log dump failed");
@@ -463,6 +472,7 @@ __inode_create:;
                int size = lh->log_size;
                HLOG_DEBUG("return log size :%d",lh->log_size);
                g_free(log_buff);
+			   
                //HLOG_DEBUG("leave func %s", __func__);
                return size;
 }

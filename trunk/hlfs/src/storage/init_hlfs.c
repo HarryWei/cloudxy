@@ -31,7 +31,7 @@ int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint3
         HLOG_ERROR("append log error");
         return -1;
     }
-    HLOG_TRACE("Append Log Exec Succ . file_size:%llu,last_segno:%u,last_offset:%u,log_size:%u,start_dbno:%u,end_dbno:%u",
+    HLOG_INFO("Append Log Exec Succ . file_size:%llu,last_segno:%u,last_offset:%u,log_size:%u,start_dbno:%u,end_dbno:%u",
 	 	                                                ctrl->inode.length,
 		                                                ctrl->last_segno,
 		                                                ctrl->last_offset,

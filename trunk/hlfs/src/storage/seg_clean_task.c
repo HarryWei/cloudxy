@@ -122,6 +122,6 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
    if(seg_usage_hashtable!=NULL){
     	g_hash_table_destroy(seg_usage_hashtable);
     }
-    HLOG_INFO("leave func %s", __func__);
+    HLOG_DEBUG("leave func %s", __func__);
     return 0;
 }

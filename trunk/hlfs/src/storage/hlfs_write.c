@@ -20,6 +20,12 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
 		HLOG_ERROR("Params Error");
 		return -1;
     }
+	HLOG_INFO("Hlfs Write Req pos:%llu,read_len:%d,last_segno:%d,last_offset:%d,cur_file_len:%d",
+    						      pos,
+    						      write_len,
+    						      ctrl->last_segno,
+    						      ctrl->last_offset,
+    						      ctrl->inode.length);
     //g_mutex_lock (ctrl->hlfs_access_mutex);
     if(ctrl->rw_inode_flag == 0){
           HLOG_ERROR("your config only allow read request!");
@@ -153,7 +159,7 @@ write_log:;
             ret =  -1;
             goto out;
         }
-	 HLOG_TRACE("Append Log Exec Succ . filesize:%llu,last_segno:%u, last_offset:%u,log size:%u,start_dbno:%u,end_dbno:%u",
+	 HLOG_INFO("Append Log Exec Succ . filesize:%llu,last_segno:%u, last_offset:%u,log size:%u,start_dbno:%u,end_dbno:%u",
 	 	                                                ctrl->inode.length,
 		                                                ctrl->last_segno,
 		                                                ctrl->last_offset,

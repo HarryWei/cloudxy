@@ -32,7 +32,7 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
           return -1;
     }		
     //g_mutex_lock (ctrl->hlfs_access_mutex);
-    HLOG_TRACE("Hlfs Read Req pos:%llu,read_len:%d,last_segno:%d,last_offset:%d,cur_file_len:%d",
+    HLOG_INFO("Hlfs Read Req pos:%llu,read_len:%d,last_segno:%d,last_offset:%d,cur_file_len:%d",
     						      pos,
     						      read_len,
     						      ctrl->last_segno,

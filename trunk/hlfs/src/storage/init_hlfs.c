@@ -141,14 +141,14 @@ out:
 struct hlfs_ctrl *
 init_hlfs(const char *uri )
 {      
-        if(NULL != uri){
+        if(NULL == uri){
 	     HLOG_ERROR("Params Error");	
 	     return NULL;
         }		
         int ret = 0;
         uint32_t seg_clean_check_period = DEF_IO_NONACTIVE_PERIOD;
 	 uint32_t seg_copy_waterlevel       = DEF_SEG_COPY_WATERLEVEL;
-	 struct hlfs_ctrl * hlfs_ctrl = __init_hlfs(uri,1, seg_copy_waterlevel,seg_clean_check_period);
+	 struct hlfs_ctrl * hlfs_ctrl = __init_hlfs(uri,1,seg_clean_check_period,seg_clean_check_period);
         if(NULL == hlfs_ctrl){
 		 HLOG_ERROR("init raw hlfs ctrl failed");
 		 return NULL;
@@ -221,7 +221,7 @@ out:
 
 struct hlfs_ctrl *
 init_hlfs_by_config(const char *config_file_path){
-  if(NULL != config_file_path){
+  if(NULL == config_file_path){
 	     HLOG_ERROR("Params Error");	
 	     return NULL;
    }		
@@ -262,7 +262,7 @@ init_hlfs_by_config(const char *config_file_path){
           is_start_clean = 1;
    }
    
-   struct hlfs_ctrl * hlfs_ctrl = __init_hlfs(uri,is_start_clean,seg_clean_check_period,seg_copy_waterlevel);
+   struct hlfs_ctrl * hlfs_ctrl = __init_hlfs(uri,is_start_clean,seg_copy_waterlevel,seg_clean_check_period);
    if(hlfs_ctrl == NULL){
 	  HLOG_ERROR("init raw hlfs failed");
 	  g_key_file_free (hlfs_conf_keyfile);

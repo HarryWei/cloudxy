@@ -35,36 +35,38 @@ int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,int layerno,char *
     }else{
         g_assert(0);
     }
-    //HLOG_DEBUG("ibno:%d",ibno);
+    HLOG_DEBUG("dbno:%d,ibno:%d",dbno,ibno);
     g_assert(ibno >= 0);
     if(TRUE == icache_iblock_exist(hctrl->icache,ibno)){
         //*iblock_buf = g_malloc0(hctrl->icache->iblock_size);	
         ret =  icache_query_iblock(hctrl->icache,ibno,iblock_buf);
         if(0 != ret){
-            //HLOG_ERROR(" can not find iblock in icache ");
+            HLOG_ERROR(" can not find iblock in icache ");
             return -1; 
         }
     }else{
+        HLOG_DEBUG(" can not find iblock in icache ");
         return -1;   
     }
     return 0;	
 }
 
 int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock){
+    HLOG_DEBUG("enter func %s", __func__);
     return __read_layer_iblock(hctrl,dbno,1,iblock);	
 }	
 int read_layer2_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock){
-    //HLOG_DEBUG("enter func %s", __func__);
+    HLOG_DEBUG("enter func %s", __func__);
     return __read_layer_iblock(hctrl,dbno,2,iblock);	
 }	
 int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock){
-    //HLOG_DEBUG("enter func %s", __func__);
+    HLOG_DEBUG("enter func %s", __func__);
     return __read_layer_iblock(hctrl,dbno,3,iblock);	
 }	
 
 
 int __write_layer_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,int layerno,char *iblock){
-	//HLOG_DEBUG("enter func %s", __func__);
+	HLOG_DEBUG("enter func %s", __func__);
     int ret =0;
     if(NULL != hctrl->icache){
 	     int ibno ;
@@ -77,6 +79,7 @@ int __write_layer_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,int layerno,char 
          }else{
             g_assert(0);
          }
+         HLOG_DEBUG("dbno:%d,ibno:%d",dbno,ibno);
 	     g_assert(ibno >= 0);
 	     ret = icache_insert_iblock(hctrl->icache,ibno,iblock);
     }	
@@ -84,14 +87,15 @@ int __write_layer_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,int layerno,char 
 }
 
 int write_layer1_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock){
+     HLOG_DEBUG("enter func %s", __func__);
      return __write_layer_iblock(hctrl,dbno,1,iblock);	
 }	
 int write_layer2_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock){
-     //HLOG_DEBUG("enter func %s", __func__);
+     HLOG_DEBUG("enter func %s", __func__);
      return __write_layer_iblock(hctrl,dbno,2,iblock);	
 }	
 int write_layer3_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock){
-     //HLOG_DEBUG("enter func %s", __func__);
+     HLOG_DEBUG("enter func %s", __func__);
      return __write_layer_iblock(hctrl,dbno,3,iblock);	
 }	
 
@@ -108,7 +112,7 @@ static int read_block_raw(struct hlfs_ctrl *ctrl,uint32_t storage_address,char* 
 
 typedef int(*READ_BLOCK_FUN)(struct hlfs_ctrl *ctrl,uint32_t storage_address,char* buf);
 static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN RB_FUN,char *block){
-	//HLOG_DEBUG("enter func %s,no:%d", __func__,no);
+	HLOG_DEBUG("enter func %s,no:%d", __func__,no);
     int ret =0;
     if(ctrl->cctrl!=NULL){
 	      //HLOG_DEBUG("read from cache first");
@@ -138,7 +142,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
 	 uint64_t *_ib= (uint64_t*)alloca(BLOCKSIZE);
 	 if(0>read_layer1_iblock(ctrl,db_no,(char*)_ib)){
         	if(0 != RB_FUN(ctrl,ctrl->inode.iblock,(char*)_ib)){
-			   //HLOG_ERROR("read_block error for iblock_addr:%llu",ctrl->inode.iblock);
+			   HLOG_ERROR("read_block error for iblock_addr:%llu",ctrl->inode.iblock);
 			   return -1;
 	 	    }
 		    write_layer1_iblock(ctrl,db_no,_ib);	
@@ -148,13 +152,13 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
         //g_free(_ib);
     }else if (is_db_in_level3_index_range(db_no)){
         if(ctrl->inode.doubly_iblock ==0){
-			//HLOG_DEBUG("inode.doubly_iblock zero");	
+			HLOG_DEBUG("inode.doubly_iblock zero");	
             return 1;
         }
         uint64_t *_ib= (uint64_t*)alloca(BLOCKSIZE);
 	 if(0>read_layer1_iblock(ctrl,db_no,(char*)_ib)){
 	 	if(0 != RB_FUN(ctrl,ctrl->inode.doubly_iblock,(char*)_ib)){
-				//HLOG_ERROR("read_block error for doubly_iblock_addr:%llu",ctrl->inode.doubly_iblock);
+				HLOG_ERROR("read_block error for doubly_iblock_addr:%llu",ctrl->inode.doubly_iblock);
 				return -1;
 		 	}
 			write_layer1_iblock(ctrl,db_no,_ib);	

@@ -18,7 +18,7 @@ int flush_work(gpointer data){
          gboolean res = g_cond_timed_wait(cctrl->flush_waken_cond, \
 				 cctrl->cache_mutex, &expired);
          g_mutex_unlock(cctrl->cache_mutex); //?
-         HLOG_DEBUG(" time wait res for cond is :%d\n",res);
+         HLOG_DEBUG(" time wait res for cond is :%d !",res);
          if(cctrl->flush_worker_should_exit){
 		 	 HLOG_INFO("-- flush worker should exit --");
              break;
@@ -37,7 +37,7 @@ int flush_work(gpointer data){
             }
             if(buff_len == 0){
                 HLOG_DEBUG("do not need flush now");
-                continue;
+                break;
             }
             if(NULL==cctrl->write_callback_func){
                 HLOG_WARN("--not given flush callback func--");
@@ -72,7 +72,7 @@ int flush_work(gpointer data){
                 g_slist_free(continue_blocks);
                 //HLOG_DEBUG("--return blocks to cache over--");
             }
-         } while (get_cache_free_size(cctrl) < cctrl->flush_trigger_level * cctrl->cache_size / 100);
+         } while (get_cache_free_size(cctrl) < cctrl->flush_trigger_level * cctrl->cache_size / 100 || (res == 0 && get_cache_free_size(cctrl) !=0));
     }
     HLOG_INFO("--flush worker exit--");
     return 0;

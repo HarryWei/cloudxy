@@ -27,7 +27,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
           return -1;
     }
 
-    if(ctrl->sb.max_fs_size < pos+write_len){
+    if(ctrl->sb.max_fs_size * 1024 *1024 < pos+write_len){
           HLOG_ERROR("your config only allow write beyond :%d",ctrl->sb.max_fs_size);
           //g_mutex_unlock (ctrl->hlfs_access_mutex);
           return -1;

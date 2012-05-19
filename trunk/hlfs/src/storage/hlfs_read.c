@@ -20,24 +20,24 @@
 
 int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_t pos)
 {
-	//HLOG_DEBUG("enter func %s", __func__);
+	HLOG_DEBUG("enter func %s", __func__);
     if((NULL == read_buf) || (NULL == ctrl) || (0 == read_len)){
 	    HLOG_ERROR("Params Error");
            return -1;
     }
 
-    if(ctrl->sb.max_fs_size < pos+read_len){
+    if(ctrl->sb.max_fs_size *1024 *1024< pos+read_len){
           HLOG_ERROR("your config only allow write beyond :%d",ctrl->sb.max_fs_size);
           //g_mutex_unlock (ctrl->hlfs_access_mutex);
           return -1;
     }		
     //g_mutex_lock (ctrl->hlfs_access_mutex);
     guint32 BLOCKSIZE = ctrl->sb.block_size;
-    //HLOG_DEBUG("read offset:%llu,read len:%d", pos,read_len);
+    HLOG_DEBUG("read offset:%llu,read len:%d", pos,read_len);
     int ret = 0;
     int start_db = 0;
     if(pos/BLOCKSIZE == (pos+read_len-1)/BLOCKSIZE){
-		//HLOG_DEBUG("only need to read one block: %llu", pos / BLOCKSIZE);
+		HLOG_DEBUG("only need to read one block: %llu", pos / BLOCKSIZE);
         char *block = (char*)alloca(BLOCKSIZE);
         //g_mutex_lock (ctrl->hlfs_access_mutex);
         ret=load_block_by_addr_fast(ctrl,pos,block);
@@ -53,14 +53,14 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
         memcpy(read_buf,block + pos%BLOCKSIZE,read_len);
         //g_free(block);
         //g_mutex_unlock (ctrl->hlfs_access_mutex);
-        //HLOG_DEBUG("read len %u", read_len);
+        HLOG_DEBUG("read len %u", read_len);
         return read_len;
     }
 
-    //HLOG_DEBUG("need to read muti block", __func__);
+    HLOG_DEBUG("need to read muti block", __func__);
     uint32_t offset=0; 
     if( pos % BLOCKSIZE != 0 ){
-	 //HLOG_DEBUG("need to read first block", __func__);
+	    HLOG_DEBUG("need to read first block", __func__);
         char *first_block = (char*)alloca(BLOCKSIZE);
         //g_mutex_lock (ctrl->hlfs_access_mutex);
         ret=load_block_by_addr_fast(ctrl,pos,first_block);
@@ -75,14 +75,14 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
         }
         memcpy(read_buf,first_block + pos%BLOCKSIZE, BLOCKSIZE - pos%BLOCKSIZE);
         offset += BLOCKSIZE - pos%BLOCKSIZE;
-        //HLOG_DEBUG("fist offset:%u", offset);
+        HLOG_DEBUG("fist offset:%u", offset);
         //g_free(block);
         start_db = (pos + BLOCKSIZE)/BLOCKSIZE;
     }else{
         start_db = pos/BLOCKSIZE;
     }
     int end_db = (pos+read_len)/BLOCKSIZE;
-    //HLOG_DEBUG("start db: %d end db: %d", start_db, end_db);
+    HLOG_DEBUG("start db: %d end db: %d", start_db, end_db);
     int i;
 	//char *block = (char*)alloca(BLOCKSIZE);
     for(i = start_db; i < end_db;i++){
@@ -100,11 +100,11 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
         }
         //memcpy(read_buf+offset,block,BLOCKSIZE);
         offset +=BLOCKSIZE;
-        //HLOG_DEBUG("offset: %u", offset);
+        HLOG_DEBUG("offset: %u", offset);
         //g_free(block);
     }
     if((pos + read_len)% BLOCKSIZE != 0 ){
-        //HLOG_DEBUG("need to read last block", __func__);
+        HLOG_DEBUG("need to read last block", __func__);
         char *last_block = (char*)alloca(BLOCKSIZE);
         //g_mutex_lock (ctrl->hlfs_access_mutex);
         ret=load_block_by_addr_fast(ctrl,pos+read_len,last_block);
@@ -126,6 +126,6 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
     //ctrl->last_access_timestamp = get_current_time();
     ctrl->last_read_timestamp = get_current_time();
     //HLOG_DEBUG("read len %u", offset);
-    //HLOG_DEBUG("leave func %s", __func__);
+    HLOG_DEBUG("leave func %s", __func__);
     return offset;
 }

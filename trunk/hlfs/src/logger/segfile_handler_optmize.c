@@ -26,7 +26,7 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
        build_segfile_name(segno,segfile_name);
        bs_file_t file = ctrl->storage->bs_file_open(ctrl->storage,segfile_name,BS_READONLY); 
        if(file==NULL){
-            //HLOG_ERROR("can not open segment file %s",segfile_name);
+            HLOG_ERROR("can not open segment file %s",segfile_name);
             g_assert(0);
             return -1;
        }

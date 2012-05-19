@@ -109,7 +109,7 @@ block_t * cache_query(CACHE_CTRL *cache_ctrl,uint32_t block_no){
 	}
 
 	if (0 == cache_ctrl->cache_size - get_cache_free_size(cache_ctrl)) {
-		HLOG_ERROR("The hash table of block_map is empty");
+		HLOG_DEBUG("The hash table of block_map is empty");
 		return NULL;
 	}
 	

@@ -10,7 +10,7 @@
 		<reread>1</reread>
 	</config>
 
-	<category name="hlfslog" priority="debug" appender="myrollingfileappender" />
+	<category name="hlfslog" priority="info" appender="myrollingfileappender" />
 	<rollingpolicy name="myrollingpolicy" type="sizewin" maxsize="1048576000" maxnum="10" />
 	<appender name="myrollingfileappender" type="rollingfile" logdir="./" prefix="log" layout="dated" rollingpolicy="myrollingpolicy" />
 	<layout name="dated" type="dated"/>

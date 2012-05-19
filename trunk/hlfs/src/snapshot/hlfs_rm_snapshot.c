@@ -34,10 +34,8 @@ hlfs_rm_snapshot(const char *uri,const char *ssname) {
     }
 	//HLOG_DEBUG("99 after dump ret is %d", ret);
 
-	HLOG_INFO("Remove Snapshot Succ - snapshot_name:%s,last_segno:%d,last_offset:%d",
-    						      ssname,
-    						      ctrl->last_segno,
-    						      ctrl->last_offset);
+	HLOG_INFO("Remove Snapshot Succ - snapshot_name:%s",
+    						      ssname);
 out:
 	if (NULL != file) {
 		storage->bs_file_close(storage, file);

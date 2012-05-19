@@ -459,8 +459,8 @@ __inode_create:;
 
  			   #if 1  /* modify inode in log's ib,but not yet modify in ctrl */
 			   struct inode _inode;
-			   memcpy(_inode,&ctrl->inode,sizeof(struct inode));
-			   update_inode_index(_inode,lh,ctrl->last_segno,ctrl->last_offset,ctrl->sb.block_size);
+			   memcpy(&_inode,&ctrl->inode,sizeof(struct inode));
+			   update_inode_index(&_inode,lh,ctrl->last_segno,ctrl->last_offset,ctrl->sb.block_size);
                memcpy(log_buff + ib_offset,&_inode,sizeof(struct inode));
 			   #endif
 			   

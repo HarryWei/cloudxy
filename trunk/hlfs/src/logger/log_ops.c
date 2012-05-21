@@ -69,7 +69,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 				
 				int _idx   = ( 131064 - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
                 HLOG_DEBUG("ib2 address:%llu",*(_ib+_idx));
-				HLOG_DEBUG("-----dbno:%131064 address:%llu",); 
+				HLOG_DEBUG("-----dbno:%131064 address:%llu,_idx:%d",_idx); 
                 ib_offset +=BLOCKSIZE;
             }
         }else if (is_db_in_level4_index_range(db_cur_no)){
@@ -301,6 +301,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             HLOG_DEBUG(" is level3 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
                 if(FALSE == ib1_flag && ctrl->inode.doubly_iblock == 0){
+					HLOG_DEBUG("set ib1 zero");
                     memset(ib1,0,BLOCKSIZE);
 					ib1_flag = TRUE;
                 }else if( FALSE == ib1_flag && ctrl->inode.doubly_iblock !=0){
@@ -340,10 +341,10 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
             HLOG_DEBUG("cur_dbno:%u,_idx2:%u,*(ib2+_idx2):%llu",db_cur_no,_idx2,*(ib2+_idx2));
             if((db_cur_no -12 - IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end){
-                HLOG_DEBUG(" save ib1");
+                HLOG_DEBUG(" save ib2");
                 set_segno ((ib1+_idx),ctrl->last_segno);
                 set_offset((ib1+_idx),ctrl->last_offset + ib_offset);
-				HLOG_DEBUG("save new ib1:%llu",*(ib1+_idx));
+				HLOG_DEBUG("save new ib2:%llu",*(ib1+_idx));
                 memcpy((char*)log_buff + ib_offset,(char*)ib2,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
                 ib2_flag=FALSE;
@@ -351,7 +352,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             }
 
             if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == db_end){
-              
+                HLOG_DEBUG(" save ib1");
 		  #if 0
                 set_segno (&ctrl->inode.doubly_iblock,ctrl->last_segno);
                 set_offset(&ctrl->inode.doubly_iblock,ctrl->last_offset + ib_offset);

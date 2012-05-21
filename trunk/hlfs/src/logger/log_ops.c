@@ -54,8 +54,10 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
                 ib_offset +=BLOCKSIZE;
             }
         }else if (is_db_in_level3_index_range(db_cur_no)){
+                uint64_t *_ib=NULL;
 			if((db_cur_no -12 - IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == end_db){
 				  HLOG_DEBUG(" save ib2 ? ");
+                  _ib = (uint64_t*)((char*)log+ib_offset);
 				  ib_offset +=BLOCKSIZE;
 			}
 		  
@@ -63,7 +65,11 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
                 HLOG_DEBUG(" save ib1");
                 set_segno (&inode->doubly_iblock,last_segno);
                 set_offset(&inode->doubly_iblock,last_offset + ib_offset);
-		        HLOG_DEBUG("-----dbno:%d,doubly_iblock:%llu,db_offset:%d",db_cur_no,inode->doubly_iblock,ib_offset);                
+		        HLOG_DEBUG("-----dbno:%d,doubly_iblock:%llu,db_offset:%d",db_cur_no,inode->doubly_iblock,ib_offset);    
+				
+				int _idx   = ( 131064 - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
+                HLOG_DEBUG("ib2 address:%llu",*(_ib+_idx));
+				HLOG_DEBUG("-----dbno:%131064 address:%llu",); 
                 ib_offset +=BLOCKSIZE;
             }
         }else if (is_db_in_level4_index_range(db_cur_no)){

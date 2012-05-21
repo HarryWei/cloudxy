@@ -329,9 +329,10 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
             HLOG_DEBUG("cur_dbno:%u,_idx2:%u,*(ib2+_idx2):%llu",db_cur_no,_idx2,*(ib2+_idx2));
             if((db_cur_no -12 - IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end){
-                //HLOG_DEBUG(" save ib2");
+                HLOG_DEBUG(" save ib1");
                 set_segno ((ib1+_idx),ctrl->last_segno);
                 set_offset((ib1+_idx),ctrl->last_offset + ib_offset);
+				HLOG_DEBUG("save new ib1:%llu",*(ib1+_idx));
                 memcpy((char*)log_buff + ib_offset,(char*)ib2,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
                 ib2_flag=FALSE;

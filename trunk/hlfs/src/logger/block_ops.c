@@ -20,6 +20,7 @@
 
 
 int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,int layerno,char *iblock_buf){
+    //return -1;
     //HLOG_DEBUG("enter func %s", __func__);
     int ret;
     int ibno ;
@@ -35,7 +36,7 @@ int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,int layerno,char *
     }else{
         g_assert(0);
     }
-    HLOG_DEBUG("dbno:%d,ibno:%d",dbno,ibno);
+    //HLOG_DEBUG("dbno:%d,ibno:%d",dbno,ibno);
     g_assert(ibno >= 0);
     if(TRUE == icache_iblock_exist(hctrl->icache,ibno)){
         //*iblock_buf = g_malloc0(hctrl->icache->iblock_size);	
@@ -52,21 +53,18 @@ int __read_layer_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,int layerno,char *
 }
 
 int read_layer1_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock){
-    HLOG_DEBUG("enter func %s", __func__);
     return __read_layer_iblock(hctrl,dbno,1,iblock);	
 }	
 int read_layer2_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock){
-    HLOG_DEBUG("enter func %s", __func__);
     return __read_layer_iblock(hctrl,dbno,2,iblock);	
 }	
 int read_layer3_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock){
-    HLOG_DEBUG("enter func %s", __func__);
     return __read_layer_iblock(hctrl,dbno,3,iblock);	
 }	
 
 
 int __write_layer_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,int layerno,char *iblock){
-	HLOG_DEBUG("enter func %s", __func__);
+	//HLOG_DEBUG("enter func %s", __func__);
     int ret =0;
     if(NULL != hctrl->icache){
 	     int ibno ;
@@ -79,7 +77,6 @@ int __write_layer_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,int layerno,char 
          }else{
             g_assert(0);
          }
-         HLOG_DEBUG("dbno:%d,ibno:%d",dbno,ibno);
 	     g_assert(ibno >= 0);
 	     ret = icache_insert_iblock(hctrl->icache,ibno,iblock);
     }	
@@ -87,15 +84,12 @@ int __write_layer_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,int layerno,char 
 }
 
 int write_layer1_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock){
-     HLOG_DEBUG("enter func %s", __func__);
      return __write_layer_iblock(hctrl,dbno,1,iblock);	
 }	
 int write_layer2_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock){
-     HLOG_DEBUG("enter func %s", __func__);
      return __write_layer_iblock(hctrl,dbno,2,iblock);	
 }	
 int write_layer3_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock){
-     HLOG_DEBUG("enter func %s", __func__);
      return __write_layer_iblock(hctrl,dbno,3,iblock);	
 }	
 
@@ -112,7 +106,7 @@ static int read_block_raw(struct hlfs_ctrl *ctrl,uint32_t storage_address,char* 
 
 typedef int(*READ_BLOCK_FUN)(struct hlfs_ctrl *ctrl,uint32_t storage_address,char* buf);
 static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN RB_FUN,char *block){
-	HLOG_DEBUG("enter func %s,no:%d", __func__,no);
+	//HLOG_DEBUG("enter func %s,no:%d", __func__,no);
     int ret =0;
     if(ctrl->cctrl!=NULL){
 	      //HLOG_DEBUG("read from cache first");
@@ -134,7 +128,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
         int _idx = db_no % 12;
         storage_address = ctrl->inode.blocks[_idx];
     }else if (is_db_in_level2_index_range(db_no)){
-        HLOG_DEBUG("inode.iblock :%llu",ctrl->inode.iblock);	
+        //HLOG_DEBUG("inode.iblock :%llu",ctrl->inode.iblock);	
         if(ctrl->inode.iblock == 0){
 		  //HLOG_DEBUG("inode.iblock zero");	
           return 1;
@@ -152,7 +146,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
         storage_address = *(_ib+_idx);
         //g_free(_ib);
     }else if (is_db_in_level3_index_range(db_no)){
-        HLOG_DEBUG("inode.double_iblock :%llu",ctrl->inode.doubly_iblock);	
+        //HLOG_DEBUG("inode.double_iblock :%llu",ctrl->inode.doubly_iblock);	
         if(ctrl->inode.doubly_iblock ==0){
 			HLOG_DEBUG("inode.doubly_iblock zero");	
             return 1;
@@ -167,7 +161,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
 			write_layer1_iblock(ctrl,db_no,_ib);	
 	 }	
         int _idx   = ( db_no - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
-        HLOG_DEBUG("ib1 address:%llu",*(_ib+_idx));
+        //HLOG_DEBUG("ib1 address:%llu",*(_ib+_idx));
         if(*(_ib+_idx) == 0 ){
             return 1;
         }
@@ -181,7 +175,6 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
 		write_layer2_iblock(ctrl,db_no,_ib2);
 	}
         int _idx2  = (db_no - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
-		
         storage_address = *(_ib2 + _idx2);
         //g_free(_ib);
         //g_free(_ib2);
@@ -194,7 +187,6 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
 	 memset(_ib,0,sizeof(BLOCKSIZE));
 	 if(0>read_layer1_iblock(ctrl,db_no,(char*)_ib)){	
 	 	 if(0 != RB_FUN(ctrl,ctrl->inode.triply_iblock,(char*)_ib)){
-        
 			//HLOG_ERROR("read_block error for triply_iblock_addr:%llu",ctrl->inode.triply_iblock);
 			return -1;
 		}
@@ -244,33 +236,33 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
 
 
 int load_block_by_no_fast(struct hlfs_ctrl *ctrl,uint32_t no,char *block){
-    HLOG_DEBUG("enter func %s", __func__);
+    //HLOG_DEBUG("enter func %s", __func__);
     int ret = __load_block_by_no(ctrl,no,read_block_fast,block);
-    HLOG_DEBUG("leave func %s", __func__);
+    //HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
 
 int load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,char *block){
-    HLOG_DEBUG("enter func %s", __func__);
+    //HLOG_DEBUG("enter func %s", __func__);
     int ret = __load_block_by_no(ctrl,no,read_block_raw,block);
-    HLOG_DEBUG("leave func %s", __func__);
+    //HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
 
 
 int load_block_by_addr_fast(struct hlfs_ctrl *ctrl,uint64_t pos,char* block){
-    HLOG_DEBUG("enter func %s", __func__);
+    //HLOG_DEBUG("enter func %s", __func__);
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     uint32_t db_no = pos /BLOCKSIZE;
-    HLOG_DEBUG("leave func %s", __func__);
+    //HLOG_DEBUG("leave func %s", __func__);
     return load_block_by_no_fast(ctrl,db_no,block);
 }
 
 int load_block_by_addr(struct hlfs_ctrl *ctrl,uint64_t pos,char* block){
-    HLOG_DEBUG("enter func %s", __func__);
+    //HLOG_DEBUG("enter func %s", __func__);
     guint32 BLOCKSIZE = ctrl->sb.block_size;
     uint32_t db_no = pos /BLOCKSIZE;
-    HLOG_DEBUG("leave func %s", __func__);
+    //HLOG_DEBUG("leave func %s", __func__);
     return load_block_by_no(ctrl,db_no,block);
 }
 

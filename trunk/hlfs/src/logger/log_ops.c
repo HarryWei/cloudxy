@@ -17,6 +17,15 @@
 #include "icache.h"
 
 
+static void dump_iblock(char *iblock){
+    uint64_t *_iblock = (uint64_t*)iblock;
+    int i=0;
+    for(i=0;i<1024;i++){
+        HLOG_DEBUG("i:%d,addr:%llu",_iblock);
+        _iblock++;
+    }
+}
+
 
 
 static int update_inode_index(struct inode *inode, struct log_header * log,uint32_t last_segno,uint32_t last_offset,uint32_t block_size){
@@ -45,7 +54,6 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
             db_offset += BLOCKSIZE;
         }else if (is_db_in_level2_index_range(db_cur_no)){
             if( (db_cur_no - 12 + 1) % IB_ENTRY_NUM == 0 || db_cur_no == end_db){ 
-
                 HLOG_DEBUG(" is level2 -- db_cur_no:%d ib_offset:%d",db_cur_no,ib_offset);
                 set_segno  (&inode->iblock, last_segno);
                 set_offset (&inode->iblock, last_offset + ib_offset);
@@ -54,22 +62,14 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
                 ib_offset +=BLOCKSIZE;
             }
         }else if (is_db_in_level3_index_range(db_cur_no)){
-                uint64_t *_ib=NULL;
+            HLOG_DEBUG(" enter level3 ... ib_offset:%d",ib_offset);
 			if((db_cur_no -12 - IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == end_db){
-				  HLOG_DEBUG(" save ib2 ? ");
-                  _ib = (uint64_t*)((char*)log+ib_offset);
 				  ib_offset +=BLOCKSIZE;
 			}
-		  
+		     
             if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == end_db){
-                HLOG_DEBUG(" save ib1");
                 set_segno (&inode->doubly_iblock,last_segno);
                 set_offset(&inode->doubly_iblock,last_offset + ib_offset);
-		        HLOG_DEBUG("-----dbno:%d,doubly_iblock:%llu,db_offset:%d",db_cur_no,inode->doubly_iblock,ib_offset);    
-				
-				int _idx   = ( 131064 - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
-                HLOG_DEBUG("ib2 address:%llu",*(_ib+_idx));
-				HLOG_DEBUG("-----dbno:%131064 address:%llu,_idx:%d",_idx); 
                 ib_offset +=BLOCKSIZE;
             }
         }else if (is_db_in_level4_index_range(db_cur_no)){
@@ -210,9 +210,9 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
 
 int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end){
     //HLOG_DEBUG("entry func: %s",__func__);
-    gboolean ib1_flag  = FALSE;
-    gboolean ib2_flag  = FALSE;
-    gboolean ib3_flag  = FALSE;
+    gboolean ib1_need_load  = TRUE;
+    gboolean ib2_need_load  = TRUE;
+    gboolean ib3_need_load  = TRUE;
 	guint32 BLOCKSIZE = ctrl->sb.block_size;
 	uint64_t*  ib1 = (uint64_t*)alloca(BLOCKSIZE);
 	uint64_t*  ib2 = (uint64_t*)alloca(BLOCKSIZE);
@@ -257,28 +257,23 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             set_segno (&ctrl->inode.blocks[_idx],ctrl->last_segno);
             set_offset(&ctrl->inode.blocks[_idx],ctrl->last_offset + db_offset);
 	     #endif
-            //HLOG_DEBUG("inode.block[%d]'s storage addr:%llu",_idx,ctrl->inode.blocks[_idx]);
-            //HLOG_DEBUG("log_buff:%p cur_log_buf:%p db_buff:%p cur_block_ptr:%p",
-            //log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
-            //HLOG_DEBUG("log_buff:%p cur_log_buf:%p db_buff:%p cur_block_ptr:%p",
-            //log_buff,cur_log_buff_ptr,db_buff,cur_block_ptr);
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
         }else if(is_db_in_level2_index_range(db_cur_no)){
            HLOG_DEBUG("is level2 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
-           if(FALSE == ib1_flag && ctrl->inode.iblock == 0){
+           if(TRUE == ib1_need_load && ctrl->inode.iblock == 0){
                     HLOG_DEBUG("---------------set iblock zero---------------------");
                     memset(ib1,0,BLOCKSIZE);
-					ib1_flag = TRUE;
-           }else if( FALSE == ib1_flag && ctrl->inode.iblock != 0){
+					ib1_need_load = FALSE;
+           }else if( TRUE == ib1_need_load && ctrl->inode.iblock != 0){
                     if(0>read_layer1_iblock(ctrl,db_cur_no,ib1)){ 	
                         if (0 != read_block_fast(ctrl,ctrl->inode.iblock,ib1)){
                             HLOG_ERROR("read block error!");
                             g_assert(0);
                             return -1;
                         }
-			            write_layer1_iblock(ctrl,db_cur_no,ib1);	
+			            /*write_layer1_iblock(ctrl,db_cur_no,ib1);*/
                     }
-                    ib1_flag = TRUE;
+                    ib1_need_load = FALSE;
             }
             int  _idx = (db_cur_no - 12)%IB_ENTRY_NUM;
             //uint64_t storage_address = *(_bi + _idx);
@@ -294,44 +289,45 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		  #endif
                 memcpy((char*)log_buff + ib_offset,(char*)ib1,BLOCKSIZE);      
                 ib_offset +=BLOCKSIZE;
-                ib1_flag=FALSE;
+                ib1_need_load=TRUE;
 	            memset(ib1,0,sizeof(BLOCKSIZE));
             }
         }else if(is_db_in_level3_index_range(db_cur_no)){
             HLOG_DEBUG(" is level3 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
-                if(FALSE == ib1_flag && ctrl->inode.doubly_iblock == 0){
+                if(TRUE == ib1_need_load && ctrl->inode.doubly_iblock == 0){
 					HLOG_DEBUG("set ib1 zero");
                     memset(ib1,0,BLOCKSIZE);
-					ib1_flag = TRUE;
-                }else if( FALSE == ib1_flag && ctrl->inode.doubly_iblock !=0){
+					ib1_need_load = FALSE;
+                }else if( TRUE== ib1_need_load && ctrl->inode.doubly_iblock !=0){
                     if(0>read_layer1_iblock(ctrl,db_cur_no,ib1)){ 	
                         if(0 != read_block_fast(ctrl,ctrl->inode.doubly_iblock,ib1)){
                             HLOG_ERROR("allocate error!");
                             g_assert(0);
                             return -1;
                         }
-			   		write_layer1_iblock(ctrl,db_cur_no,ib1);
+			   		/*  write_layer1_iblock(ctrl,db_cur_no,ib1); */
                     }
-                    ib1_flag = TRUE;
+                    ib1_need_load = FALSE;
                 }
        
             int _idx   = (db_cur_no - 12 - IB_ENTRY_NUM) / IB_ENTRY_NUM;
             HLOG_DEBUG("cur_dbno:%u,idx:%u,*(ib1+_idx):%llu",db_cur_no,_idx,*(ib1+_idx));
             //uint64_t *_ib2 = NULL; 
-            if(FALSE == ib2_flag && *(ib1+_idx) == 0 ){
+            if(TRUE == ib2_need_load && *(ib1+_idx) == 0 ){
+					HLOG_DEBUG("set ib2 zero");
                     memset(ib2,0,BLOCKSIZE);
-					ib2_flag = TRUE;
-            }else if( FALSE == ib2_flag && *(ib1+_idx) != 0){
+					ib2_need_load = FALSE;
+            }else if( TRUE == ib2_need_load && *(ib1+_idx) != 0){
                     if(0>read_layer2_iblock(ctrl,db_cur_no,ib2)){ 	
                         if ( 0!=read_block_fast(ctrl,*(ib1+_idx),ib2)){
                             HLOG_ERROR("allocate error!");
                             g_assert(0);
                             return -1;
                         }
-			   		write_layer2_iblock(ctrl,db_cur_no,ib2);
+			   		/*  write_layer2_iblock(ctrl,db_cur_no,ib2);*/
                     }
-                    ib2_flag = TRUE;
+                    ib2_need_load = FALSE;
             }
           
             int _idx2  = (db_cur_no - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
@@ -340,15 +336,33 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             set_offset((ib2+_idx2),ctrl->last_offset + db_offset);
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
             HLOG_DEBUG("cur_dbno:%u,_idx2:%u,*(ib2+_idx2):%llu",db_cur_no,_idx2,*(ib2+_idx2));
+
+            {
+		        int _idx  = ( 131064 - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
+				HLOG_DEBUG("-----dbno:%131064 ib1 address:%llu,_idx:%d",*(ib1+_idx),_idx); 
+
+		        int _idx2  = ( 131064 - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
+				HLOG_DEBUG("-----dbno:%131064 ib2 address:%llu,_idx:%d",*(ib2+_idx2),_idx2); 
+            }
+
+
+
+
             if((db_cur_no -12 - IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end){
                 HLOG_DEBUG(" save ib2");
                 set_segno ((ib1+_idx),ctrl->last_segno);
                 set_offset((ib1+_idx),ctrl->last_offset + ib_offset);
-				HLOG_DEBUG("save new ib2:%llu",*(ib1+_idx));
+				HLOG_DEBUG("save new ib2:%llu,iboffset:%d",*(ib1+_idx),ib_offset);
                 memcpy((char*)log_buff + ib_offset,(char*)ib2,BLOCKSIZE);
-                ib_offset +=BLOCKSIZE;
-                ib2_flag=FALSE;
+				HLOG_DEBUG("ib2 address:%p",log_buff+ib_offset);
+
+                ib2_need_load=TRUE;
 	            memset(ib2,0,sizeof(BLOCKSIZE));
+            {
+		        int _idx2  = ( 131064 - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
+				HLOG_DEBUG("-----dbno:%131064 ib2 address:%llu,_idx:%d",*((uint64_t*)(log_buff+ib_offset)+_idx2),_idx2); 
+            }
+                ib_offset +=BLOCKSIZE;
             }
 
             if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == db_end){
@@ -358,64 +372,64 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 set_offset(&ctrl->inode.doubly_iblock,ctrl->last_offset + ib_offset);
 		  #endif
                 memcpy((char*)log_buff + ib_offset,(char*)ib1,BLOCKSIZE);
-                ib_offset +=BLOCKSIZE;
-      
-                ib1_flag=FALSE;
+				HLOG_DEBUG("ib1 address:%p",log_buff+ib_offset);
+
+                ib1_need_load=TRUE;
 	            memset(ib1,0,sizeof(BLOCKSIZE));
+            {
+		        int _idx  = ( 131064 - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
+				HLOG_DEBUG("-----dbno:%131064 ib1 address:%llu,_idx:%d",*((uint64_t*)(log_buff+ib_offset)+_idx),_idx); 
+            }
+                ib_offset +=BLOCKSIZE;
             }
 
         }else if(is_db_in_level4_index_range(db_cur_no)){
             HLOG_DEBUG(" is level4 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
      
-                if(FALSE == ib1_flag && ctrl->inode.triply_iblock == 0){
+                if(TRUE == ib1_need_load && ctrl->inode.triply_iblock == 0){
                      memset(ib1,0,BLOCKSIZE);
-					 ib1_flag = TRUE;
-                }else if(FALSE == ib1_flag && ctrl->inode.triply_iblock !=0 ){
+					 ib1_need_load = FALSE;
+                }else if(TRUE == ib1_need_load && ctrl->inode.triply_iblock !=0 ){
                     if(0>read_layer1_iblock(ctrl,db_cur_no,&ib1)){ 	
                         if ( 0 != read_block_fast(ctrl,ctrl->inode.triply_iblock,ib1)){
                             HLOG_ERROR("allocate error!");
                             return -1;
                         }
-			        write_layer1_iblock(ctrl,db_cur_no,ib1);
+			        /*  write_layer1_iblock(ctrl,db_cur_no,ib1);*/
                     }
-					ib1_flag = TRUE;
+					ib1_need_load = FALSE;
                 }
  
             int _idx   = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM * IB_ENTRY_NUM);
-           
- 
-                if(FALSE == ib2_flag && *(ib1+_idx) == 0 ){
+                if(TRUE == ib2_need_load && *(ib1+_idx) == 0 ){
                      memset(ib2,0,BLOCKSIZE);
-					 ib2_flag = TRUE;
-                }else if( FALSE == ib2_flag && *(ib1 + _idx) != 0){
+					 ib2_need_load = FALSE;
+                }else if( TRUE == ib2_need_load && *(ib1 + _idx) != 0){
                     if(0>read_layer2_iblock(ctrl,db_cur_no,ib2)){ 	
                         if (0 != read_block_fast(ctrl,*(ib1+_idx),ib2)){
                             HLOG_ERROR("allocate error!");
                             return -1;
                         }
-			   		    write_layer2_iblock(ctrl,db_cur_no,ib2);
+			   		    /* write_layer2_iblock(ctrl,db_cur_no,ib2);*/
                     }
-					ib2_flag = TRUE;
+					ib2_need_load = FALSE;
                 }
             int _idx2  = (db_cur_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / IB_ENTRY_NUM % IB_ENTRY_NUM;
- 
-   
-                if(FALSE == ib3_flag && *(ib2+_idx2) == 0 ){
+                if(TRUE == ib3_need_load && *(ib2+_idx2) == 0 ){
                      memset(ib3,0,BLOCKSIZE);
-					 ib1_flag = TRUE;
-                }else if( FALSE == ib3_flag && *(ib2 + _idx2) !=0 ){
+					 ib3_need_load = FALSE;
+                }else if( TRUE == ib3_need_load && *(ib2 + _idx2) !=0 ){
                     if(0>read_layer3_iblock(ctrl,db_cur_no,ib3)){ 	
                         if ( 0!= read_block_fast(ctrl,*(ib2+_idx2),ib3)){
                             HLOG_ERROR("allocate error!");
                             return -1;
                         }
                     }
-		      		write_layer3_iblock(ctrl,db_cur_no,ib3);
-                    ib3_flag = TRUE;
+		      		/* write_layer3_iblock(ctrl,db_cur_no,ib3);*/
+                    ib3_need_load = FALSE;
                 }
             int _idx3  = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 
-    
             set_segno ((ib3+_idx3),ctrl->last_segno);
             set_offset((ib3+_idx3),ctrl->last_offset + db_offset);
             memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
@@ -424,9 +438,8 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 set_offset ((ib2+_idx2),ctrl->last_offset + ib_offset);
                 memcpy((char*)log_buff + ib_offset,(char*)ib3,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-
-                ib3_flag = FALSE;
-	            memset(ib3,0,sizeof(BLOCKSIZE));
+                    ib3_need_load= TRUE;
+	                memset(ib3,0,sizeof(BLOCKSIZE));
             }
 
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM * IB_ENTRY_NUM)  == 0 || db_cur_no == db_end){
@@ -434,8 +447,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 set_offset ((ib1+_idx),ctrl->last_offset + ib_offset);
                 memcpy((char*)log_buff + ib_offset,(char*)ib2,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-       
-				ib2_flag = FALSE;
+				ib2_need_load = TRUE;
 	            memset(ib2,0,sizeof(BLOCKSIZE));
             }
 
@@ -446,8 +458,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		  #endif
                 memcpy((char*)log_buff + ib_offset,(char*)ib1,BLOCKSIZE);
                 ib_offset +=BLOCKSIZE;
-   
-				ib1_flag = FALSE;
+				ib1_need_load = TRUE;
 	            memset(ib1,0,sizeof(BLOCKSIZE));
             }
   
@@ -484,9 +495,9 @@ __inode_create:;
 
  			   #if 1  /* modify inode in log's ib,but not yet modify in ctrl */
 			   struct inode _inode;
-			   memcpy(&_inode,&ctrl->inode,sizeof(struct inode));
+			   memcpy((char*)&_inode,(char*)&ctrl->inode,sizeof(struct inode));
 			   update_inode_index(&_inode,lh,ctrl->last_segno,ctrl->last_offset,ctrl->sb.block_size);
-               memcpy((char*)log_buff + offset,&_inode,sizeof(struct inode));
+               memcpy((char*)log_buff + offset,(char*)&_inode,sizeof(struct inode));
 			   #endif
 			   
                HLOG_DEBUG("log size:%d,log header:%d,inode:%d,inode map:%d,db:%d,ib:%d",lh->log_size,sizeof(struct log_header),sizeof(struct inode),sizeof(struct inode_map_entry),lh->db_num*BLOCKSIZE,lh->ib_num*BLOCKSIZE); 

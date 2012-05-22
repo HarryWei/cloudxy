@@ -167,7 +167,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
 			write_layer1_iblock(ctrl,db_no,_ib);	
 	 }	
         int _idx   = ( db_no - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
-        HLOG_DEBUG("ib2 address:%llu",*(_ib+_idx));
+        HLOG_DEBUG("ib1 address:%llu",*(_ib+_idx));
         if(*(_ib+_idx) == 0 ){
             return 1;
         }

@@ -71,7 +71,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
             if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == end_db){
                 set_segno (&inode->doubly_iblock,last_segno);
                 set_offset(&inode->doubly_iblock,last_offset + ib_offset);
-                dump_iblock((char*)log+ib_offset);
+                //dump_iblock((char*)log+ib_offset);
                 ib_offset +=BLOCKSIZE;
             }
         }else if (is_db_in_level4_index_range(db_cur_no)){

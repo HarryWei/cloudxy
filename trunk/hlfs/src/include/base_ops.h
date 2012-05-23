@@ -5,14 +5,20 @@
  * HLFS must be appended in the tail of the virtual disk,thereby speeding
  * up both file writing and crash recovery.
  * 
- * Designed by Kang Hua <kanghua151@msn.com>
+ * Copyright (C) 2012 KangHua <kanghua151@gmail.com>
  * Maintainers:
  * Harry Wei <harryxiyou@gmail.com>
  * Kelvin <kelvin.xupt@gmail.com>
  * Zhangbo <0311zhangbo@gmail.com>
  * 
  * Mail List : cloudxy@googlegroups.com
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License version 2 as published by
+ *  the Free Software Foundation.
  */
+
+
+
 #ifndef _HDFS_BASE_H_
 #define _HDFS_BASE_H_
 

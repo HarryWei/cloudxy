@@ -1,17 +1,13 @@
-/**
- * HLFS cache provide cache for HLFS.
- * 
- * The cache related code is licensed under the terms of GPL v2 or later.
- * See COPYING in the DOCUMENTATION directory.
- * 
- * Copyright (C) 2012 XUPT
- * 
- * Authors:
- * 	Kelvin Wang 
- * 		<senwang@linux.vnet.ibm.com>
- * 		<kelvin.xupt@gmail.com>
- * 
+/*
+  *  Copyright (C) 2012 KangHua <kanghua151@gmail.com>
+  *  Maintainers : Kelvin Wang 
+  *       <senwang@linux.vnet.ibm.com>
+  *       <kelvin.xupt@gmail.com>
+  *  This program is free software; you can redistribute it and/or modify it
+  *  under the terms of the GNU General Public License version 2 as published by
+  *  the Free Software Foundation.
  */
+
 
 #ifndef __CACHE_H__
 #define __CACHE_H__

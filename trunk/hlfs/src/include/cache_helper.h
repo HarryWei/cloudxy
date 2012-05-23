@@ -1,3 +1,13 @@
+/*
+  *  Copyright (C) 2012 KangHua <kanghua151@gmail.com>
+  *  Maintainers : Kelvin Wang 
+  *       <senwang@linux.vnet.ibm.com>
+  *       <kelvin.xupt@gmail.com>
+  *  This program is free software; you can redistribute it and/or modify it
+  *  under the terms of the GNU General Public License version 2 as published by
+  *  the Free Software Foundation.
+ */
+
 #ifndef __CACHE_HLEPER_H__
 #define __CACHE_HLEPER_H__
 #include "api/hlfs.h"

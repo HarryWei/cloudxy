@@ -1,8 +1,12 @@
 /*
- *  src/tools/tapdisk_ops.c
- *
- *  kanghua(kanghua151@msn.com) Harry Wei <harryxiyou@gmail.com> 2011 (C)
+  *  Copyright (C) 2012      KangHua <kanghua151@gmail.com> 
+  *  Copyright (C) 2012      Harry Wei <harryxiyou@gmail.com> 
+  *
+  *  This program is free software; you can redistribute it and/or modify it
+  *  under the terms of the GNU General Public License version 2 as published by
+  *  the Free Software Foundation.
  */
+
 #include <unistd.h>
 #include <glib.h>
 #include <stdlib.h>

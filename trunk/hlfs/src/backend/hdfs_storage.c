@@ -1,4 +1,12 @@
-#if 1
+
+/*
+  *  Copyright (C) 2012 KangHua <kanghua151@gmail.com>
+  *
+  *  This program is free software; you can redistribute it and/or modify it
+  *  under the terms of the GNU General Public License version 2 as published by
+  *  the Free Software Foundation.
+ */
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -237,5 +245,4 @@ bs_file_t hdfs_file_open(struct back_storage *storage,const char *path,int flags
     return  __hlfs_file_open(storage,path,_flags);
 }
 
-#endif
 

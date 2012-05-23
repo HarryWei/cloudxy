@@ -1,10 +1,11 @@
 /*
- * This file implements the snapshot module API hlfs_find_inode_by_name()
- * 
- * By Kelvin <kelvin.xupt@gmail.com>
- *
- * Time : 2011.12.26
+  *  Copyright (C) 2012 By Kelvin <kelvin.xupt@gmail.com>
+  *
+  *  This program is free software; you can redistribute it and/or modify it
+  *  under the terms of the GNU General Public License version 2 as published by
+  *  the Free Software Foundation.
  */
+
 #include <glib.h>
 #include <stdint.h>
 #include "storage.h"

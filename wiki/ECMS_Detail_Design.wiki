@@ -41,7 +41,7 @@
 || *host_name* ||  || 字符串 ||  || 宿主机名称||
 || *vnc_port* ||  || uint(32) ||  || vnc端口 ||
 || *vnc_password* ||  || 字符串 ||  || vnc密码 ||
-|| *vm_status* ||  || running|stopped|suspend|unknown ||  || 虚拟机状态（该字段以后移到虚拟机状态表中 ||
+|| *vm_status* ||  || running|stopped|suspend|unknown ||  || 虚拟机状态（该字段以后移到虚拟机状态表中） ||
 || *vm_vnc_port* ||  || uint ||  || vnc软件的端口号 ||
 
 

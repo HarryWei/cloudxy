@@ -123,11 +123,15 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
       //g_free(*block);
 	  HLOG_DEBUG("not find in cache!");
     }
+    
     uint64_t storage_address ;
     guint32  BLOCKSIZE = ctrl->sb.block_size;
     uint32_t db_no = no;
     uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
-    
+    if( (db_no+1)*BLOCKSIZE >ctrl->inode.length){
+        HLOG_DEBUG("beyond current inode's length:%llu",ctrl->inode.length);
+        return 1;
+    }
     if(is_db_in_level1_index_range(db_no)){
         int _idx = db_no % 12;
         storage_address = ctrl->inode.blocks[_idx];

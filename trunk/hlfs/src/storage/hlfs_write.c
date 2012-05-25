@@ -141,9 +141,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
     }
 write_log:;
 	//HLOG_DEBUG("db_start: %u db_end: %u", db_start, db_end);
-	if(ctrl->inode.length < (pos + write_len)){ 
-		ctrl->inode.length = pos + write_len;
-	}
+
 	cur_time = get_current_time();
 	ctrl->inode.mtime  = cur_time;
 	//ctrl->inode.ctime  = cur_time;
@@ -214,5 +212,8 @@ out:
     }
 	//ctrl->last_access_timestamp = get_current_time();
 	//HLOG_DEBUG("leave func %s", __func__);
+	if(ctrl->inode.length < (pos + write_len)){ 
+		ctrl->inode.length = pos + write_len;
+	}
     return write_len;
 }

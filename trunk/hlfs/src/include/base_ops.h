@@ -95,6 +95,7 @@ int hlfs_read  (HLFS_CTRL* ctrl,char* read_buf,uint32_t read_len,uint64_t pos);
  */
 int hlfs_write (HLFS_CTRL* ctrl,char* write_buf,uint32_t write_len,uint64_t pos);
 
+int hlfs_flush(struct hlfs_ctrl *ctrl);
 /**
  * hlfs_set_user_ctrl_region: Set the ctrl_region in the structure ctrl 
  * according to the given ctrl_region.

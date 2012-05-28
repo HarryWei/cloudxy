@@ -50,3 +50,12 @@ int hlfs_set_user_ctrl_region(struct hlfs_ctrl *ctrl,CTRL_REGION_T* ctrl_region)
 	//HLOG_DEBUG("leave func %s", __func__);
     return 0;
 }
+
+int hlfs_flush(struct hlfs_ctrl *ctrl)
+{
+    if(ctrl->cctrl!=NULL){
+       cache_sync(ctrl->cctrl); 
+    }
+    return 0;
+}
+

@@ -10,28 +10,43 @@
   # 编译
 = 支持操作 =
   目前尚不支持clone操作（很块会实现） 
-  * 创建操作
+  * 创建网络磁盘操作
 {{{
-  ./qemu-img create hlfs:local:///tmp/testenv/testfs 10G
+./qemu-img create hlfs:local:///tmp/testenv/testfs 10G 或
+./qemu-img create hlfs:hdfs:///tmp/testenv/testfs 10G
 }}}
   * 状态查询
 {{{
-  ./qemu-img info hlfs:local:///tmp/testenv/testfs
+./qemu-img info hlfs:local:///tmp/testenv/testfs 或
+./qemu-img info hlfs:hdfs:///tmp/testenv/testf 
 }}}
   * 快照相关操作
 {{{
-./qemu-img snapshot -c snapshot1 hlfs:local:///tmp/testenv/testfs
-./qemu-img snapshot -l hlfs:local:///tmp/testenv/testfs
-./qemu-img snapshot -d snapshot1 hlfs:local:///tmp/testenv/testfs
+生成快照
+./qemu-img snapshot -c snapshot1 hlfs:local:///tmp/testenv/testfs 或
+./qemu-img snapshot -c snapshot1 hlfs:hdfs:///tmp/testenv/testfs
+查询快照
+./qemu-img snapshot -l hlfs:local:///tmp/testenv/testfs 或
+./qemu-img snapshot -l hdfs:local:///tmp/testenv/testfs
+删除快照
+./qemu-img snapshot -d snapshot1 hlfs:local:///tmp/testenv/testfs 或
+./qemu-img snapshot -d snapshot1 hlfs:hdfs:///tmp/testenv/testfs
 }}}
   * 格式转换操作
 {{{
-  ./qemu-img convert raw.img  hlfs:local:///tmp/testenv/testfs
+./qemu-img convert raw.img  hlfs:local:///tmp/testenv/testfs
 }}}
   * 格式转换操作
 {{{
- ./qemu-img convert raw.img  hlfs:local:///tmp/testenv/testfs
+./qemu-img convert raw.img  hlfs:local:///tmp/testenv/testfs 或
+./qemu-img convert raw.img  hlfs:hdfs:///tmp/testenv/testfs
 }}}
   * KVM启动
-{{{qemu-system-x86_64 -enable-kvm -m 1024 -smp 2 -drive file=hlfs:local:///tmp/testenv/testfs,if=virtio -boot d -vnc :7
+{{{
+qemu-system-x86_64 -enable-kvm -m 1024 -smp 2 -drive file=hlfs:local:///tmp/testenv/testfs,if=virtio -boot d -vnc :7 或 
+qemu-system-x86_64 -enable-kvm -m 1024 -smp 2 -drive file=hlfs:hdfs:///tmp/testenv/testfs,if=virtio -boot d -vnc :7
+从某个快照上启动
+qemu-system-x86_64 -enable-kvm -m 1024 -smp 2 -drive file=hlfs:local:///tmp/testenv/testfs%snapshot1,if=virtio -boot d -vnc :7 或 
+qemu-system-x86_64 -enable-kvm -m 1024 -smp 2 -drive file=hlfs:hdfs:///tmp/testenv/testfs%shopshot1,if=virtio -boot d -vnc :7
+%后为快照名称
 }}}

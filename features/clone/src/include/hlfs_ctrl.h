@@ -98,6 +98,8 @@ struct hlfs_ctrl {
     struct cache_ctrl *cctrl;
     struct icache_ctrl *icache;
     uint32_t io_nonactive_period;
+	uint32_t start_segno;
+	GTree *  parents;
 };
 
 typedef struct hlfs_stat{

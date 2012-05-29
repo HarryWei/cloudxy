@@ -115,19 +115,19 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
     ctrl->usage_ref = 0;
     //ctrl->seg_clean_run = 1;
     memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
+    ctrl->ctrl_region = &CTRL_REGION;
+    ctrl->ctrl_region->is_start_clean  = is_clean_start;
+    ctrl->ctrl_region->copy_waterlevel = copy_waterlevel;
     GThread * seg_clean_thread = g_thread_create((GThreadFunc)seg_clean_task,ctrl,TRUE,NULL);
     ctrl->seg_clean_thread = seg_clean_thread;
-    ctrl->ctrl_region = &CTRL_REGION;
-    ctrl->ctrl_region->is_start_clean      = is_clean_start;
-    ctrl->ctrl_region->copy_waterlevel  = copy_waterlevel;
     ctrl->hlfs_access_mutex = g_mutex_new();
     ctrl->last_segno = segno;
     ctrl->last_offset = offset;
     if(ctrl->last_segno != 0 || ctrl->last_offset != 0){
         if( 0 != load_latest_inode_map_entry(ctrl->storage,ctrl->last_segno,ctrl->last_offset,&ctrl->imap_entry)){
             HLOG_ERROR("load inode map entry failed");
-	     g_free(ctrl);
-	     ctrl = NULL;
+            g_free(ctrl);
+            ctrl = NULL;
             goto out;
         }
     }

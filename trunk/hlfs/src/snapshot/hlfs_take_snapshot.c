@@ -61,10 +61,12 @@ int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname)
     ret = dump_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE,&ss);
     if(ret!=0){
       HLOG_ERROR("dump snapshot alive error!");
+      return -1;
     }
 	ret = dump_snapshot(ctrl->storage,SNAPSHOT_FILE,&ss);
     if(ret!=0){
       HLOG_ERROR("dump snapshot error!");
+      return -1;
     }
 	HLOG_INFO("Take Snapshot Succ- snapshot_name:%s,last_segno:%d,last_offset:%d",
     						      ssname,

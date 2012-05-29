@@ -57,7 +57,14 @@ struct back_storage* init_storage_handler(const char* uri)
 	storage->hostname = hostname;
     storage->port = port;
 	storage->user = g_strdup("kanghua");
-	
+    HLOG_DEBUG("uri:%s,head:%s,dir:%s,fsname:%s,hostname:%s,port:%d,user:%s",
+                storage->uri,
+                storage->head,
+                storage->dir,
+                storage->fs_name,
+                storage->hostname,
+                storage->port,
+                storage->user);
     if(0!=storage->bs_fs_connect(storage,uri)){
         ret = -1;
         goto out;

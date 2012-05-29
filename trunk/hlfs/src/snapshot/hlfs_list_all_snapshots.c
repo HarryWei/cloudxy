@@ -54,7 +54,7 @@ struct snapshot *__hlfs_get_all_snapshots(struct back_storage *storage,int *num_
 		HLOG_ERROR("load all ss error: %d", ret);
 		goto out;
 	}
-   
+    HLOG_DEBUG("hash table:%d",g_hash_table_size(ss_hashtable));  
     sort_all_snapshot(ss_hashtable,&snapshot_list);
 	if (0 == g_list_length(snapshot_list)) {
 		HLOG_ERROR("the length of snapshot list is 0");

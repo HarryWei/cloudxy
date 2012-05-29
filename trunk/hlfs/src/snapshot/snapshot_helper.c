@@ -170,8 +170,19 @@ int load_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHa
             goto out;
         }
 		if (flag == 0) {
-			g_hash_table_insert(ss_hashtable, ss->sname, ss);
-			HLOG_DEBUG("insert snapshot [%s]", ss->sname);
+            g_hash_table_insert(ss_hashtable, ss->sname, ss);
+            if(to_remove_ss_list!=NULL){
+                int j;
+                for(j = 0; j < g_list_length(to_remove_ss_list); j++){
+                    char * ss_name = g_list_nth_data(to_remove_ss_list,j);
+                    HLOG_DEBUG("ss_name [%s] ...", ss_name);
+                    if(0 == strcmp(ss->sname,ss_name)){
+                        to_remove_ss_list = g_list_remove(to_remove_ss_list,ss_name);
+                        break;
+                    }
+                }
+            }
+            HLOG_DEBUG("insert snapshot [%s]", ss->sname);
 		} else if (flag == 1) {
 			HLOG_DEBUG("remove snapshot [%s]", ss->sname);
             to_remove_ss_list = g_list_append(to_remove_ss_list,ss->sname);

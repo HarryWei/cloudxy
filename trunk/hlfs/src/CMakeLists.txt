@@ -75,9 +75,9 @@ SET(LHFLIBS   glib-2.0
               gthread-2.0 
               rt
 	          hdfs
-		  log4c
-     	      jvm
-			  gcov)
+		      log4c
+     	      jvm)
+              #gcov
 
 ADD_LIBRARY(hlfs SHARED ${LHFSSRCS})
 # Set linked libs with target.¡¡
@@ -106,9 +106,9 @@ ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(TOOLLIBS glib-2.0
              hlfs
-	     log4c
+	         log4c
 	         hdfs
-			 gcov)
+			 )
 
 #SET(CMAKE_INSTALL_PREFIX /usr)
 SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
@@ -143,16 +143,16 @@ SET(TOOLSRCS tools/nbd_ops.c)
 ADD_EXECUTABLE(nbd_ops ${TOOLSRCS})
 TARGET_LINK_LIBRARIES(nbd_ops ${TOOLLIBS})
 SET_TARGET_PROPERTIES(nbd_ops PROPERTIES COMPILE_FLAGS "-g")
-ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
-TARGET_LINK_LIBRARIES(nbd_ops -fprofile-arcs -ftest-coverage)
+#ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+#TARGET_LINK_LIBRARIES(nbd_ops -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(tools nbd_ops)
 
 SET(TOOLSRCS tools/tapdisk_ops.c)
 ADD_EXECUTABLE(tapdisk_ops ${TOOLSRCS})
 TARGET_LINK_LIBRARIES(tapdisk_ops ${TOOLLIBS})
 SET_TARGET_PROPERTIES(tapdisk_ops PROPERTIES COMPILE_FLAGS "-g")
-ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
-TARGET_LINK_LIBRARIES(tapdisk_ops -fprofile-arcs -ftest-coverage)
+#ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+#TARGET_LINK_LIBRARIES(tapdisk_ops -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(tools tapdisk_ops)
 
 #---------------------- Make Test ------------------------------#

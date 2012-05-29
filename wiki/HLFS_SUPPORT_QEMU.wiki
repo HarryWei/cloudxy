@@ -1,0 +1,32 @@
+#summary HLFS在QEMU中使用
+
+= 简介 =
+我们已经将HLFS移植到QEMU环境下，从而支持在KVM等虚拟环境下使用其。
+
+
+= 下载和编译 =
+  # 下载patch for qemu (
+  # patch it 
+  # 编译
+= 支持操作 =
+  目前尚不支持clone操作（很块会实现） 
+  * 创建操作
+{{{
+  ./qemu-img create hlfs:local:///tmp/testenv/testfs 10G
+}}}
+  * 状态查询
+{{{
+  ./qemu-img info hlfs:local:///tmp/testenv/testfs
+}}}
+  * 快照相关操作
+{{{
+./qemu-img snapshot -c snapshot1 hlfs:local:///tmp/testenv/testfs
+./qemu-img snapshot -l hlfs:local:///tmp/testenv/testfs
+./qemu-img snapshot -d snapshot1 hlfs:local:///tmp/testenv/testfs
+}}}
+  * 格式转换操作
+{{{
+  ./qemu-img convert raw.img  hlfs:local:///tmp/testenv/testfs
+}}}
+  * 格式转换操作
+

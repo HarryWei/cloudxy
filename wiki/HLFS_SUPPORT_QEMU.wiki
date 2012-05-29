@@ -5,11 +5,29 @@
 
 
 = 下载和编译 =
-  # 下载patch for qemu (
-  # patch it 
-  # 编译
+  # 下载 qemu - git clone git://git.qemu.org/qemu.git
+  # 下载patch for qemu - https://cloudxy.googlecode.com/svn/trunk/hlfs/patches/hlfs_driver_for_qemu.patch
+  # patch it - 在qemu目录外执行 ：patch -p0< hlfs_driver_for_qemu.patch
+{{{
+修改configure中
+GLIB_DIR1_INC=/usr/lib/glib-2.0/include
+GLIB_DIR2_INC=/usr/include/glib-2.0
+HLFS_DIR=/home/kanghua/workshop3.bak/hlfs
+LOG4C_DIR=$HLFS_DIR/3part/log
+HDFS_DIR=$HLFS_DIR/3part/hadoop
+JVM_DIR=/usr/lib/jvm/java-6-sun/
+几个变量位置为你环境的实际地址
+}}}
+  # 编译 cd qemu;./configure;make - 生成qemu-img
+{{{
+    ldd ./qemu-img 查看是否其指向的库都存在！
+}}}
 = 支持操作 =
-  目前尚不支持clone操作（很块会实现） 
+{{{
+注意：
+1.目前尚不支持clone操作（很块会实现） 
+2.确保ldd ./qemu-img 所显示的库(hlfs,hdfs,jvm,log4c等）处于动态库搜索路径，如果不再，则要自己手动添加到路径中。
+}}}
   * 创建网络磁盘操作
 {{{
 ./qemu-img create hlfs:local:///tmp/testenv/testfs 10G 或

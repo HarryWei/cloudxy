@@ -526,7 +526,7 @@ int file_append_contents(struct back_storage *storage,const char* filename,const
 	int ret = 0;
 	bs_file_t file = NULL;
 	if ( 0!= storage->bs_file_is_exist(storage,filename)) {
-		HLOG_DEBUG("cp file not exist, create file");
+		HLOG_DEBUG("file:%s not exist, create file",filename);
 		file = storage->bs_file_create(storage,filename);
 		if (NULL == file) {
             ret = -1;

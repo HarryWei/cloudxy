@@ -106,9 +106,9 @@ ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(TOOLLIBS glib-2.0
              hlfs
-	     log4c
+	         log4c
 	         hdfs
-			 gcov)
+			 )
 
 #SET(CMAKE_INSTALL_PREFIX /usr)
 SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
@@ -120,6 +120,17 @@ SET_TARGET_PROPERTIES(mkfs.hlfs PROPERTIES COMPILE_FLAGS "-g")
 #TARGET_LINK_LIBRARIES(mkfs.hlfs -fprofile-arcs -ftest-coverage)
 #INSTALL(TARGETS mkfs.hlfs RUNTIME DESTINATION bin)
 ADD_DEPENDENCIES(tools mkfs.hlfs)
+
+#SET(CMAKE_INSTALL_PREFIX /usr)
+SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
+SET(TOOLSRCS tools/hlfs_clone.c)
+ADD_EXECUTABLE(clone.hlfs ${TOOLSRCS})
+TARGET_LINK_LIBRARIES(clone.hlfs ${TOOLLIBS})
+SET_TARGET_PROPERTIES(clone.hlfs PROPERTIES COMPILE_FLAGS "-g")
+#ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+#TARGET_LINK_LIBRARIES(mkfs.hlfs -fprofile-arcs -ftest-coverage)
+#INSTALL(TARGETS mkfs.hlfs RUNTIME DESTINATION bin)
+ADD_DEPENDENCIES(tools clone.hlfs)
 
 
 SET(TOOLSRCS tools/hlfs_seg_usage_calc.c)

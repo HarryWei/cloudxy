@@ -36,8 +36,7 @@ error_func(GOptionContext *context, GOptionGroup *group,
     }
 }
 
-/*  mkfs.lhfs -l local://<path> -f name */
-/*  mkfs.lhfs -l http://<path>  -s name */
+
 int main(int argc, char *argv[])
 {
 	if (log4c_init()) {
@@ -114,7 +113,7 @@ int main(int argc, char *argv[])
     }else{
         if(segno == 0 && offset == 0){
            g_message("father hlfs is empty,no meaning");
-           inode_addr = 0;
+           return -1;
         }else{
            struct inode_map_entry imap_entry;
            if( 0 != load_latest_inode_map_entry(father_storage,segno,offset,&imap_entry)){

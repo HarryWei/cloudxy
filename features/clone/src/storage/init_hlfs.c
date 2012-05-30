@@ -146,12 +146,12 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
 	      HLOG_DEBUG("it is a clone hlfs!!!");
 	      struct back_storage * storage;
 	      if(NULL == (storage = get_parent_storage(ctrl->family,ctrl->family->base_father_inode))){
-		  	HLOG_ERROR("can not get father base inode");
-	               ret = -1;
+		  	 HLOG_ERROR("can not get father base inode");
+	         ret = -1;
 	 		 goto out;
 	     }
-	     uint32_t offset =  get_offset(ctrl->family->base_father_inode);
-            uint32_t segno = get_segno(ctrl->family->base_father_inode);
+	     	uint32_t offset =  get_offset(ctrl->family->base_father_inode);
+            uint32_t segno =   get_segno(ctrl->family->base_father_inode);
             if( 0 != load_latest_inode_map_entry(storage,segno,offset,&ctrl->imap_entry)){
                   HLOG_ERROR("load inode map entry failed");
 		    ret = -1;

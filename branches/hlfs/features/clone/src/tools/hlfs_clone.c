@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
            inode_addr = imap_entry.inode_addr;
         }
     }
-    g_key_file_set_uint64(sb_keyfile,"METADATA","start_segno",segno+1);
+    g_key_file_set_uint64(sb_keyfile,"METADATA","from_segno",segno+1);
     g_key_file_set_string(sb_keyfile,"METADATA","father_uri",father_uri);
     g_key_file_set_uint64(sb_keyfile,"METADATA","base_father_inode",inode_addr);
     gchar *data = g_key_file_to_data(sb_keyfile,NULL,NULL);

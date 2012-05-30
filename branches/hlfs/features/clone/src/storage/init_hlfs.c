@@ -54,11 +54,11 @@ int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint3
 int init_from_superblock(struct back_storage *storage, struct hlfs_ctrl *ctrl)
 {
 	//HLOG_DEBUG("enter func %s", __func__);
-    if ((NULL == storage) || (NULL == sb)) {
+    if ((NULL == storage) || (NULL == ctrl)) {
 		HLOG_ERROR("read fs superblock error");
 		return -1;
     }
-    struct super_block *sb = ctrl->sb;
+    struct super_block *sb = &ctrl->sb;
     char *father_uri = NULL;
     uint64_t base_father_inode;
     uint32_t from_segno;
@@ -159,7 +159,7 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
 		    
             }
 	     ctrl->start_segno = segno + 1;
-	     ctrl->last_segno = ctrl->start_no;
+	     ctrl->last_segno = ctrl->start_segno;
 	     ctrl->last_offset = 0;
         }		
     }
@@ -172,20 +172,19 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
 			    ctrl->sb.block_size,
 			    ctrl->last_segno,
 			    ctrl->last_offset,
-			    ctrl->io_nonactive_period); 
+                ctrl->io_nonactive_period); 
 out:
-	//HLOG_DEBUG("leave func %s", __func__);
-      if(ret!=0){
-              if(NULL!=ctrl && NULL!=ctrl->family){
-	  	    family_destroy(ctrl->family);
-              }
-	       if(NULL! = ctrl){
-		    g_free(ctrl);
-	           ctrl = NULL;
-	       }
-
-      	}	  	
-      return ctrl;
+    //HLOG_DEBUG("leave func %s", __func__);
+    if(ret!=0){
+        if(NULL!=ctrl && NULL!=ctrl->family){
+            family_destroy(ctrl->family);
+        }
+        if(NULL != ctrl){
+            g_free(ctrl);
+            ctrl = NULL;
+        }
+    }	  	
+    return ctrl;
 } 
 
 

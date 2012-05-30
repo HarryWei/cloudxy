@@ -40,7 +40,7 @@ int faimly_init(FAMILY_CTRL *fctrl,char* furi,uint64_t fbase_inode,uint32_t fseg
 	
 	struct back_storage *storage =NULL;
 	char *uri = furi;
-	uint32_t segno = fsegno;
+	uint32_t segno = fsegno+1;
 	char * father_uri = NULL;
     uint64_t base_father_inode,max_fs_size;
     uint32_t from_segno,seg_size,block_size;

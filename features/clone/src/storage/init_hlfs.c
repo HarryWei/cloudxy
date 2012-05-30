@@ -136,37 +136,37 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
     ctrl->last_segno = segno;
     ctrl->last_offset = offset ;
     ctrl->io_nonactive_period = seg_clean_check_period;
-    
+
     if(ctrl->last_segno != 0 || ctrl->last_offset != 0){
-            if( 0 != load_latest_inode_map_entry(ctrl->storage,ctrl->last_segno,ctrl->last_offset,&ctrl->imap_entry)){
+        if( 0 != load_latest_inode_map_entry(ctrl->storage,ctrl->last_segno,ctrl->last_offset,&ctrl->imap_entry)){
             HLOG_ERROR("load inode map entry failed");
-	      ret = -1;
-	      goto out;
-           }
+            ret = -1;
+            goto out;
+        }
     }else{
         if(NULL != ctrl->family){
-	      HLOG_DEBUG("it is a clone hlfs!!!");
-	      struct back_storage * storage;
-	     	uint32_t offset =  get_offset(ctrl->family->base_father_inode);
+            HLOG_DEBUG("it is a clone hlfs!!!");
+            struct back_storage * storage;
+            uint32_t offset =  get_offset(ctrl->family->base_father_inode);
             uint32_t segno =   get_segno(ctrl->family->base_father_inode);
-	      if(NULL == (storage = get_parent_storage(ctrl->family,segno))){
-		  	 HLOG_ERROR("can not get father base inode");
-	         ret = -1;
-	 		 goto out;
-	     }
+            if(NULL == (storage = get_parent_storage(ctrl->family,segno))){
+                HLOG_ERROR("can not get father base inode");
+                ret = -1;
+                goto out;
+            }
 
             if( 0 != load_latest_inode_map_entry(storage,segno,offset,&ctrl->imap_entry)){
-                  HLOG_ERROR("load inode map entry failed");
-		    ret = -1;
-	 	    goto out;
-		    
+                HLOG_ERROR("load inode map entry failed");
+                ret = -1;
+                goto out;
+
             }
-	     ctrl->start_segno = segno + 1;
-	     ctrl->last_segno = ctrl->start_segno;
-	     ctrl->last_offset = 0;
+            ctrl->start_segno = segno + 1;
+            ctrl->last_segno = ctrl->start_segno;
+            ctrl->last_offset = 0;
         }		
     }
-	
+
 
     HLOG_INFO("Raw Hlfs Ctrl Init Over ! uri:%s,max_fs_size:%llu,seg_size:%u,block_size:%u,last_segno:%u,last_offset:%u,io_nonactive_period:%u",
 			    uri,

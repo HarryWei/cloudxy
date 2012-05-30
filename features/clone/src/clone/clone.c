@@ -21,6 +21,7 @@
 #include "bs_local.h"
 #include "seg_clean.h"
 #include "logger.h"
+#include "clone.h"
 
 
 struct back_storage * get_parent_storage(FAMILY_CTRL *fctrl, uint32_t segno){
@@ -28,4 +29,6 @@ struct back_storage * get_parent_storage(FAMILY_CTRL *fctrl, uint32_t segno){
 	    return storage;
 }
 
- 
+int family_destroy(FAMILY_CTRL *fctrl){
+    return 0;
+}

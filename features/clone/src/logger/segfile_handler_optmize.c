@@ -21,6 +21,7 @@
 #include "storage.h"
 #include "icache.h"
 #include <errno.h>
+#include "clone.h"
 
 int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
 	//HLOG_DEBUG("enter func %s", __func__);
@@ -33,7 +34,7 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
        if(segno >= ctrl->start_segno){
                storage = ctrl->storage;
        }else{
-             if(NULL == (storage = get_parent_storage(ctrl->family,storage_address))){
+             if(NULL == (storage = get_parent_storage(ctrl->family,segno))){
 		  return -1;
 	      }
        }
@@ -67,7 +68,7 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
 	if(segno >= ctrl->start_segno){
                storage = ctrl->storage;
        }else{
-             if(NULL == (storage = get_parent_storage(ctrl->family,storage_address))){
+             if(NULL == (storage = get_parent_storage(ctrl->family,segno))){
 		  return -1;
 	      }
        }

@@ -18,7 +18,7 @@ typedef  struct family_ctrl{
            char*      father_uri;
 	    uint64_t  base_father_inode;
 	    uint32_t  from_segno;
-           GTree *  seg_storage_map;
+        GList*    seg_storage_list;
  }FAMILY_CTRL;
 
 FAMILY_CTRL * family_new();

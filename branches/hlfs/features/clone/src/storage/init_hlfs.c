@@ -64,7 +64,7 @@ int init_from_superblock(struct back_storage *storage, struct hlfs_ctrl *ctrl)
     uint32_t from_segno;
     int ret = read_fs_meta_all(storage,&(sb->seg_size),&(sb->block_size),&(sb->max_fs_size),
 		   			            &father_uri,&base_father_inode,&from_segno);
-    assert(ret !=0);
+    g_assert(ret !=0);
     if(father_uri!=NULL){
 	   FAMILY_CTRL *family = family_new();
 	   faimly_init(family,father_uri,base_father_inode,from_segno);

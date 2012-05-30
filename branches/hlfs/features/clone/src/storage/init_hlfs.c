@@ -53,7 +53,7 @@ int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint3
 
 int init_from_superblock(struct back_storage *storage, struct hlfs_ctrl *ctrl)
 {
-	//HLOG_DEBUG("enter func %s", __func__);
+	HLOG_DEBUG("enter func %s", __func__);
     if ((NULL == storage) || (NULL == ctrl)) {
 		HLOG_ERROR("read fs superblock error");
 		return -1;
@@ -64,8 +64,10 @@ int init_from_superblock(struct back_storage *storage, struct hlfs_ctrl *ctrl)
     uint32_t from_segno;
     int ret = read_fs_meta_all(storage,&(sb->seg_size),&(sb->block_size),&(sb->max_fs_size),
 		   			            &father_uri,&base_father_inode,&from_segno);
-    g_assert(ret !=0);
+    g_assert(ret ==0);
+	HLOG_DEBUG("father uri:%s",father_uri);
     if(father_uri!=NULL){
+	   HLOG_DEBUG("father uri:%s",father_uri);
 	   FAMILY_CTRL *family = family_new();
 	   faimly_init(family,father_uri,base_father_inode,from_segno);
 	   ctrl->family = family;
@@ -145,13 +147,14 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
         if(NULL != ctrl->family){
 	      HLOG_DEBUG("it is a clone hlfs!!!");
 	      struct back_storage * storage;
-	      if(NULL == (storage = get_parent_storage(ctrl->family,ctrl->family->base_father_inode))){
+	     	uint32_t offset =  get_offset(ctrl->family->base_father_inode);
+            uint32_t segno =   get_segno(ctrl->family->base_father_inode);
+	      if(NULL == (storage = get_parent_storage(ctrl->family,segno))){
 		  	 HLOG_ERROR("can not get father base inode");
 	         ret = -1;
 	 		 goto out;
 	     }
-	     	uint32_t offset =  get_offset(ctrl->family->base_father_inode);
-            uint32_t segno =   get_segno(ctrl->family->base_father_inode);
+
             if( 0 != load_latest_inode_map_entry(storage,segno,offset,&ctrl->imap_entry)){
                   HLOG_ERROR("load inode map entry failed");
 		    ret = -1;

@@ -56,7 +56,7 @@ int faimly_init(FAMILY_CTRL *fctrl,char* furi,uint64_t fbase_inode,uint32_t fseg
 	   storage_item = g_malloc0(sizeof(STORAGE_ITEM));
 	   storage_item->storage = storage;
 	   storage_item->segno = segno-1;
-	   g_list_append(fctrl->seg_storage_list,storage_item);
+	   fctrl->seg_storage_list = g_list_append(fctrl->seg_storage_list,storage_item);
        if(0 !=(ret = read_fs_meta_all(storage,&seg_size,&block_size,&max_fs_size,
 		   			            &father_uri,&base_father_inode,&from_segno))){
 		  HLOG_ERROR("fail to read fs meta info");
@@ -73,6 +73,9 @@ int faimly_init(FAMILY_CTRL *fctrl,char* furi,uint64_t fbase_inode,uint32_t fseg
 		  break;
        }
 	}while(1);
+    fctrl->from_segno = fsegno;
+    fctrl->father_uri = furi;
+    fctrl->base_father_inode = fbase_inode;
 out:
 	return ret;
 }
@@ -82,6 +85,7 @@ struct back_storage * get_parent_storage(FAMILY_CTRL *fctrl, uint32_t segno){
 	 int i = 0;
 	 for(i = g_list_length(fctrl->seg_storage_list)-1; i >= 0; i--){
         STORAGE_ITEM *storage_item = g_list_nth_data(fctrl->seg_storage_list,i);
+        HLOG_DEBUG("storage_item's segno:%d,search segno:%d",storage_item->segno,segno);
         if(storage_item->segno >= segno){
 		   storage = storage_item->storage;
            break; 

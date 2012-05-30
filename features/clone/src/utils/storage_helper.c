@@ -411,9 +411,9 @@ uint64_t  SEGMENT_SIZE_MASK = 0;
 uint64_t  SEGMENT_SIZE_SHIFT = 0;
 uint32_t  HBLOCK_SIZE;
 #endif
-int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size)
-{
-    HLOG_DEBUG("enter func %s", __func__);
+
+
+static GKeyFile *  get_superblock_keyfile(struct back_storage *storage){
     int ret = 0;
     if(0!=storage->bs_file_is_exist(storage,"superblock")){
         HLOG_ERROR("superblock file can not be accessable");
@@ -425,44 +425,82 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
     if(file == NULL){
       HLOG_ERROR("can not open superblock file");  
       ret = -1;
-      return ret;
+      goto out;
     }
     int size = storage->bs_file_pread(storage,file,key_file_buf,4096,0);
     if(size <0){
       HLOG_ERROR("can not read superblock file");
       storage->bs_file_close(storage,file);
-      ret = -1;
-      return ret;
+      goto out;
     }
     GKeyFile * sb_keyfile = g_key_file_new();
     if(FALSE == g_key_file_load_from_data(sb_keyfile,key_file_buf,size,G_KEY_FILE_NONE,NULL)){
        HLOG_ERROR("superblock file format is not key value pairs");
-       //storage->bs_file_close(storage,file);
-       //g_key_file_free(sb_keyfile);
-       ret = -2;
        goto out;
     }
-    gchar * _uri =  g_key_file_get_string(sb_keyfile,"METADATA","uri",NULL);
-    guint32 _seg_size = g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL);
-    guint32 _block_size = g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);
-    guint64 _max_fs_size = g_key_file_get_int64(sb_keyfile,"METADATA","max_fs_size",NULL);
-    if(_uri==NULL || _seg_size == 0 || _block_size ==0 || _max_fs_size == 0){
-       HLOG_ERROR("superblock parse error");
-       g_free(_uri);
-       ret = -3;
-       goto out;
-    }
-    HLOG_DEBUG("superblock : seg size :%u block size :%u max fs size :%u(M) uri :%s\n",_seg_size,_block_size,_max_fs_size,_uri);
+out:
+    storage->bs_file_close(storage,file);
+    return sb_keyfile;
+}
+
+int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size,
+					    gchar **father_uri,uint64_t *base_father_inode, uint32_t *from_segno){
+     GKeyFile * file = get_superblock_keyfile(storage);
+     gchar * _uri =  g_key_file_get_string(sb_keyfile,"METADATA","uri",NULL);
+     guint32 _seg_size = g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL);
+     guint32 _block_size = g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);
+     guint64 _max_fs_size = g_key_file_get_int64(sb_keyfile,"METADATA","max_fs_size",NULL); 
+     if(_uri==NULL || _seg_size == 0 || _block_size ==0 || _max_fs_size == 0){
+          HLOG_ERROR("superblock parse error");
+          g_free(_uri);
+          return -1;
+     }
     *segment_size = _seg_size;
     *block_size = _block_size;
     *max_fs_size = _max_fs_size;
     if(0!=strcmp(storage->uri,_uri)){
         HLOG_ERROR("error fs name");
         g_free(_uri);
-        ret = -4;
-        goto out;
+        return -1;
     }
-    g_free(_uri);
+     g_free(_uri);
+     gchar * _father_uri =  g_key_file_get_string(sb_keyfile,"METADATA","fater_uri",NULL);
+     guint64 _base_father_inode = g_key_file_get_int64(sb_keyfile,"METADATA","base_father_inode",NULL);
+     guint32 _from_segno = g_key_file_get_integer(sb_keyfile,"METADATA","start_segno",NULL);
+     if(_father_uri !=NULL){
+	   *father_uri = _father_uri;
+	   *base_father_inode = _base_father_inode;
+	  * from_segno = _from_segno;
+     }	 
+#if 1
+    SEGMENT_SIZE = _seg_size;
+    SEGMENT_SIZE_MASK  = SEGMENT_SIZE - 1;
+    SEGMENT_SIZE_SHIFT = 0;
+    while (0 != (SEGMENT_SIZE = (SEGMENT_SIZE >> 1)))
+    {                                                                                                         
+        SEGMENT_SIZE_SHIFT++;
+    }
+    HBLOCK_SIZE=_block_size;
+#endif	 
+     g_key_file_free(sb_keyfile); 	 
+     return 0;
+}
+
+int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size)
+{
+     GKeyFile * file = get_superblock_keyfile(storage);
+     gchar * _uri =  g_key_file_get_string(sb_keyfile,"METADATA","uri",NULL);
+     guint32 _seg_size = g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL);
+     guint32 _block_size = g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);
+     guint64 _max_fs_size = g_key_file_get_int64(sb_keyfile,"METADATA","max_fs_size",NULL); 
+     if(_uri==NULL || _seg_size == 0 || _block_size ==0 || _max_fs_size == 0){
+          HLOG_ERROR("superblock parse error");
+          g_free(_uri);
+          return -1;
+     }
+    *segment_size = _seg_size;
+    *block_size = _block_size;
+    *max_fs_size = _max_fs_size;
 #if 1
     SEGMENT_SIZE = _seg_size;
     SEGMENT_SIZE_MASK  = SEGMENT_SIZE - 1;
@@ -475,8 +513,7 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
 #endif
 out:
     g_key_file_free(sb_keyfile);
-    storage->bs_file_close(storage,file);
-	HLOG_DEBUG("leave func %s", __func__);
+    HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
  

@@ -136,7 +136,7 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
 	      struct back_storage * storage = get_parent_storage(ctrl->family,ctrl->family->base_father_inode);
 	      if( NULL == storage ){
 		   HLOG_ERROR(" can not get parent storage for addr:%llu",ctrl->family->base_father_inode);
-		   famliy_destroy(ctrl->family);
+		   family_destroy(ctrl->family);
 		   g_free(ctrl);
 	          ctrl = NULL;
                  goto out;

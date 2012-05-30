@@ -23,9 +23,15 @@
 #include "logger.h"
 #include "clone.h"
 
+FAMILY_CTRL * family_new(){
+    return NULL;
+}
+int faimly_init(FAMILY_CTRL *family_ctrl,char* father_uri,uint64_t base_inode,uint32_t from_segno){
+	return 0;
+}
 
 struct back_storage * get_parent_storage(FAMILY_CTRL *fctrl, uint32_t segno){
-           struct back_storage * storage = NULL;
+           struct  back_storage * storage = NULL;
 	    return storage;
 }
 

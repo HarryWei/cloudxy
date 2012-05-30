@@ -115,6 +115,7 @@ int main(int argc, char *argv[])
            g_message("father hlfs is empty,no meaning");
            return -1;
         }else{
+           g_message("father lastest segno:%d,offset:%d",segno,offset);
            struct inode_map_entry imap_entry;
            if( 0 != load_latest_inode_map_entry(father_storage,segno,offset,&imap_entry)){
                g_message("can not get latest inode map entry from father hlfs");

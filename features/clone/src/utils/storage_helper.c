@@ -464,13 +464,13 @@ int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32
         return -1;
     }
      g_free(_uri);
-     gchar * _father_uri =  g_key_file_get_string(sb_keyfile,"METADATA","fater_uri",NULL);
+     gchar * _father_uri =  g_key_file_get_string(sb_keyfile,"METADATA","father_uri",NULL);
      guint64 _base_father_inode = g_key_file_get_int64(sb_keyfile,"METADATA","base_father_inode",NULL);
      guint32 _from_segno = g_key_file_get_integer(sb_keyfile,"METADATA","start_segno",NULL);
      if(_father_uri !=NULL){
 	   *father_uri = _father_uri;
 	   *base_father_inode = _base_father_inode;
-	  * from_segno = _from_segno;
+	   *from_segno = _from_segno;
      }	 
 #if 1
     SEGMENT_SIZE = _seg_size;

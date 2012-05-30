@@ -96,10 +96,10 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
     //HLOG_DEBUG("storage name:%s,uri %s\n", (char *) storage->storage_name,storage->uri);
     ctrl->storage = storage;
     if(0!= read_fs_superblock(ctrl->storage,&ctrl->sb)){
-            HLOG_ERROR("[uri:%s] read superblock failed",uri);
-            g_free(ctrl);
-            ctrl = NULL;
-            goto out;
+              HLOG_ERROR("[uri:%s] read superblock failed",uri);
+              g_free(ctrl);
+              ctrl = NULL;
+              goto out;
     }
 
     //HLOG_DEBUG("superblock read over\n");
@@ -122,7 +122,7 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
     ctrl->ctrl_region->copy_waterlevel  = copy_waterlevel;
     ctrl->hlfs_access_mutex = g_mutex_new();
     ctrl->last_segno = segno;
-    ctrl->last_offset = offset;
+    ctrl->last_offset = offset ;
     if(ctrl->last_segno != 0 || ctrl->last_offset != 0){
         if( 0 != load_latest_inode_map_entry(ctrl->storage,ctrl->last_segno,ctrl->last_offset,&ctrl->imap_entry)){
             HLOG_ERROR("load inode map entry failed");
@@ -130,6 +130,19 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
 	     ctrl = NULL;
             goto out;
         }
+    }else{
+        if(NULL != ctrl->family){
+	      HLOG_DEBUG("it is a clone hlfs!!!");
+	      struct back_storage * storage = get_parent_storage(ctrl->family,ctrl->family->base_father_inode);
+	      if( NULL == storage ){
+		   HLOG_ERROR(" can not get parent storage for addr:%llu",ctrl->family->base_father_inode);
+		   famliy_destroy(ctrl->family);
+		   g_free(ctrl);
+	          ctrl = NULL;
+                 goto out;
+	      }
+		  
+        }		
     }
     ctrl->io_nonactive_period = seg_clean_check_period;
     HLOG_INFO("Raw Hlfs Ctrl Init Over ! uri:%s,max_fs_size:%llu,seg_size:%u,block_size:%u,last_segno:%u,last_offset:%u,io_nonactive_period:%u",

@@ -413,7 +413,7 @@ uint32_t  HBLOCK_SIZE;
 #endif
 int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+    HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
     if(0!=storage->bs_file_is_exist(storage,"superblock")){
         HLOG_ERROR("superblock file can not be accessable");

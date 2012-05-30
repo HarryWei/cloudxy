@@ -102,8 +102,18 @@ static int read_block_raw(struct hlfs_ctrl *ctrl,uint32_t storage_address,char* 
 {
 	//HLOG_DEBUG("enter func %s", __func__);
     uint32_t block_size = ctrl->sb.block_size;
-	int ret = read_block(ctrl->storage,storage_address,block_size,block_buf);
-	//HLOG_DEBUG("leave func %s", __func__);
+    struct back_storage * storage =NULL;
+    uint32_t offset = get_offset(storage_address);
+    uint32_t segno = get_segno(storage_address);
+    if(segno >= ctrl->start_segno){
+             storage = ctrl->storage;
+    }else{
+             if(NULL == (storage = get_parent_storage(ctrl->family,segno))){
+		  return -1;
+	      }
+    }
+    int ret = read_block(storage,storage_address,block_size,block_buf);
+    //HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
 

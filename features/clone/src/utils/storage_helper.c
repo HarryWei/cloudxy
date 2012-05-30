@@ -445,7 +445,7 @@ out:
 
 int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size,
 					    gchar **father_uri,uint64_t *base_father_inode, uint32_t *from_segno){
-     GKeyFile * file = get_superblock_keyfile(storage);
+     GKeyFile * sb_keyfile = get_superblock_keyfile(storage);
      gchar * _uri =  g_key_file_get_string(sb_keyfile,"METADATA","uri",NULL);
      guint32 _seg_size = g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL);
      guint32 _block_size = g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);
@@ -488,7 +488,8 @@ int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32
 
 int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size)
 {
-     GKeyFile * file = get_superblock_keyfile(storage);
+     int ret = 0;
+     GKeyFile * sb_keyfile = get_superblock_keyfile(storage);
      gchar * _uri =  g_key_file_get_string(sb_keyfile,"METADATA","uri",NULL);
      guint32 _seg_size = g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL);
      guint32 _block_size = g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);

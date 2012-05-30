@@ -35,16 +35,16 @@ typedef struct storage_item{
 	uint32_t segno;
 }STORAGE_ITEM;
 
-int faimly_init(FAMILY_CTRL *fctrl,char* father_uri,uint64_t base_inode,uint32_t from_segno){
+int faimly_init(FAMILY_CTRL *fctrl,char* furi,uint64_t fbase_inode,uint32_t fsegno){
 	int ret = 0;
 	
 	struct back_storage *storage =NULL;
-	char *uri = father_uri;
-	uint32_t segno = from_segno;
-	char *father_uri = NULL;
+	char *uri = furi;
+	uint32_t segno = fsegno;
+	char * father_uri = NULL;
     uint64_t base_father_inode,max_fs_size;
     uint32_t from_segno,seg_size,block_size;
-	STORAGE_ITEM *storage_item = NULL:
+	STORAGE_ITEM *storage_item = NULL;
     do{
 	   father_uri=NULL;
 	   if(NULL == (storage = init_storage_handler(uri))){
@@ -80,8 +80,8 @@ out:
 struct back_storage * get_parent_storage(FAMILY_CTRL *fctrl, uint32_t segno){
      struct  back_storage * storage = NULL;
 	 int i = 0;
-	 for(i = g_list_length(fctrl->seg_storage_list)-1; i > = 0; i--){
-        STORAGE_ITEM *storage_item = g_list_nth_data(fctrl->seg_storage_list),i);
+	 for(i = g_list_length(fctrl->seg_storage_list)-1; i >= 0; i--){
+        STORAGE_ITEM *storage_item = g_list_nth_data(fctrl->seg_storage_list,i);
         if(storage_item->segno >= segno){
 		   storage = storage_item->storage;
            break; 

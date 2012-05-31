@@ -102,6 +102,7 @@ int family_destroy(FAMILY_CTRL *fctrl){
     int i = 0;
     for(i = g_list_length(fctrl->seg_storage_list)-1; i >= 0; i--){
         STORAGE_ITEM *storage_item = g_list_nth_data(fctrl->seg_storage_list,i);
+	 deinit_storage_handler(storage_item->storage);
         g_free(storage_item);
     }
     g_list_free(fctrl->seg_storage_list);

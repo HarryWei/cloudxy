@@ -94,12 +94,24 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
         //ctrl->inode.ctime = get_current_time();
         //ctrl->inode.atime = get_current_time();
 	} else { /* exist inode */
-		//HLOG_DEBUG("open exist fs %s", ctrl->sb.fsname);
-		if (0 != load_latest_inode(ctrl)) { /* get the lastest inode structure */ 
-			HLOG_ERROR("fail to load inode !");
-            return -1; 
-		}
-		//HLOG_DEBUG("inode 's length:%llu",ctrl->inode.length);
+	      struct back_storage * storage =NULL;
+	      uint32_t segno = get_segno(ctrl->imap_entry.inode_addr);
+             if(segno >= ctrl->start_segno){
+            		storage = ctrl->storage;
+            }else{
+            		HLOG_DEBUG("get parent storage for segno:%d",segno);
+                     if(NULL == (storage = get_parent_storage(ctrl->family,segno))){
+                               g_assert(0);
+                               return -1;
+                     }
+            } 
+            struct inode *inode = load_inode(storage, ctrl->imap_entry.inode_addr);
+	     if (inode == NULL) {
+		    HLOG_ERROR("load_inode error!");
+                  return -1;
+	     }
+            memcpy(&ctrl->inode,inode,sizeof(struct inode));
+            g_free(inode);
 	}
 	//HLOG_DEBUG("ctrl->rw_inode_flag:%d", ctrl->rw_inode_flag);
     struct snapshot *ss;

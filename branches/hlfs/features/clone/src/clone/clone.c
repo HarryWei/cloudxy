@@ -67,7 +67,6 @@ int faimly_init(FAMILY_CTRL *fctrl,char* furi,uint64_t fbase_inode,uint32_t fseg
 	   	  HLOG_DEBUG("need read uri:%s 's father uri:%s",uri,father_uri);
 		  HLOG_DEBUG("from_segno:%d",from_segno);
 		  uri = father_uri;
-		  segno = from_segno;
        }else{
           HLOG_DEBUG("need read uri:%s is first uri",uri);
 		  break;

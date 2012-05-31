@@ -25,6 +25,10 @@ int hlfs_open_by_inode(struct hlfs_ctrl *ctrl,
 		HLOG_DEBUG("This fs has opened by other,can not use it"); 
         return -1;
 	}
+	if(get_segno(inode_addr) < ctrl->start_segno){
+		 HLOG_ERROR("sorry ,not support open inode in parent hlfs now!");
+		 return -1;
+	}	
 	struct inode *inode = load_inode(ctrl->storage, inode_addr);
 	if (inode == NULL) {
 		HLOG_ERROR("load_inode error!");

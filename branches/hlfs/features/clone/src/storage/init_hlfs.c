@@ -66,6 +66,7 @@ int init_from_superblock(struct back_storage *storage, struct hlfs_ctrl *ctrl)
 		   			            &father_uri,&base_father_inode,&from_segno);
     g_assert(ret ==0);
 	HLOG_DEBUG("father uri:%s",father_uri);
+	g_assert(from_segno -1 == get_segno(base_father_inode));
     if(father_uri!=NULL){
 	   HLOG_DEBUG("father uri:%s",father_uri);
 	   FAMILY_CTRL *family = family_new();
@@ -175,7 +176,7 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
 			    ctrl->sb.block_size,
 			    ctrl->last_segno,
 			    ctrl->last_offset,
-                ctrl->io_nonactive_period); 
+                         ctrl->io_nonactive_period); 
 out:
     //HLOG_DEBUG("leave func %s", __func__);
     if(ret!=0){

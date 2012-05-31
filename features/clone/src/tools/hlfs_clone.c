@@ -77,15 +77,17 @@ int main(int argc, char *argv[])
         g_message("hlfs with uri:%s has not exist,please mkfs it first!",son_uri);
         return -1;
     }
+
+   
     uint32_t segno=0;
     uint32_t offset=0;
     if(0!=get_cur_latest_segment_info(son_storage,&segno,&offset)){
-        g_message("can not get latest seg info for son ");
+          g_message("can not get latest seg info for son ");
     }else{
         if(segno != 0 || offset != 0){
            g_message("son hlfs must empty");
            return -1; 
-        }
+          }
     }
     /* check son is not clone already */
     char *content =NULL;
@@ -98,7 +100,8 @@ int main(int argc, char *argv[])
          g_message("superblock file format is not key value pairs");
          return -1;
     }
-    gchar * _father_uri =  g_key_file_get_string(sb_keyfile,"METADATA","father_uri",NULL);
+    gchar     * _father_uri =  g_key_file_get_string(sb_keyfile,"METADATA","father_uri",NULL);
+    
     printf("father uri: %s\n",_father_uri);
     if(_father_uri != NULL){
          g_message("uri:%s has clone :%s",son_uri,_father_uri);
@@ -124,9 +127,24 @@ int main(int argc, char *argv[])
            inode_addr = imap_entry.inode_addr;
         }
     }
+
+    uint32_t    father_seg_size = 0;
+    uint32_t    father_block_size = 0;
+    uint64_t    father_max_fs_size = 0;
+    if (0 != read_fs_meta(father_storage,&father_seg_size,&father_block_size,&father_max_fs_size))){
+	  g_message("can not read father uri meta");	
+	  return -1;	
+    }
+    uint32_t son_block_size =  g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);
+    uint32_t son_seg_size =  g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL); 	
+    if (son_block_size != father_block_size || father_seg_size!=son_seg_size){
+	  g_message("sorry , now father segsize and block sizee must same as son!!!");	
+	  return -1;	
+    }		
     g_key_file_set_uint64(sb_keyfile,"METADATA","from_segno",segno+1);
     g_key_file_set_string(sb_keyfile,"METADATA","father_uri",father_uri);
     g_key_file_set_uint64(sb_keyfile,"METADATA","base_father_inode",inode_addr);
+    g_key_file_set_uint64(sb_keyfile,"METADATA","max_fs_size",father_max_fs_size);	
     gchar *data = g_key_file_to_data(sb_keyfile,NULL,NULL);
     g_message("key file data :%s",data);
     if(0 != son_storage->bs_file_delete(son_storage,"superblock")){

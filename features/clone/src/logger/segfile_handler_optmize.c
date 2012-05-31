@@ -33,6 +33,7 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
         if(segno >= ctrl->start_segno){
             storage = ctrl->storage;
         }else{
+            HLOG_DEBUG("get parent storage for segno:%d",segno);
             if(NULL == (storage = get_parent_storage(ctrl->family,segno))){
                 g_assert(0);
                 return -1;
@@ -54,6 +55,7 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
         if(ctrl->last_read_segno >= ctrl->start_segno){
             storage = ctrl->storage;
         }else{
+            HLOG_DEBUG("get parent storage for segno:%d",segno);
             if(NULL == (storage = get_parent_storage(ctrl->family,ctrl->last_read_segno))){
                 g_assert(0);
                 return -1;
@@ -97,12 +99,14 @@ int prev_open_wsegfile(struct hlfs_ctrl *ctrl){
         if(ctrl->last_wsegfile_handler!=NULL){
             if(0!=ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler)){
                 //HLOG_ERROR("close segfile:%d failed",ctrl->last_segno-1);
+                g_assert(0);
                 return -1;
             }
         }
         HLOG_DEBUG("need make a new segment:%d file",ctrl->last_segno);
         if(NULL == (ctrl->last_wsegfile_handler = (void*)ctrl->storage->bs_file_create(ctrl->storage,segfile_name))){
             //HLOG_ERROR("creat segfile:%d failed,ctrl->last_segno");
+            g_assert(0);
             return -1;
         }
     }else{
@@ -111,6 +115,7 @@ int prev_open_wsegfile(struct hlfs_ctrl *ctrl){
             //HLOG_DEBUG("open a exist file............................");
             if(NULL == (ctrl->last_wsegfile_handler = (void*)ctrl->storage->bs_file_open(ctrl->storage,segfile_name,BS_WRITEABLE))){
                 //HLOG_ERROR("open segfile:%d failed,ctrl->last_segno");
+                g_assert(0);
                 return -1;
             }
         }else{
@@ -135,6 +140,7 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
     uint32_t block_size = ctrl->sb.block_size;
     if(0!=prev_open_rsegfile(ctrl,segno)){
         //HLOG_ERROR("can not pre open read segfile:%u",segno);
+        g_assert(0);
         return -1; 
     }
     //char * block = (char*)g_malloc0(block_size);
@@ -149,6 +155,7 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
         if(segno >= ctrl->start_segno){
             storage = ctrl->storage;
         }else{
+            HLOG_DEBUG("get parent storage for segno:%d",segno);
             if(NULL == (storage = get_parent_storage(ctrl->family,segno))){
                 g_assert(0);
                 return -1;

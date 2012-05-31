@@ -154,8 +154,8 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
                 ret = -1;
                 goto out;
             }
-
-            if( 0 != load_latest_inode_map_entry(storage,segno,offset,&ctrl->imap_entry)){
+            uint32_t last_offset = offset + sizeof(struct inode) + sizeof(struct inode_map_entry);
+            if( 0 != load_latest_inode_map_entry(storage,segno,last_offset,&ctrl->imap_entry)){
                 HLOG_ERROR("load inode map entry failed");
                 ret = -1;
                 goto out;

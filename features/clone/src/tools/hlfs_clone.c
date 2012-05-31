@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     uint32_t    father_seg_size = 0;
     uint32_t    father_block_size = 0;
     uint64_t    father_max_fs_size = 0;
-    if (0 != read_fs_meta(father_storage,&father_seg_size,&father_block_size,&father_max_fs_size))){
+    if (0 != read_fs_meta(father_storage,&father_seg_size,&father_block_size,&father_max_fs_size)){
 	  g_message("can not read father uri meta");	
 	  return -1;	
     }

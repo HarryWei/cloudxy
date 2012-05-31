@@ -56,6 +56,7 @@ int faimly_init(FAMILY_CTRL *fctrl,char* furi,uint64_t fbase_inode,uint32_t fseg
 	   storage_item = g_malloc0(sizeof(STORAGE_ITEM));
 	   storage_item->storage = storage;
 	   storage_item->segno = from_segno -1;
+	   HLOG_DEBUG("from_segno:%d\n",from_segno);
 	   fctrl->seg_storage_list = g_list_append(fctrl->seg_storage_list,storage_item);
        if(0 !=(ret = read_fs_meta_all(storage,&seg_size,&block_size,&max_fs_size,
 		   			            &father_uri,&base_father_inode,&from_segno))){

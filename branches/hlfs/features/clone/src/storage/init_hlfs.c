@@ -147,7 +147,7 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
         if(NULL != ctrl->family){
             HLOG_DEBUG("it is a clone hlfs!!!");
             struct back_storage * storage;
-            uint32_t offset =  get_offset(ctrl->family->base_father_inode);
+            uint32_t offset =   get_offset(ctrl->family->base_father_inode);
             uint32_t segno =   get_segno(ctrl->family->base_father_inode);
             if(NULL == (storage = get_parent_storage(ctrl->family,segno))){
                 HLOG_ERROR("can not get father storage");
@@ -161,6 +161,7 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
                 goto out;
 
             }
+	     HLOG_DEBUG("segno:%d,offset:%d,ctrl->imap_entry->node_addr:%llu",segno,offset,ctrl->imap_entry.inode_addr);
             ctrl->start_segno = segno + 1;
             ctrl->last_segno = ctrl->start_segno;
             ctrl->last_offset = 0;

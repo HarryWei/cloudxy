@@ -74,14 +74,14 @@ int faimly_init(FAMILY_CTRL *fctrl,char* furi,uint64_t fbase_inode,uint32_t fseg
        }
 	}while(1);
     fctrl->from_segno = fsegno;
-    fctrl->father_uri = furi;
+    fctrl->father_uri = g_strdup(furi);
     fctrl->base_father_inode = fbase_inode;
 out:
 	return ret;
 }
 
 struct back_storage * get_parent_storage(FAMILY_CTRL *fctrl, uint32_t segno){
-     struct  back_storage * storage = NULL;
+        struct  back_storage * storage = NULL;
 	 int i = 0;
 	 for(i = g_list_length(fctrl->seg_storage_list)-1; i >= 0; i--){
         STORAGE_ITEM *storage_item = g_list_nth_data(fctrl->seg_storage_list,i);
@@ -95,6 +95,17 @@ struct back_storage * get_parent_storage(FAMILY_CTRL *fctrl, uint32_t segno){
 }
 
 int family_destroy(FAMILY_CTRL *fctrl){
-	
+    if(fctrl == NULL){
+	  return 0;
+    }
+
+    i = 0;
+    for(i = g_list_length(fctrl->seg_storage_list)-1; i >= 0; i--){
+        STORAGE_ITEM *storage_item = g_list_nth_data(fctrl->seg_storage_list,i);
+        g_free(storage_item);
+    }
+    g_list_free(fctrl->seg_storage_list);
+    g_free(fctrl->father_uri);
+    g_free(fctrl);
     return 0;
 }

@@ -38,6 +38,9 @@ int deinit_hlfs(struct hlfs_ctrl * ctrl)
        //HLOG_DEBUG("-destroy icache-");
        icache_destroy(ctrl->icache);
     }
+    if(ctrl->family != NULL){
+	  family_destroy(ctrl->family);
+    }		
     ctrl->ctrl_region->is_start_clean = 0;
     g_thread_join(ctrl->seg_clean_thread);
     //g_async_queue_unref(ctrl->write_req_aqueue);

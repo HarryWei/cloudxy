@@ -23,7 +23,7 @@ ldd ./qemu-img 查看是否其指向的库都存在！
 = 支持操作 =
 {{{
 注意：
-1.目前尚不支持clone操作（很块会实现） 
+1.目前尚不支持prealloc操作
 2.确保ldd ./qemu-img 所显示的库(hlfs,hdfs,jvm,log4c等）处于动态库搜索路径，如果不再，则要自己手动添加到路径中。
 }}}
   * 创建网络磁盘操作
@@ -65,4 +65,15 @@ qemu-system-x86_64 -enable-kvm -m 1024 -smp 2 -drive file=hlfs:hdfs:///tmp/teste
 qemu-system-x86_64 -enable-kvm -m 1024 -smp 2 -drive file=hlfs:local:///tmp/testenv/testfs%snapshot1,if=virtio -boot d -vnc :7 或 
 qemu-system-x86_64 -enable-kvm -m 1024 -smp 2 -drive file=hlfs:hdfs:///tmp/testenv/testfs%shopshot1,if=virtio -boot d -vnc :7
 %后为快照名称
+}}}
+ * Clone 操作
+{{{
+1.首先给base hlfs系统打个快照 - ./qemu-img snapshot -c snapshot1 hlfs:local:///tmp/testenv/testfs
+2.创建新的hlfs系统 - ./qemu-img create hlfs:local:///tmp/testenv/testfs2 10G
+3.执行clone操作 -./qemu-img snapshot -b local:///tmp/testenv/testfs%snapshot1 hlfs:local:///tmp/testenv/testfs2 （快照和base系统之间使用%区分！）
+4.试试看hlfs:local:///tmp/testenv/testfs2啦。
+--------------------------------------------
+不用qemu的情况下，在我们outpub/bin下也有快照和clone命令，类似用法为
+./output/bin/snapshot.hlfs -u local:///tmp/testenv/testfs -s snapshot1
+./output/bin/clone.hlfs -f local:///tmp/testenv/testfs%snapshot1 -s local:///tmp/testenv/testfs2 
 }}}

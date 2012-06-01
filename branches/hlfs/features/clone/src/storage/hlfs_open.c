@@ -24,6 +24,7 @@
  * @param ctrl: the global control for our FS.
  * @return: if successful return 0, else return -1.
  */
+#if 0 
 static int load_latest_inode(struct hlfs_ctrl *ctrl)
 {
 	//HLOG_DEBUG("enter func %s", __func__);
@@ -51,6 +52,7 @@ out:
 	//HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
+#endif
 
 /*
  * hlfs_open: open a file.

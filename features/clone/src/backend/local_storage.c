@@ -71,7 +71,7 @@ bs_file_t local_file_open(struct back_storage *storage,const char *path,int flag
 	//HLOG_DEBUG("local -- enter func %s", __func__);
 	char full_path[256];
     build_local_path(full_path,storage->dir,storage->fs_name,path);
-    HLOG_DEBUG("full path %s", full_path);
+    //HLOG_DEBUG("full path %s", full_path);
     int fd=0;
     if(flags == BS_READONLY){
        fd = open(full_path,O_RDONLY);
@@ -95,7 +95,7 @@ bs_file_t local_file_open(struct back_storage *storage,const char *path,int flag
     *(int*)file = fd;
 #endif 
     bs_file_t file = (bs_file_t)GINT_TO_POINTER(fd); 
-    HLOG_DEBUG("-----------fd is :%d,file:%p", fd,file);
+    //HLOG_DEBUG("-----------fd is :%d,file:%p", fd,file);
     return file;
 }
 
@@ -105,7 +105,7 @@ int local_file_close(struct back_storage *storage,bs_file_t file){
     int fd = GPOINTER_TO_INT((gpointer)file);
    
     close(fd);
-    HLOG_DEBUG("-----------fd is :%d,file:%p", fd,file);
+    //("-----------fd is :%d,file:%p", fd,file);
     return 0;
 }
 

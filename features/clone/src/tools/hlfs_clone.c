@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     v = g_strsplit(father_uri_with_snapshot,"%",2);
     if(g_strv_length(v)!=2){
        g_strfreev(v);
-	g_message("not give snapshot for base:%s",father_uri_with_snapshot);
+	   g_message("not give snapshot for base:%s",father_uri_with_snapshot);
        return -1; 
     }
 	

@@ -109,14 +109,14 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
                      }
             } 
          struct inode *my_inode = NULL;
-	     HLOG_DEBUG("inode paddr:%p,ctrl->inode paddr:%p",my_inode,&ctrl->inode);			
+	    
 	     my_inode = load_inode(storage, ctrl->imap_entry.inode_addr);
-	     HLOG_DEBUG("inode paddr:%p,ctrl->inode paddr:%p",my_inode,&ctrl->inode);		
+	    
 	     if (my_inode == NULL) {
 		     HLOG_ERROR("load_inode error!");
                   return -1;
 	     }
-	     HLOG_DEBUG("inode paddr:%p,ctrl->inode paddr:%p",my_inode,&ctrl->inode);
+	    
 	     HLOG_DEBUG("inode'length:%d,ctrl->inode length:%d,sizeof inode:%d",my_inode->length,ctrl->inode.length,sizeof(struct inode));	 
             memcpy(&(ctrl->inode),my_inode,sizeof(struct inode));
             g_free(my_inode);

@@ -25,7 +25,7 @@
 //struct back_storage* init_storage_handler(const char* uri,const char *fs_name)
 struct back_storage* init_storage_handler(const char* uri)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+    HLOG_DEBUG("enter func %s", __func__);
     int ret =0;
     struct back_storage* storage = NULL;
     gchar* back_storage_type = NULL;
@@ -36,26 +36,26 @@ struct back_storage* init_storage_handler(const char* uri)
     int port;
     ret = parse_from_uri(uri,&head,&hostname,&dir,&fs_name,&port);
     if(ret !=0){
-	    HLOG_ERROR("parse_from_uri happened error");
+	 HLOG_ERROR("parse_from_uri happened error");
         return NULL;
     }
     //gchar *fs_path = g_build_filename(dir,fs_name,NULL);
-    //HLOG_DEBUG("loc [fs:%s], [path:%s]\n",fs_name,fs_path);
+    HLOG_DEBUG("loc [fs:%s], \n",fs_name);
     if (0 == g_strcmp0(head,"local")){
         storage=get_local_storage_ops();
     }else if(0 == g_strcmp0(head,"hdfs")){
         storage = get_hdfs_storage_ops();
     }else{
-        HLOG_ERROR("Error URI");
+        HLOG_ERROR("Error URI:%s",uri);
         ret = -1;
         goto out;
     }
-    storage->uri = strdup(uri);
+       storage->uri = strdup(uri);
 	storage->head = head;
 	storage->dir = dir;
 	storage->fs_name = fs_name;
 	storage->hostname = hostname;
-    storage->port = port;
+       storage->port = port;
 	storage->user = g_strdup("kanghua");
 	
     if(0!=storage->bs_fs_connect(storage,uri)){
@@ -67,13 +67,19 @@ struct back_storage* init_storage_handler(const char* uri)
 out:
     //g_free(fs_path);
     if(ret !=0){
-		g_free(storage->uri);
-	    g_free(storage->head);
-		g_free(storage->dir);
-		g_free(storage->fs_name);
-		g_free(storage->hostname);
-		g_free(storage->user);
-        g_free(storage);
+		if(storage->uri != NULL)
+			g_free(storage->uri);
+		if(storage->head !=NULL)
+	       	g_free(storage->head);
+		if(storage->dir !=NULL);
+			g_free(storage->dir);
+		if(storage->fs_name !=NULL)
+			g_free(storage->fs_name);
+		if(storage->hostname !=NULL)
+			g_free(storage->hostname);
+		if(storage->user!=NULL)
+			g_free(storage->user);
+        	g_free(storage);
 		HLOG_ERROR("ret is not 0, so error happened");
         storage = NULL;
     }
@@ -272,34 +278,36 @@ struct inode *load_inode(struct back_storage * storage,uint64_t inode_storage_ad
 {
 	HLOG_DEBUG("enter func %s",__func__);
 	bs_file_t file = NULL;
-	struct inode *inode = (struct inode*)g_malloc0(sizeof(struct inode));
-	if (!inode) {
+	struct inode *my_inode = (struct inode*)g_malloc0(sizeof(struct inode));
+	if (NULL== my_inode) {
 		HLOG_ERROR("Allocate Error!");
 		return NULL;
 	}
+	HLOG_DEBUG("--------inode paddress:%p",my_inode);
 	uint32_t offset = get_offset(inode_storage_addr); 
-    const char segfile[SEGMENT_FILE_NAME_MAX];
-    build_segfile_name(get_segno(inode_storage_addr),segfile);
+       const char segfile[SEGMENT_FILE_NAME_MAX];
+       build_segfile_name(get_segno(inode_storage_addr),segfile);
 	HLOG_DEBUG("inode_addr %lld,offset %u", inode_storage_addr,offset);
 	if (0 == storage->bs_file_is_exist(storage, segfile)) {
 		if (NULL == (file = storage->bs_file_open(storage, segfile, BS_READONLY))) {
-			g_free(inode);
+			g_free(my_inode);
 			HLOG_ERROR("open segfile error!");
 			return NULL;
 		}
-		if (sizeof(struct inode) != storage->bs_file_pread(storage, file,(char*)inode, sizeof(struct inode),offset)) {
-			g_free(inode);
+		if (sizeof(struct inode) != storage->bs_file_pread(storage, file,(char*)my_inode, sizeof(struct inode),offset)) {
+			g_free(my_inode);
 			storage->bs_file_close(storage, file);
 			HLOG_ERROR("pread error!");
 			return NULL;
 		}
 	} else {
 		HLOG_ERROR("segfile not exist!");
-		g_free(inode);
+		g_free(my_inode);
 		return NULL;
 	}
+	HLOG_DEBUG("--------inode paddress:%p",my_inode);
 	HLOG_DEBUG("leave func %s", __func__);
-	return inode;
+	return my_inode;
 }
 
 
@@ -444,8 +452,12 @@ out:
 }
 
 int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size,
-					    gchar **father_uri,uint64_t *base_father_inode, uint32_t *from_segno){
+					    gchar **father_uri,uint64_t *snapshot_inode, uint32_t *from_segno){
      GKeyFile * sb_keyfile = get_superblock_keyfile(storage);
+     if(NULL == sb_keyfile){
+	 	HLOG_ERROR("read superblock keyfile error ");
+	 	return -1;
+     }	 	
      gchar * _uri =  g_key_file_get_string(sb_keyfile,"METADATA","uri",NULL);
      guint32 _seg_size = g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL);
      guint32 _block_size = g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);
@@ -465,11 +477,11 @@ int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32
     }
      g_free(_uri);
      gchar * _father_uri =  g_key_file_get_string(sb_keyfile,"METADATA","father_uri",NULL);
-     guint64 _base_father_inode = g_key_file_get_int64(sb_keyfile,"METADATA","base_father_inode",NULL);
+     guint64 _snapshot_inode = g_key_file_get_int64(sb_keyfile,"METADATA","snapshot_inode",NULL);
      guint32 _from_segno = g_key_file_get_integer(sb_keyfile,"METADATA","from_segno",NULL);
      if(_father_uri !=NULL){
 	   *father_uri = _father_uri;
-	   *base_father_inode = _base_father_inode;
+	   *snapshot_inode = _snapshot_inode;
 	   *from_segno = _from_segno;
      }	 
 #if 1
@@ -593,7 +605,7 @@ out:
 
 }
 
-int file_get_contents(struct back_storage *storage,const char* filename,const char**contents,uint32_t *size){
+int file_get_contents(struct back_storage *storage,const char* filename,char**contents,uint32_t *size){
 	HLOG_DEBUG("enter func %s", __func__);
      if(storage == NULL || filename == NULL) {
 		HLOG_ERROR("Parameter error!");
@@ -602,11 +614,11 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 
 	int ret = 0;
 	int i = 0;
+	bs_file_t file = NULL;
 	HLOG_DEBUG("filename is %s", filename);
 	if ( 0!= storage->bs_file_is_exist(storage,filename)) {
 		HLOG_ERROR("file is not exist, but may be first start, not error, check it please");
-		ret = -1;
-		goto out;
+		return -1;
 	}
 	bs_file_info_t *file_info = storage->bs_file_info(storage,filename);
 	if (NULL == file_info) {
@@ -618,12 +630,12 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 	g_free(file_info);
 	HLOG_DEBUG("file_size : %u", *size);
 	*contents = (char *)g_malloc0(*size);
-	if (NULL == contents) {
+	if (NULL == *contents) {
 		HLOG_ERROR("Allocate error!");
 		ret = -1;
 		goto out;
 	}
-	bs_file_t file = NULL;
+	
 	file = storage->bs_file_open(storage,filename, BS_READONLY);
 	if (file == NULL) {
 		HLOG_ERROR("open snapshot.txt error");
@@ -634,7 +646,7 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 	{
 		HLOG_ERROR("Read file:%s failed",filename);
 		storage->bs_file_close(storage, file);
-        g_free(contents);
+              g_free(contents);
 		ret = -1;
         goto out;
 	}

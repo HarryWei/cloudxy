@@ -12,14 +12,16 @@
 #include "storage_helper.h"
 #include "comm_define.h"
 #include "hlfs_log.h"
-
+#include "snapshot.h"
 static gchar *son_uri = NULL;
-static gchar *father_uri = NULL;
+static gchar *father_uri_with_snapshot = NULL;
+static gchar *father_uri =NULL;
+static gchar *father_snapshot =NULL;
 //static gchar *fsname = NULL;
 static gboolean verbose = FALSE;
 static GOptionEntry entries[] = {
-	    {"filesystem father loc",'f', 0, G_OPTION_ARG_STRING,&father_uri, "father storage uri", "SFSLOC"},
-	    {"filesystem self   loc",'s', 0, G_OPTION_ARG_STRING,&son_uri, "son storage uri", "SFSLOC"},
+	{"filesystem father loc with snapshot",'f', 0, G_OPTION_ARG_STRING,&father_uri_with_snapshot, "father storage uri with snapshot", "SFSLOC"},
+	{"filesystem self   loc",'s', 0, G_OPTION_ARG_STRING,&son_uri, "son storage uri", "SFSLOC"},
     	{"verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
     	{NULL}
 };
@@ -35,6 +37,7 @@ error_func(GOptionContext *context, GOptionGroup *group,
         exit(EXIT_FAILURE);
     }
 }
+
 
 
 int main(int argc, char *argv[])
@@ -55,7 +58,18 @@ int main(int argc, char *argv[])
     }
 
     g_option_context_free(context);
-    g_message("father_uri:%s;son_uri:%s",father_uri,son_uri);
+    g_message("father_uri_with_snapshot:%s;son_uri:%s",father_uri_with_snapshot,son_uri);
+    gchar **v=NULL;
+    v = g_strsplit(father_uri_with_snapshot,"%",2);
+    if(g_strv_length(v)!=2){
+       g_strfreev(v);
+	g_message("not give snapshot for base:%s",father_uri_with_snapshot);
+       return -1; 
+    }
+	
+    father_uri = g_strdup(v[0]);
+    father_snapshot = g_strdup(v[1]);
+    g_strfreev(v);
 
     if(0 == strcmp(father_uri,son_uri)){
         g_message("father uri can not equal son uri");
@@ -78,7 +92,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-   
     uint32_t segno=0;
     uint32_t offset=0;
     if(0!=get_cur_latest_segment_info(son_storage,&segno,&offset)){
@@ -100,16 +113,18 @@ int main(int argc, char *argv[])
          g_message("superblock file format is not key value pairs");
          return -1;
     }
-    gchar     * _father_uri =  g_key_file_get_string(sb_keyfile,"METADATA","father_uri",NULL);
+    gchar   * _father_uri =  g_key_file_get_string(sb_keyfile,"METADATA","father_uri",NULL);
     
     printf("father uri: %s\n",_father_uri);
     if(_father_uri != NULL){
          g_message("uri:%s has clone :%s",son_uri,_father_uri);
          return -1;
     }
-    g_free(content); 
-    /* read father's latest inode */
+    g_free(content);
+	
+    /*  read father's snapshot 's inode */
     uint64_t inode_addr;
+#if 0
     if(0 != get_cur_latest_segment_info(father_storage,&segno,&offset)){
         g_message("can not get father's latest segment info");
         return -1;
@@ -127,7 +142,17 @@ int main(int argc, char *argv[])
            inode_addr = imap_entry.inode_addr;
         }
     }
-
+#else
+       struct snapshot *ss = NULL;
+       if (0 > load_snapshot_by_name(father_storage, SNAPSHOT_FILE, &ss, father_snapshot)) {
+		g_message("load uri:%s ss by name:%s error",father_uri,father_snapshot);
+		g_free(ss);
+		return -1;
+	}
+	inode_addr = ss->inode_addr;
+	g_free(ss);
+	
+#endif 
     uint32_t    father_seg_size = 0;
     uint32_t    father_block_size = 0;
     uint64_t    father_max_fs_size = 0;
@@ -135,6 +160,7 @@ int main(int argc, char *argv[])
 	  g_message("can not read father uri meta");	
 	  return -1;	
     }
+    segno = get_segno(inode_addr);
     uint32_t son_block_size =  g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);
     uint32_t son_seg_size =  g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL); 	
     if (son_block_size != father_block_size || father_seg_size!=son_seg_size){
@@ -143,7 +169,8 @@ int main(int argc, char *argv[])
     }		
     g_key_file_set_uint64(sb_keyfile,"METADATA","from_segno",segno+1);
     g_key_file_set_string(sb_keyfile,"METADATA","father_uri",father_uri);
-    g_key_file_set_uint64(sb_keyfile,"METADATA","base_father_inode",inode_addr);
+    g_key_file_set_string(sb_keyfile,"METADATA","father_ss",father_snapshot);	
+    g_key_file_set_uint64(sb_keyfile,"METADATA","snapshot_inode",inode_addr);
     g_key_file_set_uint64(sb_keyfile,"METADATA","max_fs_size",father_max_fs_size);	
     gchar *data = g_key_file_to_data(sb_keyfile,NULL,NULL);
     g_message("key file data :%s",data);

@@ -45,7 +45,7 @@ static void build_local_path(char *full_path,const char* dir,const char * fs_nam
 	   if(NULL != path){
 	   	  sprintf(full_path,"%s/%s/%s",dir,fs_name,path);
 	   }else{
-	      sprintf(full_path,"%s/%s",dir,fs_name);
+	         sprintf(full_path,"%s/%s",dir,fs_name);
 	   }
 	   //HLOG_DEBUG("path:%s,full path:%s",path,full_path);
 	   //HLOG_DEBUG("local -- leave func %s", __func__);
@@ -71,7 +71,7 @@ bs_file_t local_file_open(struct back_storage *storage,const char *path,int flag
 	//HLOG_DEBUG("local -- enter func %s", __func__);
 	char full_path[256];
     build_local_path(full_path,storage->dir,storage->fs_name,path);
-    //HLOG_DEBUG("full path %s", full_path);
+    HLOG_DEBUG("full path %s", full_path);
     int fd=0;
     if(flags == BS_READONLY){
        fd = open(full_path,O_RDONLY);
@@ -95,7 +95,7 @@ bs_file_t local_file_open(struct back_storage *storage,const char *path,int flag
     *(int*)file = fd;
 #endif 
     bs_file_t file = (bs_file_t)GINT_TO_POINTER(fd); 
-	//HLOG_DEBUG("local -- leave func %s", __func__);
+    HLOG_DEBUG("-----------fd is :%d,file:%p", fd,file);
     return file;
 }
 
@@ -103,14 +103,15 @@ int local_file_close(struct back_storage *storage,bs_file_t file){
 	//HLOG_DEBUG("local -- enter func %s", __func__);
     //int fd = *(int*)file;
     int fd = GPOINTER_TO_INT((gpointer)file);
+   
     close(fd);
-	//HLOG_DEBUG("local -- leave func %s", __func__);
+    HLOG_DEBUG("-----------fd is :%d,file:%p", fd,file);
     return 0;
 }
 
 int local_file_is_exist(struct back_storage * storage,const char *path){
 	//HLOG_DEBUG("local -- enter func %s", __func__);
-	char full_path[256];
+    char full_path[256];
     build_local_path(full_path,storage->dir,storage->fs_name,path);
     //HLOG_DEBUG("path:%sfull path %s",path,full_path);
     if (!g_file_test(full_path,G_FILE_TEST_EXISTS)){

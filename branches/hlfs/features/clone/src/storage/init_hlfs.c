@@ -60,19 +60,20 @@ int init_from_superblock(struct back_storage *storage, struct hlfs_ctrl *ctrl)
     }
     struct super_block *sb = &ctrl->sb;
     char *father_uri = NULL;
-    uint64_t base_father_inode;
-    uint32_t from_segno;
+    uint64_t snapshot_inode;
+    uint32_t from_segno=0;
     int ret = read_fs_meta_all(storage,&(sb->seg_size),&(sb->block_size),&(sb->max_fs_size),
-		   			            &father_uri,&base_father_inode,&from_segno);
+		   			            &father_uri,&snapshot_inode,&from_segno);
     g_assert(ret ==0);
 	HLOG_DEBUG("father uri:%s",father_uri);
     if(father_uri!=NULL){
 	   HLOG_DEBUG("father uri:%s",father_uri);
 	   FAMILY_CTRL *family = family_new();
-	   faimly_init(family,father_uri,base_father_inode,from_segno);
+	   faimly_init(family,father_uri,snapshot_inode,from_segno);
 	   ctrl->family = family;
-    }		
+    }			
     g_strlcpy(sb->fsname,g_basename(storage->uri),MAX_FILE_NAME_LEN);
+    ctrl->start_segno = from_segno;	
     //HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
@@ -126,18 +127,19 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
 
     ctrl->usage_ref = 0;
     //ctrl->seg_clean_run = 1;
-    memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
-    GThread * seg_clean_thread = g_thread_create((GThreadFunc)seg_clean_task,ctrl,TRUE,NULL);
-    ctrl->seg_clean_thread = seg_clean_thread;
     ctrl->ctrl_region = &CTRL_REGION;
     ctrl->ctrl_region->is_start_clean      = is_clean_start;
     ctrl->ctrl_region->copy_waterlevel  = copy_waterlevel;
+    memset(ctrl->alive_ss_name, 0, MAX_FILE_NAME_LEN);
+    GThread * seg_clean_thread = g_thread_create((GThreadFunc)seg_clean_task,ctrl,TRUE,NULL);
+    ctrl->seg_clean_thread = seg_clean_thread;
     ctrl->hlfs_access_mutex = g_mutex_new();
     ctrl->last_segno = segno;
     ctrl->last_offset = offset ;
     ctrl->io_nonactive_period = seg_clean_check_period;
-    ctrl->start_segno = 0;
+    
     if(ctrl->last_segno != 0 || ctrl->last_offset != 0){
+	 HLOG_DEBUG("open from self segno!!");
         if( 0 != load_latest_inode_map_entry(ctrl->storage,ctrl->last_segno,ctrl->last_offset,&ctrl->imap_entry)){
             HLOG_ERROR("load inode map entry failed");
             ret = -1;
@@ -145,7 +147,7 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
         }
     }else{
         if(NULL != ctrl->family){
-            HLOG_DEBUG("it is a clone hlfs!!!");
+            HLOG_DEBUG("it is a clone hlfs!!!,and first open");
             struct back_storage * storage;
             uint32_t offset =   get_offset(ctrl->family->base_father_inode);
             uint32_t segno =   get_segno(ctrl->family->base_father_inode);
@@ -162,20 +164,21 @@ __init_hlfs(const char *uri, uint32_t is_clean_start ,uint32_t seg_clean_check_p
 
             }
 	     HLOG_DEBUG("segno:%d,offset:%d,ctrl->imap_entry->node_addr:%llu",segno,offset,ctrl->imap_entry.inode_addr);
-            ctrl->start_segno = segno + 1;
+            //ctrl->start_segno = segno + 1;
             ctrl->last_segno = ctrl->start_segno;
             ctrl->last_offset = 0;
         }
     }
 
-
-    HLOG_INFO("Raw Hlfs Ctrl Init Over ! uri:%s,max_fs_size:%llu,seg_size:%u,block_size:%u,last_segno:%u,last_offset:%u,io_nonactive_period:%u",
+    
+    HLOG_INFO("Raw Hlfs Ctrl Init Over ! uri:%s,max_fs_size:%llu,seg_size:%u,block_size:%u,last_segno:%u,last_offset:%u,start_segno:%d,io_nonactive_period:%u",
 			    uri,
 			    ctrl->sb.max_fs_size,
 			    ctrl->sb.seg_size,
 			    ctrl->sb.block_size,
 			    ctrl->last_segno,
 			    ctrl->last_offset,
+			    ctrl->start_segno,
                 ctrl->io_nonactive_period); 
 out:
     //HLOG_DEBUG("leave func %s", __func__);

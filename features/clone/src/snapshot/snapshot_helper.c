@@ -28,6 +28,7 @@ static int snapshot2text(const struct snapshot *snapshot, char *textbuf)
 					snapshot->timestamp, sep,
 					snapshot->inode_addr, sep,
 					snapshot->up_sname);
+	//textbuf[n]='\0';
 	//HLOG_DEBUG("leave func %s", __func__);
 	return n;
 }
@@ -43,7 +44,7 @@ int dump_snapshot(struct back_storage *storage,
     int ret = 0;
     char snapshot_text[1024];
     memset(snapshot_text, 0, 1024);
-	int len = snapshot2text(snapshot, snapshot_text);
+    int len = snapshot2text(snapshot, snapshot_text);
 	//HLOG_DEBUG("ss text is %s", snapshot_text);
     ret = file_append_contents(storage,snapshot_file,snapshot_text,len);
     return ret;
@@ -152,14 +153,14 @@ int load_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHa
 	int ret = 0;
     char *contents = NULL;
     uint32_t size;
-    ret = file_get_contents(storage,snapshot_file, (const char **) &contents,&size);
+    ret = file_get_contents(storage,snapshot_file, &contents,&size);
     if(ret !=0){
 	   HLOG_ERROR("can not read snapshot content, but may be first start, not error, check it please");
        return -1; 
     }
-	gchar **lines = g_strsplit(contents, "\n", 0);
-    g_free(contents);
-	//HLOG_DEBUG("g strv length:%d:", g_strv_length(lines));
+    gchar **lines = g_strsplit(contents, "\n", 0);
+
+    //HLOG_DEBUG("g strv length:%d:", g_strv_length(lines));
     GList *to_remove_ss_list = NULL;
     int i;
 	for (i = 0; i < g_strv_length(lines) - 1; i++) {
@@ -186,6 +187,7 @@ int load_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHa
 	}
 out:
 	g_strfreev(lines);
+	g_free(contents);
     if(to_remove_ss_list!=NULL) g_list_free(to_remove_ss_list);
 	//HLOG_DEBUG("leave func %s", __func__);
 	return ret;

@@ -60,7 +60,7 @@ out:
  */
 int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 {
-	//HLOG_DEBUG("enter func %s", __func__);
+	HLOG_DEBUG("enter func %s", __func__);
 	if (ctrl==NULL ||(flag != 0 && flag != 1)) { /* check the parameters */
 		HLOG_ERROR("error params :flag %d",flag);
 		return -1;
@@ -80,20 +80,20 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
         return -1;
 	}
     int ret = 0;
-    //HLOG_DEBUG("inode no %llu , inode address %llu", ctrl->imap_entry.inode_no, ctrl->imap_entry.inode_addr);
-    if (ctrl->imap_entry.inode_no == HLFS_INODE_NO && 
-			ctrl->imap_entry.inode_addr == 0) { /* no inode condition */
-		HLOG_DEBUG("empty filesystem %s", ctrl->sb.fsname);
+    HLOG_DEBUG("inode no %llu , inode address %llu", ctrl->imap_entry.inode_no, ctrl->imap_entry.inode_addr);
+    if (ctrl->imap_entry.inode_no == 0 && ctrl->imap_entry.inode_addr == 0) { /* no inode condition */
+	 HLOG_DEBUG("empty filesystem %s", ctrl->sb.fsname);
         if (flag == 0) {
 			HLOG_ERROR("must create it with writeable flag");
 			return -1;
-		}
+	 }
         HLOG_DEBUG("create new fs inode !");
         ctrl->inode.length = 0;
         ctrl->inode.mtime = get_current_time();
         //ctrl->inode.ctime = get_current_time();
         //ctrl->inode.atime = get_current_time();
 	} else { /* exist inode */
+	      HLOG_DEBUG("this is not empty filesystem:%s",ctrl->sb.fsname);
 	      struct back_storage * storage =NULL;
 	      uint32_t segno = get_segno(ctrl->imap_entry.inode_addr);
              if(segno >= ctrl->start_segno){
@@ -105,16 +105,21 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
                                return -1;
                      }
             } 
-            struct inode *inode = load_inode(storage, ctrl->imap_entry.inode_addr);
-	     if (inode == NULL) {
+            struct inode *my_inode =NULL;
+	     HLOG_DEBUG("inode paddr:%p,ctrl->inode paddr:%p",my_inode,&ctrl->inode);			
+	     my_inode = load_inode(storage, ctrl->imap_entry.inode_addr);
+	     HLOG_DEBUG("inode paddr:%p,ctrl->inode paddr:%p",my_inode,&ctrl->inode);		
+	     if (my_inode == NULL) {
 		    HLOG_ERROR("load_inode error!");
                   return -1;
 	     }
-            memcpy(&ctrl->inode,inode,sizeof(struct inode));
-            g_free(inode);
+	     HLOG_DEBUG("inode paddr:%p,ctrl->inode paddr:%p",my_inode,&ctrl->inode);
+	     HLOG_DEBUG("inode'length:%d,ctrl->inode length:%d,sizeof inode:%d",my_inode->length,ctrl->inode.length,sizeof(struct inode));	 
+            memcpy(&(ctrl->inode),my_inode,sizeof(struct inode));
+            g_free(my_inode);
 	}
-	//HLOG_DEBUG("ctrl->rw_inode_flag:%d", ctrl->rw_inode_flag);
-    struct snapshot *ss;
+	HLOG_DEBUG("ctrl->rw_inode_flag:%d", ctrl->rw_inode_flag);
+       struct snapshot *ss;
 	if (0 == ctrl->storage->bs_file_is_exist(ctrl->storage,SNAPSHOT_FILE)){
         ret = find_latest_alive_snapshot(ctrl->storage,ALIVE_SNAPSHOT_FILE, SNAPSHOT_FILE, &ss);
         if(ret !=0){
@@ -127,6 +132,6 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 		HLOG_DEBUG("do not need read alive snapshot file");
     }
 	ctrl->usage_ref++;
-	//HLOG_DEBUG("leave func %s", __func__);
+	HLOG_DEBUG("leave func %s", __func__);
 	return 0;
 }

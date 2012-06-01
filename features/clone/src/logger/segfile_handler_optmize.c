@@ -28,10 +28,11 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
     struct back_storage * storage =NULL;
     if(NULL == ctrl->last_rsegfile_handler){
         const char segfile_name[SEGMENT_FILE_NAME_MAX];
+	 memset(segfile_name,0,SEGMENT_FILE_NAME_MAX);
         build_segfile_name(segno,segfile_name);
         bs_file_t file;   
         if(segno >= ctrl->start_segno){
-            storage = ctrl->storage;
+            storage =  ctrl->storage;
         }else{
             HLOG_DEBUG("get parent storage for segno:%d",segno);
             if(NULL == (storage = get_parent_storage(ctrl->family,segno))){
@@ -49,17 +50,17 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
         ctrl->last_rsegfile_offset = ctrl->last_offset;
         ctrl->last_read_segno =segno;
     }else if(ctrl->last_read_segno != segno || (ctrl->last_read_segno == segno && ctrl->last_rsegfile_offset != ctrl->last_offset)){
-        HLOG_DEBUG("cur segno:%d is ,last segno no:%d, last rsegfile offset:%d,last offset:%d - need close old and open new segfile",
-                segno,ctrl->last_read_segno,ctrl->last_rsegfile_offset,ctrl->last_offset);
+        HLOG_DEBUG("cur segno:%d is ,last segno no:%d, last rsegfile offset:%d,last offset:%d,start_segno:%d - need close old and open new segfile",
+                segno,ctrl->last_read_segno,ctrl->last_rsegfile_offset,ctrl->last_offset,ctrl->start_segno);
         /* close last seg file handler...  */
         if(ctrl->last_read_segno >= ctrl->start_segno){
-            storage = ctrl->storage;
+               storage = ctrl->storage;
         }else{
-            HLOG_DEBUG("get parent storage for segno:%d",segno);
-            if(NULL == (storage = get_parent_storage(ctrl->family,ctrl->last_read_segno))){
-                g_assert(0);
-                return -1;
-            }
+               HLOG_DEBUG("get parent storage for segno:%d",segno);
+               if(NULL == (storage = get_parent_storage(ctrl->family,ctrl->last_read_segno))){
+                  g_assert(0);
+                  return -1;
+              }
         }
         if(0!=storage->bs_file_close(storage,ctrl->last_rsegfile_handler)){
             g_assert(0);
@@ -71,6 +72,7 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
         if(segno >= ctrl->start_segno){
             storage = ctrl->storage;
         }else{
+             HLOG_DEBUG("get parent storage for segno:%d",segno);	
             if(NULL == (storage = get_parent_storage(ctrl->family,segno))){
                 g_assert(0);
                 return -1;
@@ -78,7 +80,7 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
         }
         bs_file_t file = storage->bs_file_open(storage,segfile_name,BS_READONLY); 
         if(file == NULL){
-            //HLOG_ERROR("can not open segment file %s",segfile_name);
+            HLOG_ERROR("can not open segment file %s",segfile_name);
             g_assert(0);
             return -1;
         }

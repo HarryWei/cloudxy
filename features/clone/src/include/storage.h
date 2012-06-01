@@ -32,10 +32,10 @@ typedef struct file_info{
 struct back_storage   
 {   
    char* storage_name;
-   const char* uri;
-   const char* dir;
-   const char* fs_name;
-   const char *head;
+   char* uri;
+   char* dir;
+   char* fs_name;
+   char *head;
    char* user;
    const char* hostname;
    uint32_t port;

@@ -301,7 +301,7 @@ static int load_all_alive_snapshot(struct back_storage *storage,const char* aliv
 	int ret = 0;
     char *contents = NULL;
     uint32_t size;
-    ret = file_get_contents(storage,alive_snapshot_file, (const char **) &contents,&size);
+    ret = file_get_contents(storage,alive_snapshot_file,&contents,&size);
     if(ret != 0){
 	   HLOG_ERROR("file get contents error!");
        return -1; 

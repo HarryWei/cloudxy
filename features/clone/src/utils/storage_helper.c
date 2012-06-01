@@ -285,8 +285,8 @@ struct inode *load_inode(struct back_storage * storage,uint64_t inode_storage_ad
 	}
 	HLOG_DEBUG("--------inode paddress:%p",my_inode);
 	uint32_t offset = get_offset(inode_storage_addr); 
-       const char segfile[SEGMENT_FILE_NAME_MAX];
-       build_segfile_name(get_segno(inode_storage_addr),segfile);
+    const char segfile[SEGMENT_FILE_NAME_MAX];
+    build_segfile_name(get_segno(inode_storage_addr),segfile);
 	HLOG_DEBUG("inode_addr %lld,offset %u", inode_storage_addr,offset);
 	if (0 == storage->bs_file_is_exist(storage, segfile)) {
 		if (NULL == (file = storage->bs_file_open(storage, segfile, BS_READONLY))) {

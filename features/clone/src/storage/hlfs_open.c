@@ -16,6 +16,7 @@
 #include "snapshot.h"
 #include "comm_define.h"
 #include "misc.h"
+#include "storage_helper.h"
 #include "logger.h"
 
 /*
@@ -105,12 +106,12 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
                                return -1;
                      }
             } 
-            struct inode *my_inode =NULL;
+         struct inode *my_inode = NULL;
 	     HLOG_DEBUG("inode paddr:%p,ctrl->inode paddr:%p",my_inode,&ctrl->inode);			
 	     my_inode = load_inode(storage, ctrl->imap_entry.inode_addr);
 	     HLOG_DEBUG("inode paddr:%p,ctrl->inode paddr:%p",my_inode,&ctrl->inode);		
 	     if (my_inode == NULL) {
-		    HLOG_ERROR("load_inode error!");
+		     HLOG_ERROR("load_inode error!");
                   return -1;
 	     }
 	     HLOG_DEBUG("inode paddr:%p,ctrl->inode paddr:%p",my_inode,&ctrl->inode);

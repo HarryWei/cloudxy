@@ -25,7 +25,7 @@
 //struct back_storage* init_storage_handler(const char* uri,const char *fs_name)
 struct back_storage* init_storage_handler(const char* uri)
 {
-	HLOG_DEBUG("enter func %s", __func__);
+    HLOG_DEBUG("enter func %s", __func__);
     int ret =0;
     struct back_storage* storage = NULL;
     gchar* back_storage_type = NULL;
@@ -36,26 +36,26 @@ struct back_storage* init_storage_handler(const char* uri)
     int port;
     ret = parse_from_uri(uri,&head,&hostname,&dir,&fs_name,&port);
     if(ret !=0){
-	    HLOG_ERROR("parse_from_uri happened error");
+	 HLOG_ERROR("parse_from_uri happened error");
         return NULL;
     }
     //gchar *fs_path = g_build_filename(dir,fs_name,NULL);
-    //HLOG_DEBUG("loc [fs:%s], [path:%s]\n",fs_name,fs_path);
+    HLOG_DEBUG("loc [fs:%s], \n",fs_name);
     if (0 == g_strcmp0(head,"local")){
         storage=get_local_storage_ops();
     }else if(0 == g_strcmp0(head,"hdfs")){
         storage = get_hdfs_storage_ops();
     }else{
-        HLOG_ERROR("Error URI");
+        HLOG_ERROR("Error URI:%s",uri);
         ret = -1;
         goto out;
     }
-    storage->uri = strdup(uri);
+       storage->uri = strdup(uri);
 	storage->head = head;
 	storage->dir = dir;
 	storage->fs_name = fs_name;
 	storage->hostname = hostname;
-    storage->port = port;
+       storage->port = port;
 	storage->user = g_strdup("kanghua");
     HLOG_DEBUG("uri:%s,head:%s,dir:%s,fsname:%s,hostname:%s,port:%d,user:%s",
                 storage->uri,
@@ -74,13 +74,19 @@ struct back_storage* init_storage_handler(const char* uri)
 out:
     //g_free(fs_path);
     if(ret !=0){
-		g_free(storage->uri);
-	    g_free(storage->head);
-		g_free(storage->dir);
-		g_free(storage->fs_name);
-		g_free(storage->hostname);
-		g_free(storage->user);
-        g_free(storage);
+		if(storage->uri != NULL)
+			g_free(storage->uri);
+		if(storage->head !=NULL)
+	       	g_free(storage->head);
+		if(storage->dir !=NULL);
+			g_free(storage->dir);
+		if(storage->fs_name !=NULL)
+			g_free(storage->fs_name);
+		if(storage->hostname !=NULL)
+			g_free(storage->hostname);
+		if(storage->user!=NULL)
+			g_free(storage->user);
+        	g_free(storage);
 		HLOG_ERROR("ret is not 0, so error happened");
         storage = NULL;
     }
@@ -279,34 +285,36 @@ struct inode *load_inode(struct back_storage * storage,uint64_t inode_storage_ad
 {
 	HLOG_DEBUG("enter func %s",__func__);
 	bs_file_t file = NULL;
-	struct inode *inode = (struct inode*)g_malloc0(sizeof(struct inode));
-	if (!inode) {
+	struct inode *my_inode = (struct inode*)g_malloc0(sizeof(struct inode));
+	if (NULL== my_inode) {
 		HLOG_ERROR("Allocate Error!");
 		return NULL;
 	}
+
 	uint32_t offset = get_offset(inode_storage_addr); 
     const char segfile[SEGMENT_FILE_NAME_MAX];
     build_segfile_name(get_segno(inode_storage_addr),segfile);
 	HLOG_DEBUG("inode_addr %lld,offset %u", inode_storage_addr,offset);
 	if (0 == storage->bs_file_is_exist(storage, segfile)) {
 		if (NULL == (file = storage->bs_file_open(storage, segfile, BS_READONLY))) {
-			g_free(inode);
+			g_free(my_inode);
 			HLOG_ERROR("open segfile error!");
 			return NULL;
 		}
-		if (sizeof(struct inode) != storage->bs_file_pread(storage, file,(char*)inode, sizeof(struct inode),offset)) {
-			g_free(inode);
+		if (sizeof(struct inode) != storage->bs_file_pread(storage, file,(char*)my_inode, sizeof(struct inode),offset)) {
+			g_free(my_inode);
 			storage->bs_file_close(storage, file);
 			HLOG_ERROR("pread error!");
 			return NULL;
 		}
 	} else {
 		HLOG_ERROR("segfile not exist!");
-		g_free(inode);
+		g_free(my_inode);
 		return NULL;
 	}
+	
 	HLOG_DEBUG("leave func %s", __func__);
-	return inode;
+	return my_inode;
 }
 
 
@@ -418,9 +426,9 @@ uint64_t  SEGMENT_SIZE_MASK = 0;
 uint64_t  SEGMENT_SIZE_SHIFT = 0;
 uint32_t  HBLOCK_SIZE;
 #endif
-int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size)
-{
-	HLOG_DEBUG("enter func %s", __func__);
+
+
+static GKeyFile *  get_superblock_keyfile(struct back_storage *storage){
     int ret = 0;
     if(0!=storage->bs_file_is_exist(storage,"superblock")){
         HLOG_ERROR("superblock file can not be accessable");
@@ -432,44 +440,87 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
     if(file == NULL){
       HLOG_ERROR("can not open superblock file");  
       ret = -1;
-      return ret;
+      goto out;
     }
     int size = storage->bs_file_pread(storage,file,key_file_buf,4096,0);
     if(size <0){
       HLOG_ERROR("can not read superblock file");
       storage->bs_file_close(storage,file);
-      ret = -1;
-      return ret;
+      goto out;
     }
     GKeyFile * sb_keyfile = g_key_file_new();
     if(FALSE == g_key_file_load_from_data(sb_keyfile,key_file_buf,size,G_KEY_FILE_NONE,NULL)){
        HLOG_ERROR("superblock file format is not key value pairs");
-       //storage->bs_file_close(storage,file);
-       //g_key_file_free(sb_keyfile);
-       ret = -2;
        goto out;
     }
-    gchar * _uri =  g_key_file_get_string(sb_keyfile,"METADATA","uri",NULL);
-    guint32 _seg_size = g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL);
-    guint32 _block_size = g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);
-    guint64 _max_fs_size = g_key_file_get_int64(sb_keyfile,"METADATA","max_fs_size",NULL);
-    if(_uri==NULL || _seg_size == 0 || _block_size ==0 || _max_fs_size == 0){
-       HLOG_ERROR("superblock parse error");
-       g_free(_uri);
-       ret = -3;
-       goto out;
-    }
-    HLOG_DEBUG("superblock : seg size :%u block size :%u max fs size :%u(M) uri :%s\n",_seg_size,_block_size,_max_fs_size,_uri);
+out:
+    storage->bs_file_close(storage,file);
+    return sb_keyfile;
+}
+
+int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size,
+					    gchar **father_uri,uint64_t *snapshot_inode, uint32_t *from_segno){
+     GKeyFile * sb_keyfile = get_superblock_keyfile(storage);
+     if(NULL == sb_keyfile){
+	 	HLOG_ERROR("read superblock keyfile error ");
+	 	return -1;
+     }	 	
+     gchar * _uri =  g_key_file_get_string(sb_keyfile,"METADATA","uri",NULL);
+     guint32 _seg_size = g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL);
+     guint32 _block_size = g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);
+     guint64 _max_fs_size = g_key_file_get_int64(sb_keyfile,"METADATA","max_fs_size",NULL); 
+     if(_uri==NULL || _seg_size == 0 || _block_size ==0 || _max_fs_size == 0){
+          HLOG_ERROR("superblock parse error");
+          g_free(_uri);
+          return -1;
+     }
     *segment_size = _seg_size;
     *block_size = _block_size;
     *max_fs_size = _max_fs_size;
     if(0!=strcmp(storage->uri,_uri)){
         HLOG_ERROR("error fs name");
         g_free(_uri);
-        ret = -4;
-        goto out;
+        return -1;
     }
-    g_free(_uri);
+     g_free(_uri);
+     gchar * _father_uri =  g_key_file_get_string(sb_keyfile,"METADATA","father_uri",NULL);
+     guint64 _snapshot_inode = g_key_file_get_int64(sb_keyfile,"METADATA","snapshot_inode",NULL);
+     guint32 _from_segno = g_key_file_get_integer(sb_keyfile,"METADATA","from_segno",NULL);
+     if(_father_uri !=NULL){
+	   *father_uri = _father_uri;
+	   *snapshot_inode = _snapshot_inode;
+	   *from_segno = _from_segno;
+     }	 
+#if 1
+    SEGMENT_SIZE = _seg_size;
+    SEGMENT_SIZE_MASK  = SEGMENT_SIZE - 1;
+    SEGMENT_SIZE_SHIFT = 0;
+    while (0 != (SEGMENT_SIZE = (SEGMENT_SIZE >> 1)))
+    {                                                                                                         
+        SEGMENT_SIZE_SHIFT++;
+    }
+    HBLOCK_SIZE=_block_size;
+#endif	 
+     g_key_file_free(sb_keyfile); 	 
+     return 0;
+}
+
+int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size)
+{
+     int ret = 0;
+     GKeyFile * sb_keyfile = get_superblock_keyfile(storage);
+     gchar * _uri =  g_key_file_get_string(sb_keyfile,"METADATA","uri",NULL);
+     guint32 _seg_size = g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL);
+     guint32 _block_size = g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);
+     guint64 _max_fs_size = g_key_file_get_int64(sb_keyfile,"METADATA","max_fs_size",NULL); 
+     if(_uri==NULL || _seg_size == 0 || _block_size ==0 || _max_fs_size == 0){
+          HLOG_ERROR("superblock parse error");
+          g_free(_uri);
+          return -1;
+     }
+    *segment_size = _seg_size;
+    *block_size = _block_size;
+    *max_fs_size = _max_fs_size;
 #if 1
     SEGMENT_SIZE = _seg_size;
     SEGMENT_SIZE_MASK  = SEGMENT_SIZE - 1;
@@ -482,8 +533,7 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
 #endif
 out:
     g_key_file_free(sb_keyfile);
-    storage->bs_file_close(storage,file);
-	HLOG_DEBUG("leave func %s", __func__);
+    HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
  
@@ -533,7 +583,7 @@ int file_append_contents(struct back_storage *storage,const char* filename,const
 	int ret = 0;
 	bs_file_t file = NULL;
 	if ( 0!= storage->bs_file_is_exist(storage,filename)) {
-		HLOG_DEBUG("cp file not exist, create file");
+		HLOG_DEBUG("file:%s not exist, create file",filename);
 		file = storage->bs_file_create(storage,filename);
 		if (NULL == file) {
             ret = -1;
@@ -562,7 +612,7 @@ out:
 
 }
 
-int file_get_contents(struct back_storage *storage,const char* filename,const char**contents,uint32_t *size){
+int file_get_contents(struct back_storage *storage,const char* filename,char**contents,uint32_t *size){
 	HLOG_DEBUG("enter func %s", __func__);
      if(storage == NULL || filename == NULL) {
 		HLOG_ERROR("Parameter error!");
@@ -571,11 +621,11 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 
 	int ret = 0;
 	int i = 0;
+	bs_file_t file = NULL;
 	HLOG_DEBUG("filename is %s", filename);
 	if ( 0!= storage->bs_file_is_exist(storage,filename)) {
 		HLOG_ERROR("file is not exist, but may be first start, not error, check it please");
-		ret = -1;
-		goto out;
+		return -1;
 	}
 	bs_file_info_t *file_info = storage->bs_file_info(storage,filename);
 	if (NULL == file_info) {
@@ -587,12 +637,12 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 	g_free(file_info);
 	HLOG_DEBUG("file_size : %u", *size);
 	*contents = (char *)g_malloc0(*size);
-	if (NULL == contents) {
+	if (NULL == *contents) {
 		HLOG_ERROR("Allocate error!");
 		ret = -1;
 		goto out;
 	}
-	bs_file_t file = NULL;
+	
 	file = storage->bs_file_open(storage,filename, BS_READONLY);
 	if (file == NULL) {
 		HLOG_ERROR("open snapshot.txt error");
@@ -603,7 +653,7 @@ int file_get_contents(struct back_storage *storage,const char* filename,const ch
 	{
 		HLOG_ERROR("Read file:%s failed",filename);
 		storage->bs_file_close(storage, file);
-        g_free(contents);
+              g_free(contents);
 		ret = -1;
         goto out;
 	}

@@ -272,7 +272,7 @@ int load_all_seg_usage(struct back_storage *storage,
 #endif
         SEG_USAGE_T *_seg_usage = g_hash_table_lookup(seg_usage_hashtable,GINT_TO_POINTER((uint32_t)seg_usage->segno));
         if(_seg_usage!=NULL){
-           HLOG_DEBUG(" seg usage:%d has exit,replace it ");
+           HLOG_DEBUG(" seg usage has exit,replace it");
            g_hash_table_replace(seg_usage_hashtable,GINT_TO_POINTER((uint32_t) seg_usage->segno),seg_usage);
            g_free(_seg_usage->bitmap);
            g_free(_seg_usage);

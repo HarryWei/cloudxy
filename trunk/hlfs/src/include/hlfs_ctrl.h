@@ -16,6 +16,7 @@
 #include "ctrl_region.h"
 #include "cache.h"
 #include "icache.h"
+#include "clone.h"
 
 #define MAX_FILE_NAME_LEN 128
 struct inode {
@@ -98,6 +99,8 @@ struct hlfs_ctrl {
     struct cache_ctrl *cctrl;
     struct icache_ctrl *icache;
     uint32_t io_nonactive_period;
+    uint32_t start_segno;
+    FAMILY_CTRL *family;
 };
 
 typedef struct hlfs_stat{

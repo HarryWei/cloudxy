@@ -48,7 +48,7 @@ int icache_query_iblock(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no, char *iblo
 
       //HLOG_DEBUG("--read iblock no:%llu",iblock->iblock_no);
       g_assert(iblock_no == iblock->iblock_no);
-      memcpy(iblock_buf, iblock->iblock,(size_t)icache_ctrl->iblock_size);
+      memcpy(iblock_buf, iblock->iblock,icache_ctrl->iblock_size);
       icache_ctrl->icache_hit++;
       //HLOG_DEBUG("--Leaving func %s", __func__);
       return ret;

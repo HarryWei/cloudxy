@@ -283,7 +283,7 @@ struct inode *load_inode(struct back_storage * storage,uint64_t inode_storage_ad
 		HLOG_ERROR("Allocate Error!");
 		return NULL;
 	}
-	HLOG_DEBUG("--------inode paddress:%p",my_inode);
+
 	uint32_t offset = get_offset(inode_storage_addr); 
     const char segfile[SEGMENT_FILE_NAME_MAX];
     build_segfile_name(get_segno(inode_storage_addr),segfile);
@@ -305,7 +305,7 @@ struct inode *load_inode(struct back_storage * storage,uint64_t inode_storage_ad
 		g_free(my_inode);
 		return NULL;
 	}
-	HLOG_DEBUG("--------inode paddress:%p",my_inode);
+	
 	HLOG_DEBUG("leave func %s", __func__);
 	return my_inode;
 }

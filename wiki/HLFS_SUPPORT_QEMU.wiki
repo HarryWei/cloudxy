@@ -72,14 +72,17 @@ qemu-system-x86_64 -enable-kvm -m 1024 -smp 2 -drive file=hlfs:hdfs:///tmp/teste
 2.创建新的hlfs系统 - ./qemu-img create hlfs:local:///tmp/testenv/testfs2 10G
 3.执行clone操作 -./qemu-img snapshot -b local:///tmp/testenv/testfs%snapshot1 hlfs:local:///tmp/testenv/testfs2 （快照和base系统之间使用%区分！）
 4.试试看hlfs:local:///tmp/testenv/testfs2啦。
+
 --------------------------------------------
+
 不用qemu的情况下，在我们outpub/bin下也有快照和clone命令，类似用法为
 ./output/bin/snapshot.hlfs -u local:///tmp/testenv/testfs -s snapshot1
 ./output/bin/clone.hlfs -f local:///tmp/testenv/testfs%snapshot1 -s local:///tmp/testenv/testfs2 
+
 --------------------------------------------
+
 CLONE行为用在那里？ 
-A 一个hdfs之上的镜像，可以作为无数新系统的base磁盘，从而提高系统生产速度和解决存储空间。
+A 一个hdfs之上的系统盘镜像，可以作为无数新系统的base系统，从而提高系统新系统生产速度和解决存储空间。
 B 为了减少本网络传输压力，提高系统响应速度，可考虑利用本地文件系统作为Base数据宿主：比如一些场景中——我们可以将标准的镜像或某系通用软件做到工具盘中，并置于到本地hlfs上,即local方式挂载的hlfs系统上，然后再在集群的hdfs上做一个新hlfs系统，并将其base到本地上述hlfs上。从而只有变化的增量数据需要途径网络io，这样很大程度上会提高系统性能。
 
 }}}
-

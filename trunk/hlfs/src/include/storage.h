@@ -15,8 +15,8 @@
 #include "comm_define.h"
 //#include "bs_local.h"
 
-#define BS_READONLY 0
-#define BS_WRITEABLE 1
+#define BS_READONLY 0U
+#define BS_WRITEABLE 1U
 
 typedef void* bs_file_t;
 typedef void* bs_fs_t;

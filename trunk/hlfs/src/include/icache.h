@@ -20,9 +20,9 @@ typedef struct {
 } iblock_t;
 
 
-#define DEF_ICACHE_SIZE 1024
-#define DEF_INVALIDATE_TRIGGER_LEVEL 90
-#define DEF_INVALIDATE_ONCE_SIZE 64
+#define DEF_ICACHE_SIZE 1024U
+#define DEF_INVALIDATE_TRIGGER_LEVEL 90U
+#define DEF_INVALIDATE_ONCE_SIZE 64U
 
 
 #ifdef __cplusplus  

@@ -18,7 +18,7 @@
 #include "icache.h"
 #include "clone.h"
 
-#define MAX_FILE_NAME_LEN 128
+#define MAX_FILE_NAME_LEN 128U
 struct inode {
 	int64_t length;
     	//int32_t uid;

@@ -14,9 +14,9 @@
 #include "hlfs_ctrl.h"
 #include "storage.h"
 
-#define DEF_IO_NONACTIVE_PERIOD  10
-#define DEF_SEG_COPY_WATERLEVEL 128
-#define DEF_SC_CHECK_PERIOD 1
+#define DEF_IO_NONACTIVE_PERIOD  10U
+#define DEF_SEG_COPY_WATERLEVEL 128U
+#define DEF_SC_CHECK_PERIOD 1U
 
 /* segment usage structure for cleaning task */
 typedef struct segment_usage {

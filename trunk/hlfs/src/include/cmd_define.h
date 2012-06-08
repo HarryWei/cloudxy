@@ -19,7 +19,7 @@
 typedef struct{
     enum ops_cmd {
 	    start_clean =1,
-        set_copy_waterlevel =2,
+            set_copy_waterlevel =2,
 	    query_stat = 3
     } nbd_ops_cmd;
     char uri[128];

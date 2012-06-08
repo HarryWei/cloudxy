@@ -23,10 +23,10 @@ typedef struct {
 } block_t;
 
 
- #define DEF_CACHE_SIZE      4096
- #define DEF_FLUSH_INTERVAL  5
- #define DEF_FLUSH_TRIGGER_LEVEL  80
- #define DEF_FLUSH_ONCE_SIZE   64
+ #define DEF_CACHE_SIZE      4096U
+ #define DEF_FLUSH_INTERVAL  5U
+ #define DEF_FLUSH_TRIGGER_LEVEL  80U
+ #define DEF_FLUSH_ONCE_SIZE   64U
 
 
 #ifdef __cplusplus  

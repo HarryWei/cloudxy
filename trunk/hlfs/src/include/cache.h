@@ -59,7 +59,7 @@ typedef struct cache_ctrl {
 #endif 
 }CACHE_CTRL;
 
-CACHE_CTRL *cache_new();
+CACHE_CTRL *cache_new(void);
 int cache_init(CACHE_CTRL *cache_ctrl,
 		uint32_t block_size,
 		uint32_t cache_size,

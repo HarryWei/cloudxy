@@ -21,7 +21,7 @@ typedef  struct family_ctrl{
         GList*    seg_storage_list;
  }FAMILY_CTRL;
 
-FAMILY_CTRL * family_new();
+FAMILY_CTRL * family_new(void);
 int faimly_init(FAMILY_CTRL *family_ctrl,char* father_uri,uint64_t base_inode,uint32_t from_segno);
 struct back_storage * get_parent_storage(FAMILY_CTRL *fctrl,uint32_t segno);
 int  famliy_destroy(FAMILY_CTRL *fctrl);

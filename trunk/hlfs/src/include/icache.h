@@ -43,7 +43,7 @@ typedef struct icache_ctrl {
     uint64_t 		icache_hit;
 }ICACHE_CTRL;
 
-ICACHE_CTRL *icache_new();
+ICACHE_CTRL *icache_new(void);
 int icache_init(ICACHE_CTRL *icache_ctrl,
 		uint32_t iblock_size,
 		uint32_t icache_size,

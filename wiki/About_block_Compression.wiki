@@ -10,7 +10,11 @@
 
 * 用什么压缩算法？
 毫无疑问，我们要：
- # 速度最快的（因为是online服务），而不是压缩比最高的。
- # 能支持块压缩（我们的压缩单位是block）
+ # 速度最快的（因为是online服务），而不是压缩比最高的.
+ # 能支持块压缩（我们的压缩单位是block).
+
+满足上述要求的最佳选择是lzo算法（我们应使用最简单的minilzo即可）
 
 = Details =
+
+http://cloudxy.googlecode.com/svn/wiki/images/lzo.png

@@ -69,12 +69,12 @@ int icache_init(ICACHE_CTRL *icache_ctrl,
 		goto err;
     }
     //HLOG_DEBUG("--iblock_map init over!--");
-    g_thread_init(NULL);
-    if (NULL == (icache_ctrl->icache_mutex = g_mutex_new())) {
-        HLOG_ERROR("--Error:Apply for mutext");
-        ret = -EHLFS_MEM;
-        goto err;
-    }
+    //g_thread_init(NULL);
+    //if (NULL == (icache_ctrl->icache_mutex = g_mutex_new())) {
+    //    HLOG_ERROR("--Error:Apply for mutext");
+    //    ret = -EHLFS_MEM;
+    //    goto err;
+    //}
 	//HLOG_DEBUG("--Leaving func %s", __func__);
     return ret;
 err:

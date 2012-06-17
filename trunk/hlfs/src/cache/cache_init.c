@@ -77,13 +77,15 @@ int cache_init(CACHE_CTRL *cache_ctrl,
 		goto err;
     }
     //HLOG_DEBUG("--dirty block_map init over!--");
-    
-	g_thread_init(NULL);
-    if (NULL == (cache_ctrl->cache_mutex = g_mutex_new())) {
-        HLOG_ERROR("--Error:Apply for mutext");
-        ret = -EHLFS_MEM;
-        goto err;
+    if(g_thread_get_initialized ()){
+		g_thread_init(NULL);
+	    if (NULL == (cache_ctrl->cache_mutex = g_mutex_new())) {
+	        HLOG_ERROR("--Error:Apply for mutext");
+	        ret = -EHLFS_MEM;
+	        goto err;
+	    }
     }
+
     cache_ctrl->flush_waken_cond =  g_cond_new();
     cache_ctrl->writer_waken_cond = g_cond_new();
     cache_ctrl->flush_worker_should_exit = 0;

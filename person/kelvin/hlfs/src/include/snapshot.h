@@ -1,52 +1,97 @@
-#ifndef _HLFS_SNAPSHOT_H_
-#define _HLFS_SNAPSHOT_H_
+/*
+  *  Copyright (C) 2012 KangHua <kanghua151@gmail.com>
+  *  Maintainers:
+  * 		Harry Wei <harryxiyou@gmail.com>
+  * 		Kelvin <kelvin.xupt@gmail.com>
+  *  This program is free software; you can redistribute it and/or modify it
+  *  under the terms of the GNU General Public License version 2 as published by
+  *  the Free Software Foundation.
+ */
 
-#include <stdio.h>
+#ifndef __HLFS_SNAPSHOT_H_
+#define __HLFS_SNAPSHOT_H_
+
 #include <stdint.h>
-#include <glib.h>
-#include "hlfs_log.h"
-#include "storage.h"
 #include "hlfs_ctrl.h"
+#include "comm_define.h"
+#include "storage.h"
 
-#define SS_FILE "snapshot.txt"
-#define MAX_SS_NAME_LEN 128
+#define	SNAPSHOT_FILE "snapshot.txt"
+#define	ALIVE_SNAPSHOT_FILE "alive_snapshot.txt"
 
 struct snapshot {
-	char ss_name[MAX_SS_NAME_LEN];
-	char up_ss_name[MAX_SS_NAME_LEN];
-	uint64_t version;
-	struct inode_map_entry ime;
-}__attribute__((packed));
+	uint64_t timestamp;
+	uint64_t inode_addr;
+	char sname[HLFS_FILE_NAME_MAX];
+	char up_sname[HLFS_FILE_NAME_MAX]; /* for tree style snapshot */
+} __attribute__((packed));
 
-#ifdef __cplusplus
+#define SS_ITEM_SEP 			"@@##$$"
+
+
+#ifdef __cplusplus  
 extern "C" {
 #endif
 
-/*Append the will-be deleted snapshot's ss_name to the ss_delmark.txt*/
-int append_ss_delmark(struct back_storage *storage, const char *ss_name);
+int hlfs_open_by_snapshot(struct hlfs_ctrl *ctrl,const char* snapshot,int flag);
+/**
+ * hlfs_find_inode_by_name: find a inode in light of sname
+ * @para uri: the hlfs storage path
+ * @para sname: the sname of inode for searching
+ * @para inode_addr: get the inode's inode addr
+ * @return value: 0 is right, -1 is wrong, 1 is no this snapshot name
+ */
+int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_addr);
+/**
+ * hlfs_rm_snapshot: delete a snapshot in light of sname
+ * @para uri: the hlfs storage path
+ * @para ssname: the sname of inode for deleting
+ * @return value: 0 is right, -1 is wrong, 1 is ssname not exist
+ */
+int hlfs_rm_snapshot(const char *uri, const char *ssanme);
 
-/*Change the format of the structure snapshot to a character string*/
-int ss2text(struct snapshot *ss, char *buf, int flag);
+struct snapshot* hlfs_get_all_snapshots(const char *uri,int *num_entries);
+//struct snapshot *__hlfs_get_all_snapshots(struct back_storage *storage,int *num_entries);
 
-/*Append the character string matching a snapshot structure to the snapshot.txt*/
-/*the buf size should be (sizeof(struct snapshot) + 6 )*/
-int dump_ss_text(struct back_storage *storage, const char *buf);
 
-/*Append the snapshot structure to the file snapshot.txt*/
-int dump_ss(struct back_storage *storage, struct snapshot *ss, int flag);
+/**
+ * hlfs_take_snapshot: take a snapshot given a snapshot name
+ * @para ctrl: the hlfs global control construction
+ * @para ssname: the snapshot's name
+ * @return value: 0 is right, -1 is wrong
+ */
+int hlfs_take_snapshot(struct hlfs_ctrl *ctrl, const char *ssname);
+/**
+ * hlfs_find_inode_before_time: find a inode nearby the timestamp
+ * @para uri: the hlfs storage path
+ * @para timestamp: the timestamp of inode for searching
+ * @para inode_addr: get the inode's inode addr
+ * @return value: 0 is right, -1 is wrong, 1 is no segfiles in back storage
+ */
+int hlfs_find_inode_before_time(const char *uri, uint64_t timestamp, uint64_t *inode_addr);
 
-/*Change the format of a character string to the structure snapshot*/
-int load_ss_from_text(struct snapshot *ss, const char *buf, int *flag);
+/**
+ * hlfs_get_inode_info: get a inode info in light of its addr
+ * @para uri: the hlfs storage path
+ * @para inode_addr: the addr of inode for searching
+ * @para ctime: get the inode's create time
+ * @para length: get the inode's length
+ * @return value: 0 is right, -1 is wrong
+ */
+int hlfs_get_inode_info(const char *uri, uint64_t inode_addr, uint64_t *ctime, uint64_t *length);
 
-/*Load all structure snapshot to a Hash table from the snapshot.txt*/
-int load_all_ss(struct back_storage *storage, GHashTable *ss_hashtable);
+/**
+ * hlfs_open_by_inode: load a inode in light of flag
+ * @para ctrl: the hlfs global control construction
+ * @para inode_addr: get the inode's inode addr
+ * @para flag: 0 is common style, 1 is readonly
+ * @return value: 0 is right, -1 is wrong
+ */
+int hlfs_open_by_inode(struct hlfs_ctrl *ctrl, uint64_t inode_addr, int flag);
 
-/*Load the structure snapshot matching a given name from the snapshot.txt*/
-int load_ss_by_name(struct back_storage *storage, struct snapshot *ss, \
-		const char *ss_name);
+#ifdef __cplusplus 
+} 
+#endif 
 
-#ifdef __cplusplus
-}
-#endif
 
-#endif
+#endif 

@@ -1,3 +1,11 @@
+/*
+  *  Copyright (C) 2012 KangHua <kanghua151@gmail.com>
+  *
+  *  This program is free software; you can redistribute it and/or modify it
+  *  under the terms of the GNU General Public License version 2 as published by
+  *  the Free Software Foundation.
+ */
+
 #ifndef _HLFS_BS_LOCAL_H_
 #define _HLFS_BS_LOCAL_H_
 
@@ -52,7 +60,7 @@ static struct back_storage local_storage = {
    bs_file_list_dir:local_list_dir,
 };
 #else
-static struct back_storage * get_local_storage_ops(){
+static struct back_storage * get_local_storage_ops(void){
        struct back_storage * storage = (struct back_storage*)malloc(sizeof(struct back_storage));
        storage->storage_name = "local";
        storage->uri=NULL;

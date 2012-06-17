@@ -1,3 +1,11 @@
+/*
+  *  Copyright (C) 2012 KangHua <kanghua151@gmail.com>
+  *
+  *  This program is free software; you can redistribute it and/or modify it
+  *  under the terms of the GNU General Public License version 2 as published by
+  *  the Free Software Foundation.
+ */
+
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,14 +17,14 @@ static gchar *uri = NULL;
 //static gchar *fsname = NULL;
 static gint block_size = 0;
 static gint seg_size = 0;
-static gint max_fs_size = 0;
+static int64_t max_fs_size = 0;
 static gboolean verbose = FALSE;
 static GOptionEntry entries[] = {
 	    {"filesystem location",'u', 0, G_OPTION_ARG_STRING,   &uri, "filesystem storage uri", "FSLOC"},
    //	{"filesystme name", 'f', 0, G_OPTION_ARG_FILENAME, &fsname, "filesystem name", "NAME"},
     	{"filesystem block size", 'b', 0, G_OPTION_ARG_INT, &block_size, "filesystem block size", "BLOCKSIZE"},
     	{"filesystem segment size", 's', 0, G_OPTION_ARG_INT, &seg_size, "filesystem segment size", "SEGSIZE"},
-    	{"filesystem max size", 'm', 0, G_OPTION_ARG_INT, &max_fs_size, "filesystem  max size(M)", "FS MAX SIZE"},
+    	{"filesystem max size", 'm', 0, G_OPTION_ARG_INT64, &max_fs_size, "filesystem  max size(M)", "FS MAX SIZE"},
     	{"verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
     	{NULL}
 };
@@ -76,18 +84,23 @@ int main(int argc, char *argv[])
        g_option_context_free(context);
        return -1;
     }
-
+    
+    if((0==storage->bs_file_is_exist(storage,NULL)) && (0==storage->bs_file_is_exist(storage,"superblock"))){
+        g_message("hlfs with uri:%s has exist",uri);
+        g_option_context_free(context);
+        return 1;
+    }
     if( 0!=storage->bs_file_mkdir(storage,NULL)){
         g_message("can not mkdir for our fs %s",uri);
         g_option_context_free(context);
         return -1;
     }
 
-    GKeyFile *  sb_keyfile= g_key_file_new();
+    GKeyFile *sb_keyfile= g_key_file_new();
     g_key_file_set_string(sb_keyfile,"METADATA","uri",uri);
     g_key_file_set_integer(sb_keyfile,"METADATA","block_size",block_size);
     g_key_file_set_integer(sb_keyfile,"METADATA","segment_size",seg_size);
-    g_key_file_set_integer(sb_keyfile,"METADATA","max_fs_size",max_fs_size);
+    g_key_file_set_uint64(sb_keyfile,"METADATA","max_fs_size",max_fs_size);
     gchar *data = g_key_file_to_data(sb_keyfile,NULL,NULL);
     g_message("key file data :%s",data);
     char *head,*hostname,*dir,*fs_name;
@@ -98,7 +111,7 @@ int main(int argc, char *argv[])
     bs_file_t file = storage->bs_file_create(storage,"superblock");
     g_message("sb file path 1%s",sb_file_path);
     //bs_file_t file = storage->bs_file_open(storage,"superblock",BS_WRITEABLE);
-    if(NULL == file){
+    if (NULL == file) {
        g_message("open file :superblock failed");
        g_free(sb_file_path);
        g_option_context_free(context);
@@ -106,7 +119,7 @@ int main(int argc, char *argv[])
     }
 
     g_message("sb file path 2%s",sb_file_path);
-    int size = storage->bs_file_append(storage,file,(char*)data,strlen(data)+1);
+    int size = storage->bs_file_append(storage, file,(char*)data,strlen(data)+1);
     if(size != strlen(data)+1){
        g_message("can not write superblock file");
        g_free(sb_file_path);

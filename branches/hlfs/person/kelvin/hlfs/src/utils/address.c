@@ -1,3 +1,11 @@
+/*
+  *  Copyright (C) 2012      KangHua <kanghua151@gmail.com> 
+  *
+  *  This program is free software; you can redistribute it and/or modify it
+  *  under the terms of the GNU General Public License version 2 as published by
+  *  the Free Software Foundation.
+ */
+
 #include <time.h>
 #include <stdint.h>
 #include <glib.h>
@@ -72,8 +80,8 @@ uint32_t ib_amount(uint32_t db_start, uint32_t db_end)
        uint32_t db_cur_no = 0;
        uint32_t IB_ENTRY_NUM = HBLOCK_SIZE/sizeof(uint64_t);
 	
-       HLOG_DEBUG("ib_amount db_start is %d", db_start);
-       HLOG_DEBUG("ib_amount db_end is %d", db_end);
+       //HLOG_DEBUG("ib_amount db_start is %d", db_start);
+       //HLOG_DEBUG("ib_amount db_end is %d", db_end);
        for (db_cur_no = db_start; db_cur_no <= db_end; db_cur_no++) {
                if (is_db_in_level1_index_range(db_cur_no)) {
                        ;
@@ -104,3 +112,60 @@ uint32_t ib_amount(uint32_t db_start, uint32_t db_end)
        return ib_amount;
 #endif
 }
+/* ibno=-1 mean this db not need this layer ib */
+int get_layer1_ibno(uint32_t db_no){
+       int ret = 0;
+     uint32_t IB_ENTRY_NUM = HBLOCK_SIZE/sizeof(uint64_t);
+     if(is_db_in_level1_index_range(db_no)){
+	    ret = -1;
+     }else if (is_db_in_level2_index_range(db_no)){
+           ret =  0;
+     }else if (is_db_in_level3_index_range(db_no)){
+           ret =  1;
+     }else if (is_db_in_level4_index_range(db_no)){
+           ret =  (1 + IB_ENTRY_NUM) + 1;
+     }else{
+           ret = -2;
+     }
+     return ret;
+}
+
+int get_layer2_ibno(uint32_t db_no){
+     int ret = 0;
+     uint32_t IB_ENTRY_NUM = HBLOCK_SIZE/sizeof(uint64_t);
+     if(is_db_in_level1_index_range(db_no)){
+	    ret =  -1;
+     }else if (is_db_in_level2_index_range(db_no)){
+           ret =  -1;
+     }else if (is_db_in_level3_index_range(db_no)){
+           int idx = (db_no - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
+           ret =  0 + 1 + idx;
+     }else if (is_db_in_level4_index_range(db_no)){
+           int idx = (db_no -12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM*IB_ENTRY_NUM);
+           ret =  0 +  ( 1 + IB_ENTRY_NUM ) + (1 + idx);
+     }else{
+           ret = -2;
+     }
+     return ret;
+}
+
+int get_layer3_ibno(uint32_t db_no){
+     int ret = 0;
+     uint32_t IB_ENTRY_NUM = HBLOCK_SIZE/sizeof(uint64_t);
+     if(is_db_in_level1_index_range(db_no)){
+	    ret =  -1;
+     }else if (is_db_in_level2_index_range(db_no)){
+           ret =  -1;
+     }else if (is_db_in_level3_index_range(db_no)){
+           ret =  -1;
+     }else if (is_db_in_level4_index_range(db_no)){
+           int idx = (db_no-12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM)/IB_ENTRY_NUM;
+           ret =  0 + (1 +  IB_ENTRY_NUM)  + (1 + IB_ENTRY_NUM + idx);
+     }else{
+           ret = -2;
+     }
+     return ret;
+}
+
+
+

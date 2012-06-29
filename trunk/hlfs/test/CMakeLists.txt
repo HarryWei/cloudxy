@@ -18,8 +18,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 SET(WORK_HOME "$ENV{PWD}/../")
 MESSAGE(STATUS "Root directory of project:" ${WORK_HOME})
-#SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
-SET(JAVA_HOME 	/mnt/jdk1.7.0)
+SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
+#SET(JAVA_HOME 	/mnt/jdk1.7.0)
 MESSAGE(STATUS "JAVA HOME:" ${JAVA_HOME})
 #SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk)
 
@@ -49,7 +49,6 @@ ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 SET(LIBS glib-2.0
 		 hlfs
 		 log4c
-		 gcov
 )
 
 file(GLOB testfiles "test_*.c")

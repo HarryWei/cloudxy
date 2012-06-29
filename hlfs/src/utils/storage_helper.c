@@ -501,7 +501,7 @@ int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32
     }
 	SEGMENT_SIZE = _seg_size;
     HBLOCK_SIZE=_block_size;
-    HLOG_DEBUG("SEGMENT_SIZE:%llu,HBLOCK_SIZE:%llu",,SEGMENT_SIZE,HBLOCK_SIZE);
+    HLOG_DEBUG("SEGMENT_SIZE:%llu,HBLOCK_SIZE:%llu",SEGMENT_SIZE,HBLOCK_SIZE);
 #endif	 
      g_key_file_free(sb_keyfile); 	 
      return 0;
@@ -533,7 +533,7 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
     }
     SEGMENT_SIZE = _seg_size;
     HBLOCK_SIZE=_block_size;
-    HLOG_DEBUG("SEGMENT_SIZE:%llu,HBLOCK_SIZE:%llu",,SEGMENT_SIZE,HBLOCK_SIZE);
+    HLOG_DEBUG("SEGMENT_SIZE:%llu,HBLOCK_SIZE:%llu",SEGMENT_SIZE,HBLOCK_SIZE);
 #endif
 out:
     g_key_file_free(sb_keyfile);

@@ -100,6 +100,7 @@ int main(int argc, char *argv[]){
     g_free(content);
 	ret = hlfs_close(ctrl);
     deinit_hlfs(ctrl);
+    g_print("TEST  hlfs test over \n");
     return 0;
 }
 #endif

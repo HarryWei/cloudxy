@@ -118,7 +118,7 @@ static int read_block_raw(struct hlfs_ctrl *ctrl,uint32_t storage_address,char* 
 }
 
 
-typedef int(*READ_BLOCK_FUN)(struct hlfs_ctrl *ctrl,uint32_t storage_address,char* buf);
+typedef int(*READ_BLOCK_FUN)(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* buf);
 static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN RB_FUN,char *block){
 	//HLOG_DEBUG("enter func %s,no:%d", __func__,no);
     int ret =0;

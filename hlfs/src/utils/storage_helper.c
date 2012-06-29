@@ -492,7 +492,7 @@ int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32
 	   *from_segno = _from_segno;
      }	 
 #if 1
-    SEGMENT_SIZE = _seg_size;
+    SEGMENT_SIZE = (uint64_t)_seg_size;
     SEGMENT_SIZE_MASK  = SEGMENT_SIZE - 1;
     SEGMENT_SIZE_SHIFT = 0;
     while (0 != (SEGMENT_SIZE = (SEGMENT_SIZE >> 1)))
@@ -500,6 +500,7 @@ int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32
         SEGMENT_SIZE_SHIFT++;
     }
     HBLOCK_SIZE=_block_size;
+    HLOG_DEBUG("segsize:%d,SEGMENT_SIZE:%llu,HBLOCK_SIZE:%llu",_seg_size,SEGMENT_SIZE,HBLOCK_SIZE);
 #endif	 
      g_key_file_free(sb_keyfile); 	 
      return 0;
@@ -522,7 +523,7 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
     *block_size = _block_size;
     *max_fs_size = _max_fs_size;
 #if 1
-    SEGMENT_SIZE = _seg_size;
+    SEGMENT_SIZE = (uint64_t)_seg_size;
     SEGMENT_SIZE_MASK  = SEGMENT_SIZE - 1;
     SEGMENT_SIZE_SHIFT = 0;
     while (0 != (SEGMENT_SIZE = (SEGMENT_SIZE >> 1)))

@@ -32,8 +32,8 @@ int icache_init(ICACHE_CTRL *icache_ctrl,
 		return -EHLFS_PARAM;
 	}
 
-	HLOG_DEBUG("--iblock_size:%llu,icache_size:%llu,\
-		invalidate_trigger_level:%llu,invalidate_once_size:%llu,%s", iblock_size, \
+	HLOG_DEBUG("--iblock_size:%lu,icache_size:%lu,\
+		invalidate_trigger_level:%lu,invalidate_once_size:%lu,%s", iblock_size, \
 		icache_size,invalidate_trigger_level,invalidate_once_size,__func__);
     icache_ctrl->iblock_size = iblock_size;
     icache_ctrl->icache_size = icache_size;

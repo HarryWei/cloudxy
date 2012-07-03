@@ -175,6 +175,7 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
 	            ret = -1;
 	        }else{
 	            HLOG_DEBUG("read block from seg:%u#%u size:%d",segno,offset,read_size);
+				break;
 	            ret = 0;
 	        }
 		}else{
@@ -194,9 +195,12 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
 	          g_usleep(1000);
 	          retry_time--;
 	          ret = -1;
+		   }else{
+		      ret = 0;
+		      break;
 		   }
 		}
-    }while((read_size < block_size || uncompressed_length <block_size) && retry_time >0);
+    }while(retry_time >0);
 out:
         //pre_close_read_segfile(ctrl,segno);
         //HLOG_DEBUG("leave func %s", __func__);

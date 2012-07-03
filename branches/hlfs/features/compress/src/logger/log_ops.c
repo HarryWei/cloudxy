@@ -81,6 +81,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 	   int i;
 	   for(i=0;i<db_num;i++){
 	   	   db_offset += get_zblock_size((char*)log + db_offset) + sizeof(uint32_t);
+		   HLOG_DEBUG(" COMPRESSED : db_offset:%d",db_offset);
 	   }
 	   ib_offset = db_offset;
 	   HLOG_DEBUG(" COMPRESSED : ib_offset:%d db_offset:%d",ib_offset,db_offset);
@@ -122,7 +123,11 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
         }else if (is_db_in_level3_index_range(db_cur_no)){
             HLOG_DEBUG(" enter level3 ... ib_offset:%d",ib_offset);
 			if((db_cur_no -12 - IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == end_db){
-				  ib_offset +=BLOCKSIZE;
+				  if(log->cflag==0){
+            		ib_offset += BLOCKSIZE;
+				  }else{
+					ib_offset += get_zblock_size((char*)log + ib_offset) + sizeof(uint32_t);
+				  }
 			}
 		     
             if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == end_db){
@@ -140,11 +145,19 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
         }else if (is_db_in_level4_index_range(db_cur_no)){
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == end_db){
 				HLOG_DEBUG(" save ib3 ? ");
-                ib_offset +=BLOCKSIZE;
+                if(log->cflag==0){
+            		ib_offset += BLOCKSIZE;
+				}else{
+					ib_offset += get_zblock_size((char*)log + ib_offset) + sizeof(uint32_t);
+				}
             }
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM * IB_ENTRY_NUM)  == 0 || db_cur_no == end_db){
 				HLOG_DEBUG(" save ib2 ? ");
-                ib_offset +=BLOCKSIZE;
+                if(log->cflag==0){
+            		ib_offset += BLOCKSIZE;
+				}else{
+					ib_offset += get_zblock_size((char*)log + ib_offset) + sizeof(uint32_t);
+				}
             }
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == end_db){
                 set_segno (&inode->triply_iblock,last_segno);

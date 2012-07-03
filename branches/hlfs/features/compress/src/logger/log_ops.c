@@ -54,7 +54,7 @@ int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb
 		offset += output_length + sizeof(uint32_t); 
 		HLOG_DEBUG(" COMPRESSED  after  pos:%d,dbno:%d,compress_size:%d",offset,i,output_length);
 		
-		HLOG_DEBUG(" COMPRESSED -- in log pos:%d", offset + LOG_HEADER_LENGTH);
+		HLOG_DEBUG(" COMPRESSED -- in log pos:%d", 4704 + LOG_HEADER_LENGTH));
 		HLOG_DEBUG(" COMPRESSED -- 4704:%d", *(uint32_t*)(dzb_buff + 4704 - LOG_HEADER_LENGTH));
 	}
 	*real_compressed_size = offset;
@@ -351,13 +351,14 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
     guint32 i=0;
 	char * cur_log_buff_ptr = NULL;
     //HLOG_DEBUG(" db_data_len:%d ib_data_len:%d BLOCKSIZE:%d",db_data_len,ib_data_len,BLOCKSIZE);
+    db_offset = LOG_HEADER_LENGTH;
     for(db_cur_no = db_start,i=0; db_cur_no <= db_end; db_cur_no++,i++){  
         /* 
          * char * cur_block_ptr = (char *) (db_buff + i * BLOCKSIZE);  
          * db_offset = LOG_HEADER_LENGTH + i*BLOCKSIZE;
          * char * cur_log_buff_ptr = log_buff + db_offset;
          */
-        cur_log_buff_ptr = log_buff + LOG_HEADER_LENGTH + db_offset;
+        cur_log_buff_ptr = log_buff + db_offset;
         HLOG_DEBUG(" db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
         if(is_db_in_level1_index_range(db_cur_no)){
             HLOG_DEBUG(" is level1 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);

@@ -55,7 +55,7 @@ int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb
 	}
 	*real_compressed_size = offset;
 
-	uint32_t debug = *(uint32_t*)(db_buff+4740);
+	uint32_t debug = *(uint32_t*)(dzb_buff+4740);
 	HLOG_DEBUG(" COMPRESSED -- 4740:%d", debug);
 
 	

@@ -518,7 +518,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             int _idx3  = (db_cur_no -12 -IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 
             set_segno ((ib3+_idx3),ctrl->last_segno);
             set_offset((ib3+_idx3),ctrl->last_offset + db_offset);
-            memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
+            //memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end){
                 set_segno ((ib2+_idx2),ctrl->last_segno);
                 set_offset ((ib2+_idx2),ctrl->last_offset + ib_offset);

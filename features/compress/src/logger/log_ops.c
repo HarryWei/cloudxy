@@ -135,6 +135,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 				}else{
 					ib_offset += get_zblock_size((char*)log + ib_offset) + sizeof(uint32_t);
 				}
+				HLOG_DEBUG("COMPRESSED inode->doubly_iblock:%lu",inode->doubly_iblock);
             }
         }else if (is_db_in_level4_index_range(db_cur_no)){
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == end_db){

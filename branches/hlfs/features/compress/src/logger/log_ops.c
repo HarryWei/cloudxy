@@ -54,6 +54,11 @@ int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb
 		HLOG_DEBUG(" dbno:%d,compress_size:%d",i,output_length);
 	}
 	*real_compressed_size = offset;
+
+	uint32_t debug = *(uint32_t*)(db_buff+4740);
+	HLOG_DEBUG(" COMPRESSED -- 4740:%d", debug);
+
+	
 	return 0;
 }
 
@@ -388,7 +393,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             //uint64_t storage_address = *(_bi + _idx);
             set_segno ((ib1+_idx),ctrl->last_segno);
             set_offset ((ib1+_idx),ctrl->last_offset + db_offset);
-            //HLOG_DEBUG("-- cur_dbno:%d,idx:%d,storage address:%llu",db_cur_no,_idx,*(ib1+_idx));
+            HLOG_DEBUG("-- cur_dbno:%d,idx:%d,storage address:%llu",db_cur_no,_idx,*(ib1+_idx));
             /*memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);*/
             if( (db_cur_no - 12 + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end ){
                 HLOG_DEBUG("set iblock - segno:%u ???",ctrl->last_segno);

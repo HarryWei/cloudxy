@@ -254,7 +254,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
     guint32  ib_offset = 0;
     uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
 
-	gboolean _is_compressed= if (no_compressed == 0) ? false:ctrl->is_compressed;
+	gboolean _is_compressed= (no_compressed == 0) ? false:ctrl->is_compressed;
 	char* log_buff = NULL;
 	if(!_is_compressed){
 	    uint32 db_data_len = (db_end-db_start + 1) * BLOCKSIZE;

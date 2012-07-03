@@ -335,7 +335,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		int ret = compress_dblocks(db_buff,(db_end-db_start + 1),BLOCKSIZE,compressed_db_buff,&real_compressed_size);
 		HLOG_DEBUG("COMPRESSED: real_compressed_size :%d",real_compressed_size);
 		g_assert(ret == 0);
-		ib_offset = LOG_HEADER_LENGTH + real_compressed_size;
+		ib_offset = real_compressed_size + LOG_HEADER_LENGTH;
 	}
 	//memcpy(log_buff + LOG_HEADER_LENGTH,db_buff,size);
     guint32 db_cur_no = 0;
@@ -365,6 +365,8 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		   }else{
 		    	db_offset += BLOCKSIZE;
 		   }
+		   HLOG_DEBUG("COMPRESSED: db_offset:%d",db_offset);
+		   ib_offset += ib1_buff_size + sizeof(uint32_t);
         }else if(is_db_in_level2_index_range(db_cur_no)){
            HLOG_DEBUG("is level2 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
            if(TRUE == ib1_need_load && ctrl->inode.iblock == 0){
@@ -412,7 +414,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  memcpy((char*)log_buff + ib_offset ,(char*)ib1_buff,ib1_buff_size);  
                   ib_offset += ib1_buff_size;
                 }
-		
+		        HLOG_DEBUG("COMPRESSED: ib_offset:%d",ib_offset);
                 ib1_need_load=TRUE;
                 //dump_iblock(ib1);
                 #if 1
@@ -425,6 +427,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		    }else{
 		    	db_offset += BLOCKSIZE;
 		    }
+			HLOG_DEBUG("COMPRESSED: db_offset:%d",db_offset);
         }else if(is_db_in_level3_index_range(db_cur_no)){
             HLOG_DEBUG(" is level3 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;

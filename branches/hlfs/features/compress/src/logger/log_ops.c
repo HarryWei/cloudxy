@@ -47,7 +47,7 @@ int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb
 	int offset=0;
 	for(i=0;i<db_num;i++){
 		cur_db = db_buff+i*block_size;
-		size_t output_length = snappy_max_compressed_length(block_size);
+		size_t output_length = 0;
 		g_assert(snappy_compress(cur_db,block_size,dzb_buff + offset + sizeof(uint32_t),&output_length)== SNAPPY_OK);
 		*(uint32_t*)(dzb_buff+offset) = output_length;
 		offset += output_length + sizeof(uint32_t);
@@ -347,8 +347,8 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
          * db_offset = LOG_HEADER_LENGTH + i*BLOCKSIZE;
          * char * cur_log_buff_ptr = log_buff + db_offset;
          */
-        cur_log_buff_ptr = log_buff + db_offset;
-        //HLOG_DEBUG(" db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
+        cur_log_buff_ptr = log_buff + LOG_HEADER_LENGTH + db_offset;
+        HLOG_DEBUG(" db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
         if(is_db_in_level1_index_range(db_cur_no)){
             HLOG_DEBUG(" is level1 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             /*  write db to log buff  */
@@ -365,7 +365,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		    	db_offset += BLOCKSIZE;
 		   }
         }else if(is_db_in_level2_index_range(db_cur_no)){
-           //HLOG_DEBUG("is level2 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
+           HLOG_DEBUG("is level2 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
            if(TRUE == ib1_need_load && ctrl->inode.iblock == 0){
                     HLOG_DEBUG("---------------set iblock zero---------------------");
                     memset(ib1,0,BLOCKSIZE);
@@ -425,7 +425,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		    	db_offset += BLOCKSIZE;
 		    }
         }else if(is_db_in_level3_index_range(db_cur_no)){
-            //HLOG_DEBUG(" is level3 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
+            HLOG_DEBUG(" is level3 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
                 if(TRUE == ib1_need_load && ctrl->inode.doubly_iblock == 0){
 					HLOG_DEBUG("set ib1 zero");

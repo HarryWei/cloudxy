@@ -75,8 +75,9 @@ SET(LHFLIBS   glib-2.0
               #-pthread 
               gthread-2.0 
               rt
-	          hdfs
-		      log4c
+	      hdfs
+	      log4c
+	      snappy
      	      jvm
 			  )
 

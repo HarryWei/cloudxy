@@ -201,26 +201,27 @@ out:
 
 
 struct hlfs_ctrl *
-init_hlfs(const char *uri )
+init_hlfs(const char *uri)
 {      
-        if(NULL == uri){
+     if(NULL == uri){
 	     HLOG_ERROR("Params Error");	
 	     return NULL;
-        }		
-        int ret = 0;
-        uint32_t seg_clean_check_period = DEF_IO_NONACTIVE_PERIOD;
+     }		
+     int ret = 0;
+     uint32_t seg_clean_check_period = DEF_IO_NONACTIVE_PERIOD;
 	 uint32_t seg_copy_waterlevel       = DEF_SEG_COPY_WATERLEVEL;
 	 struct hlfs_ctrl * hlfs_ctrl = __init_hlfs(uri,1,seg_clean_check_period,seg_clean_check_period);
         if(NULL == hlfs_ctrl){
 		 HLOG_ERROR("init raw hlfs ctrl failed");
 		 return NULL;
-        }			
-	 uint32_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
+        }
+		#if 0
+	    uint32_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
         block_size 		 	= hlfs_ctrl->sb.block_size;
-        cache_size  		 	=  DEF_CACHE_SIZE;
+        cache_size  		=  DEF_CACHE_SIZE;
         flush_interval 	 	=  DEF_FLUSH_INTERVAL;
-        flush_trigger_level		=  DEF_FLUSH_TRIGGER_LEVEL;
-        flush_once_size 	 	=  DEF_FLUSH_ONCE_SIZE;
+        flush_trigger_level	=  DEF_FLUSH_TRIGGER_LEVEL;
+        flush_once_size 	=  DEF_FLUSH_ONCE_SIZE;
         /* check .... */
         if(block_size!=hlfs_ctrl->sb.block_size){
               HLOG_ERROR("cache block size is not equal to block size in superblock"); 
@@ -275,6 +276,7 @@ init_hlfs(const char *uri )
         }
 	 HLOG_INFO("Indirect  Block Cache Init Over ! icache_size:%u,iblock_size:%u,invalidate_trigger_level:%u,invalidate_once_size:%u",
 			       icache_size,iblock_size,invalidate_trigger_level,invalidate_once_size); 
+	 #endif 
 	 return hlfs_ctrl;
 out:
      deinit_hlfs(hlfs_ctrl);

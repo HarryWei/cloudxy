@@ -39,9 +39,6 @@ static void dump_iblock(char *iblock){
     }
 }
 
-size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
-				ib1_buff = (char*)alloca(output_length);
-				g_assert(snappy_compress(ib2,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
 
 
 int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb_buff,uint32_t *real_compressed_size){

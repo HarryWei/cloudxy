@@ -184,7 +184,7 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
 		   uint32_t size = *(uint32_t*)buff;
 		   HLOG_DEBUG("compressed_length of block:%d",size);
 		   uint32_t uncompressed_length;
-		   g_assert(snappy_uncompress(buf+sizeof(uint32_t),size,block,&uncompressed_length)== SNAPPY_OK);
+		   g_assert(snappy_uncompress(buff+sizeof(uint32_t),size,block,&uncompressed_length)== SNAPPY_OK);
 		   HLOG_DEBUG("uncompressed_length of block:%d",uncompressed_length);
 		}
     }while(write_size < block_size && retry_time >0);

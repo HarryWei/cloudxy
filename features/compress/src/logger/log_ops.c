@@ -54,7 +54,7 @@ int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb
 		offset += output_length + sizeof(uint32_t); 
 		HLOG_DEBUG(" COMPRESSED  after  pos:%d,dbno:%d,compress_size:%d",offset,i,output_length);
 		
-		HLOG_DEBUG(" COMPRESSED -- in log pos:%d", offset + LOG_HEADER_LENGTH));
+		HLOG_DEBUG(" COMPRESSED -- in log pos:%d", offset + LOG_HEADER_LENGTH);
 		HLOG_DEBUG(" COMPRESSED -- 4704:%d", *(uint32_t*)(dzb_buff + 4704 - LOG_HEADER_LENGTH));
 	}
 	*real_compressed_size = offset;

@@ -50,7 +50,7 @@ int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb
 		size_t output_length = 0;
 		g_assert(snappy_compress(cur_db,block_size,dzb_buff + offset + sizeof(uint32_t),&output_length)== SNAPPY_OK);
 		*(uint32_t*)(dzb_buff+offset) = output_length;
-		offset += output_length + sizeof(uint32_t);
+		offset += output_length + sizeof(uint32_t); 
 	}
 	*real_compressed_size = offset;
 	return 0;
@@ -328,7 +328,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 									(max_compressed_size + sizeof(uint32_t)) * ib_amount(db_start, db_end) + 
 	            sizeof(struct inode) + sizeof(struct inode_map_entry) + 
 	            sizeof(struct log_header));
-		
+		g_assert(log_buff!=NULL);
 		char *compressed_db_buff = log_buff + LOG_HEADER_LENGTH;
 		uint32_t real_compressed_size = 0;
 		int ret = compress_dblocks(db_buff,(db_end-db_start + 1),BLOCKSIZE,compressed_db_buff,&real_compressed_size);

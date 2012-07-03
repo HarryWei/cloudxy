@@ -13,6 +13,8 @@
 #include "comm_define.h"
 #include "misc.h"
 #include "address.h"
+#include "snappy-c.h"
+
 /*
   *  Copyright (C) 2012 KangHua <kanghua151@gmail.com>
   *
@@ -223,8 +225,16 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
     return size;
 }
 
+int compress_dblocks(char *db_buff,uint32_t db_num,char *dzb_buff,uint32_t *real_compressed_size){
+	return 0;
+}
 
-int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end){
+int get_next_dzblock_offset(char *dzb){
+	return 0; 
+}
+
+
+int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed){
     //HLOG_DEBUG("entry func: %s",__func__);
     gboolean ib1_need_load  = TRUE;
     gboolean ib2_need_load  = TRUE;
@@ -241,28 +251,50 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 	g_assert(NULL != ib3);
     guint32  ib_cur_offset = 0;
     guint32  db_offset = 0;
-   
+    guint32  ib_offset = 0;
     uint32_t IB_ENTRY_NUM = BLOCKSIZE/sizeof(uint64_t);
-    guint32 db_data_len ;
-    guint32 ib_data_len ;
-    db_data_len = (db_end-db_start + 1) * BLOCKSIZE;
-    ib_data_len = ib_amount(db_start, db_end) * BLOCKSIZE;
-    char* log_buff = (char*)g_malloc0(db_data_len + ib_data_len + 
-            sizeof(struct inode) + sizeof(struct inode_map_entry) + 
-            sizeof(struct log_header));
-    if (!log_buff) {
-	    HLOG_ERROR("allocate error!");
-        g_assert(0);
-	    return -1;
-    }
-    guint32 ib_offset = db_data_len + LOG_HEADER_LENGTH;
+
+	gboolean _is_compressed= if (no_compressed == 0) ? false:ctrl->is_compressed;
+	char* log_buff = NULL;
+	if(!_is_compressed){
+	    uint32 db_data_len = (db_end-db_start + 1) * BLOCKSIZE;
+	    uint32 ib_data_len = ib_amount(db_start, db_end) * BLOCKSIZE;
+	    log_buff = (char*)g_malloc0(db_data_len + ib_data_len + 
+	            sizeof(struct inode) + sizeof(struct inode_map_entry) + 
+	            sizeof(struct log_header));
+	    if (!log_buff) {
+		    HLOG_ERROR("allocate error!");
+	        g_assert(0);
+		    return -1;
+	    }
+		memcpy(log_buff + LOG_HEADER_LENGTH,db_buff,db_data_len);
+		ib_offset =  db_data_len + LOG_HEADER_LENGTH;
+	}else{
+	    HLOG_DEBUG("need compressed block");
+		uint32_t max_compressed_size = snappy_max_compressed_length(BLOCKSIZE);
+		log_buff = (char*)g_malloc0((max_compressed_size + sizeof(uint32_t)) * (db_end-db_start + 1) + 
+									(max_compressed_size + sizeof(uint32_t)) * ib_amount(db_start, db_end) + 
+	            sizeof(struct inode) + sizeof(struct inode_map_entry) + 
+	            sizeof(struct log_header));
+		
+		char *db_buff_compressed = log_buff + LOG_HEADER_LENGTH;
+		uint32_t real_compressed_size = 0;
+		int ret = compress_dblocks(db_buff,(db_end-db_start + 1),db_buff_compressed,&real_compressed_size);
+		g_assert(ret == 0);
+		ib_offset = LOG_HEADER_LENGTH + real_compressed_size;
+	}
+	//memcpy(log_buff + LOG_HEADER_LENGTH,db_buff,size);
     guint32 db_cur_no = 0;
     guint32 i=0;
+	char * cur_log_buff_ptr = NULL;
     //HLOG_DEBUG(" db_data_len:%d ib_data_len:%d BLOCKSIZE:%d",db_data_len,ib_data_len,BLOCKSIZE);
-    for(db_cur_no = db_start,i=0; db_cur_no <= db_end; db_cur_no++,i++){
-        char * cur_block_ptr = (char *) (db_buff + i * BLOCKSIZE);  
-        db_offset = LOG_HEADER_LENGTH + i*BLOCKSIZE;
-        char * cur_log_buff_ptr = log_buff + db_offset;
+    for(db_cur_no = db_start,i=0; db_cur_no <= db_end; db_cur_no++,i++){  
+        /* 
+         * char * cur_block_ptr = (char *) (db_buff + i * BLOCKSIZE);  
+         * db_offset = LOG_HEADER_LENGTH + i*BLOCKSIZE;
+         * char * cur_log_buff_ptr = log_buff + db_offset;
+         */
+        cur_log_buff_ptr = log_buff + db_offset;
         //HLOG_DEBUG(" db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
         if(is_db_in_level1_index_range(db_cur_no)){
             HLOG_DEBUG(" is level1 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
@@ -273,7 +305,12 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             set_segno (&ctrl->inode.blocks[_idx],ctrl->last_segno);
             set_offset(&ctrl->inode.blocks[_idx],ctrl->last_offset + db_offset);
 	     #endif
-            memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
+           /*memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);*/
+		   if(_is_compressed){
+		   		db_offset += get_next_dzblock_offset(cur_log_buff_ptr);
+		   }else{
+		    	db_offset += BLOCKSIZE;
+		   }
         }else if(is_db_in_level2_index_range(db_cur_no)){
            //HLOG_DEBUG("is level2 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
            if(TRUE == ib1_need_load && ctrl->inode.iblock == 0){
@@ -296,19 +333,36 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             set_segno ((ib1+_idx),ctrl->last_segno);
             set_offset ((ib1+_idx),ctrl->last_offset + db_offset);
             //HLOG_DEBUG("-- cur_dbno:%d,idx:%d,storage address:%llu",db_cur_no,_idx,*(ib1+_idx));
-            memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
+            /*memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);*/
             if( (db_cur_no - 12 + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end ){
                 HLOG_DEBUG("set iblock - segno:%u ???",ctrl->last_segno);
-		  #if 0
+		  		#if 0
                 set_segno(&ctrl->inode.iblock,ctrl->last_segno);
                 set_offset(&ctrl->inode.iblock,ctrl->last_offset + ib_offset);
-		  #endif
-                memcpy((char*)log_buff + ib_offset,(char*)ib1,BLOCKSIZE);      
-                ib_offset +=BLOCKSIZE;
+		  		#endif
+				char *ib_buff = NULL;
+				uint32_t ib_buff_size = 0;
+                if(_is_compressed){
+				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
+                  ib_buff = (char*)alloca(output_length);
+    			  g_assert(snappy_compress(ib1,BLOCKSIZE,ib_buff,&output_length)== SNAPPY_OK);
+				  ib_buff_size = output_length;
+                }else{
+                  ib_buff = ib1;
+				  ib_buff_size = BLOCKSIZE;
+                }
+			    memcpy((char*)log_buff + ib_offset,(char*)ib_buff,ib_buff_size);  
+                //ib_offset +=BLOCKSIZE;
+                ib_offset += ib_buff_size;
                 ib1_need_load=TRUE;
                 //dump_iblock(ib1);
 	            memset(ib1,0,sizeof(BLOCKSIZE));
             }
+		  	if(_is_compressed){
+		   		db_offset += get_next_dzblock_offset(cur_log_buff_ptr);
+		    }else{
+		    	db_offset += BLOCKSIZE;
+		    }
         }else if(is_db_in_level3_index_range(db_cur_no)){
             //HLOG_DEBUG(" is level3 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
@@ -354,7 +408,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             
             set_segno ((ib2+_idx2),ctrl->last_segno);
             set_offset((ib2+_idx2),ctrl->last_offset + db_offset);
-            memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
+            //memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);
             //HLOG_DEBUG("cur_dbno:%u,_idx2:%u,*(ib2+_idx2):%llu",db_cur_no,_idx2,*(ib2+_idx2));
 
 
@@ -362,12 +416,23 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 //HLOG_DEBUG(" save ib2");
                 set_segno ((ib1+_idx),ctrl->last_segno);
                 set_offset((ib1+_idx),ctrl->last_offset + ib_offset);
-				//HLOG_DEBUG("save new ib2:%llu,iboffset:%d",*(ib1+_idx),ib_offset);
-                memcpy((char*)log_buff + ib_offset,(char*)ib2,BLOCKSIZE);
-				//HLOG_DEBUG("ib2 address:%p",log_buff+ib_offset);
-                ib2_need_load=TRUE;
-	            memset(ib2,0,sizeof(BLOCKSIZE));
-                ib_offset +=BLOCKSIZE;
+				char *ib2_buff = NULL;
+				uint32_t ib2_buff_size = 0;
+				if(_is_compressed){
+				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
+				  ib2_buff = (char*)alloca(output_length);
+				  g_assert(snappy_compress(ib2,BLOCKSIZE,ib2_buff,&output_length)== SNAPPY_OK);
+				  ib2_buff_size = output_length;
+				}else{
+				  ib2_buff = ib2;
+				  ib2_buff_size = BLOCKSIZE;
+				}
+				memcpy((char*)log_buff + ib_offset,(char*)ib2_buff,ib2_buff_size);  
+				//ib_offset +=BLOCKSIZE;
+				ib_offset += ib2_buff_size;
+				ib2_need_load=TRUE;
+				//dump_iblock(ib1);
+				memset(ib2,0,sizeof(BLOCKSIZE));
             }
 
             if((db_cur_no - 12 -IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == db_end){
@@ -376,13 +441,34 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 set_segno (&ctrl->inode.doubly_iblock,ctrl->last_segno);
                 set_offset(&ctrl->inode.doubly_iblock,ctrl->last_offset + ib_offset);
 		  #endif
-                memcpy((char*)log_buff + ib_offset,(char*)ib1,BLOCKSIZE);
+                //memcpy((char*)log_buff + ib_offset,(char*)ib1,BLOCKSIZE);
 				//HLOG_DEBUG("ib1 address:%p",log_buff+ib_offset);
+                //ib1_need_load=TRUE;
+	            //memset(ib1,0,sizeof(BLOCKSIZE));
+                //ib_offset +=BLOCKSIZE;
+                char *ib1_buff = NULL;
+				uint32_t ib1_buff_size = 0;
+                if(_is_compressed){
+				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
+                  ib1_buff = (char*)alloca(output_length);
+    			  g_assert(snappy_compress(ib1,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
+				  ib1_buff_size = output_length;
+                }else{
+                  ib1_buff = ib1;
+				  ib1_buff_size = BLOCKSIZE;
+                }
+			    memcpy((char*)log_buff + ib_offset,(char*)ib1_buff,ib1_buff_size);  
+                //ib_offset +=BLOCKSIZE;
+                ib_offset += ib1_buff_size;
                 ib1_need_load=TRUE;
+                //dump_iblock(ib1);
 	            memset(ib1,0,sizeof(BLOCKSIZE));
-                ib_offset +=BLOCKSIZE;
             }
-
+            if(_is_compressed){
+		   		db_offset += get_next_dzblock_offset(cur_log_buff_ptr);
+		    }else{
+		    	db_offset += BLOCKSIZE;
+		    }
         }else if(is_db_in_level4_index_range(db_cur_no)){
             HLOG_DEBUG(" is level4 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
             //uint64_t *_ib = NULL;
@@ -436,32 +522,87 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == db_end){
                 set_segno ((ib2+_idx2),ctrl->last_segno);
                 set_offset ((ib2+_idx2),ctrl->last_offset + ib_offset);
-                memcpy((char*)log_buff + ib_offset,(char*)ib3,BLOCKSIZE);
-                ib_offset +=BLOCKSIZE;
-                    ib3_need_load= TRUE;
-	                memset(ib3,0,sizeof(BLOCKSIZE));
+                //memcpy((char*)log_buff + ib_offset,(char*)ib3,BLOCKSIZE);
+                //ib_offset +=BLOCKSIZE;
+                //ib3_need_load= TRUE;
+	            //memset(ib3,0,sizeof(BLOCKSIZE));
+	            char *ib3_buff = NULL;
+				uint32_t ib3_buff_size = 0;
+				if(_is_compressed){
+				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
+				  ib3_buff = (char*)alloca(output_length);
+				  g_assert(snappy_compress(ib2,BLOCKSIZE,ib3_buff,&output_length)== SNAPPY_OK);
+				  ib3_buff_size = output_length;
+				}else{
+				  ib3_buff = ib3;
+				  ib3_buff_size = BLOCKSIZE;
+				}
+				memcpy((char*)log_buff + ib_offset,(char*)ib3_buff,ib3_buff_size);  
+				//ib_offset +=BLOCKSIZE;
+				ib_offset += ib3_buff_size;
+				ib3_need_load=TRUE;
+				//dump_iblock(ib1);
+				memset(ib3,0,sizeof(BLOCKSIZE));
             }
 
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM * IB_ENTRY_NUM)  == 0 || db_cur_no == db_end){
                 set_segno ((ib1+_idx),ctrl->last_segno);
                 set_offset ((ib1+_idx),ctrl->last_offset + ib_offset);
-                memcpy((char*)log_buff + ib_offset,(char*)ib2,BLOCKSIZE);
-                ib_offset +=BLOCKSIZE;
-				ib2_need_load = TRUE;
-	            memset(ib2,0,sizeof(BLOCKSIZE));
+                //memcpy((char*)log_buff + ib_offset,(char*)ib2,BLOCKSIZE);
+                //ib_offset +=BLOCKSIZE;
+				//ib2_need_load = TRUE;
+	            //memset(ib2,0,sizeof(BLOCKSIZE));
+	            char *ib2_buff = NULL;
+				uint32_t ib2_buff_size = 0;
+				if(_is_compressed){
+				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
+				  ib2_buff = (char*)alloca(output_length);
+				  g_assert(snappy_compress(ib2,BLOCKSIZE,ib2_buff,&output_length)== SNAPPY_OK);
+				  ib2_buff_size = output_length;
+				}else{
+				  ib2_buff = ib2;
+				  ib2_buff_size = BLOCKSIZE;
+				}
+				memcpy((char*)log_buff + ib_offset,(char*)ib2_buff,ib2_buff_size);  
+				//ib_offset +=BLOCKSIZE;
+				ib_offset += ib2_buff_size;
+				ib2_need_load=TRUE;
+				//dump_iblock(ib1);
+				memset(ib2,0,sizeof(BLOCKSIZE));
             }
 
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % (IB_ENTRY_NUM*IB_ENTRY_NUM*IB_ENTRY_NUM) == 0 || db_cur_no == db_end){
-		  #if 0
+		  		#if 0
                 set_segno (&ctrl->inode.triply_iblock,ctrl->last_segno);
                 set_offset(&ctrl->inode.triply_iblock,ctrl->last_offset + ib_offset);
-		  #endif
-                memcpy((char*)log_buff + ib_offset,(char*)ib1,BLOCKSIZE);
-                ib_offset +=BLOCKSIZE;
-				ib1_need_load = TRUE;
-	            memset(ib1,0,sizeof(BLOCKSIZE));
+		  		#endif
+                //memcpy((char*)log_buff + ib_offset,(char*)ib1,BLOCKSIZE);
+                //ib_offset +=BLOCKSIZE;
+				//ib1_need_load = TRUE;
+	            //memset(ib1,0,sizeof(BLOCKSIZE));
+	            char *ib1_buff = NULL;
+				uint32_t ib1_buff_size = 0;
+				if(_is_compressed){
+				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
+				  ib1_buff = (char*)alloca(output_length);
+				  g_assert(snappy_compress(ib2,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
+				  ib1_buff_size = output_length;
+				}else{
+				  ib1_buff = ib1;
+				  ib1_buff_size = BLOCKSIZE;
+				}
+				memcpy((char*)log_buff + ib_offset,(char*)ib1_buff,ib1_buff_size);  
+				//ib_offset +=BLOCKSIZE;
+				ib_offset += ib1_buff_size;
+				ib1_need_load=TRUE;
+				//dump_iblock(ib1);
+				memset(ib1,0,sizeof(BLOCKSIZE));
             }
-  
+ 		    if(_is_compressed){
+		   		db_offset += get_next_dzblock_offset(cur_log_buff_ptr);
+		    }else{
+		    	db_offset += BLOCKSIZE;
+		    }
         }else{
             /* over limit size  */
             HLOG_ERROR("offset is out of limit size(8T)!!!");
@@ -488,10 +629,10 @@ __inode_create:;
                lh->log_size = offset + sizeof(struct inode) + sizeof(struct inode_map_entry);
                //lh->ctime = get_current_time();
                lh->start_db_no = db_start;
-               g_assert(db_data_len%BLOCKSIZE == 0);
-               g_assert((ib_offset-db_data_len-LOG_HEADER_LENGTH)%BLOCKSIZE == 0);
-               lh->db_num = db_data_len/BLOCKSIZE;
-               lh->ib_num = (ib_offset - db_data_len - LOG_HEADER_LENGTH)/BLOCKSIZE;
+               //g_assert(db_data_len%BLOCKSIZE == 0);
+               //g_assert((ib_offset-db_data_len-LOG_HEADER_LENGTH)%BLOCKSIZE == 0);
+               lh->db_num = (db_end-db_start + 1);
+               lh->ib_num = ib_amount(db_start, db_end);
 
  			   #if 1  /* modify inode in log's ib,but not yet modify in ctrl */
 			   struct inode _inode;
@@ -500,7 +641,7 @@ __inode_create:;
                memcpy((char*)log_buff + offset,(char*)&_inode,sizeof(struct inode));
 			   #endif
 			   
-               HLOG_DEBUG("log size:%d,log header:%d,inode:%d,inode map:%d,db:%d,ib:%d",lh->log_size,sizeof(struct log_header),sizeof(struct inode),sizeof(struct inode_map_entry),lh->db_num*BLOCKSIZE,lh->ib_num*BLOCKSIZE); 
+               HLOG_DEBUG("log size:%d,log header:%d,inode:%d,inode map:%d,dbnum:%d,ibnum:%d",lh->log_size,sizeof(struct log_header),sizeof(struct inode),sizeof(struct inode_map_entry),lh->db_num,lh->ib_num); 
                if(0 >= dump_log(ctrl,lh)){
                    HLOG_ERROR("log dump failed");
                    g_assert(0);
@@ -513,7 +654,7 @@ __inode_create:;
                return size;
 }
 
-int append_log(struct hlfs_ctrl *hctrl,const char *db_buff,uint32_t db_start,uint32_t db_end){
+int append_log(struct hlfs_ctrl *hctrl,const char *db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed){
 	guint32 BLOCKSIZE = hctrl->sb.block_size;
 	int expand_size =	(db_end-db_start + 1)*BLOCKSIZE + ib_amount(db_start,db_end) * BLOCKSIZE + 
 			 														LOG_HEADER_LENGTH + 
@@ -523,13 +664,14 @@ int append_log(struct hlfs_ctrl *hctrl,const char *db_buff,uint32_t db_start,uin
 		HLOG_ERROR("write length is beyond the limit length!");
 		return -1;
 	}
+	//TODO maybe revise for compressed reason?
 	if (hctrl->last_offset + expand_size > hctrl->sb.seg_size) {
 		hctrl->last_segno++;
 		hctrl->last_offset = 0;
 	}
 	//HLOG_DEBUG("last segno:%u last offset:%u", hctrl->last_segno,hctrl->last_offset);
 	uint32_t size; 
-	size = __append_log(hctrl,db_buff,(uint32_t) db_start, (uint32_t) db_end);
+	size = __append_log(hctrl,db_buff,(uint32_t) db_start, (uint32_t) db_end,no_compressed);
 	g_assert(size > 0);
     //HLOG_DEBUG("cur last offset:%d,log size:%d,next last offset:%d",hctrl->last_offset,size,hctrl->last_offset+size);
 	hctrl->last_offset += size;

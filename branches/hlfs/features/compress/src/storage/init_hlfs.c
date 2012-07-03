@@ -23,7 +23,7 @@
 #include "logger.h"
 
 CTRL_REGION_T CTRL_REGION;
-extern int append_log(struct hlfs_ctrl * ctrl,const char*db_buff,uint32_t db_start,uint32_t db_end);
+extern int append_log(struct hlfs_ctrl * ctrl,const char*db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed);
 int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end){
     if ((NULL == ctrl) || (NULL == db_buff) ||db_end < db_start) {
 		HLOG_ERROR("Params Error");
@@ -33,7 +33,7 @@ int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint3
     //HLOG_DEBUG("last segno: %u last offset: %u", ctrl->last_segno, ctrl->last_offset);
     g_mutex_lock (ctrl->hlfs_access_mutex);
     ctrl->last_write_timestamp = get_current_time();
-    int size = append_log(ctrl,db_buff,db_start,db_end);
+    int size = append_log(ctrl,db_buff,db_start,db_end,1);
     g_mutex_unlock (ctrl->hlfs_access_mutex);
     if(size < 0){
         HLOG_ERROR("append log error");
@@ -74,6 +74,8 @@ int init_from_superblock(struct back_storage *storage, struct hlfs_ctrl *ctrl)
     }			
     g_strlcpy(sb->fsname,g_basename(storage->uri),MAX_FILE_NAME_LEN);
     ctrl->start_segno = from_segno;	
+    //TODO :config it
+	ctrl->is_compressed = true;
     //HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }

@@ -484,8 +484,8 @@ int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32
     }
      g_free(_uri);
      gchar * _father_uri =  g_key_file_get_string(sb_keyfile,"METADATA","father_uri",NULL);
-     gint64 _snapshot_inode = g_key_file_get_int64(sb_keyfile,"METADATA","snapshot_inode",NULL);
-     gint32 _from_segno = g_key_file_get_integer(sb_keyfile,"METADATA","from_segno",NULL);
+     gint64  _snapshot_inode = g_key_file_get_int64(sb_keyfile,"METADATA","snapshot_inode",NULL);
+     gint32  _from_segno = g_key_file_get_integer(sb_keyfile,"METADATA","from_segno",NULL);
      if(_father_uri !=NULL){
 	   *father_uri = _father_uri;
 	   *snapshot_inode = _snapshot_inode;

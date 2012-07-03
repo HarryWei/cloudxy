@@ -6,7 +6,7 @@
   *  the Free Software Foundation.
  */
 
-#include <glib.h>
+#include "glib.h"
 #include <stdlib.h>
 #include <string.h>
 #include "storage_helper.h"

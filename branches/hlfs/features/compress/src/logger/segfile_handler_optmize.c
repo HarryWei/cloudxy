@@ -137,7 +137,7 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
     HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
     struct back_storage * storage =NULL;
-    int write_size = 0;
+    int read_size = 0;
     uint32_t offset = get_offset(storage_address);
     uint32_t segno = get_segno(storage_address);
     HLOG_DEBUG("offset :%u,segno:%u,last_offset:%u,last_rsegfile_offset:%u",offset,segno,ctrl->last_offset,ctrl->last_rsegfile_offset);
@@ -166,8 +166,8 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
             }
         }
 		if(!ctrl->is_compressed){
-	        write_size = storage->bs_file_pread(storage,ctrl->last_rsegfile_handler,block,block_size,offset);
-	        if(write_size!=block_size){
+	        read_size = storage->bs_file_pread(storage,ctrl->last_rsegfile_handler,block,block_size,offset);
+	        if(read_size!=block_size){
 	            HLOG_WARN("can not read block from seg:%u#%u :ret :%d",segno,offset,write_size);
 	            g_usleep(1000);
 	            retry_time--;
@@ -180,7 +180,8 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
 		   HLOG_DEBUG("read for compress block");
 		   size_t output_length = snappy_max_compressed_length(block_size) + sizeof(uint32_t);
            char *buff = (char*)alloca(output_length);
-		   write_size = storage->bs_file_pread(storage,ctrl->last_rsegfile_handler,buff,output_length,offset);
+		   read_size = storage->bs_file_pread(storage,ctrl->last_rsegfile_handler,buff,output_length,offset);
+		   HLOG_DEBUG("compressed_length of read size :%d",read_size);
 		   uint32_t size = *(uint32_t*)buff;
 		   HLOG_DEBUG("compressed_length of block:%d",size);
 		   uint32_t uncompressed_length;

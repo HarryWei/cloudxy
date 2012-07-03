@@ -62,7 +62,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
     uint32_t start_db	    = log->start_db_no;
     uint32_t db_num	        = log->db_num;
     uint32_t end_db	        = start_db + db_num - 1;
-	uint32_t ib_offset;
+	uint32_t ib_offset = 0;
 	if(log->cflag == 1){
 	   int i;
 	   for(i=0;i< db_num;i++){
@@ -74,7 +74,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 	   ib_offset      = db_offset + db_num * BLOCKSIZE ;
 	}
   
-    uint32_t ib_offset      = db_offset + db_num * BLOCKSIZE ;
+
     guint32  db_cur_no = 0;
     for(db_cur_no = start_db; db_cur_no <= end_db; db_cur_no++){
         if (is_db_in_level1_index_range(db_cur_no)){

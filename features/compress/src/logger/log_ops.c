@@ -46,7 +46,7 @@ int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb
 	char *cur_db=db_buff;
 	int offset=0;
 	for(i=0;i<db_num;i++){
-		cur_db = db_buff+i*block_size;
+		cur_db = db_buff + i*block_size;
 		size_t output_length = snappy_max_compressed_length(block_size);
 		g_assert(snappy_compress(cur_db,block_size,dzb_buff + offset + sizeof(uint32_t),&output_length)== SNAPPY_OK);
 		*(uint32_t*)(dzb_buff+offset) = output_length;
@@ -65,7 +65,7 @@ int get_zblock_size(char *dzb){
 
 
 static int update_inode_index(struct inode *inode, struct log_header * log,uint32_t last_segno,uint32_t last_offset,uint32_t block_size){
-    //HLOG_DEBUG("enter func %s", __func__);
+    HLOG_DEBUG("enter func %s", __func__);
     if(NULL == inode || NULL == log){
         //HLOG_DEBUG("params is error");
         return -1;
@@ -79,16 +79,16 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 	uint32_t ib_offset = 0;
 	if(log->cflag == 1){
 	   int i;
-	   for(i=0;i< db_num;i++){
+	   for(i=0;i<db_num;i++){
 	   	   db_offset += get_zblock_size((char*)log + db_offset) + sizeof(uint32_t);
 	   }
 	   ib_offset = db_offset;
+	   HLOG_DEBUG(" COMPRESSED : ib_offset:%d db_offset:%d",ib_offset,db_offset);
 	   db_offset = LOG_HEADER_LENGTH;
 	}else{
 	   ib_offset      = db_offset + db_num * BLOCKSIZE ;
 	}
   
-
     guint32  db_cur_no = 0;
     for(db_cur_no = start_db; db_cur_no <= end_db; db_cur_no++){
         if (is_db_in_level1_index_range(db_cur_no)){

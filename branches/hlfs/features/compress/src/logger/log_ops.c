@@ -47,7 +47,7 @@ int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb
 	int offset=0;
 	for(i=0;i<db_num;i++){
 		cur_db = db_buff+i*block_size;
-		size_t output_length = snappy_max_compressed_length(input_length);
+		size_t output_length = snappy_max_compressed_length(block_size);
 		g_assert(snappy_compress(cur_db,block_size,dzb_buff + offset + sizeof(uint32_t),&output_length)== SNAPPY_OK);
 		*(uint32_t*)(dzb_buff+offset) = output_length;
 		offset += output_length + sizeof(uint32_t); 

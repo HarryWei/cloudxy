@@ -396,17 +396,22 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				char *ib1_buff = NULL;
 				uint32_t ib1_buff_size = 0;
                 if(_is_compressed){
+				  HLOG_DEBUG("COMPRESSED: need compressed for iblock");
 				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
                   ib1_buff = (char*)alloca(output_length);
     			  g_assert(snappy_compress(ib1,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
 				  ib1_buff_size = output_length;
+				  HLOG_DEBUG("COMPRESSED: after compress ib1_buff_size %d",ib1_buff_size);
+				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib1_buff,ib1_buff_size);  
+                  *(uint32_t*)((char*)log_buff+ib_offset) = ib1_buff_size;
+                  ib_offset += ib1_buff_size + sizeof(uint32_t);
                 }else{
                   ib1_buff = ib1;
 				  ib1_buff_size = BLOCKSIZE;
+				  memcpy((char*)log_buff + ib_offset ,(char*)ib1_buff,ib1_buff_size);  
+                  ib_offset += ib1_buff_size;
                 }
-			    memcpy((char*)log_buff + ib_offset,(char*)ib1_buff,ib1_buff_size);  
-                //ib_offset +=BLOCKSIZE;
-                ib_offset += ib1_buff_size;
+		
                 ib1_need_load=TRUE;
                 //dump_iblock(ib1);
                 #if 1
@@ -479,13 +484,17 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  ib2_buff = (char*)alloca(output_length);
 				  g_assert(snappy_compress(ib2,BLOCKSIZE,ib2_buff,&output_length)== SNAPPY_OK);
 				  ib2_buff_size = output_length;
+				  memcpy((char*)log_buff + ib_offset +sizeof(uint32_t),(char*)ib2_buff,ib2_buff_size);  
+				  //ib_offset +=BLOCKSIZE;
+				  *(uint32_t*)((char*)log_buff+ib_offset) = ib2_buff_size;
+				  ib_offset += ib2_buff_size + sizeof(uint32_t);
 				}else{
 				  ib2_buff = ib2;
 				  ib2_buff_size = BLOCKSIZE;
+				  memcpy((char*)log_buff + ib_offset,(char*)ib2_buff,ib2_buff_size);  
+				  ib_offset += ib2_buff_size;
 				}
-				memcpy((char*)log_buff + ib_offset,(char*)ib2_buff,ib2_buff_size);  
-				//ib_offset +=BLOCKSIZE;
-				ib_offset += ib2_buff_size;
+		
 				ib2_need_load=TRUE;
 				//dump_iblock(ib1);
 				#if 1
@@ -512,13 +521,17 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                   ib1_buff = (char*)alloca(output_length);
     			  g_assert(snappy_compress(ib1,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
 				  ib1_buff_size = output_length;
+				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib1_buff,ib1_buff_size);  
+				  *(uint32_t*)((char*)log_buff+ib_offset) = ib1_buff_size;
+				  ib_offset += ib1_buff_size;
                 }else{
                   ib1_buff = ib1;
 				  ib1_buff_size = BLOCKSIZE;
+				  memcpy((char*)log_buff + ib_offset,(char*)ib1_buff,ib1_buff_size);  
+                  //ib_offset +=BLOCKSIZE;
+                  ib_offset += ib1_buff_size;
                 }
-			    memcpy((char*)log_buff + ib_offset,(char*)ib1_buff,ib1_buff_size);  
-                //ib_offset +=BLOCKSIZE;
-                ib_offset += ib1_buff_size;
+			  
                 ib1_need_load=TRUE;
                 //dump_iblock(ib1);
                 #if 1
@@ -595,13 +608,18 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  ib3_buff = (char*)alloca(output_length);
 				  g_assert(snappy_compress(ib2,BLOCKSIZE,ib3_buff,&output_length)== SNAPPY_OK);
 				  ib3_buff_size = output_length;
+				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib3_buff,ib3_buff_size);  
+				  //ib_offset +=BLOCKSIZE;
+				  *(uint32_t*)((char*)log_buff+ib_offset) = ib3_buff_size;
+				  ib_offset += ib3_buff_size;
 				}else{
 				  ib3_buff = ib3;
 				  ib3_buff_size = BLOCKSIZE;
+				  memcpy((char*)log_buff + ib_offset,(char*)ib3_buff,ib3_buff_size);  
+				  //ib_offset +=BLOCKSIZE;
+				  ib_offset += ib3_buff_size;
 				}
-				memcpy((char*)log_buff + ib_offset,(char*)ib3_buff,ib3_buff_size);  
-				//ib_offset +=BLOCKSIZE;
-				ib_offset += ib3_buff_size;
+				
 				ib3_need_load=TRUE;
 				#if 1
                 write_layer3_iblock(ctrl,db_cur_no,ib3);
@@ -623,13 +641,18 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  ib2_buff = (char*)alloca(output_length);
 				  g_assert(snappy_compress(ib2,BLOCKSIZE,ib2_buff,&output_length)== SNAPPY_OK);
 				  ib2_buff_size = output_length;
+				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib2_buff,ib2_buff_size);  
+				  *(uint32_t*)((char*)log_buff+ib_offset) = ib2_buff_size;
+				  //ib_offset +=BLOCKSIZE;
+				  ib_offset += ib2_buff_size;
 				}else{
 				  ib2_buff = ib2;
 				  ib2_buff_size = BLOCKSIZE;
+				  memcpy((char*)log_buff + ib_offset,(char*)ib2_buff,ib2_buff_size);  
+				  //ib_offset +=BLOCKSIZE;
+				  ib_offset += ib2_buff_size;
 				}
-				memcpy((char*)log_buff + ib_offset,(char*)ib2_buff,ib2_buff_size);  
-				//ib_offset +=BLOCKSIZE;
-				ib_offset += ib2_buff_size;
+				
 				ib2_need_load=TRUE;
 				//dump_iblock(ib1);
 				#if 1
@@ -654,13 +677,18 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  ib1_buff = (char*)alloca(output_length);
 				  g_assert(snappy_compress(ib2,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
 				  ib1_buff_size = output_length;
+				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib1_buff,ib1_buff_size);  
+				  //ib_offset +=BLOCKSIZE;
+				  ib_offset += ib1_buff_size;
 				}else{
 				  ib1_buff = ib1;
 				  ib1_buff_size = BLOCKSIZE;
+				  memcpy((char*)log_buff + ib_offset,(char*)ib1_buff,ib1_buff_size);
+				  *(uint32_t*)((char*)log_buff+ib_offset) = ib1_buff_size;
+				  //ib_offset +=BLOCKSIZE;
+				  ib_offset += ib1_buff_size;
 				}
-				memcpy((char*)log_buff + ib_offset,(char*)ib1_buff,ib1_buff_size);  
-				//ib_offset +=BLOCKSIZE;
-				ib_offset += ib1_buff_size;
+				
 				ib1_need_load=TRUE;
 				//dump_iblock(ib1);
 				#if 1

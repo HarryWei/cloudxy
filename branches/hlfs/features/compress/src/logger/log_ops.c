@@ -546,7 +546,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  HLOG_DEBUG("COMPRESSED: after compress ib1_buff_size %d",ib1_buff_size);
 				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib1_buff,ib1_buff_size);  
 				  *(uint32_t*)((char*)log_buff+ib_offset) = ib1_buff_size;
-				  ib_offset += ib1_buff_size;
+				  ib_offset += ib1_buff_size +  sizeof(uint32_t);;
                 }else{
                   ib1_buff = ib1;
 				  ib1_buff_size = BLOCKSIZE;
@@ -635,7 +635,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib3_buff,ib3_buff_size);  
 				  //ib_offset +=BLOCKSIZE;
 				  *(uint32_t*)((char*)log_buff+ib_offset) = ib3_buff_size;
-				  ib_offset += ib3_buff_size;
+				  ib_offset += ib3_buff_size +  sizeof(uint32_t);
 				}else{
 				  ib3_buff = ib3;
 				  ib3_buff_size = BLOCKSIZE;
@@ -669,7 +669,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib2_buff,ib2_buff_size);  
 				  *(uint32_t*)((char*)log_buff+ib_offset) = ib2_buff_size;
 				  //ib_offset +=BLOCKSIZE;
-				  ib_offset += ib2_buff_size;
+				  ib_offset += ib2_buff_size +  sizeof(uint32_t);
 				}else{
 				  ib2_buff = ib2;
 				  ib2_buff_size = BLOCKSIZE;
@@ -705,7 +705,8 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  HLOG_DEBUG("COMPRESSED: after compress ib1_buff_size %d",ib1_buff_size);
 				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib1_buff,ib1_buff_size);  
 				  //ib_offset +=BLOCKSIZE;
-				  ib_offset += ib1_buff_size;
+				  *(uint32_t*)((char*)log_buff+ib_offset) = ib1_buff_size;
+				  ib_offset += ib1_buff_size +  sizeof(uint32_t);
 				}else{
 				  ib1_buff = ib1;
 				  ib1_buff_size = BLOCKSIZE;

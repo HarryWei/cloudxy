@@ -389,7 +389,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                   ib1_buff = ib1;
 				  ib1_buff_size = BLOCKSIZE;
                 }
-			    memcpy((char*)log_buff + ib_offset,(char*)i1b_buff,ib1_buff_size);  
+			    memcpy((char*)log_buff + ib_offset,(char*)ib1_buff,ib1_buff_size);  
                 //ib_offset +=BLOCKSIZE;
                 ib_offset += ib1_buff_size;
                 ib1_need_load=TRUE;

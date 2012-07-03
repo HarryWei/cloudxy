@@ -50,12 +50,13 @@ int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb
 		size_t output_length = snappy_max_compressed_length(block_size);
 		g_assert(snappy_compress(cur_db,block_size,dzb_buff + offset + sizeof(uint32_t),&output_length)== SNAPPY_OK);
 		*(uint32_t*)(dzb_buff+offset) = output_length;
+		HLOG_DEBUG(" COMPRESSED  pos:%d",offset);
 		offset += output_length + sizeof(uint32_t); 
 		HLOG_DEBUG(" dbno:%d,compress_size:%d",i,output_length);
 	}
 	*real_compressed_size = offset;
 
-	uint32_t debug = *(uint32_t*)(dzb_buff+4740);
+	uint32_t debug = *(uint32_t*)(dzb_buff + 4740-LOG_HEADER_LENGTH);
 	HLOG_DEBUG(" COMPRESSED -- 4740:%d", debug);
 
 	

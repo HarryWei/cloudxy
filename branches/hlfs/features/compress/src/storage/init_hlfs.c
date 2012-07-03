@@ -215,7 +215,7 @@ init_hlfs(const char *uri)
 		 HLOG_ERROR("init raw hlfs ctrl failed");
 		 return NULL;
         }
-		#if 0
+		#if 1
 	    uint32_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
         block_size 		 	= hlfs_ctrl->sb.block_size;
         cache_size  		=  DEF_CACHE_SIZE;

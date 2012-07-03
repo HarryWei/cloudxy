@@ -437,7 +437,8 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                     memset(ib1,0,BLOCKSIZE);
 					ib1_need_load = FALSE;
                 }else if( TRUE== ib1_need_load && ctrl->inode.doubly_iblock !=0){
-                    if(0>read_layer1_iblock(ctrl,db_cur_no,ib1)){ 	
+                    if(0>read_layer1_iblock(ctrl,db_cur_no,ib1)){ 
+						HLOG_DEBUG("COMPRESSED: ctrl->inode.doubly_iblock:%lu",ctrl->inode.doubly_iblock);
                         if(0 != read_block_fast(ctrl,ctrl->inode.doubly_iblock,ib1)){
                             HLOG_ERROR("allocate error!");
                             g_assert(0);
@@ -447,10 +448,10 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                     }
                     ib1_need_load = FALSE;
                 }
-       
+            
             //dump_iblock(ib1);
             int _idx   = (db_cur_no - 12 - IB_ENTRY_NUM) / IB_ENTRY_NUM;
-            //HLOG_DEBUG("cur_dbno:%u,idx:%u,*(ib1+_idx):%llu",db_cur_no,_idx,*(ib1+_idx));
+            HLOG_DEBUG("cur_dbno:%u,idx:%u,*(ib1+_idx):%llu",db_cur_no,_idx,*(ib1+_idx));
             //uint64_t *_ib2 = NULL; 
             if(TRUE == ib2_need_load && *(ib1+_idx) == 0 ){
 					HLOG_DEBUG("set ib2 zero");

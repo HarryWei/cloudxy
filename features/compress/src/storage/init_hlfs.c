@@ -75,7 +75,7 @@ int init_from_superblock(struct back_storage *storage, struct hlfs_ctrl *ctrl)
     g_strlcpy(sb->fsname,g_basename(storage->uri),MAX_FILE_NAME_LEN);
     ctrl->start_segno = from_segno;	
     //TODO :config it
-	ctrl->is_compressed = true;
+	ctrl->is_compressed = TRUE;
     //HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }

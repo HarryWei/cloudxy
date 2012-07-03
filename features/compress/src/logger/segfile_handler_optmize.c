@@ -138,6 +138,7 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
     int ret = 0;
     struct back_storage * storage =NULL;
     int read_size = 0;
+	int uncompressed_length = 0;
     uint32_t offset = get_offset(storage_address);
     uint32_t segno = get_segno(storage_address);
     HLOG_DEBUG("offset :%u,segno:%u,last_offset:%u,last_rsegfile_offset:%u",offset,segno,ctrl->last_offset,ctrl->last_rsegfile_offset);
@@ -195,7 +196,7 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
 	          ret = -1;
 		   }
 		}
-    }while(read_size < block_size && retry_time >0);
+    }while((read_size < block_size || uncompressed_length <block_size) && retry_time >0);
 out:
         //pre_close_read_segfile(ctrl,segno);
         //HLOG_DEBUG("leave func %s", __func__);

@@ -741,18 +741,21 @@ __inode_create:;
                //g_assert((ib_offset-db_data_len-LOG_HEADER_LENGTH)%BLOCKSIZE == 0);
                lh->db_num = (db_end-db_start + 1);
                lh->ib_num = ib_amount(db_start, db_end);
- 			   #if 1  /* modify inode in log's ib,but not yet modify in ctrl */
-			   struct inode _inode;
-			   memcpy((char*)&_inode,(char*)&ctrl->inode,sizeof(struct inode));
-			   update_inode_index(&_inode,lh,ctrl->last_segno,ctrl->last_offset,ctrl->sb.block_size);
-               memcpy((char*)log_buff + offset,(char*)&_inode,sizeof(struct inode));
-			   #endif
+			   
 			   if(_is_compressed == TRUE){
 			   	  HLOG_DEBUG("COMPRESSED: set cflag to 1");
 			   	  lh->cflag = 1;
 			   }else{
 			      lh->cflag = 0;
 			   }
+			   
+ 			   #if 1  /* modify inode in log's ib,but not yet modify in ctrl */
+			   struct inode _inode;
+			   memcpy((char*)&_inode,(char*)&ctrl->inode,sizeof(struct inode));
+			   update_inode_index(&_inode,lh,ctrl->last_segno,ctrl->last_offset,ctrl->sb.block_size);
+               memcpy((char*)log_buff + offset,(char*)&_inode,sizeof(struct inode));
+			   #endif
+			   
                HLOG_DEBUG("log size:%d,log header:%d,inode:%d,inode map:%d,dbnum:%d,ibnum:%d",lh->log_size,sizeof(struct log_header),sizeof(struct inode),sizeof(struct inode_map_entry),lh->db_num,lh->ib_num); 
                if(0 >= dump_log(ctrl,lh)){
                    HLOG_ERROR("log dump failed");

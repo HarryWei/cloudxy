@@ -366,7 +366,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		    	db_offset += BLOCKSIZE;
 		   }
 		   HLOG_DEBUG("COMPRESSED: db_offset:%d",db_offset);
-		   ib_offset += ib1_buff_size + sizeof(uint32_t);
+		   HLOG_DEBUG("COMPRESSED: ib_offset:%d",ib_offset);
         }else if(is_db_in_level2_index_range(db_cur_no)){
            HLOG_DEBUG("is level2 -- db_cur_no:%d db_offset:%d",db_cur_no,db_offset);
            if(TRUE == ib1_need_load && ctrl->inode.iblock == 0){

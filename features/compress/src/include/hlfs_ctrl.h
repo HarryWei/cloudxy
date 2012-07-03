@@ -50,11 +50,12 @@ struct log_header {
     //int32_t  version;
     //int64_t  header_checksum;
     //int64_t  data_checksum;
+    uint32_t cflag;            /*for compress?*/
     uint32_t log_size;
     uint64_t ctime;           /* create time */
-    uint32_t start_db_no;  /* log first db no*/
-    uint32_t db_num;	  /* db amounts */
-    uint32_t ib_num;	  /* ib amount */
+    uint32_t start_db_no;     /* log first db no*/
+    uint32_t db_num;	      /* db amounts */
+    uint32_t ib_num;	      /* ib amount */
     char data[0];
 }__attribute__((packed)); 
 

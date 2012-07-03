@@ -39,13 +39,29 @@ static void dump_iblock(char *iblock){
     }
 }
 
+size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
+				ib1_buff = (char*)alloca(output_length);
+				g_assert(snappy_compress(ib2,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
 
-int compress_dblocks(char *db_buff,uint32_t db_num,char *dzb_buff,uint32_t *real_compressed_size){
+
+int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb_buff,uint32_t *real_compressed_size){
+	int i=0;
+	char *cur_db=db_buff;
+	int offset=0;
+	for(i=0;i<db_num;i++){
+		cur_db = db_buff+i*block_size;
+		size_t output_length = snappy_max_compressed_length(block_size);
+		g_assert(snappy_compress(cur_db,block_size,dzb_buff + offset + sizeof(uint32_t),&output_length)== SNAPPY_OK);
+		*(uint32_t*)(dzb_buff+offset) = output_length;
+		offset += output_length + sizeof(uint32_t);
+	}
+	*real_compressed_size = offset;
 	return 0;
 }
 
 int get_next_dzblock_offset(char *dzb){
-	return 0; 
+	uint32_t size = *(uint32_t*)dzb;
+	return size; 
 }
 
 
@@ -308,16 +324,18 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		memcpy(log_buff + LOG_HEADER_LENGTH,db_buff,db_data_len);
 		ib_offset =  db_data_len + LOG_HEADER_LENGTH;
 	}else{
-	    HLOG_DEBUG("need compressed block");
+	    HLOG_DEBUG("COMPRESSED: need compressed block !!!!");
 		uint32_t max_compressed_size = snappy_max_compressed_length(BLOCKSIZE);
+		HLOG_DEBUG("COMPRESSED: max_compressed_size :%d",max_compressed_size);
 		log_buff = (char*)g_malloc0((max_compressed_size + sizeof(uint32_t)) * (db_end-db_start + 1) + 
 									(max_compressed_size + sizeof(uint32_t)) * ib_amount(db_start, db_end) + 
 	            sizeof(struct inode) + sizeof(struct inode_map_entry) + 
 	            sizeof(struct log_header));
 		
-		char *db_buff_compressed = log_buff + LOG_HEADER_LENGTH;
+		char *compressed_db_buff = log_buff + LOG_HEADER_LENGTH;
 		uint32_t real_compressed_size = 0;
-		int ret = compress_dblocks(db_buff,(db_end-db_start + 1),db_buff_compressed,&real_compressed_size);
+		int ret = compress_dblocks(db_buff,(db_end-db_start + 1),BLOCKSIZE,compressed_db_buff,&real_compressed_size);
+		HLOG_DEBUG("COMPRESSED: real_compressed_size :%d",real_compressed_size);
 		g_assert(ret == 0);
 		ib_offset = LOG_HEADER_LENGTH + real_compressed_size;
 	}

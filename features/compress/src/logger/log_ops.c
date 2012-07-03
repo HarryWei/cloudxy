@@ -56,7 +56,7 @@ int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb
 	return 0;
 }
 
-int get_next_dzblock_offset(char *dzb){
+int get_zblock_size(char *dzb){
 	uint32_t size = *(uint32_t*)dzb;
 	return size; 
 }
@@ -79,7 +79,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 	if(log->cflag == 1){
 	   int i;
 	   for(i=0;i< db_num;i++){
-	   	   db_offset += get_next_dzblock_offset((char*)log + db_offset);
+	   	   db_offset += get_zblock_size((char*)log + db_offset) + sizeof(uint32_t);
 	   }
 	   ib_offset = db_offset;
 	   db_offset = LOG_HEADER_LENGTH;
@@ -101,7 +101,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 			if(log->cflag==0){
             	db_offset += BLOCKSIZE;
 			}else{
-				db_offset += get_next_dzblock_offset((char*)log + db_offset);
+				db_offset += get_zblock_size((char*)log + db_offset) + sizeof(uint32_t);
 			}
         }else if (is_db_in_level2_index_range(db_cur_no)){
             if( (db_cur_no - 12 + 1) % IB_ENTRY_NUM == 0 || db_cur_no == end_db){ 
@@ -115,7 +115,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 				if(log->cflag==0){
             		ib_offset += BLOCKSIZE;
 				}else{
-					ib_offset += get_next_dzblock_offset((char*)log + ib_offset);
+					ib_offset += get_zblock_size((char*)log + ib_offset) + sizeof(uint32_t);
 				}
             }
         }else if (is_db_in_level3_index_range(db_cur_no)){
@@ -132,7 +132,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 				if(log->cflag==0){
             		ib_offset += BLOCKSIZE;
 				}else{
-					ib_offset += get_next_dzblock_offset((char*)log + ib_offset);
+					ib_offset += get_zblock_size((char*)log + ib_offset) + sizeof(uint32_t);
 				}
             }
         }else if (is_db_in_level4_index_range(db_cur_no)){
@@ -151,7 +151,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 				if(log->cflag==0){
             		ib_offset += BLOCKSIZE;
 				}else{
-					ib_offset += get_next_dzblock_offset((char*)log + ib_offset);
+					ib_offset += get_zblock_size((char*)log + ib_offset) + sizeof(uint32_t);
 				}
             }
         }
@@ -360,7 +360,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 	     #endif
            /*memcpy(cur_log_buff_ptr,cur_block_ptr,BLOCKSIZE);*/
 		   if(_is_compressed){
-		   		db_offset += get_next_dzblock_offset(cur_log_buff_ptr);
+		   		db_offset += get_zblock_size(cur_log_buff_ptr)  + sizeof(uint32_t);
 		   }else{
 		    	db_offset += BLOCKSIZE;
 		   }
@@ -420,7 +420,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 	            memset(ib1,0,sizeof(BLOCKSIZE));
             }
 		  	if(_is_compressed){
-		   		db_offset += get_next_dzblock_offset(cur_log_buff_ptr);
+		   		db_offset += get_zblock_size(cur_log_buff_ptr)  + sizeof(uint32_t);
 		    }else{
 		    	db_offset += BLOCKSIZE;
 		    }
@@ -540,7 +540,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 	            memset(ib1,0,sizeof(BLOCKSIZE));
             }
             if(_is_compressed){
-		   		db_offset += get_next_dzblock_offset(cur_log_buff_ptr);
+		   		db_offset += get_zblock_size(cur_log_buff_ptr)  + sizeof(uint32_t);
 		    }else{
 		    	db_offset += BLOCKSIZE;
 		    }
@@ -697,7 +697,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				memset(ib1,0,sizeof(BLOCKSIZE));
             }
  		    if(_is_compressed){
-		   		db_offset += get_next_dzblock_offset(cur_log_buff_ptr);
+		   		db_offset += get_zblock_size(cur_log_buff_ptr)  + sizeof(uint32_t);
 		    }else{
 		    	db_offset += BLOCKSIZE;
 		    }

@@ -102,7 +102,7 @@ struct hlfs_ctrl {
     uint32_t io_nonactive_period;
     uint32_t start_segno;
     FAMILY_CTRL *family;
-	gboolean is_compressed;
+	uint32_t is_compress;
 };
 
 typedef struct hlfs_stat{

@@ -27,9 +27,6 @@
 #include "icache.h"
 
 
-
-
-
 static void dump_iblock(char *iblock){
     uint64_t *_iblock = (uint64_t*)iblock;
     int i=0;
@@ -61,8 +58,6 @@ int get_zblock_size(char *dzb){
 	uint32_t size = *(uint32_t*)dzb;
 	return size; 
 }
-
-
 
 static int update_inode_index(struct inode *inode, struct log_header * log,uint32_t last_segno,uint32_t last_offset,uint32_t block_size){
     HLOG_DEBUG("enter func %s", __func__);

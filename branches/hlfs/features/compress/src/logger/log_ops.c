@@ -82,7 +82,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 	   HLOG_DEBUG(" COMPRESSED : ib_offset:%d db_offset:%d",ib_offset,db_offset);
 	   db_offset = LOG_HEADER_LENGTH;
 	}else{
-	   ib_offset      = db_offset + db_num * BLOCKSIZE ;
+	   ib_offset = db_offset + db_num * BLOCKSIZE ;
 	}
   
     guint32  db_cur_no = 0;
@@ -94,7 +94,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
             //HLOG_DEBUG(" idx:%u",_idx);
             set_segno (&inode->blocks[_idx],last_segno);
             set_offset (&inode->blocks[_idx],last_offset + db_offset);
-		    HLOG_DEBUG("-----dbno:%d,idx:%d, blocks:%lld,db_offset:%d",db_cur_no,_idx,inode->blocks[_idx],db_offset); 
+		    HLOG_DEBUG("-----dbno:%d,idx:%d, blocks:%llu,db_offset:%d",db_cur_no,_idx,inode->blocks[_idx],db_offset);
 			if(log->cflag==0){
             	db_offset += BLOCKSIZE;
 			}else{
@@ -804,7 +804,7 @@ int append_log(struct hlfs_ctrl *hctrl,const char *db_buff,uint32_t db_start,uin
 		uint32_t max_expand_size = (max_compressed_size + sizeof(uint32_t)) * (db_end - db_start + 1)
 					  + (max_compressed_size + sizeof(uint32_t)) * ib_amount(db_start, db_end)
 					  + sizeof(struct inode) + sizeof(struct inode_map_entry)
-					  + sizeof(struct log_header);
+					  + LOG_HEADER_LENGTH;
 		if (hctrl->last_offset + max_expand_size > hctrl->sb.seg_size) {
 			hctrl->last_segno++;
 			hctrl->last_offset = 0;

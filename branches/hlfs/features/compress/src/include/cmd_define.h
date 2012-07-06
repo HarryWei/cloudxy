@@ -16,23 +16,21 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-typedef struct{
-    enum ops_cmd {
-	    start_clean =1,
-            set_copy_waterlevel =2,
-	    query_stat = 3
-    } nbd_ops_cmd;
-    char uri[128];
-    int  value;
-}NBD_OPS_CMD_T;
-
-typedef struct{
-    int err_no;
-}NBD_OPS_RSP_T;
+typedef struct {
+	enum ops_cmd {
+	start_clean = 1, set_copy_waterlevel = 2, query_stat = 3
+	} nbd_ops_cmd;
+	char uri[128];
+	int value;
+} NBD_OPS_CMD_T;
 
 typedef struct {
-    int is_start_clean;
-    int copy_waterlevel;
-}NBD_OPS_STAT;
+	int err_no;
+} NBD_OPS_RSP_T;
+
+typedef struct {
+	int is_start_clean;
+	int copy_waterlevel;
+} NBD_OPS_STAT;
 
 #endif 

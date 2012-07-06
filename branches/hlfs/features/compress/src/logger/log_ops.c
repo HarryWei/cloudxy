@@ -275,7 +275,7 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
         return -1;
     }else{
         if(NULL != ctrl->icache){
-			#if 0
+			#if 1
             guint32 db_data_len = log->db_num * ctrl->sb.block_size;
             guint32 ib_offset   = db_data_len + LOG_HEADER_LENGTH;
             HLOG_DEBUG("-- db_num:%d,ib_offset:%d,log:%p",log->db_num,ib_offset,(char*)log + ib_offset);
@@ -427,7 +427,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		        HLOG_DEBUG("COMPRESSED: ib_offset:%d",ib_offset);
                 ib1_need_load=TRUE;
                 //dump_iblock(ib1);
-                #if 1
+                #if 0
                 write_layer1_iblock(ctrl,db_cur_no,ib1);
 				#endif 
 	            memset(ib1,0,sizeof(BLOCKSIZE));
@@ -514,7 +514,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		
 				ib2_need_load=TRUE;
 				//dump_iblock(ib1);
-				#if 1
+				#if 0
                 write_layer2_iblock(ctrl,db_cur_no,ib2);
 				#endif 
 				memset(ib2,0,sizeof(BLOCKSIZE));
@@ -552,7 +552,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 			  
                 ib1_need_load=TRUE;
                 //dump_iblock(ib1);
-                #if 1
+                #if 0
                 write_layer1_iblock(ctrl,db_cur_no,ib1);
 				#endif 
 	            memset(ib1,0,sizeof(BLOCKSIZE));
@@ -640,7 +640,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				}
 				
 				ib3_need_load=TRUE;
-				#if 1
+				#if 0
                 write_layer3_iblock(ctrl,db_cur_no,ib3);
 				#endif 
 				memset(ib3,0,sizeof(BLOCKSIZE));
@@ -675,7 +675,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				
 				ib2_need_load=TRUE;
 				//dump_iblock(ib1);
-				#if 1
+				#if 0
                 write_layer2_iblock(ctrl,db_cur_no,ib2);
 				#endif 
 				memset(ib2,0,sizeof(BLOCKSIZE));
@@ -713,7 +713,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				
 				ib1_need_load=TRUE;
 				//dump_iblock(ib1);
-				#if 1
+				#if 0
                 write_layer1_iblock(ctrl,db_cur_no,ib1);
 				#endif 
 				memset(ib1,0,sizeof(BLOCKSIZE));

@@ -62,7 +62,7 @@ int init_from_superblock(struct back_storage *storage, struct hlfs_ctrl *ctrl)
     char *father_uri = NULL;
     uint64_t snapshot_inode;
     uint32_t from_segno=0;
-    int ret = read_fs_meta_all(storage,&(sb->seg_size),&(sb->block_size),&(sb->max_fs_size),&(hlfs->is_compress),
+    int ret = read_fs_meta_all(storage,&(sb->seg_size),&(sb->block_size),&(sb->max_fs_size),&(ctrl->is_compress),
 		   			            &father_uri,&snapshot_inode,&from_segno);
     g_assert(ret ==0);
 	HLOG_DEBUG("father uri:%s",father_uri);

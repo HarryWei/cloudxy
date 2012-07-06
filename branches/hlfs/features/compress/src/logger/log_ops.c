@@ -38,7 +38,7 @@ static void dump_iblock(char *iblock){
 
 
 
-int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb_buff,uint32_t *real_compressed_size){
+static int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb_buff,uint32_t *real_compressed_size){
 	int i=0;
 	char *cur_db=db_buff;
 	int offset=0;
@@ -54,7 +54,7 @@ int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb
 	return 0;
 }
 
-int get_zblock_size(char *dzb){
+static int get_zblock_size(char *dzb){
 	uint32_t size = *(uint32_t*)dzb;
 	return size; 
 }

@@ -17,6 +17,7 @@
 #include "bs_local.h"
 #include "hlfs_log.h"
 #include "comm_define.h"
+#include "snappy-c.h"
 
 uint64_t get_current_time(void)
 {
@@ -124,6 +125,64 @@ out:
     storage->bs_file_close(storage,file);
 	//HLOG_DEBUG("leave func %s", __func__);
     return ret;
+}
+int read_zblock(struct back_storage *storage, uint64_t storage_address,
+		uint32_t block_size, char *block_buf) {
+	//HLOG_DEBUG("enter func %s", __func__);
+	if (NULL == storage || NULL == block_buf) {
+		return -1;
+	}
+	int ret = 0;
+	uint32_t offset = get_offset(storage_address);
+	const char segfile_name[SEGMENT_FILE_NAME_MAX];
+	ret = build_segfile_name(get_segno(storage_address), (char *) segfile_name);
+	if (-1 == ret) {
+		HLOG_ERROR("build_segfile_name error");
+		ret = -1;
+		goto out;
+	}
+
+	bs_file_t file = storage->bs_file_open(storage, segfile_name, BS_READONLY);
+	if (file == NULL) {
+		HLOG_ERROR("can not open segment file %s", segfile_name);
+		ret = -1;
+		goto out;
+	}
+
+	//char * block = (char*)g_malloc0(block_size);
+	//if (NULL == block) {
+	//    HLOG_ERROR("Allocate Error!");
+	//    block = NULL;
+	//    goto out;
+	//}
+	uint32_t read_size;
+	HLOG_DEBUG("read for compress block");
+	size_t output_length = snappy_max_compressed_length(block_size)
+			+ sizeof(uint32_t);
+	HLOG_DEBUG("snappy_max_compressed_length :%d",
+			output_length - sizeof(uint32_t));
+	char *buff = (char*) alloca(output_length);
+	read_size = storage->bs_file_pread(storage, ctrl->last_rsegfile_handler,
+			buff, output_length, offset);
+	HLOG_DEBUG("compressed_length of read size :%d", read_size);
+	uint32_t size = *(uint32_t*) buff;
+	HLOG_DEBUG("compressed_length of block:%d", size);
+	uint32_t uncompressed_length;
+	g_assert(
+			snappy_uncompress(buff + sizeof(uint32_t), size, block,
+					&uncompressed_length) == SNAPPY_OK);
+	HLOG_DEBUG("uncompressed_length of block:%d", uncompressed_length);
+	if (uncompressed_length != block_size) {
+		HLOG_ERROR(
+				"bs_file_pread's size:%d is not equal to block_size:%d, at offset:%u",
+				read_size, block_size, offset);
+		ret = -1;
+		goto out;
+	}
+
+	out: storage->bs_file_close(storage, file);
+//HLOG_DEBUG("leave func %s", __func__);
+	return ret;
 }
 
 /* 

@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
             g_message("get refer inode failed");
             continue;
         }
-        ret = seg_usage_calc(storage,HBLOCK_SIZE,i,inode,&seg_usage);
+        ret = seg_usage_calc(storage,HBLOCK_SIZE,is_compress,i,inode,&seg_usage);
         if(ret != 0){
             g_message("seg_usage_calc failed");
             g_assert(0);

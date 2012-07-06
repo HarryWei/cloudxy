@@ -343,7 +343,7 @@ struct inode * load_latest_inode(struct back_storage *storage)
  * @return: right return particular db's address, error return -1.
  */
 uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
-			struct inode *inode, uint32_t db_no,uint32_t block_size) 
+			struct inode *inode, uint32_t db_no,uint32_t block_size,uint32_t is_compress)
 {
     //HLOG_DEBUG("enter func %s",__func__);
 	uint64_t cur_storage_addr = 0;
@@ -358,8 +358,14 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		}
 
 		uint64_t *ib = (uint64_t*)alloca(BLOCKSIZE);
-	    if( 0!= read_block(storage, inode->iblock, BLOCKSIZE,ib)){
-			return -1;
+		if(1==is_compress){
+			if( 0!= read_zblock(storage, inode->iblock, BLOCKSIZE,ib)){
+							return -1;
+			}
+		}else{
+			if( 0!= read_block(storage, inode->iblock, BLOCKSIZE,ib)){
+				return -1;
+			}
 		}
 		int idx = (db_no - 12) % IB_ENTRY_NUM;
 		cur_storage_addr = *(ib + idx);
@@ -369,17 +375,31 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 			return 1;
 		}
 		uint64_t *ib = (uint64_t*)alloca(BLOCKSIZE);
-		if( 0!= read_block(storage, inode->doubly_iblock, BLOCKSIZE,ib)){
-			return -1;
+		if(1==is_compress){
+			if( 0!= read_zblock(storage, inode->doubly_iblock, BLOCKSIZE,ib)){
+									return -1;
+								}
+		}else{
+			if( 0!= read_block(storage, inode->doubly_iblock, BLOCKSIZE,ib)){
+						return -1;
+					}
 		}
+
 		int idx = (db_no - 12 - IB_ENTRY_NUM) / IB_ENTRY_NUM;
 		if (0 == *(ib + idx)) {
 			return 1;
 		}
 		uint64_t *ib2 = (uint64_t*)alloca(BLOCKSIZE);
-		if( 0 != read_block(storage, *(ib + idx), BLOCKSIZE,ib2)){
-			return -1;
+		if(1==is_compress){
+			if( 0 != read_zblock(storage, *(ib + idx), BLOCKSIZE,ib2)){
+						return -1;
+					}
+		}else{
+			if( 0 != read_block(storage, *(ib + idx), BLOCKSIZE,ib2)){
+						return -1;
+					}
 		}
+
 		uint64_t idx2 = (db_no - 12 - IB_ENTRY_NUM) % IB_ENTRY_NUM;
 		cur_storage_addr = *(ib2 + idx2);
 		//g_free(ib);
@@ -389,25 +409,46 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 			return 1;
 		}
 		uint64_t *ib = (uint64_t*)alloca(BLOCKSIZE);
-		if( 0!=read_block(storage,inode->triply_iblock, BLOCKSIZE,ib)){
-			return -1;
+		if(1==is_compress){
+			if( 0!=read_zblock(storage,inode->triply_iblock, BLOCKSIZE,ib)){
+						return -1;
+					}
+		}else{
+			if( 0!=read_block(storage,inode->triply_iblock, BLOCKSIZE,ib)){
+						return -1;
+					}
 		}
+
 		int idx = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) / (IB_ENTRY_NUM * IB_ENTRY_NUM);
 		if (0 == *(ib + idx)) {
 			return 1;
 		}
 		uint64_t *ib2 =(uint64_t*)alloca(BLOCKSIZE);
-		if( 0 != read_block(storage, *(ib + idx), BLOCKSIZE,ib2)){
-			return -1;
+		if(1==is_compress){
+			if( 0 != read_zblock(storage, *(ib + idx), BLOCKSIZE,ib2)){
+						return -1;
+					}
+		}else{
+			if( 0 != read_block(storage, *(ib + idx), BLOCKSIZE,ib2)){
+						return -1;
+					}
 		}
+
 		uint64_t idx2 = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) / IB_ENTRY_NUM % IB_ENTRY_NUM;
 		if (0 == *(ib2 + idx2)) {
 			return 1;
 		}
 		uint64_t *ib3 = (uint64_t*)alloca(BLOCKSIZE);
-		if( 0!= read_block(storage, *(ib2 + idx2), BLOCKSIZE,ib3)){
-			return -1;
+		if(1==is_compress){
+			if( 0!= read_zblock(storage, *(ib2 + idx2), BLOCKSIZE,ib3)){
+						return -1;
+					}
+		}else{
+			if( 0!= read_block(storage, *(ib2 + idx2), BLOCKSIZE,ib3)){
+						return -1;
+					}
 		}
+
 		uint64_t idx3 = (db_no - 12 - IB_ENTRY_NUM - IB_ENTRY_NUM * IB_ENTRY_NUM) % IB_ENTRY_NUM;
 		cur_storage_addr = *(ib3 + idx3);
 		//g_free(ib);

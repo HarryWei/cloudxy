@@ -61,7 +61,7 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
 				       uint64_t _last_inode_write_timestamp = hctrl->last_write_timestamp;
 					   //HLOG_DEBUG("for db:%llu",lh->start_db_no+i);
 					   if(1==hctrl->is_compress){
-						   _offset += *(uint32_t*)((char*)hl + LOG_HEADER_LENGTH + _offset);
+						   _offset += *(uint32_t*)((char*)lh + LOG_HEADER_LENGTH + _offset);
 						   db_mine_storage_addr_offset = offset + _offset;
 					   }else{
 						   db_mine_storage_addr_offset = offset+LOG_HEADER_LENGTH + j*hctrl->sb.block_size;

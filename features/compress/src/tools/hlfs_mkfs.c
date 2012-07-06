@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
        g_message("max fs size <=0");
        return -1;
     }
-    if(is_compress!=0 || is_compress !=1){
+    if(is_compress!=0 && is_compress !=1){
        g_message("is_compress must given 0 or 1");
        return -1;
     }

@@ -24,9 +24,9 @@ struct inode {
     	//int32_t uid;
     	//int32_t gid;
     	//int32_t mode;
-    	//uint64_t ctime;               /* time of last status change */
-    	uint64_t mtime;               /* time of last modification */
-    	//uint64_t atime;               /* time of last access */
+    	//uint64_t ctime;           /* time of last status change */
+    	uint64_t mtime;             /* time of last modification */
+    	//uint64_t atime;           /* time of last access */
     	int64_t blocks[12];         /* the first 8KB*12=96KB */
     	int64_t iblock;             /* the next 8KB/8*8KB=8MB */
     	int64_t doubly_iblock;      /* the next 8K/8*8K/8*8K=8GB */
@@ -50,7 +50,7 @@ struct log_header {
     //int32_t  version;
     //int64_t  header_checksum;
     //int64_t  data_checksum;
-    uint32_t cflag;            /*for compress?*/
+    uint8_t  cflag;            /*for compress?*/
     uint32_t log_size;
     uint64_t ctime;           /* create time */
     uint32_t start_db_no;     /* log first db no*/

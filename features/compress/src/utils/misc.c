@@ -168,8 +168,7 @@ int read_zblock(struct back_storage *storage, uint64_t storage_address,
 	uint32_t size = *(uint32_t*) buff;
 	HLOG_DEBUG("compressed_length of block:%d", size);
 	uint32_t uncompressed_length;
-	g_assert(
-			snappy_uncompress(buff + sizeof(uint32_t), size, block,
+	g_assert(snappy_uncompress(buff + sizeof(uint32_t), size, block_buf,
 					&uncompressed_length) == SNAPPY_OK);
 	HLOG_DEBUG("uncompressed_length of block:%d", uncompressed_length);
 	if (uncompressed_length != block_size) {

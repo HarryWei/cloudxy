@@ -21,7 +21,7 @@
 #include "seg_clean.h"
 
 
-int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint32_t segno,struct inode *refer_inode,SEG_USAGE_T *seg_usage)
+int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint32_t is_compress,uint32_t segno,struct inode *refer_inode,SEG_USAGE_T *seg_usage)
 {
     //HLOG_DEBUG("enter func %s",__func__);
     if(storage == NULL || refer_inode == NULL || seg_usage == NULL){
@@ -58,8 +58,6 @@ int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint32_t seg
 	}		
 
     tmp_bit_array = g_array_new(FALSE,FALSE,sizeof(gint));
-	
-
     while(offset < size){
 #if 0
         ret=storage->bs_file_pread(storage,file, (char*)&lh, LOG_HEADER_LENGTH, offset) ;//TODO read 64M once
@@ -96,14 +94,22 @@ int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint32_t seg
         //HLOG_DEBUG("start db no:%llu,db num:%d",lh->start_db_no,lh->db_num);
         int i;
 #if 1 /* check refer inode whether still refer to given db in seg */
+        uint64_t db_mine_storage_addr = 0;
+        uint32_t db_mine_storage_addr_offset = 0;
+        uint32_t _offset = 0;
         for(i=0;i<lh->db_num;i++){
             //HLOG_DEBUG("for db:%llu",lh->start_db_no+i);
-            uint64_t db_mine_storage_addr = 0;
-            uint32_t db_mine_storage_addr_offset = offset + LOG_HEADER_LENGTH+i*block_size;
+            //uint32_t db_mine_storage_addr_offset = offset + LOG_HEADER_LENGTH+i*block_size;
+        	if(1==is_compress){
+        		_offset += *(uint32_t*)((char*)hl + LOG_HEADER_LENGTH + _offset);
+        		db_mine_storage_addr_offset = offset + _offset;
+        	}else{
+        		db_mine_storage_addr_offset = offset + LOG_HEADER_LENGTH +i*block_size;
+        	}
             set_offset(&db_mine_storage_addr,db_mine_storage_addr_offset);
             set_segno (&db_mine_storage_addr,segno);
             uint64_t db_cur_storage_addr = get_db_storage_addr_in_inode(storage,refer_inode,
-			    						                                lh->start_db_no+i,block_size);
+			    						                                lh->start_db_no+i,block_size,is_compress);
             HLOG_DEBUG("db:%llu's mine storage addr:%llu,cur storage addr:%llu",
 			    	lh->start_db_no+i,db_mine_storage_addr,db_cur_storage_addr);
             if(db_mine_storage_addr != db_cur_storage_addr){

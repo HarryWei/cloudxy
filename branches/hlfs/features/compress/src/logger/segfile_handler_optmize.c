@@ -166,7 +166,7 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
                 return -1;
             }
         }
-		if(!ctrl->is_compressed){
+		if(0==ctrl->is_compress){
 	        read_size = storage->bs_file_pread(storage,ctrl->last_rsegfile_handler,block,block_size,offset);
 	        if(read_size!=block_size){
 	            HLOG_WARN("can not read block from seg:%u#%u :ret :%d",segno,offset,read_size);

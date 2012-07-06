@@ -44,14 +44,6 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
     HLOG_DEBUG("log_num: --> %llu", seg_usage->log_num);
 
 
-    if(1==is_compress){
-            		_offset += *(uint32_t*)((char*)hl + LOG_HEADER_LENGTH + _offset);
-            		db_mine_storage_addr_offset = offset + _offset;
-            	}else{
-            		db_mine_storage_addr_offset = offset + LOG_HEADER_LENGTH +i*block_size;
-            	}
-
-
     for(i=0;i<seg_usage->log_num;i++){
         lh = (struct log_header*)(content + offset);
         //HLOG_DEBUG("log_idx:%d", i);

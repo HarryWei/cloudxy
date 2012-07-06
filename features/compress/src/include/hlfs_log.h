@@ -16,7 +16,7 @@
 #include "glib.h"
 
 static GStaticMutex mutex = G_STATIC_MUTEX_INIT;
-#define LOG_LEN				2048U
+#define LOG_LEN				2048
 static char __msg_log[LOG_LEN]={0};
 static log4c_category_t *__mycat;
 static char *__hlog_path = NULL;

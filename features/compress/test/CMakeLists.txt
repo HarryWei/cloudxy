@@ -56,7 +56,7 @@ foreach(testfile ${testfiles})
 #GET_FILENAME_COMPONENT(basename ${testname} ${testfile} NAME)
 	GET_FILENAME_COMPONENT(testname ${testfile} NAME_WE)
 	ADD_EXECUTABLE(${testname} ${testfile})
-    SET_TARGET_PROPERTIES(${testname} PROPERTIES COMPILE_FLAGS "-g -U_FORTIFY_SOURCE")
+    SET_TARGET_PROPERTIES(${testname} PROPERTIES COMPILE_FLAGS "-g")
     #ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
 	TARGET_LINK_LIBRARIES(${testname} ${LIBS})
 

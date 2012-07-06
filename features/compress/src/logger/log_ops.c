@@ -109,7 +109,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 		        HLOG_DEBUG("-----dbno:%d,iblock:%llu,db_offset:%d",db_cur_no,inode->iblock,ib_offset);                
                 //dump_iblock((char*)log+ib_offset);
                 //ib_offset +=BLOCKSIZE;
-				if(log->cflag==0){
+				if(log->cflag == 0){
             		ib_offset += BLOCKSIZE;
 				}else{
 					ib_offset += get_zblock_size((char*)log + ib_offset) + sizeof(uint32_t);

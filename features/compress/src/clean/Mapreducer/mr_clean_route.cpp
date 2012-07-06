@@ -63,7 +63,8 @@ class SegUsageCalcMap: public HadoopPipes::Mapper {
             uint32_t segment_size;
             uint32_t block_size;
             uint64_t max_fs_size;
-            int ret = read_fs_meta(m_storage, &segment_size, &block_size,&max_fs_size);
+            uint32_t is_compress = 0;
+            int ret = read_fs_meta(m_storage, &segment_size, &block_size,&max_fs_size,&is_compress);
             printf("DBG:--segment size:%u,block size:%u,max fs size%llu\n",segment_size,block_size,max_fs_size);
             //m_latest_inode = load_latest_inode(m_storage); 
      	    //HADOOP_ASSERT(m_latest_inode != NULL, "failed to load latest inode ");

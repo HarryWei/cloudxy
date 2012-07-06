@@ -43,6 +43,7 @@ int faimly_init(FAMILY_CTRL *fctrl,char* furi,uint64_t fbase_inode,uint32_t fseg
 	char * father_uri = NULL;
     uint64_t base_father_inode,max_fs_size;
     uint32_t from_segno,seg_size,block_size;
+    uint32_t is_compress = 0;
 	STORAGE_ITEM *storage_item = NULL;
     from_segno = fsegno;
     do{
@@ -58,7 +59,7 @@ int faimly_init(FAMILY_CTRL *fctrl,char* furi,uint64_t fbase_inode,uint32_t fseg
 	   storage_item->segno = from_segno -1;
 	   HLOG_DEBUG("from_segno:%d\n",from_segno);
 	   fctrl->seg_storage_list = g_list_append(fctrl->seg_storage_list,storage_item);
-       if(0 !=(ret = read_fs_meta_all(storage,&seg_size,&block_size,&max_fs_size,
+       if(0 !=(ret = read_fs_meta_all(storage,&seg_size,&block_size,&max_fs_size,&is_compress,
 		   			            &father_uri,&base_father_inode,&from_segno))){
 		  HLOG_ERROR("fail to read fs meta info");
 		  ret = -1;

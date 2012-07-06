@@ -458,7 +458,7 @@ out:
     return sb_keyfile;
 }
 
-int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size,uint32_t,uint32_t *is_compress,
+int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size,uint32_t *is_compress,
 					    gchar **father_uri,uint64_t *snapshot_inode, uint32_t *from_segno){
      GKeyFile * sb_keyfile = get_superblock_keyfile(storage);
      if(NULL == sb_keyfile){

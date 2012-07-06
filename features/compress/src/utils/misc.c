@@ -162,7 +162,7 @@ int read_zblock(struct back_storage *storage, uint64_t storage_address,
 	HLOG_DEBUG("snappy_max_compressed_length :%d",
 			output_length - sizeof(uint32_t));
 	char *buff = (char*) alloca(output_length);
-	read_size = storage->bs_file_pread(storage, ctrl->last_rsegfile_handler,
+	read_size = storage->bs_file_pread(storage,file,
 			buff, output_length, offset);
 	HLOG_DEBUG("compressed_length of read size :%d", read_size);
 	uint32_t size = *(uint32_t*) buff;

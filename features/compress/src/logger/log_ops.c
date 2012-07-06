@@ -792,9 +792,23 @@ int append_log(struct hlfs_ctrl *hctrl,const char *db_buff,uint32_t db_start,uin
 		return -1;
 	}
 	//TODO maybe revise for compressed reason?
-	if (hctrl->last_offset + expand_size > hctrl->sb.seg_size) {
-		hctrl->last_segno++;
-		hctrl->last_offset = 0;
+	gboolean _is_compressed= (no_compressed == 0) ? FALSE:hctrl->is_compress;
+	if(!_is_compressed){
+		if (hctrl->last_offset + expand_size > hctrl->sb.seg_size) {
+			hctrl->last_segno++;
+			hctrl->last_offset = 0;
+		}
+	}else{
+		uint32_t max_compressed_size = snappy_max_compressed_length(BLOCKSIZE);
+		HLOG_DEBUG("COMPRESSED: max_compressed_size :%d", max_compressed_size);
+		uint32_t max_expand_size = (max_compressed_size + sizeof(uint32_t)) * (db_end - db_start + 1)
+					  + (max_compressed_size + sizeof(uint32_t)) * ib_amount(db_start, db_end)
+					  + sizeof(struct inode) + sizeof(struct inode_map_entry)
+					  + sizeof(struct log_header);
+		if (hctrl->last_offset + max_expand_size > hctrl->sb.seg_size) {
+			hctrl->last_segno++;
+			hctrl->last_offset = 0;
+		}
 	}
 	//HLOG_DEBUG("last segno:%u last offset:%u", hctrl->last_segno,hctrl->last_offset);
 	uint32_t size; 

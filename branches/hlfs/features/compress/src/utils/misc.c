@@ -154,7 +154,7 @@ int read_zblock(struct back_storage *storage, uint64_t storage_address,
 	//    HLOG_ERROR("Allocate Error!");
 	//    block = NULL;
 	//    goto out;
-	//}
+	//}uu
 	uint32_t read_size;
 	HLOG_DEBUG("read for compress block");
 	size_t output_length = snappy_max_compressed_length(block_size)
@@ -178,6 +178,7 @@ int read_zblock(struct back_storage *storage, uint64_t storage_address,
 		ret = -1;
 		goto out;
 	}
+
 
 	out: storage->bs_file_close(storage, file);
 //HLOG_DEBUG("leave func %s", __func__);

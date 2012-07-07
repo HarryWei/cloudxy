@@ -115,7 +115,7 @@ int main(int argc, char *argv[]){
            SEG_USAGE_T seg_usage;
            memset(&seg_usage,0,sizeof(SEG_USAGE_T));
            strncpy(seg_usage.up_sname,up_sname,strlen(up_sname));
-           ret = seg_usage_calc(ctrl->storage,ctrl->sb.block_size,i,inode,&seg_usage);
+           ret = seg_usage_calc(ctrl->storage,ctrl->sb.block_size,ctrl->is_compress,i,inode,&seg_usage);
            printf("up sname is:%s\n",seg_usage.up_sname);
            g_assert(ret ==0);
            char textbuf[8192];
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]){
            memset(&seg_usage,0,sizeof(SEG_USAGE_T));
            strncpy(seg_usage.up_sname,"_____",strlen("_____"));
            printf("up sname is:%s\n",seg_usage.up_sname);
-           ret = seg_usage_calc(ctrl->storage,ctrl->sb.block_size,i,&ctrl->inode,&seg_usage);
+           ret = seg_usage_calc(ctrl->storage,ctrl->sb.block_size,ctrl->is_compress,i,&ctrl->inode,&seg_usage);
            g_assert(ret ==0);
            char textbuf[8192];
            memset(textbuf,0,8192);

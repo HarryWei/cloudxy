@@ -106,14 +106,15 @@ static int __is_init_log_path = 0;
 				 }																						\
 				__is_init_log_path = 1;																	\
 			}																							\
-	if (NULL != __mycat) {		\
-		static GStaticMutex mutex = G_STATIC_MUTEX_INIT;\
-        g_static_mutex_lock (&mutex);                                                           \
+	if (NULL != __mycat) {																					\
+        g_static_mutex_lock (&__hlfs_log_mutex);                                                           \
+        pringf("--enter lock region--");\
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		const log4c_location_info_t locinfo = LOG4C_LOCATION_INFO_INITIALIZER(NULL);\
 		log4c_category_log_locinfo(__mycat, &locinfo, LOG4C_PRIORITY_DEBUG, __msg_log, ##args);		\
-        g_static_mutex_unlock (&mutex);                                                           \
+		pringf("--exit lock region --");\
+        g_static_mutex_unlock (&__hlfs_log_mutex);                                                           \
 	} else {																					\
 		printf(msg, ##args);																	\
 		printf("\n");																			\

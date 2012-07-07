@@ -38,7 +38,8 @@ static int __is_init_log_path = 0;
         g_static_mutex_lock (&__mutex);                                                         \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
-		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_NOTICE, __msg_log, ##args);	\
+		const log4c_location_info_t locinfo = LOG4C_LOCATION_INFO_INITIALIZER(NULL);\
+		log4c_category_log_locinfo(__mycat, &locinfo, LOG4C_PRIORITY_NOTICE, __msg_log, ##args);	\
         g_static_mutex_unlock (&__mutex); 														\
 	}else {																						\
 		printf(msg, ##args);																	\
@@ -61,7 +62,8 @@ static int __is_init_log_path = 0;
         g_static_mutex_lock (&__mutex);                                                         \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
-		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_TRACE, __msg_log, ##args);		\
+		const log4c_location_info_t locinfo = LOG4C_LOCATION_INFO_INITIALIZER(NULL);\
+		log4c_category_log_locinfo(__mycat, &locinfo, LOG4C_PRIORITY_TRACE, __msg_log, ##args);		\
         g_static_mutex_unlock (&__mutex);                                                       \
 	} else {																					\
 		printf(msg, ##args);																	\
@@ -84,7 +86,8 @@ static int __is_init_log_path = 0;
         g_static_mutex_lock (&__mutex);                                                         \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
-		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_FATAL, __msg_log, ##args);		\
+		const log4c_location_info_t locinfo = LOG4C_LOCATION_INFO_INITIALIZER(NULL);\
+		log4c_category_log_locinfo(__mycat, &locinfo, LOG4C_PRIORITY_FATAL, __msg_log, ##args);		\
         g_static_mutex_unlock (&__mutex);                                                       \
 	} else {																					\
 		printf(msg, ##args);																	\
@@ -107,7 +110,8 @@ static int __is_init_log_path = 0;
         g_static_mutex_lock (&__mutex);                                                           \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
-		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_DEBUG, __msg_log, ##args);		\
+		const log4c_location_info_t locinfo = LOG4C_LOCATION_INFO_INITIALIZER(NULL);\
+		log4c_category_log_locinfo(__mycat, &locinfo, LOG4C_PRIORITY_DEBUG, __msg_log, ##args);		\
         g_static_mutex_unlock (&__mutex);                                                           \
 	} else {																					\
 		printf(msg, ##args);																	\
@@ -130,7 +134,8 @@ static int __is_init_log_path = 0;
         g_static_mutex_lock (&__mutex);                                                           \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
-		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_INFO, __msg_log, ##args);		\
+		const log4c_location_info_t locinfo = LOG4C_LOCATION_INFO_INITIALIZER(NULL);\
+		log4c_category_log_locinfo(__mycat, &locinfo, LOG4C_PRIORITY_INFO, __msg_log, ##args);		\
         g_static_mutex_unlock (&__mutex);                                                           \
 	} else {																					\
 		printf(msg, ##args);																	\
@@ -153,7 +158,8 @@ static int __is_init_log_path = 0;
         g_static_mutex_lock (&__mutex);                                                         \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
-		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_ERROR, __msg_log, ##args);		\
+		const log4c_location_info_t locinfo = LOG4C_LOCATION_INFO_INITIALIZER(NULL);\
+		log4c_category_log_locinfo(__mycat,&locinfo, LOG4C_PRIORITY_ERROR, __msg_log, ##args);		\
         g_static_mutex_unlock (&__mutex);                                                       \
 	} else {																					\
 		printf(msg, ##args);																	\
@@ -176,7 +182,8 @@ static int __is_init_log_path = 0;
         g_static_mutex_lock (&__mutex);                                                         \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);	\
-		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_WARN, __msg_log, ##args);		\
+		const log4c_location_info_t locinfo = LOG4C_LOCATION_INFO_INITIALIZER(NULL);\
+		log4c_category_log_locinfo(__mycat, &locinfo, LOG4C_PRIORITY_WARN, __msg_log, ##args);		\
         g_static_mutex_unlock (&__mutex);                                                       \
 	} else {																					\
 		printf(msg, ##args);																	\

@@ -9,8 +9,8 @@
 # _So_that we can debug it.
 
 SET(CMAKE_BUILD_TYPE "Debug") 
-SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g")
-SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -Wall -g")
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -Wall")
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 PROJECT(HLFS)
@@ -56,7 +56,7 @@ foreach(testfile ${testfiles})
 #GET_FILENAME_COMPONENT(basename ${testname} ${testfile} NAME)
 	GET_FILENAME_COMPONENT(testname ${testfile} NAME_WE)
 	ADD_EXECUTABLE(${testname} ${testfile})
-    SET_TARGET_PROPERTIES(${testname} PROPERTIES COMPILE_FLAGS "-g -U_FORTIFY_SOURCE")
+    SET_TARGET_PROPERTIES(${testname} PROPERTIES COMPILE_FLAGS "-g")
     #ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
 	TARGET_LINK_LIBRARIES(${testname} ${LIBS})
 

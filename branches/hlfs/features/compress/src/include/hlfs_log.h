@@ -33,7 +33,6 @@ static int __is_init_log_path = 0;
 		if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
 		    __mycat = log4c_category_get("hlfslog");								    	    \
 		}																						\
-		g_static_mutex_init (&__hlfs_log_mutex__);														\
 		__is_init_log_path = 1;																	\
 	}																							\
     if (NULL != __mycat) {																		\
@@ -58,7 +57,6 @@ static int __is_init_log_path = 0;
 				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){								\
 				    __mycat = log4c_category_get("hlfslog");								    \
 				 }																				\
-				g_static_mutex_init (&__hlfs_log_mutex__);														\
 				__is_init_log_path = 1;															\
 			}																					\
 	if (NULL != __mycat) {																		\
@@ -83,7 +81,6 @@ static int __is_init_log_path = 0;
 				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){								\
 				    __mycat = log4c_category_get("hlfslog");								    \
 				 }																				\
-				g_static_mutex_init (&__hlfs_log_mutex__);														\
 				__is_init_log_path = 1;															\
 			}																					\
 	if (NULL != __mycat) {																		\
@@ -108,7 +105,6 @@ static int __is_init_log_path = 0;
 				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
 				    __mycat = log4c_category_get("hlfslog");								    	    \
 				 }																						\
-				g_static_mutex_init (&__hlfs_log_mutex__);														\
 				__is_init_log_path = 1;																	\
 			}																							\
 	if (NULL != __mycat) {                                                         \
@@ -135,7 +131,6 @@ static int __is_init_log_path = 0;
 				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
 				    __mycat = log4c_category_get("hlfslog");								    	    \
 				 }																						\
-				g_static_mutex_init (&__hlfs_log_mutex__);														\
 				__is_init_log_path = 1;																	\
 			}																							\
 	if (NULL != __mycat) {																					\
@@ -160,7 +155,6 @@ static int __is_init_log_path = 0;
 		if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
 			__mycat = log4c_category_get("hlfslog");								    	    \
 		 }																						\
-		g_static_mutex_init (&__hlfs_log_mutex__);														\
 		__is_init_log_path = 1;																	\
 	}																							\
 	if (NULL != __mycat) {																		\
@@ -185,7 +179,6 @@ static int __is_init_log_path = 0;
 		if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){								\
 			__mycat = log4c_category_get("hlfslog");								    \
 		 }																				\
-		g_static_mutex_init (&__hlfs_log_mutex__);														\
 		__is_init_log_path = 1;															\
 	}																							\
 	if (NULL != __mycat) {																		\

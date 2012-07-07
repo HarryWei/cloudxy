@@ -107,7 +107,7 @@ static int __is_init_log_path = 0;
 				 }																						\
 				__is_init_log_path = 1;																	\
 			}																							\
-	if (NULL != __mycat) {
+	if (NULL != __mycat) {                                                         \
  	    GStaticMutex __hlfs_log_mutex2__;											\
 		g_static_mutex_init (&__hlfs_log_mutex2__);														\
         g_static_mutex_lock (&__hlfs_log_mutex2__);                                                   \

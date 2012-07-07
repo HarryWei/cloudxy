@@ -31,7 +31,8 @@ int hlfs_lstat(const char*uri,HLFS_STAT_T *stat){
     }
     uint32_t seg_size,block_size,last_segno,last_offset;
     uint64_t max_fs_size;
-    ret = read_fs_meta(storage,&seg_size,&block_size,&max_fs_size);
+    uint32_t is_compress = 0;
+    ret = read_fs_meta(storage,&seg_size,&block_size,&max_fs_size,&is_compress);
     if(ret != 0){
          HLOG_ERROR("can not read fs meta data");
          goto out;

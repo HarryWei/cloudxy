@@ -23,7 +23,7 @@
 #include "logger.h"
 
 CTRL_REGION_T CTRL_REGION;
-extern int append_log(struct hlfs_ctrl * ctrl,const char*db_buff,uint32_t db_start,uint32_t db_end);
+extern int append_log(struct hlfs_ctrl * ctrl,const char*db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed);
 int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end){
     if ((NULL == ctrl) || (NULL == db_buff) ||db_end < db_start) {
 		HLOG_ERROR("Params Error");
@@ -33,7 +33,7 @@ int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint3
     //HLOG_DEBUG("last segno: %u last offset: %u", ctrl->last_segno, ctrl->last_offset);
     g_mutex_lock (ctrl->hlfs_access_mutex);
     ctrl->last_write_timestamp = get_current_time();
-    int size = append_log(ctrl,db_buff,db_start,db_end);
+    int size = append_log(ctrl,db_buff,db_start,db_end,1);
     g_mutex_unlock (ctrl->hlfs_access_mutex);
     if(size < 0){
         HLOG_ERROR("append log error");
@@ -62,7 +62,7 @@ int init_from_superblock(struct back_storage *storage, struct hlfs_ctrl *ctrl)
     char *father_uri = NULL;
     uint64_t snapshot_inode;
     uint32_t from_segno=0;
-    int ret = read_fs_meta_all(storage,&(sb->seg_size),&(sb->block_size),&(sb->max_fs_size),
+    int ret = read_fs_meta_all(storage,&(sb->seg_size),&(sb->block_size),&(sb->max_fs_size),&(ctrl->is_compress),
 		   			            &father_uri,&snapshot_inode,&from_segno);
     g_assert(ret ==0);
 	HLOG_DEBUG("father uri:%s",father_uri);
@@ -74,6 +74,8 @@ int init_from_superblock(struct back_storage *storage, struct hlfs_ctrl *ctrl)
     }			
     g_strlcpy(sb->fsname,g_basename(storage->uri),MAX_FILE_NAME_LEN);
     ctrl->start_segno = from_segno;	
+    //TODO :config it
+	//ctrl->is_compressed = TRUE;
     //HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
@@ -199,26 +201,27 @@ out:
 
 
 struct hlfs_ctrl *
-init_hlfs(const char *uri )
+init_hlfs(const char *uri)
 {      
-        if(NULL == uri){
+     if(NULL == uri){
 	     HLOG_ERROR("Params Error");	
 	     return NULL;
-        }		
-        int ret = 0;
-        uint32_t seg_clean_check_period = DEF_IO_NONACTIVE_PERIOD;
+     }		
+     int ret = 0;
+     uint32_t seg_clean_check_period = DEF_IO_NONACTIVE_PERIOD;
 	 uint32_t seg_copy_waterlevel       = DEF_SEG_COPY_WATERLEVEL;
 	 struct hlfs_ctrl * hlfs_ctrl = __init_hlfs(uri,1,seg_clean_check_period,seg_clean_check_period);
         if(NULL == hlfs_ctrl){
 		 HLOG_ERROR("init raw hlfs ctrl failed");
 		 return NULL;
-        }			
-	 uint32_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
+        }
+		#if 1
+	    uint32_t block_size,cache_size,flush_interval,flush_trigger_level,flush_once_size;
         block_size 		 	= hlfs_ctrl->sb.block_size;
-        cache_size  		 	=  DEF_CACHE_SIZE;
+        cache_size  		=  DEF_CACHE_SIZE;
         flush_interval 	 	=  DEF_FLUSH_INTERVAL;
-        flush_trigger_level		=  DEF_FLUSH_TRIGGER_LEVEL;
-        flush_once_size 	 	=  DEF_FLUSH_ONCE_SIZE;
+        flush_trigger_level	=  DEF_FLUSH_TRIGGER_LEVEL;
+        flush_once_size 	=  DEF_FLUSH_ONCE_SIZE;
         /* check .... */
         if(block_size!=hlfs_ctrl->sb.block_size){
               HLOG_ERROR("cache block size is not equal to block size in superblock"); 
@@ -273,6 +276,7 @@ init_hlfs(const char *uri )
         }
 	 HLOG_INFO("Indirect  Block Cache Init Over ! icache_size:%u,iblock_size:%u,invalidate_trigger_level:%u,invalidate_once_size:%u",
 			       icache_size,iblock_size,invalidate_trigger_level,invalidate_once_size); 
+	 #endif 
 	 return hlfs_ctrl;
 out:
      deinit_hlfs(hlfs_ctrl);

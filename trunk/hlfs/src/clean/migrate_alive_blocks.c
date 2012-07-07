@@ -42,6 +42,8 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
     uint32_t offset=0;
     struct log_header *lh = NULL;
     HLOG_DEBUG("log_num: --> %llu", seg_usage->log_num);
+
+
     for(i=0;i<seg_usage->log_num;i++){
         lh = (struct log_header*)(content + offset);
         //HLOG_DEBUG("log_idx:%d", i);
@@ -52,15 +54,22 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
 			/* we need check with current inode again */
 			int32_t db_start = -1;
 			int32_t db_end = -1;
+			uint64_t db_mine_storage_addr = 0;
+			uint32_t db_mine_storage_addr_offset = 0;
+			uint32_t _offset = 0;
 			for(j=0;j<lh->db_num;j++){
-				          uint64_t _last_inode_write_timestamp = hctrl->last_write_timestamp;
+				       uint64_t _last_inode_write_timestamp = hctrl->last_write_timestamp;
 					   //HLOG_DEBUG("for db:%llu",lh->start_db_no+i);
-					   uint64_t db_mine_storage_addr = 0;
-					   uint32_t db_mine_storage_addr_offset = offset+LOG_HEADER_LENGTH + j*hctrl->sb.block_size;
+					   if(1==hctrl->is_compress){
+						   _offset += *(uint32_t*)((char*)lh + LOG_HEADER_LENGTH + _offset);
+						   db_mine_storage_addr_offset = offset + _offset;
+					   }else{
+						   db_mine_storage_addr_offset = offset+LOG_HEADER_LENGTH + j*hctrl->sb.block_size;
+					   }
 					   set_offset(&db_mine_storage_addr,db_mine_storage_addr_offset);
 					   set_segno (&db_mine_storage_addr,seg_usage->segno);
 					   uint64_t db_cur_storage_addr = get_db_storage_addr_in_inode(hctrl->storage,&hctrl->inode,
-			    						                                lh->start_db_no+j,hctrl->sb.block_size);
+			    						                                lh->start_db_no+j,hctrl->sb.block_size,hctrl->is_compress);
 					   HLOG_DEBUG("db:%llu's mine storage addr:%llu,cur storage addr:%llu",
 							   lh->start_db_no+i,db_mine_storage_addr,db_cur_storage_addr);
 					   if(db_mine_storage_addr == db_cur_storage_addr){
@@ -109,7 +118,7 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
 							  g_mutex_unlock (hctrl->hlfs_access_mutex);
 							  continue;
 						   }	
-    					   int size = append_log(hctrl,db_buff,db_start,db_end);
+    					   int size = append_log(hctrl,db_buff,db_start,db_end,0);
     					   g_mutex_unlock (hctrl->hlfs_access_mutex);
     				       if(size < 0){
        						 HLOG_ERROR("append log error");

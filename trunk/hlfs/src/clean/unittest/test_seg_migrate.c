@@ -106,7 +106,7 @@ void test_seg_migrate()
            printf("seg is in snapshots\n");
            SEG_USAGE_T seg_usage;
            memset(&seg_usage,0,sizeof(SEG_USAGE_T));
-           ret = seg_usage_calc(storage,block_size,i,inode,&seg_usage);
+           ret = seg_usage_calc(storage,block_size,,inode,&seg_usage);
            g_assert(ret ==0);
            char textbuf[4096];
            memset(textbuf,4096,0);
@@ -121,7 +121,7 @@ void test_seg_migrate()
            printf("seg is above snapshot,maybe need migrate\n");
            SEG_USAGE_T seg_usage;
            memset(&seg_usage,0,sizeof(SEG_USAGE_T));
-           ret = seg_usage_calc(storage,block_size,i,&fixture.hctrl->inode,&seg_usage);
+           ret = seg_usage_calc(storage,block_size,fixture.hctrl->is_compress,i,&fixture.hctrl->inode,&seg_usage);
            g_assert(ret ==0);
            char textbuf[4096];
            memset(textbuf,4096,0);

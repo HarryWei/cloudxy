@@ -121,7 +121,7 @@ block_t * cache_query(CACHE_CTRL *cache_ctrl,uint32_t block_no){
 		return NULL;
 	}
 	
-	HLOG_DEBUG("block_no %llu will be queried",block_no);
+	HLOG_DEBUG("block_no %u will be queried",block_no);
     g_mutex_lock(cache_ctrl->cache_mutex);
 	block = (block_t*)g_hash_table_lookup(cache_ctrl->block_map, \
 			&(block_no));

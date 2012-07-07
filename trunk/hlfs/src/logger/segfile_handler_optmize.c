@@ -22,6 +22,8 @@
 #include "icache.h"
 #include <errno.h>
 #include "clone.h"
+#include "snappy-c.h"
+
 
 int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
     //HLOG_DEBUG("enter func %s", __func__);
@@ -132,16 +134,17 @@ int prev_open_wsegfile(struct hlfs_ctrl *ctrl){
 
 int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
 {
-    //HLOG_DEBUG("enter func %s", __func__);
+    HLOG_DEBUG("enter func %s", __func__);
     int ret = 0;
     struct back_storage * storage =NULL;
-    int write_size = 0;
+    int read_size = 0;
+	int uncompressed_length = 0;
     uint32_t offset = get_offset(storage_address);
     uint32_t segno = get_segno(storage_address);
     HLOG_DEBUG("offset :%u,segno:%u,last_offset:%u,last_rsegfile_offset:%u",offset,segno,ctrl->last_offset,ctrl->last_rsegfile_offset);
     uint32_t block_size = ctrl->sb.block_size;
     if(0!=prev_open_rsegfile(ctrl,segno)){
-        //HLOG_ERROR("can not pre open read segfile:%u",segno);
+        HLOG_ERROR("can not pre open read segfile:%u",segno);
         g_assert(0);
         return -1; 
     }
@@ -163,17 +166,41 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
                 return -1;
             }
         }
-        write_size = storage->bs_file_pread(storage,ctrl->last_rsegfile_handler,block,block_size,offset);
-        if(write_size!=block_size){
-            HLOG_WARN("can not read block from seg:%u#%u :ret :%d",segno,offset,write_size);
-            g_usleep(1000);
-            retry_time--;
-            ret = -1;
-        }else{
-            HLOG_DEBUG("read block from seg:%u#%u size:%d",segno,offset,write_size);
-            ret = 0;
-        }
-    }while(write_size < block_size && retry_time >0);
+		if(0==ctrl->is_compress){
+	        read_size = storage->bs_file_pread(storage,ctrl->last_rsegfile_handler,block,block_size,offset);
+	        if(read_size!=block_size){
+	            HLOG_WARN("can not read block from seg:%u#%u :ret :%d",segno,offset,read_size);
+	            g_usleep(1000);
+	            retry_time--;
+	            ret = -1;
+	        }else{
+	            HLOG_DEBUG("read block from seg:%u#%u size:%d",segno,offset,read_size);
+				break;
+	            ret = 0;
+	        }
+		}else{
+		   HLOG_DEBUG("read for compress block");
+		   size_t output_length = snappy_max_compressed_length(block_size) + sizeof(uint32_t);
+		   HLOG_DEBUG("snappy_max_compressed_length :%d",output_length - sizeof(uint32_t));
+           char *buff = (char*)alloca(output_length);
+		   read_size = storage->bs_file_pread(storage,ctrl->last_rsegfile_handler,buff,output_length,offset);
+		   HLOG_DEBUG("compressed_length of read size :%d",read_size);
+		   uint32_t size = *(uint32_t*)buff;
+		   HLOG_DEBUG("compressed_length of block:%d",size);
+		   uint32_t uncompressed_length;
+		   g_assert(snappy_uncompress(buff+sizeof(uint32_t),size,block,&uncompressed_length)== SNAPPY_OK);
+		   HLOG_DEBUG("uncompressed_length of block:%d",uncompressed_length);
+		   if(uncompressed_length!=block_size){
+		   	  HLOG_WARN("can not read block from seg:%u#%u :ret :%d",segno,offset,uncompressed_length);
+	          g_usleep(1000);
+	          retry_time--;
+	          ret = -1;
+		   }else{
+		      ret = 0;
+		      break;
+		   }
+		}
+    }while(retry_time >0);
 out:
         //pre_close_read_segfile(ctrl,segno);
         //HLOG_DEBUG("leave func %s", __func__);

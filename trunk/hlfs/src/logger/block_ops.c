@@ -112,7 +112,13 @@ static int read_block_raw(struct hlfs_ctrl *ctrl,uint32_t storage_address,char* 
 		  return -1;
 	      }
     }
-    int ret = read_block(storage,storage_address,block_size,block_buf);
+    int ret = 0;
+    if(1==ctrl->is_compress){
+    	ret = read_zblock(storage,storage_address,block_size,block_buf);
+    }else{
+    	ret = read_block(storage,storage_address,block_size,block_buf);
+    }
+
     //HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }

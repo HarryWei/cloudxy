@@ -23,7 +23,7 @@ void case_setup()
 #if 1
 	system("rm -rf /tmp/testenv");
 	system("mkdir /tmp/testenv -p");
-	system("cd ../../../ && ./output/bin/mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024 -c 1");
+	system("cd ../../../ && ./output/bin/mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024");
 	system("cd -");
     char * uri = "local:///tmp/testenv/testfs";
     fixture.hctrl = init_hlfs(uri);

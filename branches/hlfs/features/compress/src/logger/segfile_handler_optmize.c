@@ -144,7 +144,7 @@ int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
     HLOG_DEBUG("offset :%u,segno:%u,last_offset:%u,last_rsegfile_offset:%u",offset,segno,ctrl->last_offset,ctrl->last_rsegfile_offset);
     uint32_t block_size = ctrl->sb.block_size;
     if(0!=prev_open_rsegfile(ctrl,segno)){
-        //HLOG_ERROR("can not pre open read segfile:%u",segno);
+        HLOG_ERROR("can not pre open read segfile:%u",segno);
         g_assert(0);
         return -1; 
     }

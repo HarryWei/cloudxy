@@ -14,14 +14,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include "glib.h"
+#include "gthread.h"
 
-GStaticMutex __hlfs_log_mutex__ = G_STATIC_MUTEX_INIT;
+
 #define LOG_LEN				4096U
 static char __msg_log[LOG_LEN]={0};
 static log4c_category_t *__mycat=NULL;
 static char *__hlog_path = NULL;
 static char __log4cfile[128] = {0};
 static int __is_init_log_path = 0;
+
+static GStaticMutex __hlfs_log_mutex__ = G_STATIC_MUTEX_INIT;
 
 #define HLOG_NOTICE(msg, args...) { 															\
 	if (0 == __is_init_log_path) {																\

@@ -16,7 +16,7 @@
 #include "glib.h"
 
 static GStaticMutex __hlfs_log_mutex__ = G_STATIC_MUTEX_INIT;
-static GStaticMutex __hlfs_log_mutex2__ = G_STATIC_MUTEX_INIT;
+static GStaticMutex __hlfs_log_mutex2;
 #define LOG_LEN				4096U
 static char __msg_log[LOG_LEN]={0};
 static log4c_category_t *__mycat=NULL;
@@ -108,6 +108,7 @@ static int __is_init_log_path = 0;
 				__is_init_log_path = 1;																	\
 			}																							\
 	if (NULL != __mycat) {																					\
+		g_static_mutex_init (&__hlfs_log_mutex2__);\
         g_static_mutex_lock (&__hlfs_log_mutex2__);                                                           \
         printf("--enter lock region--");\
 		memset(__msg_log, 0, LOG_LEN);															\

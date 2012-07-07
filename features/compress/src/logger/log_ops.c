@@ -428,7 +428,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 ib1_need_load=TRUE;
                 //dump_iblock(ib1);
                 #if 1
-                if(NULL != hctrl->icache){
+                if(NULL != ctrl->icache){
                 	write_layer1_iblock(ctrl,db_cur_no,ib1);
                 }
 				#endif 
@@ -517,7 +517,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				ib2_need_load=TRUE;
 				//dump_iblock(ib1);
 				#if 1
-				if(NULL != hctrl->icache){
+				if(NULL != ctrl->icache){
 					write_layer2_iblock(ctrl,db_cur_no,ib2);
 				}
 				#endif 
@@ -557,7 +557,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
                 ib1_need_load=TRUE;
                 //dump_iblock(ib1);
 				#if 1
-                if(NULL != hctrl->icache){
+                if(NULL != ctrl->icache){
                 	write_layer1_iblock(ctrl,db_cur_no,ib1);
                 }
 				#endif 
@@ -647,7 +647,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				
 				ib3_need_load=TRUE;
 				#if 1
-				if(NULL != hctrl->icache){
+				if(NULL != ctrl->icache){
 					write_layer3_iblock(ctrl,db_cur_no,ib3);
 				}
 				#endif 
@@ -684,7 +684,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				ib2_need_load=TRUE;
 				//dump_iblock(ib1);
 				#if 1
-				if(NULL != hctrl->icache){
+				if(NULL != ctrl->icache){
 					write_layer2_iblock(ctrl,db_cur_no,ib2);
 				}
 				#endif 
@@ -724,7 +724,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				ib1_need_load=TRUE;
 				//dump_iblock(ib1);
 				#if 1
-				if(NULL != hctrl->icache){
+				if(NULL != ctrl->icache){
 					write_layer1_iblock(ctrl,db_cur_no,ib1);
 				}
 				#endif 

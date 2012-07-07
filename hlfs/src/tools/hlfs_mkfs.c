@@ -6,7 +6,7 @@
   *  the Free Software Foundation.
  */
 
-#include <glib.h>
+#include "glib.h"
 #include <stdlib.h>
 #include <string.h>
 #include "storage_helper.h"
@@ -18,6 +18,7 @@ static gchar *uri = NULL;
 static gint block_size = 0;
 static gint seg_size = 0;
 static int64_t max_fs_size = 0;
+static gint is_compress = 0;
 static gboolean verbose = FALSE;
 static GOptionEntry entries[] = {
 	    {"filesystem location",'u', 0, G_OPTION_ARG_STRING,   &uri, "filesystem storage uri", "FSLOC"},
@@ -25,6 +26,7 @@ static GOptionEntry entries[] = {
     	{"filesystem block size", 'b', 0, G_OPTION_ARG_INT, &block_size, "filesystem block size", "BLOCKSIZE"},
     	{"filesystem segment size", 's', 0, G_OPTION_ARG_INT, &seg_size, "filesystem segment size", "SEGSIZE"},
     	{"filesystem max size", 'm', 0, G_OPTION_ARG_INT64, &max_fs_size, "filesystem  max size(M)", "FS MAX SIZE"},
+    	{"block compress", 'c', 0, G_OPTION_ARG_INT, &is_compress, "filesystem  block compress(0/1)", "FS COMPRESS"},
     	{"verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
     	{NULL}
 };
@@ -78,6 +80,10 @@ int main(int argc, char *argv[])
        g_message("max fs size <=0");
        return -1;
     }
+    if(is_compress!=0 && is_compress !=1){
+       g_message("is_compress must given 0 or 1");
+       return -1;
+    }
     struct back_storage *storage = init_storage_handler(uri);
     if(NULL ==storage){
        g_message("can not get storage handler for uri:%s",uri);
@@ -101,6 +107,7 @@ int main(int argc, char *argv[])
     g_key_file_set_integer(sb_keyfile,"METADATA","block_size",block_size);
     g_key_file_set_integer(sb_keyfile,"METADATA","segment_size",seg_size);
     g_key_file_set_uint64(sb_keyfile,"METADATA","max_fs_size",max_fs_size);
+    g_key_file_set_integer(sb_keyfile,"METADATA","is_compress",is_compress);
     gchar *data = g_key_file_to_data(sb_keyfile,NULL,NULL);
     g_message("key file data :%s",data);
     char *head,*hostname,*dir,*fs_name;

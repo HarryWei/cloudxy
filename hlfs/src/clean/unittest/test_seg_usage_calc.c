@@ -75,7 +75,8 @@ void test_seg_usage_calc()
     uint32_t segment_size = 0;
     uint32_t block_size = 0;
     uint64_t max_fs_size = 0;
-    int ret = read_fs_meta(storage,&segment_size, &block_size,&max_fs_size);
+    uint32_t is_compress = 0;
+    int ret = read_fs_meta(storage,&segment_size, &block_size,&max_fs_size,&is_compress);
     g_assert(ret == 0);
     GHashTable   * ss_hashtable = g_hash_table_new_full(g_str_hash,g_str_equal,NULL,NULL);
     ret = load_all_snapshot(storage,"snapshot.txt",ss_hashtable);
@@ -96,7 +97,7 @@ void test_seg_usage_calc()
            printf("seg is in snapshots\n");
            SEG_USAGE_T seg_usage;
            memset(&seg_usage,0,sizeof(SEG_USAGE_T));
-           ret = seg_usage_calc(storage,block_size,i,inode,&seg_usage);
+           ret = seg_usage_calc(storage,is_compress,block_size,i,inode,&seg_usage);
            g_assert(ret ==0);
            char textbuf[4096];
            memset(textbuf,4096,0);

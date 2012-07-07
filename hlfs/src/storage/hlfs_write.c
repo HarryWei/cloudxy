@@ -148,7 +148,7 @@ write_log:;
 	//ctrl->inode.atime  = cur_time;
 	//HLOG_DEBUG("get_current_time is %llu", ctrl->inode.mtime);
        //HLOG_DEBUG("length is %llu", ctrl->inode.length);
-   
+	ctrl->last_write_timestamp = get_current_time();
 	if(ctrl->cctrl != NULL){
 	 	HLOG_DEBUG("we use write back mode !");
         	int ret = cache_insert_blocks(ctrl->cctrl,db_start,(db_end - db_start + 1),datablocks);
@@ -156,8 +156,8 @@ write_log:;
     }else{
         HLOG_DEBUG("we use write through mode !");
         g_mutex_lock  (ctrl->hlfs_access_mutex);
-        ctrl->last_write_timestamp = get_current_time();
-        int size = append_log(ctrl,datablocks,db_start,db_end);
+        //ctrl->last_write_timestamp = get_current_time();
+        int size = append_log(ctrl,datablocks,db_start,db_end,1);
         g_mutex_unlock  (ctrl->hlfs_access_mutex);
         if(size < 0){
             HLOG_ERROR("Append Log Error");

@@ -156,15 +156,17 @@ int main(int argc, char *argv[])
     uint32_t    father_seg_size = 0;
     uint32_t    father_block_size = 0;
     uint64_t    father_max_fs_size = 0;
-    if (0 != read_fs_meta(father_storage,&father_seg_size,&father_block_size,&father_max_fs_size)){
+    uint32_t    father_is_compress = 0;
+    if (0 != read_fs_meta(father_storage,&father_seg_size,&father_block_size,&father_max_fs_size,&father_is_compress)){
 	  g_message("can not read father uri meta");	
 	  return -1;	
     }
     segno = get_segno(inode_addr);
     uint32_t son_block_size =  g_key_file_get_integer(sb_keyfile,"METADATA","block_size",NULL);
     uint32_t son_seg_size =  g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL); 	
-    if (son_block_size != father_block_size || father_seg_size!=son_seg_size){
-	  g_message("sorry , now father segsize and block sizee must same as son!!!");	
+    uint32_t son_is_compress =  g_key_file_get_integer(sb_keyfile,"METADATA","is_compress",NULL);
+    if (son_block_size != father_block_size || father_seg_size!=son_seg_size ||father_is_compress!=son_is_compress){
+	  g_message("sorry , now father segsize\block size\compress flag must same as son!!!");
 	  return -1;	
     }		
     g_key_file_set_uint64(sb_keyfile,"METADATA","from_segno",segno+1);

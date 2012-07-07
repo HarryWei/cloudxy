@@ -45,6 +45,7 @@ int seg_clean_task(struct hlfs_ctrl * ctrl)
         }
         if(0!=ctrl->storage->bs_file_is_exist(ctrl->storage,SEGMENTS_USAGE_FILE)){
             HLOG_DEBUG("seg usage file not exit");
+            g_usleep(DEF_SC_CHECK_PERIOD*1000*1000);
             continue;
         }
 	    //HLOG_DEBUG("do clean in silent period");

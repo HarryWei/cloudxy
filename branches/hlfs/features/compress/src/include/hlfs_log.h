@@ -15,8 +15,8 @@
 #include <stdlib.h>
 #include "glib.h"
 
-static GStaticMutex mutex = G_STATIC_MUTEX_INIT;
-#define LOG_LEN				2048
+static GStaticMutex __mutex = G_STATIC_MUTEX_INIT;
+#define LOG_LEN				4096
 static char __msg_log[LOG_LEN]={0};
 static log4c_category_t *__mycat;
 static char *__hlog_path = NULL;
@@ -27,42 +27,42 @@ static int __is_init_log_path = 0;
 	if (0 == __is_init_log_path) {																\
 		__hlog_path = g_get_current_dir();														\
 		setenv("LOG4C_RCPATH", __hlog_path, 1);													\
-		sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");										\
-		g_free(__hlog_path);																		\
+		sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");									\
+		g_free(__hlog_path);																	\
+		if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
+		    __mycat = log4c_category_get("hlfslog");								    	    \
+		 }																						\
 		__is_init_log_path = 1;																	\
 	}																							\
-	if (g_file_test(__log4cfile, G_FILE_TEST_EXISTS)) {											\
-		if (NULL == __mycat) {																	\
-			__mycat = log4c_category_get("hlfslog");											\
-		}																						\
-        g_static_mutex_lock (&mutex);                                                           \
+    if (NULL != __mycat) {																		\																						\																					\
+        g_static_mutex_lock (&__mutex);                                                           \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_NOTICE, __msg_log, ##args);	\
-        g_static_mutex_unlock (&mutex); \
-	} else {																					\
+        g_static_mutex_unlock (&__mutex); \
+	}else {																					\
 		printf(msg, ##args);																	\
 		printf("\n");																			\
 	}																							\
 }
 
 #define HLOG_TRACE(msg, args...) { 																\
-	if (0 == __is_init_log_path) {																\
-		__hlog_path = g_get_current_dir();														\
-		setenv("LOG4C_RCPATH", __hlog_path, 1);													\
-		sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");										\
-		g_free(__hlog_path);																		\
-		__is_init_log_path = 1;																	\
-	}																							\
-	if (g_file_test(__log4cfile, G_FILE_TEST_EXISTS)) {											\
-		if (NULL == __mycat) {																	\
-			__mycat = log4c_category_get("hlfslog");											\
-		}																						\
-        g_static_mutex_lock (&mutex);                                                           \
+		if (0 == __is_init_log_path) {																\
+				__hlog_path = g_get_current_dir();														\
+				setenv("LOG4C_RCPATH", __hlog_path, 1);													\
+				sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");									\
+				g_free(__hlog_path);																	\
+				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
+				    __mycat = log4c_category_get("hlfslog");								    	    \
+				 }																						\
+				__is_init_log_path = 1;																	\
+			}																							\
+	if (NULL != __mycat) {																		\
+        g_static_mutex_lock (&__mutex);                                                           \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_TRACE, __msg_log, ##args);		\
-        g_static_mutex_unlock (&mutex);                                                         \
+        g_static_mutex_unlock (&__mutex);                                                         \
 	} else {																					\
 		printf(msg, ##args);																	\
 		printf("\n");																			\
@@ -70,22 +70,22 @@ static int __is_init_log_path = 0;
 }
 
 #define HLOG_FATAL(msg, args...) { 																\
-	if (0 == __is_init_log_path) {																\
-		__hlog_path = g_get_current_dir();														\
-		setenv("LOG4C_RCPATH", __hlog_path, 1);													\
-		sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");										\
-		g_free(__hlog_path);																		\
-		__is_init_log_path = 1;																	\
-	}																							\
-	if (g_file_test(__log4cfile, G_FILE_TEST_EXISTS)) {											\
-		if (NULL == __mycat) {																	\
-			__mycat = log4c_category_get("hlfslog");											\
-		}																						\
-        g_static_mutex_lock (&mutex);                                                           \
+		if (0 == __is_init_log_path) {																\
+				__hlog_path = g_get_current_dir();														\
+				setenv("LOG4C_RCPATH", __hlog_path, 1);													\
+				sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");									\
+				g_free(__hlog_path);																	\
+				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
+				    __mycat = log4c_category_get("hlfslog");								    	    \
+				 }																						\
+				__is_init_log_path = 1;																	\
+			}																							\
+	if (NULL != __mycat) {																				\
+        g_static_mutex_lock (&__mutex);                                                           \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_FATAL, __msg_log, ##args);		\
-        g_static_mutex_unlock (&mutex);                                                           \
+        g_static_mutex_unlock (&__mutex);                                                           \
 	} else {																					\
 		printf(msg, ##args);																	\
 		printf("\n");																			\
@@ -93,22 +93,22 @@ static int __is_init_log_path = 0;
 }
 
 #define HLOG_DEBUG(msg, args...) { 																\
-	if (0 == __is_init_log_path) {																\
-		__hlog_path = g_get_current_dir();														\
-		setenv("LOG4C_RCPATH", __hlog_path, 1);													\
-		sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");										\
-		g_free(__hlog_path);																		\
-		__is_init_log_path = 1;																	\
-	}																							\
-	if (g_file_test(__log4cfile, G_FILE_TEST_EXISTS)) {											\
-		if (NULL == __mycat) {																	\
-			__mycat = log4c_category_get("hlfslog");											\
-		}																						\
-        g_static_mutex_lock (&mutex);                                                           \
+		if (0 == __is_init_log_path) {																\
+				__hlog_path = g_get_current_dir();														\
+				setenv("LOG4C_RCPATH", __hlog_path, 1);													\
+				sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");									\
+				g_free(__hlog_path);																	\
+				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
+				    __mycat = log4c_category_get("hlfslog");								    	    \
+				 }																						\
+				__is_init_log_path = 1;																	\
+			}																							\
+	if (NULL != __mycat) {																					\
+        g_static_mutex_lock (&__mutex);                                                           \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_DEBUG, __msg_log, ##args);		\
-        g_static_mutex_unlock (&mutex);                                                           \
+        g_static_mutex_unlock (&__mutex);                                                           \
 	} else {																					\
 		printf(msg, ##args);																	\
 		printf("\n");																			\
@@ -116,22 +116,22 @@ static int __is_init_log_path = 0;
 }
 
 #define HLOG_INFO(msg, args...) { 																\
-	if (0 == __is_init_log_path) {																\
-		__hlog_path = g_get_current_dir();														\
-		setenv("LOG4C_RCPATH", __hlog_path, 1);													\
-		sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");										\
-		g_free(__hlog_path);																		\
-		__is_init_log_path = 1;																	\
-	}																							\
-	if (g_file_test(__log4cfile, G_FILE_TEST_EXISTS)) {											\
-		if (NULL == __mycat) {																	\
-			__mycat = log4c_category_get("hlfslog");											\
-		}																						\
-        g_static_mutex_lock (&mutex);                                                           \
+		if (0 == __is_init_log_path) {																\
+				__hlog_path = g_get_current_dir();														\
+				setenv("LOG4C_RCPATH", __hlog_path, 1);													\
+				sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");									\
+				g_free(__hlog_path);																	\
+				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
+				    __mycat = log4c_category_get("hlfslog");								    	    \
+				 }																						\
+				__is_init_log_path = 1;																	\
+			}																							\													\
+	if (NULL != __mycat) {																					\
+        g_static_mutex_lock (&__mutex);                                                           \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_INFO, __msg_log, ##args);		\
-        g_static_mutex_unlock (&mutex);                                                           \
+        g_static_mutex_unlock (&__mutex);                                                           \
 	} else {																					\
 		printf(msg, ##args);																	\
 		printf("\n");																			\
@@ -139,22 +139,22 @@ static int __is_init_log_path = 0;
 }
 
 #define HLOG_ERROR(msg, args...) { 																\
-	if (0 == __is_init_log_path) {																\
-		__hlog_path = g_get_current_dir();														\
-		setenv("LOG4C_RCPATH", __hlog_path, 1);													\
-		sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");										\
-		g_free(__hlog_path);																		\
-		__is_init_log_path = 1;																	\
-	}																							\
-	if (g_file_test(__log4cfile, G_FILE_TEST_EXISTS)) {											\
-		if (NULL == __mycat) {																	\
-			__mycat = log4c_category_get("hlfslog");											\
-		}																						\
-        g_static_mutex_lock (&mutex);                                                           \
+		if (0 == __is_init_log_path) {																\
+				__hlog_path = g_get_current_dir();														\
+				setenv("LOG4C_RCPATH", __hlog_path, 1);													\
+				sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");									\
+				g_free(__hlog_path);																	\
+				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
+				    __mycat = log4c_category_get("hlfslog");								    	    \
+				 }																						\
+				__is_init_log_path = 1;																	\
+			}																							\																\
+	if (NULL != __mycat) {																							\
+        g_static_mutex_lock (&__mutex);                                                           \
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_ERROR, __msg_log, ##args);		\
-        g_static_mutex_unlock (&mutex);                                                           \
+        g_static_mutex_unlock (&__mutex);                                                           \
 	} else {																					\
 		printf(msg, ##args);																	\
 		printf("\n");																			\
@@ -163,21 +163,21 @@ static int __is_init_log_path = 0;
 
 #define HLOG_WARN(msg, args...) { 																\
 	if (0 == __is_init_log_path) {																\
-		__hlog_path = g_get_current_dir();														\
-		setenv("LOG4C_RCPATH", __hlog_path, 1);													\
-		sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");										\
-		g_free(__hlog_path);																		\
-		__is_init_log_path = 1;																	\
-	}																							\
-	if (g_file_test(__log4cfile, G_FILE_TEST_EXISTS)) {											\
-		if (NULL == __mycat) {																	\
-			__mycat = log4c_category_get("hlfslog");											\
-		}																						\
-        g_static_mutex_lock (&mutex);                                                           \
+				__hlog_path = g_get_current_dir();														\
+				setenv("LOG4C_RCPATH", __hlog_path, 1);													\
+				sprintf(__log4cfile, "%s/%s", __hlog_path, "log4crc");									\
+				g_free(__hlog_path);																	\
+				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
+				    __mycat = log4c_category_get("hlfslog");								    	    \
+				 }																						\
+				__is_init_log_path = 1;																	\
+	}																							\															\
+	if (NULL != __mycat) {																				\
+        g_static_mutex_lock (&__mutex);                                                           \
 		memset(__msg_log, 0, LOG_LEN);															\
-		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
+		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);	\
 		log4c_category_log_locinfo(__mycat, NULL, LOG4C_PRIORITY_WARN, __msg_log, ##args);		\
-        g_static_mutex_unlock (&mutex);                                                           \
+        g_static_mutex_unlock (&__mutex);                                                       \
 	} else {																					\
 		printf(msg, ##args);																	\
 		printf("\n");																			\

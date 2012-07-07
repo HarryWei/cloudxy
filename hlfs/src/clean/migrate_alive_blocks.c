@@ -63,7 +63,7 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
 					   if(1==hctrl->is_compress){
 						   HLOG_DEBUG("COMPRESS: _offset:%u",_offset);
 						   db_mine_storage_addr_offset = offset + _offset;
-						   _offset += *(uint32_t*)((char*)lh  + _offset);
+						   _offset += *(uint32_t*)((char*)lh  + _offset) + sizeof(uint32_t);
 					   }else{
 						   db_mine_storage_addr_offset = offset+LOG_HEADER_LENGTH + j*hctrl->sb.block_size;
 					   }

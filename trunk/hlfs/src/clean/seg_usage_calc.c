@@ -102,7 +102,7 @@ int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint32_t is_
             //HLOG_DEBUG("for db:%llu",lh->start_db_no+i);
             //uint32_t db_mine_storage_addr_offset = offset + LOG_HEADER_LENGTH+i*block_size;
         	if(1==is_compress){
-        		HLOG_DEBUG("COMPRESS: _offset:%u",_offset);
+        		HLOG_DEBUG("COMPRESS: _offset:%u,idx:%d",_offset,i);
         		db_mine_storage_addr_offset = offset + _offset;
         		_offset += *(uint32_t*)((char*)lh + _offset) + sizeof(uint32_t);
         	}else{

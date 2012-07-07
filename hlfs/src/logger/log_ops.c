@@ -336,8 +336,9 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 		HLOG_DEBUG("COMPRESSED: max_compressed_size :%d",max_compressed_size);
 		log_buff = (char*)g_malloc0((max_compressed_size + sizeof(uint32_t)) * (db_end-db_start + 1) + 
 									(max_compressed_size + sizeof(uint32_t)) * ib_amount(db_start, db_end) + 
-	            sizeof(struct inode) + sizeof(struct inode_map_entry) + 
-	            sizeof(struct log_header));
+									sizeof(struct inode) +
+									sizeof(struct inode_map_entry) +
+									sizeof(struct log_header));
 		g_assert(log_buff!=NULL);
 		char *compressed_db_buff = log_buff + LOG_HEADER_LENGTH;
 		uint32_t real_compressed_size = 0;

@@ -33,6 +33,7 @@ static int __is_init_log_path = 0;
 		if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
 		    __mycat = log4c_category_get("hlfslog");								    	    \
 		}																						\
+		g_static_mutex_init (&__hlfs_log_mutex__);														\
 		__is_init_log_path = 1;																	\
 	}																							\
     if (NULL != __mycat) {																		\
@@ -57,6 +58,7 @@ static int __is_init_log_path = 0;
 				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){								\
 				    __mycat = log4c_category_get("hlfslog");								    \
 				 }																				\
+				g_static_mutex_init (&__hlfs_log_mutex__);														\
 				__is_init_log_path = 1;															\
 			}																					\
 	if (NULL != __mycat) {																		\
@@ -81,6 +83,7 @@ static int __is_init_log_path = 0;
 				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){								\
 				    __mycat = log4c_category_get("hlfslog");								    \
 				 }																				\
+				g_static_mutex_init (&__hlfs_log_mutex__);														\
 				__is_init_log_path = 1;															\
 			}																					\
 	if (NULL != __mycat) {																		\
@@ -105,19 +108,18 @@ static int __is_init_log_path = 0;
 				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
 				    __mycat = log4c_category_get("hlfslog");								    	    \
 				 }																						\
+				g_static_mutex_init (&__hlfs_log_mutex__);														\
 				__is_init_log_path = 1;																	\
 			}																							\
 	if (NULL != __mycat) {                                                         \
- 	    static GStaticMutex __hlfs_log_mutex2__;											\
-		g_static_mutex_init (&__hlfs_log_mutex2__);														\
-        g_static_mutex_lock (&__hlfs_log_mutex2__);                                                   \
+        g_static_mutex_lock (&__hlfs_log_mutex__);                                                   \
         printf("--enter lock region--");										\
 		memset(__msg_log, 0, LOG_LEN);															\
 		snprintf(__msg_log, LOG_LEN, "[%p][%s][%s][%d]%s", g_thread_self(),__FILE__, __func__, __LINE__, msg);		\
 		const log4c_location_info_t locinfo = LOG4C_LOCATION_INFO_INITIALIZER(NULL);\
 		log4c_category_log_locinfo(__mycat, &locinfo, LOG4C_PRIORITY_DEBUG, __msg_log, ##args);		\
 		printf("--exit lock region --\n");											\
-        g_static_mutex_unlock (&__hlfs_log_mutex2__);                                                           \
+        g_static_mutex_unlock (&__hlfs_log_mutex__);                                                           \
 	} else {																					\
 		printf(msg, ##args);																	\
 		printf("\n");																			\
@@ -133,6 +135,7 @@ static int __is_init_log_path = 0;
 				if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
 				    __mycat = log4c_category_get("hlfslog");								    	    \
 				 }																						\
+				g_static_mutex_init (&__hlfs_log_mutex__);														\
 				__is_init_log_path = 1;																	\
 			}																							\
 	if (NULL != __mycat) {																					\
@@ -157,6 +160,7 @@ static int __is_init_log_path = 0;
 		if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){										\
 			__mycat = log4c_category_get("hlfslog");								    	    \
 		 }																						\
+		g_static_mutex_init (&__hlfs_log_mutex__);														\
 		__is_init_log_path = 1;																	\
 	}																							\
 	if (NULL != __mycat) {																		\
@@ -181,6 +185,7 @@ static int __is_init_log_path = 0;
 		if(g_file_test(__log4cfile, G_FILE_TEST_EXISTS)){								\
 			__mycat = log4c_category_get("hlfslog");								    \
 		 }																				\
+		g_static_mutex_init (&__hlfs_log_mutex__);														\
 		__is_init_log_path = 1;															\
 	}																							\
 	if (NULL != __mycat) {																		\

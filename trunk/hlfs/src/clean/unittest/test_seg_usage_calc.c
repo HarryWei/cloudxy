@@ -97,7 +97,7 @@ void test_seg_usage_calc()
            printf("seg is in snapshots\n");
            SEG_USAGE_T seg_usage;
            memset(&seg_usage,0,sizeof(SEG_USAGE_T));
-           ret = seg_usage_calc(storage,is_compress,block_size,fixture.hctrl->is_compress,i,inode,&seg_usage);
+           ret = seg_usage_calc(storage,block_size,fixture.hctrl->is_compress,i,inode,&seg_usage);
            g_assert(ret ==0);
            char textbuf[4096];
            memset(textbuf,4096,0);

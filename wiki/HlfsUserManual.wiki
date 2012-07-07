@@ -162,7 +162,10 @@
 hlfs支持log4c日志系统，但作为库，日志系统的初始化工作并不会去做。如果需要使用请在调用方执行log4c_init()
 
 ===更新===
-目前由于支持块内压缩功能,所以mkfs命令增加了参数-c 0/1；0代表不压缩，1代表压缩！！！如./output/bin/mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024 -c 1
+# 目前由于支持块内压缩功能,所以mkfs命令增加了参数-c 0/1；0代表不压缩，1代表压缩。其余结构不变。
+{{{
+./output/bin/mkfs.hlfs -u local:///tmp/testenv/testfs -b 8192 -s 67108864 -m 1024 -c 1
+}}}
 
 
 

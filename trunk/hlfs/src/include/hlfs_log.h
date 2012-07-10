@@ -15,9 +15,9 @@
 #include <stdlib.h>
 #include "glib.h"
 
-static GStaticMutex __hlfs_log_mutex__ = G_STATIC_MUTEX_INIT;
-
-#define LOG_LEN				4096U
+//static GStaticMutex __hlfs_log_mutex__ = G_STATIC_MUTEX_INIT;
+extern GStaticMutex __hlfs_log_mutex__;
+#define LOG_LEN				2048U
 static char __msg_log[LOG_LEN]={0};
 static log4c_category_t *__mycat=NULL;
 static char *__hlog_path = NULL;

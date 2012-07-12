@@ -50,12 +50,12 @@ struct back_storage* init_storage_handler(const char* uri)
         ret = -1;
         goto out;
     }
-       storage->uri = strdup(uri);
+    storage->uri = strdup(uri);
 	storage->head = head;
 	storage->dir = dir;
 	storage->fs_name = fs_name;
 	storage->hostname = hostname;
-       storage->port = port;
+    storage->port = port;
 	storage->user = g_strdup("kanghua");
     HLOG_DEBUG("uri:%s,head:%s,dir:%s,fsname:%s,hostname:%s,port:%d,user:%s",
                 storage->uri,
@@ -105,12 +105,25 @@ int deinit_storage_handler(struct back_storage * storage){
        return -1;
     }
     HLOG_DEBUG("disconnect succ");
-    //g_free(storage->storage_name);
+    //g_free(storage->uri);
+    //g_free(storage->user);
     //g_message("%s disconnect succ\n",__func__);
     //g_free(storage->fs_name);
     //g_free(storage->fs_location);
     //g_message("%s disconnect succ\n",__func__);
     //g_free(storage->user);
+    if(storage->uri != NULL)
+    			g_free(storage->uri);
+    		if(storage->head !=NULL)
+    	       	g_free(storage->head);
+    		if(storage->dir !=NULL);
+    			g_free(storage->dir);
+    		if(storage->fs_name !=NULL)
+    			g_free(storage->fs_name);
+    		if(storage->hostname !=NULL)
+    			g_free(storage->hostname);
+    		if(storage->user!=NULL)
+    			g_free(storage->user);
 	HLOG_DEBUG("leave func %s", __func__);
     return 0;
 }

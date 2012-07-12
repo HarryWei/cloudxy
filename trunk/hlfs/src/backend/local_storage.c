@@ -227,6 +227,7 @@ local_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num
         info->lmtime = buf.st_mtime;
         info++;
         idx++;
+        g_free(file_path);
     }
     *num_entries = idx;
     g_dir_close(dir);

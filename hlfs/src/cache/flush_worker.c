@@ -82,6 +82,7 @@ int flush_work(gpointer data){
             }
          } while (get_cache_free_size(cctrl) < cctrl->flush_trigger_level * cctrl->cache_size / 100 || (res == 0 && get_cache_free_size(cctrl) !=0));
     }
+    g_free(tmp_buf);
     HLOG_INFO("--flush worker exit--");
     return 0;
 }

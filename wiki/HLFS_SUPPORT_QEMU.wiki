@@ -34,7 +34,7 @@ ldd ./qemu-img 查看是否其指向的库都存在！
   * 状态查询
 {{{
 ./qemu-img info hlfs:local:///tmp/testenv/testfs 或
-./qemu-img info hlfs:hdfs:///tmp/testenv/testf 
+./qemu-img info hlfs:hdfs:///tmp/testenv/testfs 
 }}}
   * 快照相关操作
 {{{

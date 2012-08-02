@@ -75,7 +75,7 @@ qemu-system-x86_64 -enable-kvm -m 1024 -smp 2 -drive file=hlfs:hdfs:///tmp/teste
 
 --------------------------------------------
 
-不用qemu的情况下，在我们outpub/bin下也有快照和clone命令，类似用法为
+不用qemu的情况下，在我们output/bin下也有快照和clone命令，类似用法为
 ./output/bin/snapshot.hlfs -u local:///tmp/testenv/testfs -s snapshot1
 ./output/bin/clone.hlfs -f local:///tmp/testenv/testfs%snapshot1 -s local:///tmp/testenv/testfs2 
 

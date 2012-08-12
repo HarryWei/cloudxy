@@ -46,7 +46,7 @@ int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint32_t is_
     GArray *tmp_bit_array;
     seg_usage->segno = segno; 
     seg_usage->timestamp = get_current_time();
-    HLOG_DEBUG("seg usage's segno:%llu,timestamp:%llu",seg_usage->segno,seg_usage->timestamp);
+    HLOG_DEBUG("seg usage's segno:%u,timestamp:%llu",seg_usage->segno,seg_usage->timestamp);
 
     char segfile[SEGMENT_FILE_NAME_MAX];
 	build_segfile_name(segno,segfile);
@@ -112,13 +112,13 @@ int seg_usage_calc(struct back_storage* storage,uint32_t block_size,uint32_t is_
             set_segno (&db_mine_storage_addr,segno);
             uint64_t db_cur_storage_addr = get_db_storage_addr_in_inode(storage,refer_inode,
 			    						                                lh->start_db_no+i,block_size,is_compress);
-            HLOG_DEBUG("db:%llu's mine storage addr:%llu,cur storage addr:%llu",
+            HLOG_DEBUG("db:%u's mine storage addr:%llu,cur storage addr:%llu",
 			    	lh->start_db_no+i,db_mine_storage_addr,db_cur_storage_addr);
             if(db_mine_storage_addr != db_cur_storage_addr){
                 HLOG_DEBUG("this is overwrite data block");
             }else{
                 seg_usage->alive_block_num++;
-                HLOG_DEBUG("this is used data block :%llu",seg_usage->alive_block_num);
+                HLOG_DEBUG("this is used data block :%u",seg_usage->alive_block_num);
             }
 			seg_usage->block_num++;
         }

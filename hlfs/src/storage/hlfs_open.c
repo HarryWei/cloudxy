@@ -117,7 +117,7 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
                   return -1;
 	     }
 	    
-	     HLOG_DEBUG("inode'length:%d,ctrl->inode length:%d,sizeof inode:%d",my_inode->length,ctrl->inode.length,sizeof(struct inode));	 
+	     HLOG_DEBUG("inode'length:%llu,ctrl->inode length:%llu,sizeof inode:%d",my_inode->length,ctrl->inode.length,sizeof(struct inode));	 
             memcpy(&(ctrl->inode),my_inode,sizeof(struct inode));
             g_free(my_inode);
 	}

@@ -29,8 +29,8 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
     //HLOG_DEBUG("enter func %s", __func__);
     struct back_storage * storage =NULL;
     if(NULL == ctrl->last_rsegfile_handler){
-        const char segfile_name[SEGMENT_FILE_NAME_MAX];
-	 memset(segfile_name,0,SEGMENT_FILE_NAME_MAX);
+        char segfile_name[SEGMENT_FILE_NAME_MAX];
+		memset((void *)segfile_name,0,SEGMENT_FILE_NAME_MAX);
         build_segfile_name(segno,segfile_name);
         bs_file_t file;   
         if(segno >= ctrl->start_segno){

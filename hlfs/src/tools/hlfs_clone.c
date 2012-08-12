@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     uint32_t son_seg_size =  g_key_file_get_integer(sb_keyfile,"METADATA","segment_size",NULL); 	
     uint32_t son_is_compress =  g_key_file_get_integer(sb_keyfile,"METADATA","is_compress",NULL);
     if (son_block_size != father_block_size || father_seg_size!=son_seg_size ||father_is_compress!=son_is_compress){
-	  g_message("sorry , now father segsize\block size\compress flag must same as son!!!");
+	  g_message("sorry , now father segsize block size compress flag must same as son!!!");
 	  return -1;	
     }		
     g_key_file_set_uint64(sb_keyfile,"METADATA","from_segno",segno+1);

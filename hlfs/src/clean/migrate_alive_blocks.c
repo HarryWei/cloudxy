@@ -41,7 +41,7 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
     int i= 0,j=0;
     uint32_t offset=0;
     struct log_header *lh = NULL;
-    HLOG_DEBUG("log_num: --> %llu", seg_usage->log_num);
+    HLOG_DEBUG("log_num: --> %u", seg_usage->log_num);
 
 
     for(i=0;i<seg_usage->log_num;i++){
@@ -71,7 +71,7 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
 					   set_segno (&db_mine_storage_addr,seg_usage->segno);
 					   uint64_t db_cur_storage_addr = get_db_storage_addr_in_inode(hctrl->storage,&hctrl->inode,
 			    						                                lh->start_db_no+j,hctrl->sb.block_size,hctrl->is_compress);
-					   HLOG_DEBUG("db:%llu's mine storage addr:%llu,cur storage addr:%llu",
+					   HLOG_DEBUG("db:%u's mine storage addr:%llu,cur storage addr:%llu",
 							   lh->start_db_no+i,db_mine_storage_addr,db_cur_storage_addr);
 					   if(db_mine_storage_addr == db_cur_storage_addr){
 						  HLOG_DEBUG("this is alive data block");

@@ -135,7 +135,7 @@ static int update_inode_index(struct inode *inode, struct log_header * log,uint3
 				}else{
 					ib_offset += get_zblock_size((char*)log + ib_offset) + sizeof(uint32_t);
 				}
-				HLOG_DEBUG("COMPRESSED inode->doubly_iblock:%lu",inode->doubly_iblock);
+				HLOG_DEBUG("COMPRESSED inode->doubly_iblock:%llu",inode->doubly_iblock);
             }
         }else if (is_db_in_level4_index_range(db_cur_no)){
             if((db_cur_no-12-IB_ENTRY_NUM-IB_ENTRY_NUM*IB_ENTRY_NUM + 1) % IB_ENTRY_NUM == 0 || db_cur_no == end_db){
@@ -295,7 +295,7 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
 
 
 
-int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed){
+int __append_log(struct hlfs_ctrl *ctrl,char *db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed){
     //HLOG_DEBUG("entry func: %s",__func__);
     gboolean ib1_need_load  = TRUE;
     gboolean ib2_need_load  = TRUE;
@@ -414,14 +414,14 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
                   ib1_buff = (char*)alloca(output_length);
                   g_assert(ib1_buff!=NULL);
-    			  g_assert(snappy_compress(ib1,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
+    			  g_assert(snappy_compress((const char *)ib1,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
 				  ib1_buff_size = output_length;
 				  HLOG_DEBUG("COMPRESSED: after compress ib1_buff_size %d",ib1_buff_size);
 				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib1_buff,ib1_buff_size);  
                   *(uint32_t*)((char*)log_buff+ib_offset) = ib1_buff_size;
                   ib_offset += ib1_buff_size + sizeof(uint32_t);
                 }else{
-                  ib1_buff = ib1;
+                  ib1_buff = (char *)ib1;
 				  ib1_buff_size = BLOCKSIZE;
 				  memcpy((char*)log_buff + ib_offset ,(char*)ib1_buff,ib1_buff_size);  
                   ib_offset += ib1_buff_size;
@@ -451,7 +451,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 					ib1_need_load = FALSE;
                 }else if( TRUE== ib1_need_load && ctrl->inode.doubly_iblock !=0){
                     if(0>read_layer1_iblock(ctrl,db_cur_no,ib1)){ 
-						HLOG_DEBUG("COMPRESSED: ctrl->inode.doubly_iblock:%lu",ctrl->inode.doubly_iblock);
+						HLOG_DEBUG("COMPRESSED: ctrl->inode.doubly_iblock:%llu",ctrl->inode.doubly_iblock);
                         if(0 != read_block_fast(ctrl,ctrl->inode.doubly_iblock,ib1)){
                             HLOG_ERROR("allocate error!");
                             g_assert(0);
@@ -503,7 +503,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
 				  ib2_buff = (char*)alloca(output_length);
 				  g_assert(ib2_buff!=NULL);
-				  g_assert(snappy_compress(ib2,BLOCKSIZE,ib2_buff,&output_length)== SNAPPY_OK);
+				  g_assert(snappy_compress((const char *)ib2,BLOCKSIZE,ib2_buff,&output_length)== SNAPPY_OK);
 				  ib2_buff_size = output_length;
 				  HLOG_DEBUG("COMPRESSED: after compress ib2_buff_size %d",ib2_buff_size);
 				  memcpy((char*)log_buff + ib_offset +sizeof(uint32_t),(char*)ib2_buff,ib2_buff_size);  
@@ -511,7 +511,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  *(uint32_t*)((char*)log_buff+ib_offset) = ib2_buff_size;
 				  ib_offset += ib2_buff_size + sizeof(uint32_t);
 				}else{
-				  ib2_buff = ib2;
+				  ib2_buff = (char *)ib2;
 				  ib2_buff_size = BLOCKSIZE;
 				  memcpy((char*)log_buff + ib_offset,(char*)ib2_buff,ib2_buff_size);  
 				  ib_offset += ib2_buff_size;
@@ -544,14 +544,14 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
                   ib1_buff = (char*)alloca(output_length);
                   g_assert(ib1_buff!=NULL);
-    			  g_assert(snappy_compress(ib1,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
+    			  g_assert(snappy_compress((const char *)ib1,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
 				  ib1_buff_size = output_length;
 				  HLOG_DEBUG("COMPRESSED: after compress ib1_buff_size %d",ib1_buff_size);
 				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib1_buff,ib1_buff_size);  
 				  *(uint32_t*)((char*)log_buff+ib_offset) = ib1_buff_size;
 				  ib_offset += ib1_buff_size +  sizeof(uint32_t);;
                 }else{
-                  ib1_buff = ib1;
+                  ib1_buff = (char *)ib1;
 				  ib1_buff_size = BLOCKSIZE;
 				  memcpy((char*)log_buff + ib_offset,(char*)ib1_buff,ib1_buff_size);  
                   //ib_offset +=BLOCKSIZE;
@@ -635,7 +635,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
 				  ib3_buff = (char*)alloca(output_length);
 				  g_assert(ib3_buff!=NULL);
-				  g_assert(snappy_compress(ib3,BLOCKSIZE,ib3_buff,&output_length)== SNAPPY_OK);
+				  g_assert(snappy_compress((const char *)ib3,BLOCKSIZE,ib3_buff,&output_length)== SNAPPY_OK);
 				  ib3_buff_size = output_length;
 				  HLOG_DEBUG("COMPRESSED: after compress ib3_buff_size %d",ib3_buff_size);
 				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib3_buff,ib3_buff_size);  
@@ -643,7 +643,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  *(uint32_t*)((char*)log_buff+ib_offset) = ib3_buff_size;
 				  ib_offset += ib3_buff_size +  sizeof(uint32_t);
 				}else{
-				  ib3_buff = ib3;
+				  ib3_buff = (char *)ib3;
 				  ib3_buff_size = BLOCKSIZE;
 				  memcpy((char*)log_buff + ib_offset,(char*)ib3_buff,ib3_buff_size);  
 				  //ib_offset +=BLOCKSIZE;
@@ -672,7 +672,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
 				  ib2_buff = (char*)alloca(output_length);
 				  g_assert(ib2_buff!=NULL);
-				  g_assert(snappy_compress(ib2,BLOCKSIZE,ib2_buff,&output_length)== SNAPPY_OK);
+				  g_assert(snappy_compress((const char *)ib2,BLOCKSIZE,ib2_buff,&output_length)== SNAPPY_OK);
 				  ib2_buff_size = output_length;
 				  HLOG_DEBUG("COMPRESSED: after compress ib2_buff_size %d",ib2_buff_size);
 				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib2_buff,ib2_buff_size);  
@@ -680,7 +680,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  //ib_offset +=BLOCKSIZE;
 				  ib_offset += ib2_buff_size +  sizeof(uint32_t);
 				}else{
-				  ib2_buff = ib2;
+				  ib2_buff = (char *)ib2;
 				  ib2_buff_size = BLOCKSIZE;
 				  memcpy((char*)log_buff + ib_offset,(char*)ib2_buff,ib2_buff_size);  
 				  //ib_offset +=BLOCKSIZE;
@@ -712,7 +712,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  size_t output_length = snappy_max_compressed_length(BLOCKSIZE);
 				  ib1_buff = (char*)alloca(output_length);
 				  g_assert(ib1_buff!=NULL);
-				  g_assert(snappy_compress(ib1,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
+				  g_assert(snappy_compress((const char *)ib1,BLOCKSIZE,ib1_buff,&output_length)== SNAPPY_OK);
 				  ib1_buff_size = output_length;
 				  HLOG_DEBUG("COMPRESSED: after compress ib1_buff_size %d",ib1_buff_size);
 				  memcpy((char*)log_buff + ib_offset + sizeof(uint32_t),(char*)ib1_buff,ib1_buff_size);  
@@ -720,7 +720,7 @@ int __append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,ui
 				  *(uint32_t*)((char*)log_buff+ib_offset) = ib1_buff_size;
 				  ib_offset += ib1_buff_size +  sizeof(uint32_t);
 				}else{
-				  ib1_buff = ib1;
+				  ib1_buff = (char *)ib1;
 				  ib1_buff_size = BLOCKSIZE;
 				  memcpy((char*)log_buff + ib_offset,(char*)ib1_buff,ib1_buff_size);
 				  *(uint32_t*)((char*)log_buff+ib_offset) = ib1_buff_size;
@@ -800,7 +800,7 @@ __inode_create:;
                return size;
 }
 
-int append_log(struct hlfs_ctrl *hctrl,const char *db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed){
+int append_log(struct hlfs_ctrl *hctrl,char *db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed){
 	guint32 BLOCKSIZE = hctrl->sb.block_size;
 	int expand_size =	(db_end-db_start + 1)*BLOCKSIZE + ib_amount(db_start,db_end) * BLOCKSIZE + 
 			 														LOG_HEADER_LENGTH + 

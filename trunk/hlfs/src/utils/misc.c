@@ -76,7 +76,7 @@ int  build_segfile_name_by_address(uint64_t storage_address, const char*segfile_
 uint32_t get_segfile_no(const char * segfile)
 {
     //HLOG_DEBUG("enter func %s", __func__);
-    const gchar *basename = g_basename(segfile);
+    const gchar *basename = g_path_get_basename(segfile);
     gchar **v = g_strsplit(basename,".",2);
     uint32_t segno = atol(v[0]);
     g_strfreev(v);
@@ -200,7 +200,7 @@ int parse_from_uri(const char *uri, char ** head, char** hostname ,char** dir,ch
     gchar **v1=NULL;
     gchar **v2=NULL;
     char *pre_uri = g_dirname(uri);
-    *fs_name = g_strdup((char *) g_basename (uri));
+    *fs_name = g_strdup((char *) g_path_get_basename (uri));
     v = g_strsplit(pre_uri,"://",2);
 	g_free(pre_uri); 
     if(g_strv_length(v)!=2){

@@ -45,7 +45,7 @@ int hlfs_lstat(const char*uri,HLFS_STAT_T *stat){
     stat->seg_size    = seg_size;
     stat->block_size  = block_size;
     stat->max_fs_size = max_fs_size;
-    g_strlcpy(stat->fsname,g_basename(uri),MAX_FILE_NAME_LEN);
+    g_strlcpy(stat->fsname,g_path_get_basename(uri),MAX_FILE_NAME_LEN);
     stat->last_segno  = last_segno;
     stat->last_offset = last_offset;
 out:

@@ -72,7 +72,7 @@ int init_from_superblock(struct back_storage *storage, struct hlfs_ctrl *ctrl)
 	   faimly_init(family,father_uri,snapshot_inode,from_segno);
 	   ctrl->family = family;
     }			
-    g_strlcpy(sb->fsname,g_basename(storage->uri),MAX_FILE_NAME_LEN);
+    g_strlcpy(sb->fsname,g_path_get_basename(storage->uri),MAX_FILE_NAME_LEN);
     ctrl->start_segno = from_segno;	
     //TODO :config it
 	//ctrl->is_compressed = TRUE;
@@ -232,7 +232,7 @@ init_hlfs(const char *uri)
               goto out;
            }
         if(flush_once_size * block_size * 64 > hlfs_ctrl->sb.seg_size){
-              HLOG_ERROR("flush_once_size can not too much:%llu",flush_once_size); 
+              HLOG_ERROR("flush_once_size can not too much:%u",flush_once_size); 
               goto out;
            }
 
@@ -262,7 +262,7 @@ init_hlfs(const char *uri)
               goto out;
            }
         if(invalidate_once_size * iblock_size * 64 > hlfs_ctrl->sb.seg_size){
-              HLOG_ERROR("flush_once_size can not too much:%llu",invalidate_once_size); 
+              HLOG_ERROR("flush_once_size can not too much:%u",invalidate_once_size); 
               goto out;
         }
 
@@ -356,7 +356,7 @@ init_hlfs_by_config(const char *config_file_path){
               	goto out;
            }
            if(flush_once_size * block_size * 64 > hlfs_ctrl->sb.seg_size){
-              	HLOG_ERROR("flush_once_size can not too much:%llu",flush_once_size); 
+              	HLOG_ERROR("flush_once_size can not too much:%u",flush_once_size); 
               	goto out;
            }
 
@@ -408,7 +408,7 @@ init_hlfs_by_config(const char *config_file_path){
                  hlfs_ctrl->icache=NULL;
                  goto out;
            }
-           HLOG_INFO("Indirect  Block Cache Init Over ! icache_size:%u,iblock_size:%u,invalidate_trigger_level:%u,invalidate_once_size:%u",
+           HLOG_INFO("Indirect  Block Cache Init Over ! icache_size:%llu,iblock_size:%llu,invalidate_trigger_level:%llu,invalidate_once_size:%llu",
 			       icache_size,iblock_size,invalidate_trigger_level,invalidate_once_size); 
        }
    }   

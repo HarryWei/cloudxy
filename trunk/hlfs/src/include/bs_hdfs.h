@@ -60,7 +60,7 @@ static struct back_storage hdfs_storage = {
 };
 
 #else
-static struct back_storage * get_hdfs_storage_ops(){
+static struct back_storage * get_hdfs_storage_ops(void){
        struct back_storage * storage = (struct back_storage*)malloc(sizeof(struct back_storage));
        storage->storage_name = "hdfs";
        storage->uri=NULL;

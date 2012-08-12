@@ -35,12 +35,12 @@ int hlfs_read(struct hlfs_ctrl *ctrl, char* read_buf, uint32_t read_len, uint64_
     }
 
     if(ctrl->sb.max_fs_size *1024 *1024< pos+read_len){
-          HLOG_ERROR("your config only allow write beyond :%d",ctrl->sb.max_fs_size);
+          HLOG_ERROR("your config only allow write beyond :%llu",ctrl->sb.max_fs_size);
           //g_mutex_unlock (ctrl->hlfs_access_mutex);
           return -1;
     }		
     //g_mutex_lock (ctrl->hlfs_access_mutex);
-    HLOG_INFO("Hlfs Read Req pos:%llu,read_len:%d,last_segno:%d,last_offset:%d,cur_file_len:%d",
+    HLOG_INFO("Hlfs Read Req pos:%llu,read_len:%d,last_segno:%d,last_offset:%d,cur_file_len:%llu",
     						      pos,
     						      read_len,
     						      ctrl->last_segno,

@@ -74,19 +74,7 @@ struct back_storage* init_storage_handler(const char* uri)
 out:
     //g_free(fs_path);
     if(ret !=0){
-		if(storage->uri != NULL)
-			g_free(storage->uri);
-		if(storage->head !=NULL)
-	       	g_free(storage->head);
-		if(storage->dir !=NULL);
-			g_free(storage->dir);
-		if(storage->fs_name !=NULL)
-			g_free(storage->fs_name);
-		if(storage->hostname !=NULL)
-			g_free(storage->hostname);
-		if(storage->user!=NULL)
-			g_free(storage->user);
-        	g_free(storage);
+        g_free(storage);
 		HLOG_ERROR("ret is not 0, so error happened");
         storage = NULL;
     }
@@ -112,18 +100,7 @@ int deinit_storage_handler(struct back_storage * storage){
     //g_free(storage->fs_location);
     //g_message("%s disconnect succ\n",__func__);
     //g_free(storage->user);
-    if(storage->uri != NULL)
-    			g_free(storage->uri);
-    		if(storage->head !=NULL)
-    	       	g_free(storage->head);
-    		if(storage->dir !=NULL);
-    			g_free(storage->dir);
-    		if(storage->fs_name !=NULL)
-    			g_free(storage->fs_name);
-    		if(storage->hostname !=NULL)
-    			g_free(storage->hostname);
-    		if(storage->user!=NULL)
-    			g_free(storage->user);
+	g_free(storage);
 	HLOG_DEBUG("leave func %s", __func__);
     return 0;
 }
@@ -198,7 +175,7 @@ static int restore_last_segno_file(const char* uri,const char*path){
        //}
        const char full_segno_file_path[256];
        const char tmp_segno_file_path[256];
-       const char *segfile = g_basename(path);
+       const char *segfile = g_path_get_basename(path);
        sprintf((char *) full_segno_file_path,"%s/%s",uri,segfile);
        sprintf((char *) tmp_segno_file_path,"%s%s",full_segno_file_path,".bak");
        HLOG_DEBUG("full segno file path :%s",full_segno_file_path);
@@ -263,7 +240,7 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
 
     if(latest_file!=NULL){
 	    HLOG_DEBUG("latest file:%s",latest_file);
-	    const gchar *basename = g_basename(latest_file);
+	    const gchar *basename = g_path_get_basename(latest_file);
 	    gchar **v = g_strsplit(basename,".",2);
 	    *segno = atol(v[0]);
 	    HLOG_DEBUG("segno :%d",*segno);
@@ -372,11 +349,11 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 
 		uint64_t *ib = (uint64_t*)alloca(BLOCKSIZE);
 		if(1==is_compress){
-			if( 0!= read_zblock(storage, inode->iblock, BLOCKSIZE,ib)){
+			if( 0!= read_zblock(storage, inode->iblock, BLOCKSIZE,(char *)ib)){
 							return -1;
 			}
 		}else{
-			if( 0!= read_block(storage, inode->iblock, BLOCKSIZE,ib)){
+			if( 0!= read_block(storage, inode->iblock, BLOCKSIZE,(char *)ib)){
 				return -1;
 			}
 		}
@@ -389,11 +366,11 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		}
 		uint64_t *ib = (uint64_t*)alloca(BLOCKSIZE);
 		if(1==is_compress){
-			if( 0!= read_zblock(storage, inode->doubly_iblock, BLOCKSIZE,ib)){
+			if( 0!= read_zblock(storage, inode->doubly_iblock, BLOCKSIZE,(char *)ib)){
 									return -1;
 								}
 		}else{
-			if( 0!= read_block(storage, inode->doubly_iblock, BLOCKSIZE,ib)){
+			if( 0!= read_block(storage, inode->doubly_iblock, BLOCKSIZE,(char *)ib)){
 						return -1;
 					}
 		}
@@ -404,11 +381,11 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		}
 		uint64_t *ib2 = (uint64_t*)alloca(BLOCKSIZE);
 		if(1==is_compress){
-			if( 0 != read_zblock(storage, *(ib + idx), BLOCKSIZE,ib2)){
+			if( 0 != read_zblock(storage, *(ib + idx), BLOCKSIZE,(char *)ib2)){
 						return -1;
 					}
 		}else{
-			if( 0 != read_block(storage, *(ib + idx), BLOCKSIZE,ib2)){
+			if( 0 != read_block(storage, *(ib + idx), BLOCKSIZE,(char *)ib2)){
 						return -1;
 					}
 		}
@@ -423,11 +400,11 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		}
 		uint64_t *ib = (uint64_t*)alloca(BLOCKSIZE);
 		if(1==is_compress){
-			if( 0!=read_zblock(storage,inode->triply_iblock, BLOCKSIZE,ib)){
+			if( 0!=read_zblock(storage,inode->triply_iblock, BLOCKSIZE,(char *)ib)){
 						return -1;
 					}
 		}else{
-			if( 0!=read_block(storage,inode->triply_iblock, BLOCKSIZE,ib)){
+			if( 0!=read_block(storage,inode->triply_iblock, BLOCKSIZE,(char *)ib)){
 						return -1;
 					}
 		}
@@ -438,11 +415,11 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		}
 		uint64_t *ib2 =(uint64_t*)alloca(BLOCKSIZE);
 		if(1==is_compress){
-			if( 0 != read_zblock(storage, *(ib + idx), BLOCKSIZE,ib2)){
+			if( 0 != read_zblock(storage, *(ib + idx), BLOCKSIZE,(char *)ib2)){
 						return -1;
 					}
 		}else{
-			if( 0 != read_block(storage, *(ib + idx), BLOCKSIZE,ib2)){
+			if( 0 != read_block(storage, *(ib + idx), BLOCKSIZE,(char *)ib2)){
 						return -1;
 					}
 		}
@@ -453,11 +430,11 @@ uint64_t get_db_storage_addr_in_inode(struct back_storage * storage,
 		}
 		uint64_t *ib3 = (uint64_t*)alloca(BLOCKSIZE);
 		if(1==is_compress){
-			if( 0!= read_zblock(storage, *(ib2 + idx2), BLOCKSIZE,ib3)){
+			if( 0!= read_zblock(storage, *(ib2 + idx2), BLOCKSIZE,(char *)ib3)){
 						return -1;
 					}
 		}else{
-			if( 0!= read_block(storage, *(ib2 + idx2), BLOCKSIZE,ib3)){
+			if( 0!= read_block(storage, *(ib2 + idx2), BLOCKSIZE,(char *)ib3)){
 						return -1;
 					}
 		}
@@ -483,17 +460,14 @@ uint32_t  HBLOCK_SIZE;
 
 
 static GKeyFile *  get_superblock_keyfile(struct back_storage *storage){
-    int ret = 0;
     if(0!=storage->bs_file_is_exist(storage,"superblock")){
         HLOG_ERROR("superblock file can not be accessable");
-        ret = -1;
-        return ret;
+        return NULL;
     }
     char key_file_buf[4096];
     bs_file_t file = storage->bs_file_open(storage,"superblock",BS_READONLY);
     if(file == NULL){
       HLOG_ERROR("can not open superblock file");  
-      ret = -1;
       goto out;
     }
     int size = storage->bs_file_pread(storage,file,key_file_buf,4096,0);
@@ -557,7 +531,7 @@ int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32
     }
 	SEGMENT_SIZE = _seg_size;
     HBLOCK_SIZE=_block_size;
-    HLOG_DEBUG("SEGMENT_SIZE:%llu,HBLOCK_SIZE:%llu",SEGMENT_SIZE,HBLOCK_SIZE);
+    HLOG_DEBUG("SEGMENT_SIZE:%llu,HBLOCK_SIZE:%u",SEGMENT_SIZE,HBLOCK_SIZE);
 #endif	 
      g_key_file_free(sb_keyfile); 	 
      return 0;
@@ -594,7 +568,7 @@ int read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *b
     }
     SEGMENT_SIZE = _seg_size;
     HBLOCK_SIZE=_block_size;
-    HLOG_DEBUG("SEGMENT_SIZE:%llu,HBLOCK_SIZE:%llu",SEGMENT_SIZE,HBLOCK_SIZE);
+    HLOG_DEBUG("SEGMENT_SIZE:%llu,HBLOCK_SIZE:%u",SEGMENT_SIZE,HBLOCK_SIZE);
 #endif
 out:
     g_key_file_free(sb_keyfile);

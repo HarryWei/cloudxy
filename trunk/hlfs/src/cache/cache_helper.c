@@ -69,7 +69,7 @@ int get_continues_blocks(CACHE_CTRL *cctrl, GSList **continue_block_list){
     block_t *block = (gpointer)g_queue_peek_head(cctrl->dirty_block);
     int max_block_no = block->block_no;
     int min_block_no = block->block_no;
-    HLOG_DEBUG("--total dirty block:%d,oldest block no:%llu--",size,block->block_no);
+    HLOG_DEBUG("--total dirty block:%d,oldest block no:%u--",size,block->block_no);
     *continue_block_list = g_slist_append(*continue_block_list, block);
     if (size == 1) {
        g_mutex_unlock(cctrl->cache_mutex);

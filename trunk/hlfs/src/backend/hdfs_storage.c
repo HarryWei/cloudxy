@@ -178,7 +178,7 @@ hdfs_list_dir(struct back_storage * storage,const char * dir_path,uint32_t* num_
     bs_file_info_t *info = infos;
     int i;
     for(i=0;i<num;i++){
-        strcpy((char *) info->name, (const char *) g_basename(hinfo->mName));
+        strcpy((char *) info->name, (const char *) g_path_get_basename(hinfo->mName));
         info->is_dir = 0;//?
         info->size =   hinfo->mSize;
         info->lmtime = hinfo->mLastMod;

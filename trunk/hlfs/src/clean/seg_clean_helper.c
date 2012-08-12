@@ -26,7 +26,7 @@
 int seg_usage2text(SEG_USAGE_T * seg_usage,char *textbuf){
        HLOG_DEBUG("enter func %s",__func__);
        memset(textbuf,0,sizeof(SEG_USAGE_T)*10);
-       int n = sprintf (textbuf,"%llu %s %llu %llu %u %u %u ",
+       int n = sprintf (textbuf,"%u %s %llu %llu %u %u %u ",
 		       seg_usage->segno,
 		       seg_usage->up_sname,
 		       seg_usage->inode_addr,
@@ -175,7 +175,7 @@ int seg_usage4text(SEG_USAGE_T * seg_usage, const char *textbuf){
     
 	 
      g_strfreev(v);
-     HLOG_DEBUG("segno:%llu,alive_blocks:%u,timestamp:%llu,log_num:%u,block_num:%u",
+     HLOG_DEBUG("segno:%u,alive_blocks:%u,timestamp:%llu,log_num:%u,block_num:%u",
 		   		 seg_usage->segno,
                  seg_usage->alive_block_num,
                  seg_usage->timestamp,
@@ -260,7 +260,7 @@ int load_all_seg_usage(struct back_storage *storage,
         SEG_USAGE_T * seg_usage= (SEG_USAGE_T *)g_malloc0(sizeof(SEG_USAGE_T));
         seg_usage4text(seg_usage,segs[i]);
         //g_hash_table_insert(seg_usage_hashtable,seg_usage->segno,seg_usage);
-        HLOG_DEBUG("segno:%llu",seg_usage->segno);
+        HLOG_DEBUG("segno:%u",seg_usage->segno);
 #if 0
         if(seg_usage->alive_block_num !=0){
             g_hash_table_insert(seg_usage_hashtable,GINT_TO_POINTER((uint32_t) seg_usage->segno),seg_usage);

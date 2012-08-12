@@ -164,7 +164,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
 			   HLOG_ERROR("read_block error for iblock_addr:%llu",ctrl->inode.iblock);
 			   return -1;
 	 	    }
-		    write_layer1_iblock(ctrl,db_no,_ib);	
+		    write_layer1_iblock(ctrl,db_no,(char *)_ib);	
 	    }
         int  _idx = (db_no-12)%IB_ENTRY_NUM;
         storage_address = *(_ib+_idx);
@@ -182,7 +182,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
 				HLOG_ERROR("read_block error for doubly_iblock_addr:%llu",ctrl->inode.doubly_iblock);
 				return -1;
 		 	}
-			write_layer1_iblock(ctrl,db_no,_ib);	
+			write_layer1_iblock(ctrl,db_no,(char *)_ib);	
 	 }	
         int _idx   = ( db_no - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
         //HLOG_DEBUG("ib1 address:%llu",*(_ib+_idx));
@@ -191,12 +191,12 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
         }
         uint64_t *_ib2=(uint64_t*)alloca(BLOCKSIZE);
 	    memset(_ib2,0,sizeof(BLOCKSIZE));
-	 if( 0> read_layer2_iblock(ctrl,db_no,_ib2)){
+	 if( 0> read_layer2_iblock(ctrl,db_no,(char *)_ib2)){
 		if( 0!= RB_FUN(ctrl,*(_ib+_idx),(char*)_ib2)){	
 			//HLOG_ERROR("read_block error");
 			return -1;
 		}
-		write_layer2_iblock(ctrl,db_no,_ib2);
+		write_layer2_iblock(ctrl,db_no,(char *)_ib2);
 	}
         int _idx2  = (db_no - 12 - IB_ENTRY_NUM)%IB_ENTRY_NUM;
         storage_address = *(_ib2 + _idx2);
@@ -214,7 +214,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
 			//HLOG_ERROR("read_block error for triply_iblock_addr:%llu",ctrl->inode.triply_iblock);
 			return -1;
 		}
-			write_layer1_iblock(ctrl,db_no,_ib);
+			write_layer1_iblock(ctrl,db_no,(char *)_ib);
 	 }
         int _idx   = (db_no -12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM*IB_ENTRY_NUM);
         if(*(_ib + _idx) == 0){
@@ -227,7 +227,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
 			//HLOG_ERROR("read_block error");
 			return -1;
 		}
-		write_layer2_iblock(ctrl,db_no,_ib2);	
+		write_layer2_iblock(ctrl,db_no,(char *)_ib2);	
 	}	
         int _idx2  = (db_no-12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM)/IB_ENTRY_NUM % IB_ENTRY_NUM;
         if(*(_ib2 + _idx2) == 0){
@@ -240,7 +240,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
 			//HLOG_ERROR("read_block error");
 			return -1;
 		}
-		write_layer3_iblock(ctrl,db_no,_ib3);	
+		write_layer3_iblock(ctrl,db_no,(char *)_ib3);	
 	 }
         int _idx3  = (db_no-12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) % IB_ENTRY_NUM; 
         storage_address = *(_ib3 + _idx3);
@@ -268,7 +268,7 @@ int load_block_by_no_fast(struct hlfs_ctrl *ctrl,uint32_t no,char *block){
 
 int load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,char *block){
     //HLOG_DEBUG("enter func %s", __func__);
-    int ret = __load_block_by_no(ctrl,no,read_block_raw,block);
+    int ret = __load_block_by_no(ctrl,no,(READ_BLOCK_FUN)read_block_raw,block);
     //HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }

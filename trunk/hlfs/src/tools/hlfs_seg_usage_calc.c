@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     uint64_t max_fs_size;
     uint32_t is_compress = 0;
     int ret = read_fs_meta(storage, &segment_size, &block_size,&max_fs_size,&is_compress);
-    g_message("segment size:%d,block size:%d,max fs size%d",segment_size,block_size,max_fs_size);
+    g_message("segment size:%u,block size:%u,max fs size%llu",segment_size,block_size,max_fs_size);
 #if 0
     SEGMENT_SIZE_MASK  = segment_size - 1;
     SEGMENT_SIZE_SHIFT = 0;

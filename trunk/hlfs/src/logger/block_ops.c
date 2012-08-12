@@ -222,7 +222,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
         }
         uint64_t *_ib2 = (uint64_t*)alloca(BLOCKSIZE);
 	 memset(_ib2,0,sizeof(BLOCKSIZE));
-	 if(0>read_layer2_iblock(ctrl,db_no,&_ib2)){
+	 if(0>read_layer2_iblock(ctrl,db_no,(char *)_ib2)){
 	 	 if(0 != RB_FUN(ctrl,*(_ib + _idx),(char*)_ib2)){
 			//HLOG_ERROR("read_block error");
 			return -1;

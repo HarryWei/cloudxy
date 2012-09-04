@@ -34,8 +34,7 @@ Install
  - Download the source code from the google code.
  	# svn checkout http://cloudxy.googlecode.com/svn/trunk/ cloudxy-read-only
  	# git clone git://github.com/kelvin-xupt/hlfs.git
- 	# Download hlfs.tar.gz
- - Modify the CMakeList.txt. 
+ - Modify the CMakeLists.txt. 
  	# Set the variant JAVA_HOME to your own.
  	# Add your own path of include headers to INCLUDE_DIRECTORIES.
  - Generate Makefile:

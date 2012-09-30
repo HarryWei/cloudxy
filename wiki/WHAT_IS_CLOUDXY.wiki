@@ -7,7 +7,7 @@ Cloudxy is constructed of HLFS(HDFS-based Log-structured file system) and ECMS(E
 == HLFS == 
 The subsystem HLFS(actually, Block level Storage System seems more proper than File System) is a distributed VM image storage system for ECMS,which provides highly available block level storage volumes that can be attached to XEN virtual machines by its tapdisk driver.Similar project related to KVM is sheepdog，but they are in different architectures.
 
-Compared with sheepdog, HLFS has greater scalability and reliability than sheepdog by now,as we are on the shoulder of hadoop distrubute file system (HDFS).Meanwhile,HLFS also supports advanced volume management features such as snapshot(HLFS can also support snapshot tree)、cloning、thin provisioning and cache.
+Compared with sheepdog, HLFS has greater scalability and reliability than sheepdog by now,as we are on the shoulder of hadoop distribute file system (HDFS).Meanwhile,HLFS also supports advanced volume management features such as snapshot(HLFS can also support snapshot tree)、cloning、thin provisioning and cache.
 
 The main idea of HLFS is: 
  * Take advantage of Log-structured File System's ideology to build an on-line image storage system on HDFS which can guarantee the reliability and scalability for our storage system

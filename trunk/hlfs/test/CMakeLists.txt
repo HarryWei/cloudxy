@@ -18,8 +18,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 SET(WORK_HOME "$ENV{PWD}/../")
 MESSAGE(STATUS "Root directory of project:" ${WORK_HOME})
-SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
-#SET(JAVA_HOME 	/mnt/jdk1.7.0)
+#SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
+SET(JAVA_HOME 	/mnt/jdk1.7.0_02)
 MESSAGE(STATUS "JAVA HOME:" ${JAVA_HOME})
 #SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk)
 
@@ -32,6 +32,7 @@ INCLUDE_DIRECTORIES(
 	${JAVA_HOME}/include/linux
 	${WORK_HOME}/src/include
 	${WORK_HOME}/3part/log/include
+	${WORK_HOME}/3part/snappy/include
 )
 
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -39,16 +40,19 @@ LINK_DIRECTORIES(
     ${WORK_HOME}/output/lib32
 	${JAVA_HOME}/jre/lib/i386/client
 	${JAVA_HOME}/jre/lib/i386/server
-    ${WORK_HOME}/3part/log/lib32)
+    ${WORK_HOME}/3part/log/lib32
+    ${WORK_HOME}/3part/snappy/lib32)
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 LINK_DIRECTORIES(
     ${WORK_HOME}/output/lib64
-    ${WORK_HOME}/3part/log/lib64)
+    ${WORK_HOME}/3part/log/lib64
+    ${WORK_HOME}/3part/snappy/lib64)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(LIBS glib-2.0
 		 hlfs
 		 log4c
+		 snappy
 )
 
 file(GLOB testfiles "test_*.c")

@@ -45,6 +45,8 @@ LINK_DIRECTORIES(
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 LINK_DIRECTORIES(
     ${WORK_HOME}/output/lib64
+    ${WORK_HOME}/jre/lib/amd64/client
+    ${WORK_HOME}/jre/lib/amd64/server
     ${WORK_HOME}/3part/log/lib64
     ${WORK_HOME}/3part/snappy/lib64)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)

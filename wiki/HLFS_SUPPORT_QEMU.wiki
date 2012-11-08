@@ -7,7 +7,7 @@
 = 下载和编译 =
   # 下载 qemu - git clone git://git.qemu.org/qemu.git
   # 下载patch for qemu - https://cloudxy.googlecode.com/svn/trunk/hlfs/patches/hlfs_driver_for_qemu.patch
-  # patch it - 在qemu目录中执行 ：git apply ${HLFS_HOME}/patches/hlfs_driver_for_qemu.patch
+  # patch it - 在qemu目录中执行 ：git apply hlfs_driver_for_qemu.patch
 {{{
 修改configure中
 GLIB_DIR1_INC=/usr/lib/glib-2.0/include

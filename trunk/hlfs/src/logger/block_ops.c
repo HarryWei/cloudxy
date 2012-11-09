@@ -261,7 +261,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl,uint32_t no,READ_BLOCK_FUN 
 
 int load_block_by_no_fast(struct hlfs_ctrl *ctrl,uint32_t no,char *block){
     //HLOG_DEBUG("enter func %s", __func__);
-    int ret = __load_block_by_no(ctrl,no,read_block_fast,block);
+    int ret = __load_block_by_no(ctrl,no,(READ_BLOCK_FUN)read_block_fast,block);
     //HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }

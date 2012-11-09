@@ -76,7 +76,7 @@ struct snapshot *__hlfs_get_all_snapshots(struct back_storage *storage,int *num_
     }
     *num_entries = g_list_length(snapshot_list);
 out: 
-	g_free(storage);
+//	g_free(storage);
 //	g_hash_table_destroy(ss_hashtable);
     if(snapshot_list!=NULL){
         g_list_free(snapshot_list);

@@ -28,8 +28,9 @@ ldd ./qemu-img 查看是否其指向的库都存在！
 }}}
   * 创建网络磁盘操作
 {{{
-./qemu-img create hlfs:local:///tmp/testenv/testfs 10G 或
-./qemu-img create hlfs:hdfs:///tmp/testenv/testfs 10G
+mkdir /tmp/testenv
+./qemu-img create -f hlfs hlfs:local:///tmp/testenv/testfs 10G 或
+./qemu-img create -f hlfs hlfs:hdfs:///tmp/testenv/testfs 10G
 }}}
   * 状态查询
 {{{

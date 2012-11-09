@@ -114,7 +114,7 @@ int hlfs_open(struct hlfs_ctrl *ctrl, int flag)
 	    
 	     if (my_inode == NULL) {
 		     HLOG_ERROR("load_inode error!");
-                  return -1;
+             return -1;
 	     }
 	    
 	     HLOG_DEBUG("inode'length:%llu,ctrl->inode length:%llu,sizeof inode:%d",my_inode->length,ctrl->inode.length,sizeof(struct inode));	 

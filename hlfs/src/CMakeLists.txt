@@ -21,7 +21,8 @@ SET(SNAPPY_HOME ${WORK_HOME}/3part/snappy)
 #SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
 #SET(JAVA_HOME 	/usr/lib/jvm/java-6-openjdk)
 #SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk.x86_64)
-SET(JAVA_HOME /opt/jdk1.7.0_05)
+#SET(JAVA_HOME /opt/jdk1.7.0_05)
+SET(JAVA_HOME /mnt/jdk1.7.0_02)
 INCLUDE_DIRECTORIES(
        /usr/include/glib-2.0 
        /usr/lib/glib-2.0/include 

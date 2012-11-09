@@ -20,22 +20,22 @@
 
 #define MAX_FILE_NAME_LEN 128U
 struct inode {
-	int64_t length;
-    	//int32_t uid;
-    	//int32_t gid;
-    	//int32_t mode;
-    	//uint64_t ctime;           /* time of last status change */
-    	uint64_t mtime;             /* time of last modification */
-    	//uint64_t atime;           /* time of last access */
-    	int64_t blocks[12];         /* the first 8KB*12=96KB */
-    	int64_t iblock;             /* the next 8KB/8*8KB=8MB */
-    	int64_t doubly_iblock;      /* the next 8K/8*8K/8*8K=8GB */
-    	int64_t triply_iblock;      /* the next 8K/8*8K/8*8K/8*8K=8TB */
+	uint64_t length;
+    //int32_t uid;
+    //int32_t gid;
+    //int32_t mode;
+   	//uint64_t ctime;           /* time of last status change */
+   	uint64_t mtime;             /* time of last modification */
+   	//uint64_t atime;           /* time of last access */
+   	int64_t blocks[12];         /* the first 8KB*12=96KB */
+   	int64_t iblock;             /* the next 8KB/8*8KB=8MB */
+   	int64_t doubly_iblock;      /* the next 8K/8*8K/8*8K=8GB */
+   	int64_t triply_iblock;      /* the next 8K/8*8K/8*8K/8*8K=8TB */
 }__attribute__((packed));  
 
 struct inode_map_entry {
 	uint64_t inode_no;	              /* inode number */
-       uint64_t inode_addr;		/* inode's DISK address */ 
+	uint64_t inode_addr;		/* inode's DISK address */ 
 }__attribute__((packed)); 
 
 struct super_block {

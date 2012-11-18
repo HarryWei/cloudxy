@@ -1,13 +1,15 @@
-# Support iSCSI
+iSCSI Protocol Support
 
 = Introduction =
 
-Add your content here.
+Support iSCSI protocol by patching TGT. This wiki page is intended to outline
+some steps need to quickly get the TGT working with HLFS.
 
+= Installation=
 
-= Details =
+Start by installing TGT.
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+ * Download the source code of TGT.
+{{{
+git clone git://github.com/fujita/tgt.git
+}}}

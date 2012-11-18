@@ -34,3 +34,31 @@ $sudo cp HLFS_HOME/output/lib32/libhlfs.so /usr/lib
 $make 
 $sudo make install
 }}}
+
+= Demo=
+
+ * Format HLFS.
+{{{
+$cd HLFS_HOME
+$./auto_local.sh
+}}}
+ * Start tgt deamon.
+{{{
+$sudo service tgt restart
+}}}
+ * Create an iSCSI target
+{{{
+sudo tgtadm --lld iscsi --mode target --op new --tid 1 --targetname iqn.2012-11.com.example:hlfs
+}}}
+ * Create an iSCSI LUN
+{{{
+sudo tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1 -b local:///tmp/testenv/testfs --bstype hlfs
+}}}
+ * Show the result
+{{{
+sudo tgtadm --lld iscsi --mode target --op show
+}}}
+
+---
+Wang Sen <kelvin.xupt@gmail.com>
+2012.11.18

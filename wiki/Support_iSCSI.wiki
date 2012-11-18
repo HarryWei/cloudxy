@@ -13,3 +13,24 @@ Start by installing TGT.
 {{{
 git clone git://github.com/fujita/tgt.git
 }}}
+ * Apply the patch located in the project cloudxy.
+{{{
+$cd tgt
+$git apply HLFS_HOME/patches/hlfs_driver_for_tgt.patch
+}}}
+ * configure your Makefile.
+{{{
+$vim usr/Makefile
+# line 2: Set the hlfs_home to your own.
+# line 31, line 32: Set the glib path to your own.
+# line 35, line 36: Set the JAVA path to your own.
+}}}
+ * Copy the libhlfs.so to /usr/lib directory.
+{{{
+$sudo cp HLFS_HOME/output/lib32/libhlfs.so /usr/lib
+}}}
+ * Compile and Installation
+{{{
+$make 
+$sudo make install
+}}}

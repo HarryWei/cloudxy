@@ -1,0 +1,194 @@
+From 78531bcdeb444908383f5aed5b744489294a2bd8 Mon Sep 17 00:00:00 2001
+From: Wang Sen <kelvin.xupt@gmail.com>
+Date: Sun, 18 Nov 2012 15:09:11 +0800
+Subject: [PATCH] Support iSCSI
+
+---
+ usr/Makefile  |   16 ++++++--
+ usr/bs_hlfs.c |  121 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 133 insertions(+), 4 deletions(-)
+ create mode 100644 usr/bs_hlfs.c
+
+diff --git a/usr/Makefile b/usr/Makefile
+index 64cb58c..212e531 100644
+--- a/usr/Makefile
++++ b/usr/Makefile
+@@ -1,4 +1,5 @@
+ sbindir ?= $(PREFIX)/sbin
++hlfs_home ?= /home/kelvin/project/cloudxy/trunk/hlfs
+ 
+ ifneq ($(shell test -e /usr/include/linux/signalfd.h && echo 1),)
+ CFLAGS += -DUSE_SIGNALFD
+@@ -11,7 +12,7 @@ endif
+ TGTD_OBJS += $(addprefix iscsi/, conn.o param.o session.o \
+ 		iscsid.o target.o chap.o sha1.o md5.o transport.o iscsi_tcp.o \
+ 		isns.o)
+-TGTD_OBJS += bs_rdwr.o
++TGTD_OBJS += bs_rdwr.o bs_hlfs.o
+ 
+ ifneq ($(shell test -e /usr/include/sys/eventfd.h && test -e /usr/include/libaio.h && echo 1),)
+ CFLAGS += -DUSE_EVENTFD
+@@ -25,7 +26,14 @@ LIBS += -libverbs -lrdmacm
+ endif
+ 
+ INCLUDES += -I.
+-
++INCLUDES += -I$(hlfs_home)/src/include
++INCLUDES += -I$(hlfs_home)/3part/log/include
++INCLUDES += -I/usr/include/glib-2.0
++INCLUDES += -I/usr/lib/i386-linux-gnu/glib-2.0/include
++
++CFLAGS += -L$(hlfs_home)/output/lib32
++CFLAGS += -L/opt/jdk1.7.0_05/jre/lib/i386/server
++CFLAGS += -L/opt/jdk1.7.0_05/jre/lib/i386/client
+ CFLAGS += -D_GNU_SOURCE
+ CFLAGS += $(INCLUDES)
+ ifneq ($(DEBUG),)
+@@ -36,7 +44,7 @@ endif
+ CFLAGS += -Wall -Wstrict-prototypes -fPIC
+ CFLAGS += -DTGT_VERSION=\"$(VERSION)$(EXTRAVERSION)\"
+ 
+-LIBS += -lpthread
++LIBS += -lpthread -lhlfs -ljvm
+ 
+ PROGRAMS += tgtd tgtadm tgtimg
+ TGTD_OBJS += tgtd.o mgmt.o target.o scsi.o log.o driver.o util.o work.o \
+@@ -50,7 +58,7 @@ TGTD_DEP = $(TGTD_OBJS:.o=.d)
+ all: $(PROGRAMS)
+ 
+ tgtd: $(TGTD_OBJS)
+-	$(CC) $^ -o $@ $(LIBS)
++	$(CC) $^ -o $@ $(LIBS) $(CFLAGS)
+ 
+ -include $(TGTD_DEP)
+ 
+diff --git a/usr/bs_hlfs.c b/usr/bs_hlfs.c
+new file mode 100644
+index 0000000..61785fa
+--- /dev/null
++++ b/usr/bs_hlfs.c
+@@ -0,0 +1,121 @@
++/*
++ * Copyright (C) 2012 Xi'an University of Post & Telecommunications
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation, version 2 of the
++ * License.
++ *
++ * Wang Sen <kelvin.xupt@gmail.com>
++ */
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <stdint.h>
++#include <unistd.h>
++#include <fcntl.h>
++
++#include "glib.h"
++#include "list.h"
++#include "util.h"
++#include "tgtd.h"
++#include "scsi.h"
++#include "bs_thread.h"
++#include "api/hlfs.h"
++
++struct hlfs_access_info {
++	HLFS_CTRL *ctrl;
++};
++
++static void bs_hlfs_request(struct scsi_cmd *cmd)
++{
++	int ret = 0;
++	int result = SAM_STAT_GOOD;
++	int length = 0;
++	struct bs_thread_info *info = BS_THREAD_I(cmd->dev);
++	struct hlfs_access_info *ai = (struct hlfs_access_info *)(info + 1);
++	switch (cmd->scb[0])
++	{
++	case SYNCHRONIZE_CACHE:
++	case SYNCHRONIZE_CACHE_16:
++		break;
++	case WRITE_6:
++	case WRITE_10:
++	case WRITE_12:
++	case WRITE_16:
++		length = scsi_get_out_length(cmd);
++		ret = hlfs_write(ai->ctrl, scsi_get_out_buffer(cmd), length,
++				cmd->offset);
++		if (ret < 0) {
++			result = SAM_STAT_CHECK_CONDITION;
++		}
++		break;
++	case READ_6:
++	case READ_10:
++	case READ_12:
++	case READ_16:
++		length = scsi_get_in_length(cmd);
++		ret = hlfs_read(ai->ctrl, scsi_get_in_buffer(cmd), length,
++				cmd->offset);
++		if (ret < 0) {
++			result = SAM_STAT_CHECK_CONDITION;
++		}
++		break;
++	default:
++		break;
++	}
++	scsi_set_result(cmd, result);
++	if (result != SAM_STAT_GOOD) {
++	}
++}
++
++static int bs_hlfs_open(struct scsi_lu *lu, char *path, int *fd, uint64_t *size)
++{
++	struct bs_thread_info *info = BS_THREAD_I(lu);
++	struct hlfs_access_info *ai = (struct hlfs_access_info *)(info + 1);
++	ai->ctrl = init_hlfs(path);
++	if (!ai->ctrl) {
++		return -1;
++	}
++	int ret = hlfs_open(ai->ctrl, 1);
++	g_assert(ret == 0);
++	return 0;
++}
++
++static void bs_hlfs_close(struct scsi_lu *lu)
++{
++	struct bs_thread_info *info = BS_THREAD_I(lu);
++	struct hlfs_access_info *ai = (struct hlfs_access_info *)(info + 1);
++	if (ai->ctrl) {
++		hlfs_close(ai->ctrl);
++		deinit_hlfs(ai->ctrl);
++	}
++}
++
++static int bs_hlfs_init(struct scsi_lu *lu)
++{
++	eprintf("Hello kitty\n");
++	struct bs_thread_info *info = BS_THREAD_I(lu);
++	return bs_thread_open(info, bs_hlfs_request, 1);
++}
++
++static void bs_hlfs_exit(struct scsi_lu *lu)
++{
++	struct bs_thread_info *info = BS_THREAD_I(lu);
++	bs_thread_close(info);
++}
++
++static struct backingstore_template hlfs_bst = {
++	.bs_name = "hlfs",
++	.bs_datasize = sizeof(struct bs_thread_info) + sizeof(struct hlfs_access_info),
++	.bs_open = bs_hlfs_open,
++	.bs_close = bs_hlfs_close,
++	.bs_init = bs_hlfs_init,
++	.bs_exit = bs_hlfs_exit,
++	.bs_cmd_submit 	= bs_thread_cmd_submit,
++};
++
++__attribute__((constructor)) static void __constructor(void)
++{
++	register_backingstore_template(&hlfs_bst);
++}
+-- 
+1.7.9.5
+

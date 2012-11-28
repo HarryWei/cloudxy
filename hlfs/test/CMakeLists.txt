@@ -7,6 +7,8 @@
 
 # This *ON* can let cmake procedure output into console.
 # _So_that we can debug it.
+#Be sure that you have made a build dir under hlfs/test
+#before you execute this CMakeLists.txt.
 
 SET(CMAKE_BUILD_TYPE "Debug") 
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -Wall -g")
@@ -16,7 +18,7 @@ SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(HLFS)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-SET(WORK_HOME "$ENV{PWD}/..")
+SET(WORK_HOME "$ENV{PWD}/../..")
 MESSAGE(STATUS "Root directory of project:" ${WORK_HOME})
 #SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
 SET(JAVA_HOME 	/mnt/jdk1.7.0_02)

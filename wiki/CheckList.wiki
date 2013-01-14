@@ -1,7 +1,6 @@
 #summary Checklist for our tasks
 
-= CheckList =
-
+=CheckList=
 ==第一阶段==
  * 张典博：openstack 安装工作。
  * 康华：测试HLFS Iscsi驱动。

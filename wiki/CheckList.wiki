@@ -12,4 +12,4 @@
  # 这种开发方式可有效避免重复劳动，推动项目前进。
 
 ----
-Checklist Maintainer:贾威威
+Checklist Maintainer:贾威威 (harryxiyou@gmail.com)

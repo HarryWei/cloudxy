@@ -1,0 +1,9 @@
+#summary Checklist for our tasks
+
+= CheckList =
+
+==第一阶段==
+ * 张典博：openstack 安装工作。
+ * 康华：测试HLFS Iscsi驱动。
+ * 王森：修复目前发现的HLFS的bugs。
+ * 贾威威：调查sheepdog支持qemu/libvirt/openstack都做了哪些改动

@@ -11,7 +11,7 @@
 
 ==第二阶段==
 || 王森     || 修复目前使用QEMU的bug，完善iscsi驱动的功能（快照、获取容量） || 进行中  || 未讨论 ||  修复要细致，准确  ||
-|| 贾威威   || 1，测试(可能需要修改)HLFS Patch for QEMU; 2, 开发HLFS driver for Libvirt并测试   || 进行中   || 未讨论 || 理解HLFS driver for QEMU&&Libvirt,测试工作需仔细认真对待(关乎HLFS集成Openstack的成功与否)  ||
+|| 贾威威   || 1，测试(可能需要修改)HLFS Patch for QEMU; <br> 2, 开发HLFS driver for Libvirt并测试   || 进行中   || 未讨论 || 理解HLFS driver for QEMU&&Libvirt;<br>测试工作需仔细认真对待(关乎HLFS集成Openstack的成功与否)  ||
 
 
 

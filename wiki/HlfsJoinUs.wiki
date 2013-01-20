@@ -22,6 +22,7 @@
  # 进入cloudxy主页(http://code.google.com/p/cloudxy/)
  # 进入主页上的issues提交问题(http://code.google.com/p/cloudxy/issues/list)
  # 请详细描述你的操作过程，操作环境，以及问题所在
+ # 报告之后，最好发邮件到群邮件列表cloudxy@googlegroups.com说明一下，方便我们及时帮助你解决
 ==维护者==
    * 导师：陈莉君 <cljcore@gmail.com>
    * 康华 <kanghua151@gmail.com>

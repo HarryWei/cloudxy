@@ -17,9 +17,10 @@ JVM_DIR=/usr/lib/jvm/java-6-sun/
 
 注意：以上几个变量所指的位置为你系统环境的实际地址
 }}}
-  # 编译 cd qemu;./configure;make - 生成qemu-img<br>
+  # 编译 cd qemu;./configure;make - 生成qemu-img
 {{{
-ldd ./qemu-img 查看是否其指向的库都存在！
+ldd ./qemu-img 
+执行这个命令是为了查看qemu-img所指向的库是否都存在！
 }}}
 = 支持操作 =
 {{{

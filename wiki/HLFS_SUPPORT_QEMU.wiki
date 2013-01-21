@@ -14,8 +14,7 @@ GLIB_DIR1_INC=/usr/lib/glib-2.0/include
 GLIB_DIR2_INC=/usr/include/glib-2.0
 HLFS_DIR=/home/kanghua/workshop3.bak/hlfs
 JVM_DIR=/usr/lib/jvm/java-6-sun/
-
-注意：几个变量，变量所指的位置为你系统上环境的实际地址
+注意：以上几个变量所指的位置为你系统环境的实际地址
 }}}
   # 编译 cd qemu;./configure;make - 生成qemu-img
 {{{

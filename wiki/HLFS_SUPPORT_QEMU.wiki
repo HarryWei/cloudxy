@@ -57,10 +57,6 @@ mkdir /tmp/testenv
 }}}
   * 格式转换操作
 {{{
-./qemu-img convert raw.img  hlfs:local:///tmp/testenv/testfs
-}}}
-  * 格式转换操作
-{{{
 ./qemu-img convert raw.img  hlfs:local:///tmp/testenv/testfs 或
 ./qemu-img convert raw.img  hlfs:hdfs:///tmp/testenv/testfs
 }}}

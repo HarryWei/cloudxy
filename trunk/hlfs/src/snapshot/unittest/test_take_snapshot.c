@@ -42,12 +42,12 @@ void case1_setup()
 		g_message("init_hlfs error");
 		g_assert(case1_fixture.ctrl != NULL);
 	}
-	
+
 	if (0 != (ret = hlfs_open(case1_fixture.ctrl, 1))) {
 		g_message("open hlfs error with flag 1");
 		exit(EXIT_FAILURE);
 	}
-	
+
 	char *buf = (char *)g_malloc0(4096);
 	if (buf == NULL) {
 		g_message("allocate mem error");
@@ -103,16 +103,16 @@ void case1_teardown()
 	system("rm -rf /tmp/testenv");
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv){
 	if (log4c_init()) {
 		g_message("log4c init error!");
 	}
 	g_test_init(&argc, &argv, NULL);
 	g_test_add("/misc/hlfs_take_snapshot", 
-				Fixture, 
-				NULL,
-				case1_setup, 
-				test_case1, 
-				case1_teardown);
+			Fixture, 
+			NULL,
+			case1_setup, 
+			test_case1, 
+			case1_teardown);
 	return g_test_run();
 }

@@ -45,89 +45,98 @@ char *build_segfile_name_by_address(uint64_t storage_address)
 	uint32_t segno  = get_segno(storage_address);
     	char s[64];
     	sprintf(s, "%d", segno);
-    	gchar * segfile_name = g_strconcat(s,".","seg",NULL);
+    	gchar *segfile_name = g_strconcat(s, ".", "seg", NULL);
     	return segfile_name;
 }
 #endif 
 int  build_segfile_name(uint32_t segno, const char *segfile_name)
 {
-    //HLOG_DEBUG("enter func %s", __func__);
-    if(segfile_name==NULL){
+	//HLOG_DEBUG("enter func %s", __func__);
+        if (segfile_name == NULL) {
         HLOG_ERROR("segfile_name is null");
         return -1;
-    }
-    snprintf((char *) segfile_name,SEGMENT_FILE_NAME_MAX,"%u%s%s",segno,".","seg");
-    //HLOG_DEBUG("leave func %s", __func__);
-    return 0;
+        }
+        snprintf((char *)segfile_name,SEGMENT_FILE_NAME_MAX, "%u%s%s", \
+		segno, ".", "seg");
+        //HLOG_DEBUG("leave func %s", __func__);
+        return 0;
 }
 
-int  build_segfile_name_by_address(uint64_t storage_address, const char*segfile_name)
+int  build_segfile_name_by_address(uint64_t storage_address, \
+		const char *segfile_name)
 {
-    //HLOG_DEBUG("enter func %s", __func__);
-    if(segfile_name==NULL){
+        //HLOG_DEBUG("enter func %s", __func__);
+        if (segfile_name == NULL) {
         return -1;
-    }
-    uint32_t segno  = get_segno(storage_address);
-    snprintf((char *) segfile_name,SEGMENT_FILE_NAME_MAX,"%u%s%s",segno,".","seg");
-    //HLOG_DEBUG("leave func %s", __func__);
-    return 0;
+        }
+        uint32_t segno  = get_segno(storage_address);
+        snprintf((char *)segfile_name, SEGMENT_FILE_NAME_MAX, "%u%s%s", \
+		segno, ".", "seg");
+       //HLOG_DEBUG("leave func %s", __func__);
+       return 0;
 }
 
-uint32_t get_segfile_no(const char * segfile)
+uint32_t get_segfile_no(const char *segfile)
 {
-    //HLOG_DEBUG("enter func %s", __func__);
-    const gchar *basename = g_path_get_basename(segfile);
-    gchar **v = g_strsplit(basename,".",2);
-    uint32_t segno = atol(v[0]);
-    g_strfreev(v);
-    //HLOG_DEBUG("leave func %s", __func__);
-    return segno;
+	//HLOG_DEBUG("enter func %s", __func__);
+        const gchar *basename = g_path_get_basename(segfile);
+        gchar **v = g_strsplit(basename, ".", 2);
+        uint32_t segno = atol(v[0]);
+        g_strfreev(v);
+        //HLOG_DEBUG("leave func %s", __func__);
+        return segno;
 }
 
 
-int read_block(struct back_storage *storage ,uint64_t storage_address,uint32_t block_size,char *block_buf)
+int read_block(struct back_storage *storage, uint64_t storage_address, \
+		uint32_t block_size, char *block_buf)
 {
     //HLOG_DEBUG("enter func %s", __func__);
-	if(NULL == storage || NULL == block_buf){
+	if (NULL == storage || NULL == block_buf) {
 		return -1;
 	}
-    int ret = 0;
-    uint32_t offset = get_offset(storage_address); 
-    const char segfile_name[SEGMENT_FILE_NAME_MAX];
-    ret = build_segfile_name(get_segno(storage_address), (char *) segfile_name);
-    if (-1 == ret) {
+        int ret = 0;
+        uint32_t offset = get_offset(storage_address); 
+        const char segfile_name[SEGMENT_FILE_NAME_MAX];
+        ret = build_segfile_name(get_segno(storage_address), \
+		(char *)segfile_name);
+        if (-1 == ret) {
         HLOG_ERROR("build_segfile_name error");
         ret = -1;
 		goto out;
-    }
+        }
 
-    bs_file_t file = storage->bs_file_open(storage,segfile_name,BS_READONLY); 
-    if(file==NULL){
-        HLOG_ERROR("can not open segment file %s",segfile_name);
+        bs_file_t file = storage->bs_file_open(storage, segfile_name, \
+		BS_READONLY); 
+        if (file == NULL) {
+        HLOG_ERROR("can not open segment file %s", segfile_name);
         ret = -1;
 		goto out;
-    }
+        }
 	
-    //char * block = (char*)g_malloc0(block_size);
+    //char * block = (char *)g_malloc0(block_size);
     //if (NULL == block) {
     //    HLOG_ERROR("Allocate Error!");
     //    block = NULL;
 	//    goto out;
     //}
-    uint32_t read_size;
-    if(block_size != (read_size = storage->bs_file_pread(storage,file,block_buf,block_size,offset))){
-	    HLOG_ERROR("bs_file_pread's size:%d is not equal to block_size:%d, at offset:%u",read_size,block_size,offset);
+	uint32_t read_size;
+        if (block_size != (read_size = storage->bs_file_pread(storage, file, \
+		block_buf, block_size, offset))) {
+	    HLOG_ERROR("bs_file_pread's size:%d is not equal to block_size:%d, \
+		at offset:%u", read_size, block_size, offset);
         ret = -1;
         goto out;
     }
 
 out:
-    storage->bs_file_close(storage,file);
+        storage->bs_file_close(storage, file);
 	//HLOG_DEBUG("leave func %s", __func__);
-    return ret;
+        return ret;
 }
-int read_zblock(struct back_storage *storage, uint64_t storage_address,
-		uint32_t block_size, char *block_buf) {
+int read_zblock(struct back_storage *storage, uint64_t storage_address, \
+		uint32_t block_size, char *block_buf) 
+{
 	//HLOG_DEBUG("enter func %s", __func__);
 	if (NULL == storage || NULL == block_buf) {
 		return -1;
@@ -135,21 +144,23 @@ int read_zblock(struct back_storage *storage, uint64_t storage_address,
 	int ret = 0;
 	uint32_t offset = get_offset(storage_address);
 	const char segfile_name[SEGMENT_FILE_NAME_MAX];
-	ret = build_segfile_name(get_segno(storage_address), (char *) segfile_name);
+	ret = build_segfile_name(get_segno(storage_address), \
+	(char *)segfile_name);
 	if (-1 == ret) {
 		HLOG_ERROR("build_segfile_name error");
 		ret = -1;
 		goto out;
 	}
 
-	bs_file_t file = storage->bs_file_open(storage, segfile_name, BS_READONLY);
+	bs_file_t file = storage->bs_file_open(storage, segfile_name, \
+		BS_READONLY);
 	if (file == NULL) {
 		HLOG_ERROR("can not open segment file %s", segfile_name);
 		ret = -1;
 		goto out;
 	}
 
-	//char * block = (char*)g_malloc0(block_size);
+	//char * block = (char *)g_malloc0(block_size);
 	//if (NULL == block) {
 	//    HLOG_ERROR("Allocate Error!");
 	//    block = NULL;
@@ -157,24 +168,24 @@ int read_zblock(struct back_storage *storage, uint64_t storage_address,
 	//}uu
 	uint32_t read_size;
 	HLOG_DEBUG("read for compress block");
-	size_t output_length = snappy_max_compressed_length(block_size)
-			+ sizeof(uint32_t);
-	HLOG_DEBUG("snappy_max_compressed_length :%d",
+	size_t output_length = snappy_max_compressed_length(block_size) \
+		+ sizeof(uint32_t);
+	HLOG_DEBUG("snappy_max_compressed_length :%d", \
 			output_length - sizeof(uint32_t));
 	char *buff = (char*) alloca(output_length);
-	read_size = storage->bs_file_pread(storage,file,
+	read_size = storage->bs_file_pread(storage,file, \
 			buff, output_length, offset);
 	HLOG_DEBUG("compressed_length of read size :%d", read_size);
-	uint32_t size = *(uint32_t*) buff;
+	uint32_t size = *(uint32_t *) buff;
 	HLOG_DEBUG("compressed_length of block:%d", size);
 	uint32_t uncompressed_length;
 	g_assert(snappy_uncompress(buff + sizeof(uint32_t), size, block_buf,
 					&uncompressed_length) == SNAPPY_OK);
 	HLOG_DEBUG("uncompressed_length of block:%d", uncompressed_length);
 	if (uncompressed_length != block_size) {
-		HLOG_ERROR(
-				"bs_file_pread's size:%d is not equal to block_size:%d, at offset:%u",
-				read_size, block_size, offset);
+		HLOG_ERROR("bs_file_pread's size:%d is not equal to \
+			block_size:%d, at offset:%u", read_size, 
+			block_size, offset);
 		ret = -1;
 		goto out;
 	}
@@ -193,54 +204,55 @@ int read_zblock(struct back_storage *storage, uint64_t storage_address,
  * hdfs://localhost/tmp/testenv/testfs
  * hdfs://192.168.0.1:8020/tmp/testenv/testfs
  * */
-int parse_from_uri(const char *uri, char ** head, char** hostname ,char** dir,char** fs_name,int* port)
+int parse_from_uri(const char *uri, char ** head, char** hostname , \
+		char** dir, char** fs_name, int* port)
 {
 	//HLOG_DEBUG("enter func %s", __func__);
-    gchar **v=NULL;
-    gchar **v1=NULL;
-    gchar **v2=NULL;
-    char *pre_uri = g_dirname(uri);
-    *fs_name = g_strdup((char *) g_path_get_basename (uri));
-    v = g_strsplit(pre_uri,"://",2);
+	gchar **v=NULL;
+        gchar **v1=NULL;
+        gchar **v2=NULL;
+        char *pre_uri = g_dirname(uri);
+        *fs_name = g_strdup((char *) g_path_get_basename (uri));
+        v = g_strsplit(pre_uri,"://", 2);
 	g_free(pre_uri); 
-    if(g_strv_length(v)!=2){
-       g_strfreev(v);
-       return -1; 
-    }
-    *head = g_strdup(v[0]);
+        if (g_strv_length(v) != 2) {
+        g_strfreev(v);
+        return -1; 
+        }
+        *head = g_strdup(v[0]);
         
-    if( v[1][0] == '/' ){
+        if (v[1][0] == '/' ) {
         //HLOG_DEBUG("default localhost for hostname\n");
         *hostname = g_strdup("default");
         *dir = g_strdup(v[1]);
         *port = 0; 
-    }else{
-        v1 = g_strsplit(v[1],"/",2);
-        if(g_strv_length(v1) < 2){
+        } else {
+        v1 = g_strsplit(v[1], "/", 2);
+        if (g_strv_length(v1) < 2) {
            g_strfreev(v);
            g_strfreev(v1);
            return -1;
         }
-        v2 = g_strsplit(v1[0],":",2);
-        if(g_strv_length(v2)!=2){
+        v2 = g_strsplit(v1[0], ":", 2);
+        if (g_strv_length(v2) != 2) {
            *hostname = g_strdup(v1[0]);
-		   char _dir[128];
-		   memset(_dir, 0, 128);
-		   sprintf(_dir, "%s%s", "/", v1[1]);
+		char _dir[128];
+		memset(_dir, 0, 128);
+		sprintf(_dir, "%s%s", "/", v1[1]);
            *dir = g_strdup(_dir);
            *port = 8020;
-        }else{
+        } else {
            *hostname = g_strdup(v2[0]);
 		   char _dir[128];
 		   memset(_dir, 0, 128);
 		   sprintf(_dir, "%s%s", "/", v1[1]);
            *dir = g_strdup(_dir);
            *port = atoi(v2[1]);
-        }
-    }
-    g_strfreev(v);
-    g_strfreev(v1);
-    g_strfreev(v2);
+              }
+       }
+       g_strfreev(v);
+       g_strfreev(v1);
+       g_strfreev(v2);
 	//HLOG_DEBUG("leave func %s", __func__);
-    return 0;
+       return 0;
 }

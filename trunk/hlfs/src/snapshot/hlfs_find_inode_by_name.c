@@ -1,9 +1,9 @@
 /*
-  *  Copyright (C) 2012 By Kelvin <kelvin.xupt@gmail.com>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License version 2 as published by
-  *  the Free Software Foundation.
+ *  Copyright (C) 2012 By Kelvin <kelvin.xupt@gmail.com>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License version 2 as published by
+ *  the Free Software Foundation.
  */
 
 #include <glib.h>
@@ -13,7 +13,8 @@
 #include "snapshot.h"
 #include "hlfs_log.h"
 
-int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_addr) {
+int hlfs_find_inode_by_name(const char *uri, const char *sname, \
+		uint64_t *inode_addr) {
 	int ret = 0;
 	struct snapshot *ss = NULL;
 	struct back_storage *storage = init_storage_handler(uri);
@@ -22,7 +23,8 @@ int hlfs_find_inode_by_name(const char *uri, const char *sname, uint64_t *inode_
 		ret = -1;
 		goto out;
 	}
-	if (0 > (ret = load_snapshot_by_name(storage, SNAPSHOT_FILE, &ss, sname))) {
+	if (0 > (ret = load_snapshot_by_name(storage, SNAPSHOT_FILE, \
+					&ss, sname))) {
 		HLOG_ERROR("load ss by name error");
 		g_free(ss);
 		ret = -1;

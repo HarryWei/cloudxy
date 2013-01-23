@@ -1,9 +1,9 @@
 /*
-  *  Copyright (C) 2012 KangHua <kanghua151@gmail.com>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License version 2 as published by
-  *  the Free Software Foundation.
+ *  Copyright (C) 2012 KangHua <kanghua151@gmail.com>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License version 2 as published by
+ *  the Free Software Foundation.
  */
 
 #ifndef _COMM_DEFINE_H_
@@ -34,14 +34,14 @@ extern uint32_t HBLOCK_SIZE;
  * error number before you do this, which can make sure your error 
  * number is ok for all the developers, thanks.
  */
-#define EHLFS_MEM			((int) (1)) 		/* memory error in hlfs */
-#define EHLFS_NOFILE 		((int) (2)) 		/* no this file */
-#define EHLFS_FUNC			((int) (3)) 		/* invoke func error */
-#define EHLFS_SSEXIST		((int) (4)) 		/* snapshot name exist */
-#define EHLFS_SSNOTEXIST 	((int) (5))		/* snapshot name not exist */
-#define EHLFS_PERM 			((int) (6)) 		/* Permssion deny*/
-#define EHLFS_PARAM			((int) (7)) 		/* Parameter error*/
-#define EHLFS_NOITEM		((int) (8)) 		/* NO item in one data structure*/
-#define EHLFS_UNKNOWN		((int) (99)) 		/* unknown error */
+#define EHLFS_MEM	((int) (1)) 		/* memory error in hlfs */
+#define EHLFS_NOFILE	((int) (2)) 		/* no this file */
+#define EHLFS_FUNC	((int) (3)) 		/* invoke func error */
+#define EHLFS_SSEXIST	((int) (4)) 		/* snapshot name exist */
+#define EHLFS_SSNOTEXIST	((int) (5))	/* snapshot name not exist */
+#define EHLFS_PERM 	((int) (6)) 		/* Permssion deny*/
+#define EHLFS_PARAM	((int) (7)) 		/* Parameter error*/
+#define EHLFS_NOITEM	((int) (8))	/* NO item in one data structure*/
+#define EHLFS_UNKNOWN	((int) (99)) 		/* unknown error */
 
 #endif

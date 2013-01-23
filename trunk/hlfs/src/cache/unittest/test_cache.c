@@ -20,16 +20,17 @@
 #define BLK_NO 200
 
 typedef struct {
-    HLFS_CTRL *ctrl;
+	HLFS_CTRL *ctrl;
 	char *config_file;
 } Fixture;
 
 Fixture fixture;
 char *hlfs_path = "local:///tmp/testenv/testfs";
 
-int gen_conf_file(char *path, gboolean enable, char *storage_uri, uint64_t block_size, \
-		uint32_t cache_size, uint32_t flush_interval, uint32_t flush_trigger_level, \
-		uint32_t flush_once_size)
+int gen_conf_file(char *path, gboolean enable, \
+		char *storage_uri, uint64_t block_size, \
+		uint32_t cache_size, uint32_t flush_interval, \
+		uint32_t flush_trigger_level, uint32_t flush_once_size)
 {
 	g_message("enter func : %s", __func__);
 
@@ -42,10 +43,10 @@ int gen_conf_file(char *path, gboolean enable, char *storage_uri, uint64_t block
 		return -1;
 	}
 	GKeyFile *key_file = g_key_file_new();
-    g_key_file_set_string(key_file, "STORAGE", "storage_uri", storage_uri);
-    g_key_file_set_boolean(key_file, "CACHE", "is_enable_cache", enable);
-    g_key_file_set_uint32(key_file, "CACHE", "block_size", block_size);
-    g_key_file_set_uint32(key_file, "CACHE", "cache_size", cache_size);
+	g_key_file_set_string(key_file, "STORAGE", "storage_uri", storage_uri);
+	g_key_file_set_boolean(key_file, "CACHE", "is_enable_cache", enable);
+	g_key_file_set_uint32(key_file, "CACHE", "block_size", block_size);
+	g_key_file_set_uint32(key_file, "CACHE", "cache_size", cache_size);
 	g_key_file_set_uint32(key_file, "CACHE", "flush_interval", flush_interval);
 	g_key_file_set_uint32(key_file, "CACHE", "flush_trigger_level", flush_trigger_level);
 	g_key_file_set_uint32(key_file, "CACHE", "flush_once_size", flush_once_size);
@@ -74,7 +75,8 @@ void case_setup()
 	fixture.config_file = (char *)g_malloc(20);
 	sprintf(fixture.config_file, "./hlfsrc");
 	int ret = 0;
-	ret = gen_conf_file(fixture.config_file, TRUE, hlfs_path, 8192, 1024, 10, 80, 100);
+	ret = gen_conf_file(fixture.config_file, TRUE, hlfs_path, \
+			8192, 1024, 10, 80, 100);
 	g_assert(ret == 0);
 	g_message("gen config file succ");
 	fixture.ctrl = init_hlfs_by_config(fixture.config_file);
@@ -85,13 +87,13 @@ void case_setup()
 		return;
 	}
 	g_assert(fixture.ctrl->cctrl != NULL);
-    g_assert(fixture.ctrl != NULL);
+	g_assert(fixture.ctrl != NULL);
 	g_message("setup done");
 }
 
 void test_cache()
 {
-/*---init HLFS with cache on by conf file---*/
+	/*---init HLFS with cache on by conf file---*/
 	int ret = 0;
 	g_message("test begin...");
 	g_assert(fixture.ctrl->cctrl->block_size == 8192);
@@ -103,12 +105,12 @@ void test_cache()
 	g_message("height of cache blocks:%d", ret);
 	g_assert(ret == 1024);
 	g_assert(fixture.ctrl->cctrl->dirty_block != NULL);
-    g_assert(g_queue_get_length(fixture.ctrl->cctrl->dirty_block) == 0);
+	g_assert(g_queue_get_length(fixture.ctrl->cctrl->dirty_block) == 0);
 	g_assert(fixture.ctrl->cctrl->block_map != NULL);
 	g_assert(fixture.ctrl->cctrl->flush_waken_cond != NULL);
 	g_message("initializing HLFS successfully");
 
-/*---Write something and check when flush---*/
+	/*---Write something and check when flush---*/
 	uint64_t pos = 0;
 	int loop = 0;
 	char *buf = (char *)g_malloc0(8192);
@@ -124,9 +126,10 @@ void test_cache()
 		}
 		g_message("write the %dth blk", loop);
 		pos += BLK_NO;
-		if (!g_file_test("/tmp/testenv/testfs/0.seg", G_FILE_TEST_EXISTS)) {
+		if (!g_file_test("/tmp/testenv/testfs/0.seg",\
+					G_FILE_TEST_EXISTS)) {
 			g_message("file not exists");
-		} else {
+		}else{
 			memset(_stat, 0, sizeof(_stat));
 			ret = stat("/tmp/testenv/testfs/0.seg", _stat);
 			if (ret < 0) {
@@ -137,7 +140,7 @@ void test_cache()
 			g_message("size of 0.seg:%d", _stat->st_size);
 			g_message("inode of 0.seg:%d", _stat->st_ino);
 			g_message("atime of 0.seg:%d", _stat->st_atime);
-		//sleep(1);
+			//sleep(1);
 		}
 	}
 }
@@ -153,7 +156,7 @@ void case_teardown()
 	g_message("size of 0.seg:%d", _stat->st_size);
 	g_message("inode of 0.seg:%d", _stat->st_ino);
 	g_message("atime of 0.seg:%d", _stat->st_atime);
-		//sleep(1);
+	//sleep(1);
 	ret = deinit_hlfs(fixture.ctrl);
 	system("rm -rf /tmp/testenv");
 	system("rm ./hlfsrc");
@@ -166,11 +169,7 @@ int main(int argc, char **argv) {
 		g_message("log4c init error!");
 	}
 	g_test_init(&argc, &argv, NULL);
-	g_test_add("/misc/cache", 
-				Fixture, 
-				NULL,
-				case_setup, 
-				test_cache, 
-				case_teardown);
+	g_test_add("/misc/cache", Fixture, NULL, case_setup, test_cache, \
+			case_teardown);
 	return g_test_run();
 }

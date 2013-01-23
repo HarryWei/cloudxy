@@ -1,7 +1,6 @@
 # CMAKE by Zhang bo.
 # CMAKE updated by Harry Wei.
 # Time & Place: 2011, 3, 26, @ linux lab in xiyou.
-# Just for our LHDFS project.
 
 # This *ON* can let cmake procedure output into console.
 # _So_that we can debug it.
@@ -12,29 +11,24 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 SET(WORK_HOME   $ENV{PWD}/..)
 MESSAGE(STATUS "This is dir " ${WORK_HOME})
-#SET(WORK_HOME   /home/kanghua/workshop3.bak/hlfs)
-# include these files for building.
 SET(HADOOP_HOME ${WORK_HOME}/3part/hadoop)
 SET(LOG_HOME ${WORK_HOME}/3part/log)
 SET(SNAPPY_HOME ${WORK_HOME}/3part/snappy)
-#MESSAGE(STATUS "This is dir " ${HADOOP_HOME})
 #SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
-#SET(JAVA_HOME 	/usr/lib/jvm/java-6-openjdk)
+SET(JAVA_HOME 	/usr/lib/jvm/java-7-openjdk-i386)
 #SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk.x86_64)
-#SET(JAVA_HOME /opt/jdk1.7.0_05)
-SET(JAVA_HOME /mnt/jdk1.7.0_02)
 INCLUDE_DIRECTORIES(
-       /usr/include/glib-2.0 
-       /usr/lib/glib-2.0/include 
-	   /usr/lib/i386-linux-gnu/glib-2.0/include
-       ${JAVA_HOME}/include/
-       ${JAVA_HOME}/include/linux
-       ${HADOOP_HOME}/include
-       ${LOG_HOME}/include
-       ${SNAPPY_HOME}/include
-       include
-       .)
-# Use SRCS present all the sources.
+		/usr/include/glib-2.0 
+		/usr/lib/glib-2.0/include 
+		/usr/lib/i386-linux-gnu/glib-2.0/include
+		${JAVA_HOME}/include
+		${JAVA_HOME}/include/linux
+		${HADOOP_HOME}/include
+		${LOG_HOME}/include
+		${SNAPPY_HOME}/include
+		include
+		.)
+# Use SRCS to save all the sources.
 # If it has subdirectory, use following commands for adding.
 
 #AUX_SOURCE_DIRECTORY(utils SRCS)
@@ -61,7 +55,7 @@ AUX_SOURCE_DIRECTORY(icache LHFSSRCS)
 AUX_SOURCE_DIRECTORY(clone LHFSSRCS)
 
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    SET(LIBRARY_OUTPUT_PATH ${WORK_HOME}/output/lib32)
+	SET(LIBRARY_OUTPUT_PATH ${WORK_HOME}/output/lib32)
     LINK_DIRECTORIES(
         ${HADOOP_HOME}/lib32
         ${LOG_HOME}/lib32
@@ -186,8 +180,4 @@ SET_TARGET_PROPERTIES(tapdisk_ops PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototyp
 #TARGET_LINK_LIBRARIES(tapdisk_ops -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(tools tapdisk_ops)
 
-#---------------------- Make Test ------------------------------#
-
-
 #--------------------- Make all end -----------------------------#
-ADD_DEPENDENCIES(all hlfs mkfs.hlfs test1)

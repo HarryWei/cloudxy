@@ -1,4 +1,3 @@
 #!/bin/bash
 
-cscope -Rbq
-ctags -R
+cscope -Rbq && ctags -R

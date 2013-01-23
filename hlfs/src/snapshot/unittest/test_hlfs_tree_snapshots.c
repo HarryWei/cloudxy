@@ -26,33 +26,36 @@ hlfs_tree_snapshots_setup(Fixture *fixture, const void *data) {
 	const char *test_dir = (const char *)data;
 	HLOG_DEBUG("test env dir is %s", test_dir);
 	char *fs_dir = g_build_filename(test_dir, "testfs", NULL);
-//	g_assert(g_mkdir(fs_dir, 0700) == 0);
+	//	g_assert(g_mkdir(fs_dir, 0700) == 0);
 	char *uri = g_malloc0(128);
 	g_assert(uri != NULL);
 	snprintf(uri, 128, "%s%s", "local://", fs_dir);
-//	char *uri = g_build_path(tmp, fs_dir, NULL);
+	//	char *uri = g_build_path(tmp, fs_dir, NULL);
 	HLOG_DEBUG("uri is %s", uri);
 	pid_t status;
 	const char cmd[256];
 	memset((char *) cmd, 0, 256);
 	sprintf((char *) cmd, "%s %s %s %s %d %s %d %s %d", "../mkfs.hlfs", 
-								"-u", uri,
-								"-b", 8192,
-								"-s", 67108864,
-								"-m", 1024);
+			"-u", uri,
+			"-b", 8192,
+			"-s", 67108864,
+			"-m", 1024);
 	HLOG_DEBUG("cmd is [%s]", cmd);
 	status = system(cmd);
 #if 0
 	GKeyFile *sb_keyfile = g_key_file_new();
 	g_key_file_set_string(sb_keyfile, "METADATA", "uri", uri);
 	g_key_file_set_integer(sb_keyfile, "METADATA", "block_size", 8196);
-	g_key_file_set_integer(sb_keyfile, "METADATA", "segment_size", 67108864);
-	g_key_file_set_integer(sb_keyfile, "METADATA", "max_fs_size", 671088640);
+	g_key_file_set_integer(sb_keyfile, "METADATA", \
+			"segment_size", 67108864);
+	g_key_file_set_integer(sb_keyfile, "METADATA", \
+			"max_fs_size", 671088640);
 	gchar *content = g_key_file_to_data(sb_keyfile, NULL, NULL);
 	char *sb_file_path = g_build_filename(fs_dir, "superblock", NULL);
 	g_print("sb file path is %s\n", sb_file_path);
 	GError *error = NULL;
-	if (TRUE != g_file_set_contents(sb_file_path, content, strlen(content) + 1, &error)) {
+	if (TRUE != g_file_set_contents(sb_file_path, content, \
+				strlen(content) + 1, &error)) {
 		g_print("error msg is %s", error->message);
 		error = NULL;
 	}
@@ -63,8 +66,8 @@ hlfs_tree_snapshots_setup(Fixture *fixture, const void *data) {
 	g_assert(fixture->ctrl != NULL);
 	int ret = hlfs_open(fixture->ctrl, 1);
 	g_assert(ret == 0);
-//	g_key_file_free(sb_keyfile);
-//	g_free(sb_file_path);
+	//	g_key_file_free(sb_keyfile);
+	//	g_free(sb_file_path);
 	g_free(fs_dir);
 	return ;
 }
@@ -98,8 +101,9 @@ do_snapshot(Fixture *fixture, int i) {
 		HLOG_DEBUG("%d buffer is [%s]", i, buffer);
 		int ret = hlfs_take_snapshot(fixture->ctrl, buffer);
 		g_assert(ret == 0);
-		HLOG_DEBUG("fixture->ctrl->imap_entry.inode_addr is %llu, inode_no is %llu, \
-				iblock is %llu, doubly_iblock is %llu, triply_iblock is %llu", 
+		HLOG_DEBUG("fixture->ctrl->imap_entry.inode_addr is %llu, \
+				inode_no is %llu, iblock is %llu, doubly_iblock is %llu, \
+				triply_iblock is %llu", 
 				fixture->ctrl->imap_entry.inode_addr, 
 				fixture->ctrl->imap_entry.inode_no, 
 				fixture->ctrl->inode.iblock, 
@@ -107,7 +111,8 @@ do_snapshot(Fixture *fixture, int i) {
 				fixture->ctrl->inode.triply_iblock);
 		int j = 0;
 		for (j = 0; j < 12; j++) {
-			HLOG_DEBUG("fixture->ctrl->inode.blocks[%d] is %llu", j, fixture->ctrl->inode.blocks[j]);
+			HLOG_DEBUG("fixture->ctrl->inode.blocks[%d] is %llu", \
+					j, fixture->ctrl->inode.blocks[j]);
 		}
 	} else if (5 == i) {
 		sprintf(buffer, "%s", "T6");
@@ -345,7 +350,7 @@ test_hlfs_tree_snapshots(Fixture *fixture, const void *data) {
 		offset += REQ_SIZE;
 		i += 1;
 	}
-	
+
 	HLOG_DEBUG("Test callback and the 1 tree fork >>>>>>");
 	hlfs_close(fixture->ctrl);
 	int ret = hlfs_open(fixture->ctrl, 1);
@@ -410,7 +415,7 @@ test_hlfs_tree_snapshots(Fixture *fixture, const void *data) {
 		offset += REQ_SIZE;
 		i += 1;
 	}
-	
+
 	ret = 0;
 	HLOG_DEBUG("Test callback and the 4 tree fork >>>>>>");
 	hlfs_close(fixture->ctrl);
@@ -464,12 +469,12 @@ hlfs_tree_snapshots_tear_down(Fixture *fixture, const void *data) {
 		g_free(tmp_file);
 		info += 1;
 	}
-//	char *sb_file = g_build_filename(fs_dir, "superblock", NULL);
-//	g_assert(g_remove(sb_file) == 0);
+	//	char *sb_file = g_build_filename(fs_dir, "superblock", NULL);
+	//	g_assert(g_remove(sb_file) == 0);
 	g_assert(g_remove(fs_dir) == 0);
 	g_free(fixture->uri);
 	g_free(fs_dir);
-//	g_free(sb_file);
+	//	g_free(sb_file);
 	g_free(storage);
 	g_free(infos);
 #endif
@@ -480,16 +485,16 @@ hlfs_tree_snapshots_tear_down(Fixture *fixture, const void *data) {
 	return;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv){
 	if (log4c_init()) {
 		g_message("log4c init error!");
 	}
 	g_test_init(&argc, &argv, NULL);
 	g_test_add("/misc/hlfs_take_snapshot", 
-				Fixture, 
-				g_get_current_dir(),
-				hlfs_tree_snapshots_setup, 
-				test_hlfs_tree_snapshots, 
-				hlfs_tree_snapshots_tear_down);
+			Fixture, 
+			g_get_current_dir(),
+			hlfs_tree_snapshots_setup, 
+			test_hlfs_tree_snapshots, 
+			hlfs_tree_snapshots_tear_down);
 	return g_test_run();
 }

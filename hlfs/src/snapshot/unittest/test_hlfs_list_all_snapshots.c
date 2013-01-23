@@ -38,18 +38,18 @@ static void test_no_ss_exist(Fixture *fixture, const void *data)
 	g_message("enter function test_ssfile_not_exist");
 	struct back_storage *storage = NULL;
 	storage = init_storage_handler(fixture->uri);
-	
+
 	if (storage->bs_file_is_exist(storage, SS_FILE) == 0) {
 		if (storage->bs_file_delete(storage, SS_FILE) < 0) {
 			g_message("snapshot.txt exist but rm failed");
 			return;
 		}
 	}
-	
+
 	char *res = NULL;
 	int ret = hlfs_list_all_snapshots(fixture->uri, &res);
 	g_assert_cmpint(ret, ==, -3);
-	
+
 	g_message("leave function test_ssfile_not_exist");
 	g_free(res);
 }
@@ -95,7 +95,7 @@ void test_ss_exist(Fixture *fixture, const void *data)
 	char *res = NULL;
 	int ret = hlfs_list_all_snapshots(fixture->uri, &res);
 	g_assert_cmpint(ret, >, 0);
-	
+
 	g_message("%s", res); 
 	g_free(content);
 	g_free(buf);
@@ -117,16 +117,16 @@ int main(int argc, char **argv) {
 	Fixture *fixture = NULL;
 	g_test_init(&argc, &argv, NULL);
 	g_test_add("/misc/hlfs_list_all/no_file", 
-				Fixture, 
-				NULL,
-				test_setup, 
-				test_no_ss_exist, 
-				test_tear_down);
+			Fixture, 
+			NULL,
+			test_setup, 
+			test_no_ss_exist, 
+			test_tear_down);
 	g_test_add("/misc/hlfs_list_all/have_file", 
-				Fixture, 
-				NULL,
-				test_setup, 
-				test_ss_exist,
-				test_tear_down);
+			Fixture, 
+			NULL,
+			test_setup, 
+			test_ss_exist,
+			test_tear_down);
 	return g_test_run();
 }

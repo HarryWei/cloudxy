@@ -1,4 +1,3 @@
-
  /*
    *  Copyright (C) 2012 KangHua<kanghua151@gmail.com>
    *  
@@ -149,7 +148,7 @@ static int load_snapshot_from_text(struct snapshot **ss, const char *buf, int *f
 
 int load_all_snapshot(struct back_storage *storage,const char* snapshot_file,GHashTable *ss_hashtable)
 {
-	//HLOG_DEBUG("enter func %s", __func__);
+	HLOG_DEBUG("enter func %s", __func__);
 	int ret = 0;
     char *contents = NULL;
     uint32_t size;
@@ -200,7 +199,7 @@ out:
 	g_strfreev(lines);
 	g_free(contents);
     if(to_remove_ss_list!=NULL) g_list_free(to_remove_ss_list);
-	//HLOG_DEBUG("leave func %s", __func__);
+	HLOG_DEBUG("leave func %s", __func__);
 	return ret;
 }
 

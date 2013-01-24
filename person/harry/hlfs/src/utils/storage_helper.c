@@ -703,10 +703,3 @@ out:
 	HLOG_DEBUG("leave func %s", __func__);
     return ret;
 }
-
-
-
-
-
-
-

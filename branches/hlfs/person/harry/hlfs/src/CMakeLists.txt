@@ -19,10 +19,10 @@ SET(LOG_HOME ${WORK_HOME}/3part/log)
 SET(SNAPPY_HOME ${WORK_HOME}/3part/snappy)
 #MESSAGE(STATUS "This is dir " ${HADOOP_HOME})
 #SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
-#SET(JAVA_HOME 	/usr/lib/jvm/java-6-openjdk)
+SET(JAVA_HOME 	/usr/lib/jvm/java-6-openjdk)
 #SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk.x86_64)
 #SET(JAVA_HOME /opt/jdk1.7.0_05)
-SET(JAVA_HOME /mnt/jdk1.7.0_02)
+#SET(JAVA_HOME /mnt/jdk1.7.0_02)
 INCLUDE_DIRECTORIES(
        /usr/include/glib-2.0 
        /usr/lib/glib-2.0/include 
@@ -187,7 +187,14 @@ SET_TARGET_PROPERTIES(tapdisk_ops PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototyp
 ADD_DEPENDENCIES(tools tapdisk_ops)
 
 #---------------------- Make Test ------------------------------#
-
+ADD_CUSTOM_TARGET(test)
+SET(TESTSRCS ../test/test_base.c)
+ADD_EXECUTABLE(test_base ${TESTSRCS})
+TARGET_LINK_LIBRARIES(test_base ${TOOLLIBS})
+SET_TARGET_PROPERTIES(test_base PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototypes")
+#ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+#TARGET_LINK_LIBRARIES(tapdisk_ops -fprofile-arcs -ftest-coverage)
+ADD_DEPENDENCIES(test test_base)
 
 #--------------------- Make all end -----------------------------#
-ADD_DEPENDENCIES(all hlfs mkfs.hlfs test1)
+ADD_DEPENDENCIES(all libhlfs tools test)

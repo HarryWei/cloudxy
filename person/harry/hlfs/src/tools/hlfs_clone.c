@@ -13,6 +13,7 @@
 #include "comm_define.h"
 #include "hlfs_log.h"
 #include "snapshot.h"
+
 static gchar *son_uri = NULL;
 static gchar *father_uri_with_snapshot = NULL;
 static gchar *father_uri =NULL;
@@ -37,8 +38,6 @@ error_func(GOptionContext *context, GOptionGroup *group,
         exit(EXIT_FAILURE);
     }
 }
-
-
 
 int main(int argc, char *argv[])
 {
@@ -150,6 +149,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	inode_addr = ss->inode_addr;
+	g_message("snapshot %s's inode_addr is %llu", father_snapshot, inode_addr);
 	g_free(ss);
 	
 #endif 
@@ -157,7 +157,9 @@ int main(int argc, char *argv[])
     uint32_t    father_block_size = 0;
     uint64_t    father_max_fs_size = 0;
     uint32_t    father_is_compress = 0;
-    if (0 != read_fs_meta(father_storage,&father_seg_size,&father_block_size,&father_max_fs_size,&father_is_compress)){
+    if (0 != read_fs_meta(father_storage,
+						&father_seg_size,&father_block_size,
+						&father_max_fs_size,&father_is_compress)){
 	  g_message("can not read father uri meta");	
 	  return -1;	
     }
@@ -168,8 +170,9 @@ int main(int argc, char *argv[])
     if (son_block_size != father_block_size || father_seg_size!=son_seg_size ||father_is_compress!=son_is_compress){
 	  g_message("sorry , now father segsize block size compress flag must same as son!!!");
 	  return -1;	
-    }		
-    g_key_file_set_uint64(sb_keyfile,"METADATA","from_segno",segno+1);
+    }
+	g_message("segno is %d", segno);
+    g_key_file_set_uint64(sb_keyfile,"METADATA","from_segno",(guint64)(segno+1));
     g_key_file_set_string(sb_keyfile,"METADATA","father_uri",father_uri);
     g_key_file_set_string(sb_keyfile,"METADATA","father_ss",father_snapshot);	
     g_key_file_set_uint64(sb_keyfile,"METADATA","snapshot_inode",inode_addr);

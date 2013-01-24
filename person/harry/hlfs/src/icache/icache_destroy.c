@@ -40,7 +40,7 @@ int icache_destroy(ICACHE_CTRL *icache_ctrl){
     if (icache_ctrl->iblock_cache) {
 		int i = 0;
         while (g_trash_stack_height(&icache_ctrl->iblock_cache) != 0) {
-			HLOG_DEBUG("g_trash_stack_height: %d", g_trash_stack_height(&icache_ctrl->iblock_cache));
+			//HLOG_DEBUG("g_trash_stack_height: %d", g_trash_stack_height(&icache_ctrl->iblock_cache));
 			iblock_t *_iblock = (iblock_t *)g_trash_stack_pop(&icache_ctrl->iblock_cache);
 			if (_iblock->iblock != NULL) 
 				g_free(_iblock->iblock);
@@ -52,7 +52,7 @@ int icache_destroy(ICACHE_CTRL *icache_ctrl){
     g_mutex_free (icache_ctrl->icache_mutex);
   
 	g_free(icache_ctrl);
-	//HLOG_DEBUG("--Leaving func %s", __func__);
+	HLOG_DEBUG("--Leaving func %s", __func__);
 	return ret;
 }
 

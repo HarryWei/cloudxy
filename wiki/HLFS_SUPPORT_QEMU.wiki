@@ -40,8 +40,8 @@ mkdir /tmp/testenv
 }}}
   * 状态查询
 {{{
-./qemu-img info hlfs:local:///tmp/testenv/testfs 或
-./qemu-img info hlfs:hdfs:///tmp/testenv/testfs 
+./qemu-img info -f hlfs hlfs:local:///tmp/testenv/testfs 或
+./qemu-img info -f hlfs hlfs:hdfs:///tmp/testenv/testfs 
 }}}
   * 快照相关操作
 {{{

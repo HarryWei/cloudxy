@@ -186,7 +186,7 @@ int main(int argc, char *argv[]){
 				must same as son!!!");
 		return -1;	
 	}		
-	g_key_file_set_uint64(sb_keyfile, "METADATA", "from_segno", segno + 1);
+	g_key_file_set_uint64(sb_keyfile, "METADATA", "from_segno", (guint64) (segno + 1));
 	g_key_file_set_string(sb_keyfile, "METADATA", "father_uri", father_uri);
 	g_key_file_set_string(sb_keyfile, "METADATA", "father_ss", \
 			father_snapshot);	

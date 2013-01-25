@@ -1,13 +1,15 @@
-From 0272239d16edca5c381ba7c48f52cf87aad241f1 Mon Sep 17 00:00:00 2001
-From: Wang Sen <senwang@linux.vnet.ibm.com>
-Date: Fri, 9 Nov 2012 11:12:49 +0800
-Subject: [PATCH] Support HLFS
+Signed-off-by: Kanghua <kanghua151@gmail.com>
+Signed-off-by: Wang Sen <senwang@linux.vnet.ibm.com>
+Signed-off-by: Harry Wei <harryxiyou@gmail.com>
+Tested-by: Harry Wei <harryxiyou@gmail.com>
+Date: Thu, 24 Jan 2013 16:20:22 +0800
+Subject: [PATCH] Fix HLFS patch for QEMU
 
 ---
  block/Makefile.objs |    2 +-
- block/hlfs.c        |  502 +++++++++++++++++++++++++++++++++++++++++++++++++++
- configure           |   69 +++++--
- 3 files changed, 560 insertions(+), 13 deletions(-)
+ block/hlfs.c        |  508 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ configure           |   69 ++++++--
+ 3 files changed, 566 insertions(+), 13 deletions(-)
  create mode 100644 block/hlfs.c
 
 diff --git a/block/Makefile.objs b/block/Makefile.objs
@@ -25,10 +27,10 @@ index 7f01510..da06c37 100644
  block-obj-$(CONFIG_RBD) += rbd.o
 diff --git a/block/hlfs.c b/block/hlfs.c
 new file mode 100644
-index 0000000..287c22b
+index 0000000..8223e25
 --- /dev/null
 +++ b/block/hlfs.c
-@@ -0,0 +1,502 @@
+@@ -0,0 +1,508 @@
 +/*
 + * Block driver for HLFS(HDFS-based Log-structured File System)
 + *
@@ -462,10 +464,16 @@ index 0000000..287c22b
 +static int hlbs_snapshot_list(BlockDriverState *bs, QEMUSnapshotInfo **psn_tab)
 +{
 +	BDRVHLBSState *s = bs->opaque;
-+	int num_entries;
++	/*Fixed: num_entries must be inited 0*/
++	int num_entries = 0;
 +	struct snapshot *snapshots = hlfs_get_all_snapshots(s->hctrl->storage->uri,
 +		&num_entries);
-+	printf("snapshot count:%d\n",num_entries);
++	dprintf("snapshot count:%d\n",num_entries);
++	/*Fixed: snapshots is NULL condition*/
++	if (NULL == snapshots) {
++		dprintf("snapshots is NULL, may be no snapshots, check it please!\n");
++		return num_entries;
++	}
 +	QEMUSnapshotInfo *sn_tab = NULL;
 +	struct snapshot * snapshot = snapshots;
 +	sn_tab = g_malloc0(num_entries * sizeof(*sn_tab));
@@ -532,7 +540,7 @@ index 0000000..287c22b
 +
 +block_init(bdrv_hlbs_init);
 diff --git a/configure b/configure
-index 7290f50..1599600 100755
+index 994f731..00fc7e1 100755
 --- a/configure
 +++ b/configure
 @@ -223,6 +223,7 @@ libiscsi=""
@@ -563,7 +571,7 @@ index 7290f50..1599600 100755
  echo ""
  echo "NOTE: The object files are built at the place where configure is launched"
  exit 1
-@@ -2805,24 +2812,57 @@ fi
+@@ -2819,24 +2826,57 @@ fi
  ##########################################
  
  ##########################################
@@ -633,7 +641,7 @@ index 7290f50..1599600 100755
  # check if we have madvise
  
  madvise=no
-@@ -3232,6 +3272,7 @@ echo "build guest agent $guest_agent"
+@@ -3250,6 +3290,7 @@ echo "build guest agent $guest_agent"
  echo "seccomp support   $seccomp"
  echo "coroutine backend $coroutine_backend"
  echo "GlusterFS support $glusterfs"
@@ -641,7 +649,7 @@ index 7290f50..1599600 100755
  
  if test "$sdl_too_old" = "yes"; then
  echo "-> Your SDL version is too old - please upgrade to have SDL support"
-@@ -4125,6 +4166,10 @@ if test "$gprof" = "yes" ; then
+@@ -4149,6 +4190,10 @@ if test "$gprof" = "yes" ; then
    fi
  fi
  
@@ -653,5 +661,5 @@ index 7290f50..1599600 100755
    linker_script=""
  else
 -- 
-1.7.9.5
+1.7.0.4
 

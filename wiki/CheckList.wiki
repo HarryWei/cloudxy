@@ -16,7 +16,7 @@
 
 ==第三阶段==
 || *责任人* || *任务* || *完成情况* || *分享与讨论日志* || *备注* || 
-|| 贾威威   || 开发HLFS driver for Libvirt并测试;   || 进行中  || 未讨论 || 1, 开发HLFS driver for Libvirt并测试;<br>2, 测试工作需仔细认真对待(关乎HLFS集成Openstack的成功与否);  ||
+|| 贾威威   || 开发HLFS driver for Libvirt并测试;   || 进行中  || 未讨论 || 测试工作需仔细认真对待(关乎HLFS集成Openstack的成功与否);  ||
 
 
 ==注意事项==

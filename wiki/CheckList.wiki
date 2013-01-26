@@ -10,10 +10,12 @@
 || 贾威威   || 1,调查Openstack支持Sheepdog都需要对QEMU Libvirt等做了哪些改动;<br>2,调查Openstack支持iSCSI都需要做哪些改动;   || 调查完成   || 讨论完成 || 理解其支持的原理和机制，方便移植  ||
 
 ==第二阶段==
+|| *责任人* || *任务* || *完成情况* || *分享与讨论日志* || *备注* || 
 || 王森     || 修复目前使用QEMU的bug，完善iscsi驱动的功能（快照、获取容量） || 进行中  || 未讨论 ||  修复要细致，准确  ||
 || 贾威威   || 1, 测试(可能需要修改)HLFS patch for QEMU; <br> 2, 开发HLFS driver for Libvirt并测试;   || 任务1完成<br>任务2调整到下阶段完成   || 讨论完成 || 1, 理解HLFS driver for QEMU&&Libvirt;<br>2, 测试工作需仔细认真对待(关乎HLFS集成Openstack的成功与否);  ||
 
 ==第三阶段==
+|| *责任人* || *任务* || *完成情况* || *分享与讨论日志* || *备注* || 
 || 贾威威   || 开发HLFS driver for Libvirt并测试;   || 进行中  || 未讨论 || 1, 开发HLFS driver for Libvirt并测试;<br>2, 测试工作需仔细认真对待(关乎HLFS集成Openstack的成功与否);  ||
 
 

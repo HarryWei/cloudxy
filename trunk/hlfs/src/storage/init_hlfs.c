@@ -266,7 +266,7 @@ struct hlfs_ctrl *init_hlfs(const char *uri)
 			flush_trigger_level, flush_once_size); 
 	uint32_t iblock_size,icache_size, invalidate_trigger_level, \
 		invalidate_once_size;
-	iblock_size =  hlfs_ctrl->sb.block_size;
+	iblock_size = hlfs_ctrl->sb.block_size;
 	icache_size = DEF_ICACHE_SIZE;
 	invalidate_trigger_level = DEF_INVALIDATE_TRIGGER_LEVEL;
 	invalidate_once_size = DEF_INVALIDATE_ONCE_SIZE;

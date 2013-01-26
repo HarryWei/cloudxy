@@ -127,7 +127,6 @@ int main(int argc, char *argv[])
 	char *sb_file_path = g_build_filename(dir, fs_name, "superblock", NULL);
 	g_message("sb file path %s", sb_file_path);
 	bs_file_t file = storage->bs_file_create(storage, "superblock");
-	g_message("sb file path 1%s", sb_file_path);
 	//bs_file_t file = storage->bs_file_open(storage, \
 	"superblock", BS_WRITEABLE);
 	if (NULL == file) {
@@ -137,7 +136,6 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	g_message("sb file path 2 % s", sb_file_path);
 	int size = storage->bs_file_append(storage, file, (char *)data, \
 			strlen(data) + 1);
 	if (size != strlen(data) + 1) {

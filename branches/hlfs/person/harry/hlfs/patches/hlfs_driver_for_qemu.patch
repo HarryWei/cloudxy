@@ -60,7 +60,7 @@ index 0000000..8223e25
 +#undef dprintf
 +#ifdef DEBUG_HLBS
 +#define dprintf(fmt, args...) \
-+	do { 	\
++	do {	\
 +		fprintf(stdout, "%s %d: " fmt, __func__, __LINE__, ##args); \
 +	} while (0)
 +#else
@@ -80,14 +80,14 @@ index 0000000..8223e25
 + * Parse a filename.
 + *
 + * file name format must be one of the following:
-+ * 	1. [vdiname]
-+ * 	2. [vdiname]%[snapshot]
-+ * 	* vdiname format --
-+ * 	* local:///tmp/testenv/testfs
-+ * 	* hdfs:///tmp/testenv/testfs
-+ * 	* hdfs://localhost:8020/tmp/testenv/testfs
-+ * 	* hdfs://localhost/tmp/testenv/testfs
-+ * 	* hdfs://192.168.0.1:8020/tmp/testenv/testfs
++ *	1. [vdiname]
++ *	2. [vdiname]%[snapshot]
++ *	* vdiname format --
++ *	* local:///tmp/testenv/testfs
++ *	* hdfs:///tmp/testenv/testfs
++ *	* hdfs://localhost:8020/tmp/testenv/testfs
++ *	* hdfs://localhost/tmp/testenv/testfs
++ *	* hdfs://192.168.0.1:8020/tmp/testenv/testfs
 + */
 +
 +static int parse_vdiname(BDRVHLBSState *s, const char *filename, char *vdi,
@@ -566,8 +566,8 @@ index 994f731..00fc7e1 100755
  echo "                           gthread, ucontext, sigaltstack, windows"
  echo "  --enable-glusterfs       enable GlusterFS backend"
  echo "  --disable-glusterfs      disable GlusterFS backend"
-+echo "  --enable-hlfs 			 enable HLFS backend"
-+echo "  --disable-hlfs      	 disable HLFS backend"
++echo "  --enable-hlfs			 enable HLFS backend"
++echo "  --disable-hlfs		 disable HLFS backend"
  echo ""
  echo "NOTE: The object files are built at the place where configure is launched"
  exit 1
@@ -645,7 +645,7 @@ index 994f731..00fc7e1 100755
  echo "seccomp support   $seccomp"
  echo "coroutine backend $coroutine_backend"
  echo "GlusterFS support $glusterfs"
-+echo "HLFS support 	 	$hlfs"
++echo "HLFS support		$hlfs"
  
  if test "$sdl_too_old" = "yes"; then
  echo "-> Your SDL version is too old - please upgrade to have SDL support"

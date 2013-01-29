@@ -250,7 +250,7 @@ struct hlfs_ctrl *init_hlfs(const char *uri)
 		goto out;
 	}
 
-	hlfs_ctrl->cctrl = cache_new();
+	hlfs_ctrl->cctrl = dbcache_new();
 	ret = dbcache_init(hlfs_ctrl->cctrl, block_size, cache_size, \
 			flush_interval, flush_trigger_level, flush_once_size);
 	if (ret != 0) {
@@ -400,7 +400,7 @@ struct hlfs_ctrl *init_hlfs_by_config(const char *config_file_path)
 				goto out;
 			}
 
-			hlfs_ctrl->cctrl = cache_new();
+			hlfs_ctrl->cctrl = dbcache_new();
 			ret = dbcache_init(hlfs_ctrl->cctrl, block_size, cache_size, \
 					flush_interval, flush_trigger_level, flush_once_size);
 			if (ret != 0) {

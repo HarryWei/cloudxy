@@ -20,7 +20,7 @@ void case_setup()
 { 
 	int ret;
 	g_message("--enter fun %s", __func__);
-	fixture.cache_ctrl = cache_new();
+	fixture.cache_ctrl = dbcache_new();
 	g_assert(fixture.cache_ctrl != NULL);
 	ret = dbcache_init(fixture.cache_ctrl, BLOCK_SIZE, 1024, 1000, 80, 100);
 	g_assert(ret == 0);

@@ -19,7 +19,7 @@ Fixture fixture;
 void case_setup()
 {
 	int ret = 0;
-	fixture.cache_ctrl = cache_new();
+	fixture.cache_ctrl = dbcache_new();
 	g_assert(fixture.cache_ctrl != NULL);
 	dbcache_init(fixture.cache_ctrl, 8192, 1024, 20, 80, 1024);
 	g_assert(fixture.cache_ctrl != NULL);

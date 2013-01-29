@@ -24,7 +24,7 @@ void case_setup()
 {
 
 	int ret = 0;
-	CACHE_CTRL *cache_ctrl = cache_new();
+	CACHE_CTRL *cache_ctrl = dbcache_new();
 	fixture.cache_ctrl = cache_ctrl;
 	ret = dbcache_init(fixture.cache_ctrl, 8192, 1024, 3, 80, 10);
 	ret = dbcache_set_write_cb(fixture.cache_ctrl, test_printf, NULL);

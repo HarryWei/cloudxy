@@ -16,7 +16,7 @@ typedef struct {
 Fixture fixture;
 void case_setup()
 {
-	fixture.cache_ctrl = cache_new();
+	fixture.cache_ctrl = dbcache_new();
 	g_assert(fixture.cache_ctrl != NULL);
 }
 

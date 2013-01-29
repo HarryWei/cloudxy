@@ -62,7 +62,7 @@ extern "C" {
 #endif 
 	}CACHE_CTRL;
 
-	CACHE_CTRL *cache_new(void);
+	CACHE_CTRL *dbcache_new(void);
 	int dbcache_init(CACHE_CTRL *cache_ctrl,
 			uint32_t block_size,
 			uint32_t cache_size,
@@ -75,7 +75,7 @@ extern "C" {
 			char *block_buf);
 	int dbcache_query_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, \
 			char *block_buf);
-	gboolean  cache_block_exist(CACHE_CTRL *cache_ctrl, uint32_t block_no);
+	gboolean  dbcache_block_exist(CACHE_CTRL *cache_ctrl, uint32_t block_no);
 	int dbcache_set_write_cb(CACHE_CTRL *cache_ctrl, void *cb_func, \
 			void *cb_user_param);
 	int dbcache_destroy(CACHE_CTRL *cache_ctrl);

@@ -26,7 +26,7 @@ int dbcache_query_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, \
 	return ret;
 
 }
-gboolean  cache_block_exist(CACHE_CTRL *cache_ctrl, uint32_t block_no){
+gboolean  dbcache_block_exist(CACHE_CTRL *cache_ctrl, uint32_t block_no){
 	HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;
 	block_t *block = cache_query(cache_ctrl, block_no);

@@ -23,7 +23,7 @@ void case_setup()
 void test_cache_init()
 {
 	int ret = 0;
-	ret = cache_init(fixture.cache_ctrl, 8192, 1024, 10, 80, 1024);
+	ret = dbcache_init(fixture.cache_ctrl, 8192, 1024, 10, 80, 1024);
 	g_assert(ret == 0);
 	g_assert(fixture.cache_ctrl->block_size == 8192);
 	g_assert(fixture.cache_ctrl->cache_size == 1024);

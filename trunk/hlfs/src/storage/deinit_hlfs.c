@@ -30,7 +30,7 @@ int deinit_hlfs(struct hlfs_ctrl *ctrl)
 		return -1; 
 	}
 	if (ctrl->cctrl) {
-		cache_destroy(ctrl->cctrl);
+		dbcache_destroy(ctrl->cctrl);
 	}
 	if (ctrl->icache) {
 		icache_destroy(ctrl->icache);

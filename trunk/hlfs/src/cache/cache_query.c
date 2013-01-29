@@ -9,7 +9,7 @@
 #include "cache.h"
 #include "cache_helper.h"
 
-int cache_query_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, \
+int dbcache_query_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, \
 		char *block_buf){
 	HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;

@@ -26,8 +26,8 @@ void case_setup()
 	int ret = 0;
 	CACHE_CTRL *cache_ctrl = cache_new();
 	fixture.cache_ctrl = cache_ctrl;
-	ret = cache_init(fixture.cache_ctrl, 8192, 1024, 3, 80, 10);
-	ret = cache_set_write_cb(fixture.cache_ctrl, test_printf, NULL);
+	ret = dbcache_init(fixture.cache_ctrl, 8192, 1024, 3, 80, 10);
+	ret = dbcache_set_write_cb(fixture.cache_ctrl, test_printf, NULL);
 	//block_t *block = \
 	(block_t*)g_trash_stack_pop(&fixture.cache_ctrl->block_cache);
 	//char buf[]="xxxxxxxxxxxxxx";
@@ -52,7 +52,7 @@ void test_case_cache_flush_1()
 	char *buf = g_malloc0(fixture.cache_ctrl->block_size);
 	int i = 0;
 	for (i = 0;i < 1024;i++) {
-		ret = cache_insert_block(fixture.cache_ctrl, i, buf);
+		ret = dbcache_insert_block(fixture.cache_ctrl, i, buf);
 		g_assert(ret == 0);
 	}
 }
@@ -63,7 +63,7 @@ void test_case_cache_flush_2()
 	char *buf = g_malloc0(fixture.cache_ctrl->block_size*8);
 	int i = 0;
 	for (i = 0;i < 1024/8;i++) {
-		ret = cache_insert_blocks(fixture.cache_ctrl, i * 8, 8, buf);
+		ret = dbcache_insert_blocks(fixture.cache_ctrl, i * 8, 8, buf);
 		g_assert(ret == 0);
 	}
 }
@@ -74,7 +74,7 @@ void test_case_cache_flush_3()
 	char *buf = g_malloc0(fixture.cache_ctrl->block_size * 64);
 	int i = 0;
 	for (i = 0;i < 1024 / 64;i++) {
-		ret = cache_insert_blocks(fixture.cache_ctrl, i * 64, 64, buf);
+		ret = dbcache_insert_blocks(fixture.cache_ctrl, i * 64, 64, buf);
 		g_assert(ret == 0);
 	}
 }
@@ -85,7 +85,7 @@ void test_case_cache_flush_4()
 	char *buf = g_malloc0(fixture.cache_ctrl->block_size*64);
 	int i = 0;
 	for (i = 0;i < 1024 * 64 / 64;i++) {
-		ret = cache_insert_blocks(fixture.cache_ctrl, i * 64, 64, buf);
+		ret = dbcache_insert_blocks(fixture.cache_ctrl, i * 64, 64, buf);
 		g_assert(ret == 0);
 	}
 }

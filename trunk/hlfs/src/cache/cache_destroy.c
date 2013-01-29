@@ -8,7 +8,7 @@
 
 #include "cache.h"
 
-int cache_destroy(CACHE_CTRL *cache_ctrl)
+int dbcache_destroy(CACHE_CTRL *cache_ctrl)
 {
 	//HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0, i = 0;

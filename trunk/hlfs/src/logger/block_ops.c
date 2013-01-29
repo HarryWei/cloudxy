@@ -136,7 +136,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl, uint32_t no, \
 	if (ctrl->cctrl != NULL) {
 		//HLOG_DEBUG("read from cache first");
 		//*block = g_malloc0(ctrl->cctrl->block_size);
-		ret = cache_query_block(ctrl->cctrl, no,block);
+		ret = dbcache_query_block(ctrl->cctrl, no,block);
 		if (ret == 0 ) {
 			HLOG_DEBUG("succ to get block from cache!");
 			return 0;

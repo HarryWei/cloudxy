@@ -667,7 +667,7 @@ int __append_log(struct hlfs_ctrl *ctrl,char *db_buff, uint32_t db_start, \
 				ib1_need_load = FALSE;
 			}else if (TRUE == \
 					ib1_need_load && ctrl->inode.triply_iblock != 0 ){
-				if (0 > read_layer1_iblock(ctrl, db_cur_no, &ib1)) { 	
+				if (0 > read_layer1_iblock(ctrl, db_cur_no, ib1)) {
 					if (0 != read_block_fast(ctrl, \
 								ctrl->inode.triply_iblock, ib1)) {
 						HLOG_ERROR("allocate error!");

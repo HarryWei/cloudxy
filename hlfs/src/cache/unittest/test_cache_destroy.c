@@ -21,7 +21,7 @@ void case_setup()
 	int ret = 0;
 	fixture.cache_ctrl = cache_new();
 	g_assert(fixture.cache_ctrl != NULL);
-	cache_init(fixture.cache_ctrl, 8192, 1024, 20, 80, 1024);
+	dbcache_init(fixture.cache_ctrl, 8192, 1024, 20, 80, 1024);
 	g_assert(fixture.cache_ctrl != NULL);
 	g_assert(ret == 0);
 }
@@ -40,7 +40,7 @@ void test_cache_destroy()
 				(gpointer)_block);
 	}
 
-	ret = cache_destroy(fixture.cache_ctrl);
+	ret = dbcache_destroy(fixture.cache_ctrl);
 	g_assert(ret == 0);
 }
 

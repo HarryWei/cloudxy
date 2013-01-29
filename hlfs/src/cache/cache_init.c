@@ -23,7 +23,7 @@ CACHE_CTRL *cache_new()
 	return cache_ctrl;
 }
 
-int cache_init(CACHE_CTRL *cache_ctrl, 
+int dbcache_init(CACHE_CTRL *cache_ctrl, 
 		uint32_t block_size, \
 		uint32_t cache_size, \
 		uint32_t flush_interval, \

@@ -55,7 +55,7 @@ int hlfs_set_user_ctrl_region(struct hlfs_ctrl *ctrl, \
 int hlfs_flush(struct hlfs_ctrl *ctrl)
 {
 	if (ctrl->cctrl != NULL) {
-		cache_sync(ctrl->cctrl); 
+		dbcache_sync(ctrl->cctrl); 
 	}
 	return 0;
 }

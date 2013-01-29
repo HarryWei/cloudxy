@@ -251,7 +251,7 @@ struct hlfs_ctrl *init_hlfs(const char *uri)
 	}
 
 	hlfs_ctrl->cctrl = cache_new();
-	ret = cache_init(hlfs_ctrl->cctrl, block_size, cache_size, \
+	ret = dbcache_init(hlfs_ctrl->cctrl, block_size, cache_size, \
 			flush_interval, flush_trigger_level, flush_once_size);
 	if (ret != 0) {
 		HLOG_ERROR("init cache failed");
@@ -259,7 +259,7 @@ struct hlfs_ctrl *init_hlfs(const char *uri)
 		hlfs_ctrl->cctrl=NULL;
 		goto out;
 	}
-	cache_set_write_cb(hlfs_ctrl->cctrl, flush_log, hlfs_ctrl);
+	dbcache_set_write_cb(hlfs_ctrl->cctrl, flush_log, hlfs_ctrl);
 	HLOG_INFO("Data Block Cache Init Over ! cache_size:%u, \
 			block_size:%u, flush_interval:%u, flush_trigger_level:%u, \
 			flush_once_size:%d", cache_size, block_size, flush_interval, \
@@ -401,7 +401,7 @@ struct hlfs_ctrl *init_hlfs_by_config(const char *config_file_path)
 			}
 
 			hlfs_ctrl->cctrl = cache_new();
-			ret = cache_init(hlfs_ctrl->cctrl, block_size, cache_size, \
+			ret = dbcache_init(hlfs_ctrl->cctrl, block_size, cache_size, \
 					flush_interval, flush_trigger_level, flush_once_size);
 			if (ret != 0) {
 				HLOG_ERROR("init cache failed");
@@ -409,7 +409,7 @@ struct hlfs_ctrl *init_hlfs_by_config(const char *config_file_path)
 				hlfs_ctrl->cctrl = NULL;
 				goto out;
 			}
-			cache_set_write_cb(hlfs_ctrl->cctrl, flush_log, hlfs_ctrl);
+			dbcache_set_write_cb(hlfs_ctrl->cctrl, flush_log, hlfs_ctrl);
 			HLOG_INFO("Data Block Cache Init Over ! cache_size:%u, \
 					block_size:%u, flush_interval:%u, flush_trigger_level:%u, \
 					flush_once_size:%d", cache_size, block_size, flush_interval, \

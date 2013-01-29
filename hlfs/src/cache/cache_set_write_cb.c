@@ -9,7 +9,7 @@
 #include "cache.h"
 #include "hlfs_log.h"
 
-int cache_set_write_cb(CACHE_CTRL *cache_ctrl, void *cb_func, \
+int dbcache_set_write_cb(CACHE_CTRL *cache_ctrl, void *cb_func, \
 		void *cb_user_param)
 {
 	if (NULL == cache_ctrl || NULL == cb_func) {

@@ -28,7 +28,7 @@ void case_setup()
 	g_message("--enter fun %s", __func__);
 	fixture.cache_ctrl = cache_new();
 	g_assert(fixture.cache_ctrl != NULL);
-	ret = cache_init(fixture.cache_ctrl, BLOCK_SIZE, 1024, 10, 80, 100);
+	ret = dbcache_init(fixture.cache_ctrl, BLOCK_SIZE, 1024, 10, 80, 100);
 	g_assert(ret == 0);
 }
 /*  base insert  */
@@ -39,15 +39,15 @@ void test_cache_insert_1()
 	char *_block_buf = NULL;
 	_block_buf = (char *)g_malloc0(BLOCK_SIZE);
 	sprintf(_block_buf, "hello cache mine");
-	ret = cache_insert_block(fixture.cache_ctrl, 1, _block_buf);
+	ret = dbcache_insert_block(fixture.cache_ctrl, 1, _block_buf);
 	printf("ret is :%d\n", ret);
 	g_assert(ret == 0);
 	sprintf(_block_buf, "hello cache you");
-	ret = cache_insert_block(fixture.cache_ctrl, 2, _block_buf);
+	ret = dbcache_insert_block(fixture.cache_ctrl, 2, _block_buf);
 	printf("ret is :%d\n", ret);
 	g_assert(ret == 0);
 	sprintf(_block_buf, "hello cache him");
-	ret = cache_insert_block(fixture.cache_ctrl, 4, _block_buf);
+	ret = dbcache_insert_block(fixture.cache_ctrl, 4, _block_buf);
 	g_assert(ret == 0);
 
 	/* test cache free size  */
@@ -65,7 +65,7 @@ void test_cache_insert_1()
 	g_assert(get_cache_free_size(fixture.cache_ctrl) == 1024 - 1);
 	int i = 0;
 	for (i = 5; i < 200; i++){
-		ret = cache_insert_block(fixture.cache_ctrl, i, _block_buf);
+		ret = dbcache_insert_block(fixture.cache_ctrl, i, _block_buf);
 		g_assert(ret == 0);
 	}
 	continue_block_list = NULL;
@@ -74,9 +74,9 @@ void test_cache_insert_1()
 	printf("con block count:%d\n", con_blocks_count);
 	g_assert(con_blocks_count == 100);
 	/* test trigger level + */
-	cache_set_write_cb(fixture.cache_ctrl, my_cb, NULL);
+	dbcache_set_write_cb(fixture.cache_ctrl, my_cb, NULL);
 	for (i = 0; i < 1024 * 90 / 100; i++) {
-		ret = cache_insert_block(fixture.cache_ctrl, i, _block_buf);
+		ret = dbcache_insert_block(fixture.cache_ctrl, i, _block_buf);
 		g_message("insert_block:%d", i);
 		g_assert(ret == 0);
 	}
@@ -85,7 +85,7 @@ void test_cache_insert_1()
 
 void case_teardown()
 {
-	if (0 > cache_destroy(fixture.cache_ctrl)) {
+	if (0 > dbcache_destroy(fixture.cache_ctrl)) {
 		g_message("destroy cache error");
 		return;
 	}	

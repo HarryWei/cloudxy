@@ -10,7 +10,7 @@
 
 extern int flush_work(gpointer data);
 
-CACHE_CTRL *cache_new()
+CACHE_CTRL *dbcache_new()
 {
 	//HLOG_DEBUG("--Entering func %s", __func__);
 	struct cache_ctrl *cache_ctrl = NULL;

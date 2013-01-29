@@ -32,7 +32,7 @@ int dbcache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, \
 int dbcache_insert_block(CACHE_CTRL *cache_ctrl, \
 		uint32_t block_no, char *block_buf){
 	int ret = 0;
-	block_t *block = cache_query(cache_ctrl, block_no);
+	block_t *block = dbcache_query(cache_ctrl, block_no);
 	if (block != NULL) {
 		HLOG_DEBUG("-- in cache,update dirty block --");
 		memcpy(block->block, block_buf, cache_ctrl->block_size);  

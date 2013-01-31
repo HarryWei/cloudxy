@@ -11,7 +11,7 @@
 #include "cache_helper.h"
 #include "hlfs_log.h"
 
-int cache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_t block_count, char *block_buf)
+int dbcache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_t block_count, char *block_buf)
 {
 	//HLOG_DEBUG("--Entering func :%s", __func__);
 	int ret = 0;
@@ -19,16 +19,16 @@ int cache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_
     int idx=0;
     HLOG_DEBUG("--write to cache start bno:%d,block_count:%d--",start_block_no, block_count);
     for(i=start_block_no;i<start_block_no+block_count;i++){
-        cache_insert_block(cache_ctrl,i,block_buf + idx*cache_ctrl->block_size);
+        dbcache_insert_block(cache_ctrl,i,block_buf + idx*cache_ctrl->block_size);
         idx++;
     }
     return ret;
 }
 
 
-int cache_insert_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf){
+int dbcache_insert_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf){
     int ret = 0;
-    block_t *block = cache_query(cache_ctrl,block_no);
+    block_t *block = dbcache_query(cache_ctrl,block_no);
     if(block!=NULL){
         HLOG_DEBUG("-- in cache,update dirty block --");
         memcpy(block->block,block_buf,cache_ctrl->block_size);  

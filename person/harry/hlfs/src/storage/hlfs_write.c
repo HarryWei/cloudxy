@@ -151,7 +151,7 @@ write_log:;
 	ctrl->last_write_timestamp = get_current_time();
 	if(ctrl->cctrl != NULL){
 	 	HLOG_DEBUG("we use write back mode !");
-        	int ret = cache_insert_blocks(ctrl->cctrl,db_start,(db_end - db_start + 1),datablocks);
+        	int ret = dbcache_insert_blocks(ctrl->cctrl,db_start,(db_end - db_start + 1),datablocks);
         	g_assert(ret == 0);
     }else{
         HLOG_DEBUG("we use write through mode !");

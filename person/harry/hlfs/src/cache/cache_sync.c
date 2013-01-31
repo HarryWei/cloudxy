@@ -11,7 +11,7 @@
 #include "cache_helper.h"
 #include "hlfs_log.h"
 
-int cache_sync(CACHE_CTRL *cache_ctrl)
+int dbcache_sync(CACHE_CTRL *cache_ctrl)
 {
 	//HLOG_DEBUG("--Entering func :%s", __func__);
 	int ret = 0;

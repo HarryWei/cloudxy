@@ -40,7 +40,7 @@ int hlfs_close(struct hlfs_ctrl *ctrl){
     ctrl->usage_ref--;
     if(ctrl->cctrl!=NULL){
        //HLOG_DEBUG("before close hlfs,sync all dirty block");
-          cache_sync(ctrl->cctrl); 
+          dbcache_sync(ctrl->cctrl); 
     }
     HLOG_INFO("hlfs close over !");
     //HLOG_DEBUG("leave func:%s",__func__);

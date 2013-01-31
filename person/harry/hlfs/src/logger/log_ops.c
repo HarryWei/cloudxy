@@ -26,7 +26,6 @@
 #include "storage.h"
 #include "icache.h"
 
-
 static void dump_iblock(char *iblock){
     uint64_t *_iblock = (uint64_t*)iblock;
     int i=0;
@@ -35,8 +34,6 @@ static void dump_iblock(char *iblock){
         _iblock++;
     }
 }
-
-
 
 static int compress_dblocks(char *db_buff,uint32_t db_num,uint32_t block_size,char *dzb_buff,uint32_t *real_compressed_size){
 	int i=0;
@@ -580,7 +577,7 @@ int __append_log(struct hlfs_ctrl *ctrl,char *db_buff,uint32_t db_start,uint32_t
                      memset(ib1,0,BLOCKSIZE);
 					 ib1_need_load = FALSE;
                 }else if(TRUE == ib1_need_load && ctrl->inode.triply_iblock !=0 ){
-                    if(0>read_layer1_iblock(ctrl,db_cur_no,&ib1)){ 	
+                    if(0>read_layer1_iblock(ctrl,db_cur_no,ib1)){ 	
                         if ( 0 != read_block_fast(ctrl,ctrl->inode.triply_iblock,ib1)){
                             HLOG_ERROR("allocate error!");
                             return -1;

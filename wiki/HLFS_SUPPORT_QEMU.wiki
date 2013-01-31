@@ -10,7 +10,7 @@
 注意：HLFS driver patch for QEMU V1.3.0, clone完mailine的git tree,还需执行下面命令，回滚到 QEMU V1.3.0.
       git reset --hard v1.3.0
 }}}
-  # 下载patch for qemu - https://cloudxy.googlecode.com/svn/trunk/hlfs/patches/hlfs_driver_for_qemu.patch
+  # 下载patch for qemu - http://cloudxy.googlecode.com/svn/trunk/hlfs/patches/hlfs_driver_for_qemu_1.3.0.patch
   # patch it - 在qemu目录中执行 ：git apply hlfs_driver_for_qemu.patch
   # 在qemu目录下的configure文件中修改如下内容
 {{{

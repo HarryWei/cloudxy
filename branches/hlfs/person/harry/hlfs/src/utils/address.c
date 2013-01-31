@@ -139,10 +139,10 @@ int get_layer2_ibno(uint32_t db_no){
            ret =  -1;
      }else if (is_db_in_level3_index_range(db_no)){
            int idx = (db_no - 12 - IB_ENTRY_NUM)/IB_ENTRY_NUM;
-           ret =  0 + 1 + idx;
+           ret =  0 + 1 + idx + 1;
      }else if (is_db_in_level4_index_range(db_no)){
            int idx = (db_no -12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM) / (IB_ENTRY_NUM*IB_ENTRY_NUM);
-           ret =  0 +  ( 1 + IB_ENTRY_NUM ) + (1 + idx);
+           ret =  0 +  ( 1 + IB_ENTRY_NUM ) + (1 + idx + 1);
      }else{
            ret = -2;
      }
@@ -160,7 +160,7 @@ int get_layer3_ibno(uint32_t db_no){
            ret =  -1;
      }else if (is_db_in_level4_index_range(db_no)){
            int idx = (db_no-12 - IB_ENTRY_NUM - IB_ENTRY_NUM*IB_ENTRY_NUM)/IB_ENTRY_NUM;
-           ret =  0 + (1 +  IB_ENTRY_NUM)  + (1 + IB_ENTRY_NUM + idx);
+           ret =  0 + (1 +  IB_ENTRY_NUM)  + (1 + IB_ENTRY_NUM + idx + 1);
      }else{
            ret = -2;
      }

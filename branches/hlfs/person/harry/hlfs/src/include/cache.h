@@ -59,20 +59,20 @@ typedef struct cache_ctrl {
 #endif 
 }CACHE_CTRL;
 
-CACHE_CTRL *cache_new(void);
-int cache_init(CACHE_CTRL *cache_ctrl,
+CACHE_CTRL *dbcache_new(void);
+int dbcache_init(CACHE_CTRL *cache_ctrl,
 		uint32_t block_size,
 		uint32_t cache_size,
 		uint32_t flush_interval,
 		uint32_t flush_trigger_level,
 		uint32_t flush_once_size);
-int cache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_t block_count,char *block_buf);
-int cache_insert_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf);
-int cache_query_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf);
-gboolean  cache_block_exist(CACHE_CTRL *cache_ctrl, uint32_t block_no);
-int cache_set_write_cb(CACHE_CTRL *cache_ctrl, void *cb_func, void * cb_user_param);
-int cache_destroy(CACHE_CTRL *cache_ctrl);
-int cache_sync(CACHE_CTRL *cache_ctrl);
+int dbcache_insert_blocks(CACHE_CTRL *cache_ctrl, uint32_t start_block_no, uint32_t block_count,char *block_buf);
+int dbcache_insert_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf);
+int dbcache_query_block(CACHE_CTRL *cache_ctrl, uint32_t block_no, char *block_buf);
+gboolean  dbcache_block_exist(CACHE_CTRL *cache_ctrl, uint32_t block_no);
+int dbcache_set_write_cb(CACHE_CTRL *cache_ctrl, void *cb_func, void * cb_user_param);
+int dbcache_destroy(CACHE_CTRL *cache_ctrl);
+int dbcache_sync(CACHE_CTRL *cache_ctrl);
 #ifdef __cplusplus 
 } 
 #endif 

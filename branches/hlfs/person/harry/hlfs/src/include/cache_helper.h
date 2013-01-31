@@ -24,7 +24,7 @@ uint32_t get_cache_free_size(CACHE_CTRL *cctrl);
 void __free_from_cache(CACHE_CTRL *cctrl, GSList *free_list);
 void free_from_cache(CACHE_CTRL *cctrl, GSList *free_list);
 int get_continues_blocks(CACHE_CTRL *cctrl, GSList **continue_block_list);
-block_t * cache_query(CACHE_CTRL *cache_ctrl,uint64_t block_no);
+block_t *dbcache_query(CACHE_CTRL *cache_ctrl,uint64_t block_no);
 #ifdef __cplusplus 
 } 
 #endif 

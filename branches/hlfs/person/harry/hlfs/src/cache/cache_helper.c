@@ -107,7 +107,7 @@ int get_continues_blocks(CACHE_CTRL *cctrl, GSList **continue_block_list){
     return 0;
 }
 
-block_t * cache_query(CACHE_CTRL *cache_ctrl,uint32_t block_no){
+block_t *dbcache_query(CACHE_CTRL *cache_ctrl,uint32_t block_no){
 	//HLOG_DEBUG("--Entering func %s", __func__);
 	int ret = 0;
 	block_t *block = NULL;

@@ -21,7 +21,7 @@ JVM_DIR=/usr/lib/jvm/java-6-sun/
 
 注意：以上几个变量所指的位置为你系统环境的实际地址
 }}}
-  # 编译 cd qemu;./configure;make - 生成qemu-img
+  # 编译 cd qemu;./configure;make;sudo make install - 生成qemu-img等执行文件，并且安装到系统目录下
 {{{
 ldd ./qemu-img 
 执行这个命令是为了查看qemu-img所指向的库是否都存在！
@@ -69,6 +69,14 @@ qemu-system-x86_64 -enable-kvm -m 1024 -smp 2 -drive file=hlfs:local:///tmp/test
 qemu-system-x86_64 -enable-kvm -m 1024 -smp 2 -drive file=hlfs:hdfs:///tmp/testenv/testfs%shopshot1,if=virtio -boot d -vnc :7
 %后为快照名称
 }}}
+
+ * Qemu 安装系统盘和启动 - 有的朋友说自己没有kvm环境，那么我们就用qemu好了！
+{{{
+1.创建10G虚拟盘：qemu-img create -f hlfs hlfs:local:///tmp/testenv/testfs 10G。
+2.通过iso安装系统：qemu-system-x86_64 -hda hlfs:local:///tmp/testenv/testfs  -cdrom /home/kanghua/ubuntu-12.04.1-server-i386.iso -boot d -m 512 -no-acpi （漫长的等待...,直到完毕；我是通过本机上执行vncviewer 127.0.0.1 5900 去操作的，没有的话sudo apt-get install tightvnc-java去安装一个小客户端吧，登陆时密码为空！）
+3.启动新安装系统 qemu-system-x86_64 -m512 -drive file=hlfs:local:///tmp/testenv/testfs
+}}}
+
  * Clone 操作
 {{{
 1.首先给base hlfs系统打个快照 - ./qemu-img snapshot -c snapshot1 hlfs:local:///tmp/testenv/testfs

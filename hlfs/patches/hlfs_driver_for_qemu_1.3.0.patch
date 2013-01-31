@@ -1,15 +1,17 @@
+From 2d9abf45dadced0254be5fb05e3facf460d3b18a Mon Sep 17 00:00:00 2001
+From: Harry Wei <harryxiyou@gmail.com>
+Date: Thu, 31 Jan 2013 20:33:27 +0800
 Signed-off-by: Kanghua <kanghua151@gmail.com>
 Signed-off-by: Wang Sen <senwang@linux.vnet.ibm.com>
 Signed-off-by: Harry Wei <harryxiyou@gmail.com>
 Tested-by: Harry Wei <harryxiyou@gmail.com>
-Date: Thu, 24 Jan 2013 16:20:22 +0800
-Subject: [PATCH] Fix HLFS patch for QEMU
+Subject: [PATCH] fix hlbs_read and hlbs_write's return value by Brother Kang
 
 ---
  block/Makefile.objs |    2 +-
- block/hlfs.c        |  508 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ block/hlfs.c        |  514 +++++++++++++++++++++++++++++++++++++++++++++++++++
  configure           |   69 ++++++--
- 3 files changed, 566 insertions(+), 13 deletions(-)
+ 3 files changed, 572 insertions(+), 13 deletions(-)
  create mode 100644 block/hlfs.c
 
 diff --git a/block/Makefile.objs b/block/Makefile.objs
@@ -27,10 +29,10 @@ index 7f01510..da06c37 100644
  block-obj-$(CONFIG_RBD) += rbd.o
 diff --git a/block/hlfs.c b/block/hlfs.c
 new file mode 100644
-index 0000000..8223e25
+index 0000000..0283bd6
 --- /dev/null
 +++ b/block/hlfs.c
-@@ -0,0 +1,508 @@
+@@ -0,0 +1,514 @@
 +/*
 + * Block driver for HLFS(HDFS-based Log-structured File System)
 + *
@@ -390,7 +392,10 @@ index 0000000..8223e25
 +	uint32_t write_size = nb_sectors * 512;
 +	uint64_t offset = sector_num * 512;
 +	ret = hlfs_write(s->hctrl, (char *)buf, write_size, offset);
-+	return ret;
++	if (ret != write_size) {
++		return -EIO;
++	}
++	return 0;
 +}
 +
 +static int hlbs_read(BlockDriverState *bs, int64_t sector_num, uint8_t *buf,
@@ -401,7 +406,10 @@ index 0000000..8223e25
 +	uint32_t read_size = nb_sectors * 512;
 +	uint64_t offset = sector_num * 512;
 +	ret = hlfs_read(s->hctrl, (char *)buf, read_size, offset);
-+	return ret;
++	if (ret != read_size) {
++		return -EIO;
++	}
++	return 0;
 +}
 +
 +static int hlbs_flush(BlockDriverState *bs)
@@ -540,7 +548,7 @@ index 0000000..8223e25
 +
 +block_init(bdrv_hlbs_init);
 diff --git a/configure b/configure
-index 994f731..00fc7e1 100755
+index 994f731..740c99c 100755
 --- a/configure
 +++ b/configure
 @@ -223,6 +223,7 @@ libiscsi=""

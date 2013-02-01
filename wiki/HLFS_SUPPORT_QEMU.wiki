@@ -26,7 +26,7 @@ JVM_DIR=/usr/lib/jvm/java-6-sun/
 $./configure --enable-kvm --enable-debug --enable-hlfs --enable-sdl --target-list=i386-softmmu
 $make -j8
 $sudo make install
-ldd ./qemu-img 
+$ldd ./qemu-img 
 执行这个命令是为了查看qemu-img所指向的库是否都存在！
 }}}
 = 支持操作 =

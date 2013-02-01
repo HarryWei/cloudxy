@@ -21,8 +21,11 @@ JVM_DIR=/usr/lib/jvm/java-6-sun/
 
 注意：以上几个变量所指的位置为你系统环境的实际地址
 }}}
-  # 编译 cd qemu;./configure;make;sudo make install - 生成qemu-img等执行文件，并且安装到系统目录下
+  # 编译安装QEMU
 {{{
+$./configure --enable-kvm --enable-debug --enable-hlfs --enable-sdl --target-list=i386-softmmu
+$make -j8
+$sudo make install
 ldd ./qemu-img 
 执行这个命令是为了查看qemu-img所指向的库是否都存在！
 }}}

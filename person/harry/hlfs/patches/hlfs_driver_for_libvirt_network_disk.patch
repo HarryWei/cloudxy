@@ -1,0 +1,320 @@
+From 86a286b68c2623ee195bac4a004c83e6d5a7a76b Mon Sep 17 00:00:00 2001
+From: Harry Wei <harryxiyou@gmail.com>
+Date: Sat, 2 Feb 2013 12:21:37 +0800
+Subject: [PATCH] Add HLFS network disk for Libvirt
+
+---
+ docs/schemas/domaincommon.rng                      |    1 +
+ docs/schemas/storagepool.rng                       |   17 ++++
+ src/conf/domain_conf.c                             |    5 +-
+ src/conf/domain_conf.h                             |    1 +
+ src/qemu/qemu_command.c                            |   97 ++++++++++++++++++++
+ src/qemu/qemu_driver.c                             |    5 +-
+ .../qemuxml2argv-disk-drive-network-hlfs.args      |    5 +
+ .../qemuxml2argv-disk-drive-network-hlfs.xml       |   33 +++++++
+ 8 files changed, 161 insertions(+), 3 deletions(-)
+ create mode 100644 tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-hlfs.args
+ create mode 100644 tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-hlfs.xml
+
+diff --git a/docs/schemas/domaincommon.rng b/docs/schemas/domaincommon.rng
+index 049f232..731be66 100644
+--- a/docs/schemas/domaincommon.rng
++++ b/docs/schemas/domaincommon.rng
+@@ -1080,6 +1080,7 @@
+                     <value>nbd</value>
+                     <value>rbd</value>
+                     <value>sheepdog</value>
++                    <value>hlfs</value>
+                     <value>gluster</value>
+                   </choice>
+                 </attribute>
+diff --git a/docs/schemas/storagepool.rng b/docs/schemas/storagepool.rng
+index 165e276..0d1d901 100644
+--- a/docs/schemas/storagepool.rng
++++ b/docs/schemas/storagepool.rng
+@@ -21,6 +21,7 @@
+         <ref name='poolmpath'/>
+         <ref name='poolrbd'/>
+         <ref name='poolsheepdog'/>
++        <ref name='poolhlfs'/>
+       </choice>
+     </element>
+   </define>
+@@ -125,6 +126,15 @@
+     <ref name='sourcesheepdog'/>
+   </define>
+ 
++  <define name='poolhlfs'>
++    <attribute name='type'>
++      <value>hlfs</value>
++    </attribute>
++    <ref name='commonmetadata'/>
++    <ref name='sizing'/>
++    <ref name='sourcehlfs'/>
++  </define>
++
+   <define name='sourceinfovendor'>
+     <optional>
+       <element name='vendor'>
+@@ -519,6 +529,13 @@
+     </element>
+   </define>
+ 
++  <define name='sourcehlfs'>
++    <element name='source'>
++      <ref name='sourceinfohost'/>
++      <ref name='sourceinfoname'/>
++    </element>
++  </define>
++
+   <define name="PortNumber">
+     <data type="short">
+       <param name="minInclusive">-1</param>
+diff --git a/src/conf/domain_conf.c b/src/conf/domain_conf.c
+index 5782abb..034364a 100644
+--- a/src/conf/domain_conf.c
++++ b/src/conf/domain_conf.c
+@@ -225,7 +225,8 @@ VIR_ENUM_IMPL(virDomainDiskProtocol, VIR_DOMAIN_DISK_PROTOCOL_LAST,
+               "nbd",
+               "rbd",
+               "sheepdog",
+-              "gluster")
++              "gluster",
++              "hlfs")
+ 
+ VIR_ENUM_IMPL(virDomainDiskProtocolTransport, VIR_DOMAIN_DISK_PROTO_TRANS_LAST,
+               "tcp",
+@@ -1736,7 +1737,7 @@ void virDomainDefFree(virDomainDefPtr def)
+     virDomainClockDefClear(&def->clock);
+ 
+     VIR_FREE(def->name);
+-    VIR_FREE(def->cpumask);
++    virBitmapFree(def->cpumask);
+     VIR_FREE(def->emulator);
+     VIR_FREE(def->description);
+     VIR_FREE(def->title);
+diff --git a/src/conf/domain_conf.h b/src/conf/domain_conf.h
+index 9a9e0b1..de31816 100644
+--- a/src/conf/domain_conf.h
++++ b/src/conf/domain_conf.h
+@@ -480,6 +480,7 @@ enum virDomainDiskProtocol {
+     VIR_DOMAIN_DISK_PROTOCOL_RBD,
+     VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG,
+     VIR_DOMAIN_DISK_PROTOCOL_GLUSTER,
++    VIR_DOMAIN_DISK_PROTOCOL_HLFS,
+ 
+     VIR_DOMAIN_DISK_PROTOCOL_LAST
+ };
+diff --git a/src/qemu/qemu_command.c b/src/qemu/qemu_command.c
+index f6273c1..f214956 100644
+--- a/src/qemu/qemu_command.c
++++ b/src/qemu/qemu_command.c
+@@ -2379,6 +2379,16 @@ qemuBuildDriveStr(virConnectPtr conn ATTRIBUTE_UNUSED,
+                                       disk->hosts->name, disk->hosts->port);
+                     virBufferEscape(&opt, ',', ",", "%s,", disk->src);
+                 }
++
++            case VIR_DOMAIN_DISK_PROTOCOL_HLFS:
++                if (disk->nhosts == 0) {
++                    virBufferEscape(&opt, ',', ",", "file=hlfs:%s,",
++                                    disk->src);
++                } else {
++                    virBufferAsprintf(&opt, "file=hlfs:%s:%s:",
++                                      disk->hosts->name, disk->hosts->port);
++                    virBufferEscape(&opt, ',', ",", "%s,", disk->src);
++                }
+                 break;
+             }
+         } else {
+@@ -5970,6 +5980,18 @@ qemuBuildCommandLine(virConnectPtr conn,
+                             goto no_memory;
+                         }
+                     }
++                case VIR_DOMAIN_DISK_PROTOCOL_HLFS:
++                    if (disk->nhosts == 0) {
++                        if (virAsprintf(&file, "hlfs:%s,", disk->src) < 0) {
++                            goto no_memory;
++                        }
++                    } else {
++                        if (virAsprintf(&file, "hlfs:%s:%s:%s,",
++                                        disk->hosts->name, disk->hosts->port,
++                                        disk->src) < 0) {
++                            goto no_memory;
++                        }
++                    }
+                     break;
+                 }
+             } else {
+@@ -7503,6 +7525,51 @@ qemuParseCommandLineDisk(virCapsPtr caps,
+                     }
+ 
+                     VIR_FREE(p);
++                } else if (STRPREFIX(def->src, "hlfs:")) {
++                    char *p = def->src;
++                    char *port, *vdi;
++
++                    def->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
++                    def->protocol = VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG;
++                    def->src = strdup(p + strlen("hlfs:"));
++                    if (!def->src) {
++                        virReportOOMError();
++                        goto cleanup;
++                    }
++
++                    /* def->src must be [vdiname] or [host]:[port]:[vdiname] */
++                    port = strchr(def->src, ':');
++                    if (port) {
++                        *port++ = '\0';
++                        vdi = strchr(port, ':');
++                        if (!vdi) {
++                            def = NULL;
++                            virReportError(VIR_ERR_INTERNAL_ERROR,
++                                           _("cannot parse hlfs filename '%s'"), p);
++                            goto cleanup;
++                        }
++                        *vdi++ = '\0';
++                        if (VIR_ALLOC(def->hosts) < 0) {
++                            virReportOOMError();
++                            goto cleanup;
++                        }
++                        def->nhosts = 1;
++                        def->hosts->name = def->src;
++                        def->hosts->port = strdup(port);
++                        if (!def->hosts->port) {
++                            virReportOOMError();
++                            goto cleanup;
++                        }
++                        def->hosts->transport = VIR_DOMAIN_DISK_PROTO_TRANS_TCP;
++                        def->hosts->socket = NULL;
++                        def->src = strdup(vdi);
++                        if (!def->src) {
++                            virReportOOMError();
++                            goto cleanup;
++                        }
++                    }
++
++                    VIR_FREE(p);
+                 } else
+                     def->type = VIR_DOMAIN_DISK_TYPE_FILE;
+             } else {
+@@ -8688,6 +8755,10 @@ virDomainDefPtr qemuParseCommandLine(virCapsPtr caps,
+                 disk->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
+                 disk->protocol = VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG;
+                 val += strlen("sheepdog:");
++            } else if (STRPREFIX(val, "hlfs:")) {
++                disk->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
++                disk->protocol = VIR_DOMAIN_DISK_PROTOCOL_HLFS;
++                val += strlen("hlfs:");
+             } else
+                 disk->type = VIR_DOMAIN_DISK_TYPE_FILE;
+             if (STREQ(arg, "-cdrom")) {
+@@ -8769,6 +8840,32 @@ virDomainDefPtr qemuParseCommandLine(virCapsPtr caps,
+                             goto no_memory;
+                     }
+                     break;
++                case VIR_DOMAIN_DISK_PROTOCOL_HLFS:
++                    /* disk->src must be [vdiname] or [host]:[port]:[vdiname] */
++                    port = strchr(disk->src, ':');
++                    if (port) {
++                        char *vdi;
++
++                        *port++ = '\0';
++                        vdi = strchr(port, ':');
++                        if (!vdi) {
++                            virReportError(VIR_ERR_INTERNAL_ERROR,
++                                           _("cannot parse hlfs filename '%s'"), val);
++                            goto error;
++                        }
++                        *vdi++ = '\0';
++                        if (VIR_ALLOC(disk->hosts) < 0)
++                            goto no_memory;
++                        disk->nhosts = 1;
++                        disk->hosts->name = disk->src;
++                        disk->hosts->port = strdup(port);
++                        if (!disk->hosts->port)
++                            goto no_memory;
++                        disk->src = strdup(vdi);
++                        if (!disk->src)
++                            goto no_memory;
++                    }
++					break;
+                 case VIR_DOMAIN_DISK_PROTOCOL_GLUSTER:
+                     if (qemuParseGlusterString(disk) < 0)
+                         goto error;
+diff --git a/src/qemu/qemu_driver.c b/src/qemu/qemu_driver.c
+index 13bf854..80ca261 100644
+--- a/src/qemu/qemu_driver.c
++++ b/src/qemu/qemu_driver.c
+@@ -4922,8 +4922,10 @@ qemuDomainSaveImageStartVM(virConnectPtr conn,
+             VIR_FORCE_CLOSE(*fd);
+         }
+ 
+-        if (virCommandWait(cmd, NULL) < 0)
++        if (virCommandWait(cmd, NULL) < 0) {
++            qemuProcessStop(driver, vm, VIR_DOMAIN_SHUTOFF_FAILED, 0);
+             ret = -1;
++        }
+     }
+     VIR_FORCE_CLOSE(intermediatefd);
+ 
+@@ -10729,6 +10731,7 @@ qemuDomainSnapshotPrepare(virDomainObjPtr vm, virDomainSnapshotDefPtr def,
+             if (def->state != VIR_DOMAIN_DISK_SNAPSHOT &&
+                 dom_disk->type == VIR_DOMAIN_DISK_TYPE_NETWORK &&
+                 (dom_disk->protocol == VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG ||
++                 dom_disk->protocol == VIR_DOMAIN_DISK_PROTOCOL_HLFS ||
+                  dom_disk->protocol == VIR_DOMAIN_DISK_PROTOCOL_RBD)) {
+                 break;
+             }
+diff --git a/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-hlfs.args b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-hlfs.args
+new file mode 100644
+index 0000000..05b9663
+--- /dev/null
++++ b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-hlfs.args
+@@ -0,0 +1,5 @@
++LC_ALL=C PATH=/bin HOME=/home/test USER=test LOGNAME=test /usr/bin/qemu -S -M \
++pc -m 214 -smp 1 -nographic -monitor unix:/tmp/test-monitor,server,nowait \
++-no-acpi -boot c -usb -drive file=/dev/HostVG/QEMU,,Guest,,,,1,if=ide,bus=0,unit=0 \
++-drive file=hlfs:example.org:6000:image,,with,,commas,if=virtio,format=raw \
++-net none -serial none -parallel none
+diff --git a/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-hlfs.xml b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-hlfs.xml
+new file mode 100644
+index 0000000..ad5f091
+--- /dev/null
++++ b/tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-hlfs.xml
+@@ -0,0 +1,33 @@
++<domain type='qemu'>
++  <name>QEMUGuest1</name>
++  <uuid>c7a5fdbd-edaf-9455-926a-d65c16db1809</uuid>
++  <memory unit='KiB'>219136</memory>
++  <currentMemory unit='KiB'>219136</currentMemory>
++  <vcpu placement='static'>1</vcpu>
++  <os>
++    <type arch='i686' machine='pc'>hvm</type>
++    <boot dev='hd'/>
++  </os>
++  <clock offset='utc'/>
++  <on_poweroff>destroy</on_poweroff>
++  <on_reboot>restart</on_reboot>
++  <on_crash>destroy</on_crash>
++  <devices>
++    <emulator>/usr/bin/qemu</emulator>
++    <disk type='block' device='disk'>
++      <source dev='/dev/HostVG/QEMU,Guest,,1'/>
++      <target dev='hda' bus='ide'/>
++      <address type='drive' controller='0' bus='0' target='0' unit='0'/>
++    </disk>
++    <disk type='network' device='disk'>
++      <driver name='qemu' type='raw'/>
++      <source protocol='hlfs' name='image,with,commas'>
++        <host name='example.org' port='6000'/>
++      </source>
++      <target dev='vda' bus='virtio'/>
++    </disk>
++    <controller type='usb' index='0'/>
++    <controller type='ide' index='0'/>
++    <memballoon model='virtio'/>
++  </devices>
++</domain>
+-- 
+1.7.0.4
+

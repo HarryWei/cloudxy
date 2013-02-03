@@ -1,8 +1,9 @@
 #summary HLFS在Libvirt中使用
 
-= Introduction =
-
-Add your content here.
+= 简介 =
+Libvirt 存储管理分为两种模式。
+ #在线模式 -- 应用作为一个服务在运行，例如模拟的块设备等等。
+ #离线模式 -- 即standalone方式运行，应用执行完就退出。
 
 
 = Details =

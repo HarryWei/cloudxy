@@ -30,3 +30,28 @@
   8. sudo make install
 注意：HLFS driver for Libvirt network disk 是针对Libvirt v1.0.1
 }}} 
+ *搭建环境过程中可能需要安装一些依赖库，缺什么库文件，就安装对应库文件
+===从HLFS Volumes启动虚拟机===
+ # wget http://wiki.qemu.org/download/linux-0.2.img.bz2
+ # bunzip2 linux-0.2.img.bz2
+ # mkdir /tmp/testenv
+ # qemu-img convert -t directsync linux-0.2.img hlfs:local:///tmp/testenv/testfs
+ # cat > hlfs.xml
+{{{
+<domain type='qemu'>
+<name>testvm</name>
+<memory>1048576</memory>
+<os>
+<type arch='x86_64'>hvm</type>
+</os>
+<devices>
+<disk type='network'>
+<source protocol="hlfs" name="local:///tmp/testenv/testfs"/>
+<target dev='hda' bus='ide'/>
+</disk>
+<graphics type='vnc' port='-1' autoport='yes'/>
+</devices>
+}}}
+ # virsh create hlfs.xml
+ # vncviewer localhost
+</domain> 

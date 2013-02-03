@@ -55,6 +55,9 @@
 }}}
  # virsh create hlfs.xml
  # vncviewer localhost
+{{{
+注意：没有vncviewer的话，sudo apt-get install tightvnc-java(debian是这样，其他distro可以找对应软件安装)去安装一个小客户端吧，登陆时密码为空！
+}}}
 ===从HLFS 快照启动虚拟机===
  # wget http://wiki.qemu.org/download/linux-0.2.img.bz2
  # bunzip2 linux-0.2.img.bz2
@@ -80,5 +83,8 @@
 }}}
  # virsh create hlfs.xml
  # vncviewer localhost
+{{{
+注意：没有vncviewer的话，sudo apt-get install tightvnc-java(debian是这样，其他distro可以找对应软件安装)去安装一个小客户端吧，登陆时密码为空！
+}}}
 =离线模式测试=
 =...待续=

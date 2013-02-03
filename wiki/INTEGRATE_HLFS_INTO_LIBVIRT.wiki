@@ -14,9 +14,5 @@
  * 通过Libvirt在Pool上创建HLFS格式的Volumes
  * 通过Libvirt对HLFS Pool和HLFS Volumes进行一些必要的操作
 
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+=在线模式实验=
+===下载和编译===

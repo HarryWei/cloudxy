@@ -28,4 +28,5 @@
   6. ./configure
   7. make
   8. sudo make install
+注意：HLFS driver for Libvirt network disk 是针对Libvirt v1.0.1
 }}} 

@@ -51,7 +51,34 @@
 </disk>
 <graphics type='vnc' port='-1' autoport='yes'/>
 </devices>
+</domain> 
 }}}
  # virsh create hlfs.xml
  # vncviewer localhost
+===从HLFS 快照启动虚拟机===
+ # wget http://wiki.qemu.org/download/linux-0.2.img.bz2
+ # bunzip2 linux-0.2.img.bz2
+ # mkdir /tmp/testenv
+ # qemu-img convert -t directsync linux-0.2.img hlfs:local:///tmp/testenv/testfs
+ # qemu-img snapshot -c snapshot1 hlfs:local:///tmp/testenv/testfs
+ # cat > hlfs.xml
+{{{
+<domain type='qemu'>
+<name>testvm</name>
+<memory>1048576</memory>
+<os>
+<type arch='x86_64'>hvm</type>
+</os>
+<devices>
+<disk type='network'>
+<source protocol="hlfs" name="local:///tmp/testenv/testfs%snapshot1"/>
+<target dev='hda' bus='ide'/>
+</disk>
+<graphics type='vnc' port='-1' autoport='yes'/>
+</devices>
 </domain> 
+}}}
+ # virsh create hlfs.xml
+ # vncviewer localhost
+=离线模式测试=
+=...待续=

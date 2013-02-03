@@ -1,10 +1,18 @@
 #summary HLFS在Libvirt中使用
 
 = 简介 =
-Libvirt 存储管理分为两种模式。
+===Libvirt 存储管理分为两种模式===
  # 在线模式 -- 应用作为一个服务在运行，例如模拟的块设备等等。
  # 离线模式 -- 即standalone方式运行，应用执行完就退出。
 
+===在线模式===
+ # 通过Libvirt创建虚拟机和HLFS格式的磁盘（目前HLFS支持QEMU和XEN）。
+ # 通过Libvirt和虚拟机交互，进而通过虚拟机对HLFS格式磁盘进行一些必要的操作。
+
+===离线模式===
+ # 通过Libvirt创建HLFS格式的Pool
+ # 通过Libvirt在Pool上创建HLFS格式的Volumes
+ # 通过Libvirt对HLFS Pool和HLFS Volumes进行一些必要的操作
 
 = Details =
 

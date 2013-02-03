@@ -30,7 +30,7 @@
   8. sudo make install
 注意：HLFS driver for Libvirt network disk 是针对Libvirt v1.0.1
 }}} 
- *搭建环境过程中可能需要安装一些依赖库，缺什么库文件，就安装对应库文件
+ * 搭建环境过程中可能需要安装一些依赖库，缺什么库文件，就安装对应库文件
 ===从HLFS Volumes启动虚拟机===
  # wget http://wiki.qemu.org/download/linux-0.2.img.bz2
  # bunzip2 linux-0.2.img.bz2

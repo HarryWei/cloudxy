@@ -6,13 +6,13 @@
  # 离线模式 -- 即standalone方式运行，应用执行完就退出。
 
 ===在线模式===
- # 通过Libvirt创建虚拟机和HLFS格式的磁盘（目前HLFS支持QEMU和XEN）。
- # 通过Libvirt和虚拟机交互，进而通过虚拟机对HLFS格式磁盘进行一些必要的操作。
+ * 通过Libvirt创建虚拟机和HLFS格式的磁盘（目前HLFS支持QEMU和XEN）。
+ * 通过Libvirt和虚拟机交互，进而通过虚拟机对HLFS格式磁盘进行一些必要的操作。
 
 ===离线模式===
- # 通过Libvirt创建HLFS格式的Pool
- # 通过Libvirt在Pool上创建HLFS格式的Volumes
- # 通过Libvirt对HLFS Pool和HLFS Volumes进行一些必要的操作
+ * 通过Libvirt创建HLFS格式的Pool
+ * 通过Libvirt在Pool上创建HLFS格式的Volumes
+ * 通过Libvirt对HLFS Pool和HLFS Volumes进行一些必要的操作
 
 = Details =
 

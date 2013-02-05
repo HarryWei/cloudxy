@@ -56,5 +56,6 @@ struct back_storage
               (*bs_file_info)(struct back_storage *storage,const char *path);
    bs_file_info_t*
               (*bs_file_list_dir)(struct back_storage *storage,const char * dir,uint32_t* num_entries);};
+
 #endif 
 

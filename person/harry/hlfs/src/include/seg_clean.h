@@ -8,6 +8,7 @@
 
 #ifndef _HLFS_SEG_CLEAN_H_
 #define _HLFS_SEG_CLEAN_H_
+
 #define ALIVE_LOG_BITMAP 512
 #define SEGMENTS_USAGE_FILE "segments_usage.txt"
 //#define SEGMENTS_DEL_FILE   "segments_delmark.txt"

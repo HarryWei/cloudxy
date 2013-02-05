@@ -1,0 +1,517 @@
+From 669303b0a5546f4d89bda7b24ccced79d6bb7002 Mon Sep 17 00:00:00 2001
+From: Harry Wei <harryxiyou@gmail.com>
+Date: Tue, 5 Feb 2013 17:59:23 +0800
+Subject: [PATCH] Add HLFS Pool driver for Libvirt
+
+---
+ configure.ac                       |   30 ++++++++++
+ docs/drivers.html.in               |    1 +
+ docs/storage.html.in               |   62 ++++++++++++++++++++
+ libvirt.spec.in                    |   15 +++++
+ po/POTFILES.in                     |    1 +
+ src/Makefile.am                    |   29 +++++++++
+ src/conf/storage_conf.c            |   19 +++++-
+ src/conf/storage_conf.h            |    1 +
+ src/storage/storage_backend.c      |    6 ++
+ src/storage/storage_backend_hlfs.c |  111 ++++++++++++++++++++++++++++++++++++
+ src/storage/storage_backend_hlfs.h |   16 +++++
+ 11 files changed, 288 insertions(+), 3 deletions(-)
+ create mode 100644 src/storage/storage_backend_hlfs.c
+ create mode 100644 src/storage/storage_backend_hlfs.h
+
+diff --git a/configure.ac b/configure.ac
+index 3c97e4f..9741389 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -2036,6 +2036,8 @@ AC_ARG_WITH([storage-rbd],
+   AC_HELP_STRING([--with-storage-rbd], [with RADOS Block Device backend for the storage driver @<:@default=check@:>@]),[],[with_storage_rbd=check])
+ AC_ARG_WITH([storage-sheepdog],
+   AC_HELP_STRING([--with-storage-sheepdog], [with Sheepdog backend for the storage driver @<:@default=check@:>@]),[],[with_storage_sheepdog=check])
++AC_ARG_WITH([storage-hlfs],
++  AC_HELP_STRING([--with-storage-hlfs], [with Hlfs backend for the storage driver @<:@default=check@:>@]),[],[with_storage_hlfs=check])
+ 
+ if test "$with_libvirtd" = "no"; then
+   with_storage_dir=no
+@@ -2047,6 +2049,7 @@ if test "$with_libvirtd" = "no"; then
+   with_storage_disk=no
+   with_storage_rbd=no
+   with_storage_sheepdog=no
++  with_storage_hlfs=no
+ fi
+ if test "$with_storage_dir" = "yes" ; then
+   AC_DEFINE_UNQUOTED([WITH_STORAGE_DIR], 1, [whether directory backend for storage driver is enabled])
+@@ -2248,6 +2251,32 @@ fi
+ AM_CONDITIONAL([WITH_STORAGE_SHEEPDOG],
+   [test "$with_storage_sheepdog" = "yes"])
+ 
++if test "$with_storage_hlfs" = "yes" ||
++   test "$with_storage_hlfs" = "check"; then
++  AC_PATH_PROG([QEMUIMG], [qemu-img], [], [$PATH:/sbin:/usr/sbin])
++
++  if test "$with_storage_hlfs" = "yes"; then
++    if test -z "$QEMUIMG"; then
++      AC_MSG_ERROR([We need qemu-img for Hlfs storage driver])
++    fi
++  else
++    if test -z "$QEMUIMG"; then
++      with_storage_hlfs=no
++    fi
++
++    if test "$with_storage_hlfs" = "check"; then
++      with_storage_hlfs=yes
++    fi
++  fi
++
++  if test "$with_storage_hlfs" = "yes"; then
++    AC_DEFINE_UNQUOTED([WITH_STORAGE_HLFS], 1,
++      [whether hlfs backend for storage driver is enabled])
++    AC_DEFINE_UNQUOTED([QEMUIMG],["$QEMUIMG"],[Location of qemu-img program])
++  fi
++fi
++AM_CONDITIONAL([WITH_STORAGE_HLFS],
++  [test "$with_storage_hlfs" = "yes"])
+ 
+ LIBPARTED_CFLAGS=
+ LIBPARTED_LIBS=
+@@ -3129,6 +3158,7 @@ AC_MSG_NOTICE([   mpath: $with_storage_mpath])
+ AC_MSG_NOTICE([    Disk: $with_storage_disk])
+ AC_MSG_NOTICE([     RBD: $with_storage_rbd])
+ AC_MSG_NOTICE([Sheepdog: $with_storage_sheepdog])
++AC_MSG_NOTICE([Hlfs: $with_storage_hlfs])
+ AC_MSG_NOTICE([])
+ AC_MSG_NOTICE([Security Drivers])
+ AC_MSG_NOTICE([])
+diff --git a/docs/drivers.html.in b/docs/drivers.html.in
+index 307d286..0a03c65 100644
+--- a/docs/drivers.html.in
++++ b/docs/drivers.html.in
+@@ -45,6 +45,7 @@
+       <li><strong><a href="storage.html#StorageBackendMultipath">Multipath backend</a></strong></li>
+       <li><strong><a href="storage.html#StorageBackendRBD">RBD (RADOS Block Device) backend</a></strong></li>
+       <li><strong><a href="storage.html#StorageBackendSheepdog">Sheepdog backend</a></strong></li>
++      <li><strong><a href="storage.html#StorageBackendHlfs">Hlfs backend</a></strong></li>
+     </ul>
+   </body>
+ </html>
+diff --git a/docs/storage.html.in b/docs/storage.html.in
+index 26a949a..dd24531 100644
+--- a/docs/storage.html.in
++++ b/docs/storage.html.in
+@@ -113,6 +113,9 @@
+       <li>
+         <a href="#StorageBackendSheepdog">Sheepdog backend</a>
+       </li>
++      <li>
++        <a href="#StorageBackendHlfs">Hlfs backend</a>
++      </li>
+     </ul>
+ 
+     <h2><a name="StorageBackendDir">Directory pool</a></h2>
+@@ -627,5 +630,64 @@
+       The Sheepdog pool does not use the volume format type element.
+     </p>
+ 
++    <h2><a name="StorageBackendHlfs">Hlfs pools</a></h2>
++    <p>
++      This provides a pool based on a Hlfs.
++      Hlfs is HDFS based Log-Structured File System.
++      It provides highly available block level storage volumes that
++      can be attached to QEMU/XEN virtual machines.
++
++      The HLFS must already be installed.
++
++      <span class="since">Since 1.0.1</span>
++    </p>
++
++    <h3>Example pool input</h3>
++    <pre>
++      &lt;pool type="hlfs"&gt;
++        &lt;name&gt;myhlfspool&lt;/name&gt;
++        &lt;source&gt;
++          &lt;name&gt;myhlfspool&lt;/name&gt;
++          &lt;host name='localhost' port='7000'/&gt;
++        &lt;/source&gt;
++      &lt;/pool&gt;</pre>
++
++    <h3>Example volume output</h3>
++    <pre>
++       &lt;volume&gt;
++         &lt;name&gt;myvol&lt;/name&gt;
++         &lt;key&gt;hlfs/myvol&lt;/key&gt;
++         &lt;source&gt;
++         &lt;/source&gt;
++         &lt;capacity unit='bytes'&gt;53687091200&lt;/capacity&gt;
++         &lt;allocation unit='bytes'&gt;53687091200&lt;/allocation&gt;
++         &lt;target&gt;
++           &lt;path&gt;hlfs:myvol&lt;/path&gt;
++           &lt;format type='unknown'/&gt;
++           &lt;permissions&gt;
++             &lt;mode&gt;00&lt;/mode&gt;
++             &lt;owner&gt;0&lt;/owner&gt;
++             &lt;group&gt;0&lt;/group&gt;
++           &lt;/permissions&gt;
++         &lt;/target&gt;
++       &lt;/volume&gt;</pre>
++
++    <h3>Example disk attachment</h3>
++    <p>Hlfs images can be attached to Qemu/XEN guests.
++    Information about attaching a HLFS image to a
++    guest can be found
++    at the <a href="formatdomain.html#elementsDisks">format domain</a>
++    page.</p>
++
++    <h3>Valid pool format types</h3>
++    <p>
++      The Hlfs pool does not use the pool format type element.
++    </p>
++
++    <h3>Valid volume format types</h3>
++    <p>
++      The Hlfs pool does not use the volume format type element.
++    </p>
++
+   </body>
+ </html>
+diff --git a/libvirt.spec.in b/libvirt.spec.in
+index 7457a48..ef1f656 100644
+--- a/libvirt.spec.in
++++ b/libvirt.spec.in
+@@ -93,6 +93,11 @@
+ %else
+ %define with_storage_sheepdog 0
+ %endif
++%if 0%{?fedora} >= 18
++%define with_storage_hlfs 0%{!?_without_storage_hlfs:%{server_drivers}}
++%else
++%define with_storage_hlfs 0
++%endif
+ %define with_numactl          0%{!?_without_numactl:%{server_drivers}}
+ %define with_selinux          0%{!?_without_selinux:%{server_drivers}}
+ 
+@@ -263,6 +268,7 @@
+ %define with_storage_mpath 0
+ %define with_storage_rbd 0
+ %define with_storage_sheepdog 0
++%define with_storage_hlfs 0
+ %define with_storage_disk 0
+ %endif
+ 
+@@ -695,6 +701,10 @@ Requires: device-mapper
+ # For Sheepdog support
+ Requires: sheepdog
+ %endif
++%if %{with_storage_hlfs}
++# For Hlfs support
++Requires: hlfs
++%endif
+ %if %{with_cgconfig}
+ Requires: libcgroup
+ %endif
+@@ -1198,6 +1208,10 @@ of recent versions of Linux (and other OSes).
+ %define _without_storage_sheepdog --without-storage-sheepdog
+ %endif
+ 
++%if ! %{with_storage_hlfs}
++%define _without_storage_hlfs --without-storage-hlfs
++%endif
++
+ %if ! %{with_numactl}
+ %define _without_numactl --without-numactl
+ %endif
+@@ -1314,6 +1328,7 @@ autoreconf -if
+            %{?_without_storage_mpath} \
+            %{?_without_storage_rbd} \
+            %{?_without_storage_sheepdog} \
++           %{?_without_storage_hlfs} \
+            %{?_without_numactl} \
+            %{?_without_numad} \
+            %{?_without_capng} \
+diff --git a/po/POTFILES.in b/po/POTFILES.in
+index f0cfd7f..500cfeb 100644
+--- a/po/POTFILES.in
++++ b/po/POTFILES.in
+@@ -133,6 +133,7 @@ src/storage/storage_backend_mpath.c
+ src/storage/storage_backend_rbd.c
+ src/storage/storage_backend_scsi.c
+ src/storage/storage_backend_sheepdog.c
++src/storage/storage_backend_hlfs.c
+ src/storage/storage_driver.c
+ src/test/test_driver.c
+ src/uml/uml_conf.c
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 53ec9da..1b680dc 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -656,6 +656,9 @@ STORAGE_DRIVER_RBD_SOURCES =					\
+ STORAGE_DRIVER_SHEEPDOG_SOURCES =				\
+ 		storage/storage_backend_sheepdog.h storage/storage_backend_sheepdog.c
+ 
++STORAGE_DRIVER_HLFS_SOURCES =					\
++		storage/storage_backend_hlfs.h storage/storage_backend_hlfs.c
++
+ STORAGE_HELPER_DISK_SOURCES =					\
+ 		storage/parthelper.c
+ 
+@@ -1198,6 +1201,31 @@ if WITH_STORAGE_SHEEPDOG
+ libvirt_driver_storage_impl_la_SOURCES += $(STORAGE_DRIVER_SHEEPDOG_SOURCES)
+ endif
+ 
++if WITH_STORAGE_HLFS
++GLIB_DIR1_INC=/usr/lib/glib-2.0/include
++GLIB_DIR2_INC=/usr/include/glib-2.0
++HLFS_DIR=/home/jiawei/workshop3/hlfs
++LOG4C_DIR=$(HLFS_DIR)/3part/log
++HDFS_DIR=$(HLFS_DIR)/3part/hadoop
++JVM_DIR=/usr/lib/jvm/java-6-openjdk
++
++libvirt_driver_storage_impl_la_SOURCES += $(STORAGE_DRIVER_HLFS_SOURCES)
++libvirt_driver_storage_impl_la_CFLAGS += -I$(top_srcdir)/src/conf	\
++										 -I$(GLIB_DIR1_INC)			\
++										 -I$(GLIB_DIR2_INC)			\
++										 -I$(HLFS_DIR)/src/include	\
++										 -I$(LOG4C_DIR)/include		\
++										 -I$(HDFS_DIR)/include		\
++										 -I$(JVM_DIR)/include		\
++										 -I$(JVM_DIR)/include/linux
++libvirt_driver_storage_impl_la_LIBADD += /usr/lib/libglib-2.0.la			\
++										-L$(HLFS_DIR)/lib32					\
++										-L$(LOG4C_DIR)/lib32				\
++										-L$(JVM_DIR)/jre/lib/i386/server	\
++										-L$(HDFS_DIR)/lib32					\
++										-lhlfs -lglib-2.0 -lgthread-2.0 -lrt -llog4c -lhdfs -ljvm
++endif
++
+ if WITH_NODE_DEVICES
+ # Needed to keep automake quiet about conditionals
+ if WITH_DRIVER_MODULES
+@@ -1299,6 +1327,7 @@ EXTRA_DIST +=							\
+ 		$(STORAGE_DRIVER_DISK_SOURCES)			\
+ 		$(STORAGE_DRIVER_RBD_SOURCES)			\
+ 		$(STORAGE_DRIVER_SHEEPDOG_SOURCES)		\
++		$(STORAGE_DRIVER_HLFS_SOURCES)			\
+ 		$(NODE_DEVICE_DRIVER_SOURCES)			\
+ 		$(NODE_DEVICE_DRIVER_HAL_SOURCES)		\
+ 		$(NODE_DEVICE_DRIVER_UDEV_SOURCES)		\
+diff --git a/src/conf/storage_conf.c b/src/conf/storage_conf.c
+index ad0f0c1..9de03dd 100644
+--- a/src/conf/storage_conf.c
++++ b/src/conf/storage_conf.c
+@@ -54,7 +54,7 @@ VIR_ENUM_IMPL(virStoragePool,
+               VIR_STORAGE_POOL_LAST,
+               "dir", "fs", "netfs",
+               "logical", "disk", "iscsi",
+-              "scsi", "mpath", "rbd", "sheepdog")
++              "scsi", "mpath", "rbd", "sheepdog", "hlfs")
+ 
+ VIR_ENUM_IMPL(virStoragePoolFormatFileSystem,
+               VIR_STORAGE_POOL_FS_LAST,
+@@ -228,6 +228,17 @@ static virStoragePoolTypeInfo poolTypeInfo[] = {
+             .formatToString = virStoragePoolFormatDiskTypeToString,
+         }
+     },
++    { .poolType = VIR_STORAGE_POOL_HLFS,
++      .poolOptions = {
++             .flags = (VIR_STORAGE_POOL_SOURCE_HOST |
++                       VIR_STORAGE_POOL_SOURCE_NETWORK |
++                       VIR_STORAGE_POOL_SOURCE_NAME),
++        },
++       .volOptions = {
++            .defaultFormat = VIR_STORAGE_FILE_RAW,
++            .formatToString = virStoragePoolFormatDiskTypeToString,
++        }
++    },
+     { .poolType = VIR_STORAGE_POOL_MPATH,
+       .volOptions = {
+             .formatToString = virStoragePoolFormatDiskTypeToString,
+@@ -1049,9 +1060,11 @@ virStoragePoolDefFormat(virStoragePoolDefPtr def) {
+     if (virStoragePoolSourceFormat(&buf, options, &def->source) < 0)
+         goto cleanup;
+ 
+-    /* RBD and Sheepdog devices are not local block devs nor files, so it doesn't
++    /* RBD, Sheepdog and HLFS devices are not local block devs nor files, so it doesn't
+      * have a target */
+-    if (def->type != VIR_STORAGE_POOL_RBD && def->type != VIR_STORAGE_POOL_SHEEPDOG) {
++    if (def->type != VIR_STORAGE_POOL_RBD &&
++			def->type != VIR_STORAGE_POOL_SHEEPDOG &&
++				def->type != VIR_STORAGE_POOL_HLFS) {
+         virBufferAddLit(&buf,"  <target>\n");
+ 
+         if (def->target.path)
+diff --git a/src/conf/storage_conf.h b/src/conf/storage_conf.h
+index 743b768..61d0ee1 100644
+--- a/src/conf/storage_conf.h
++++ b/src/conf/storage_conf.h
+@@ -135,6 +135,7 @@ enum virStoragePoolType {
+     VIR_STORAGE_POOL_MPATH,    /* Multipath devices */
+     VIR_STORAGE_POOL_RBD,      /* RADOS Block Device */
+     VIR_STORAGE_POOL_SHEEPDOG, /* Sheepdog device */
++    VIR_STORAGE_POOL_HLFS,	   /* HLFS device */
+ 
+     VIR_STORAGE_POOL_LAST,
+ };
+diff --git a/src/storage/storage_backend.c b/src/storage/storage_backend.c
+index 083028d..a820e12 100644
+--- a/src/storage/storage_backend.c
++++ b/src/storage/storage_backend.c
+@@ -82,6 +82,9 @@
+ #if WITH_STORAGE_SHEEPDOG
+ # include "storage_backend_sheepdog.h"
+ #endif
++#if WITH_STORAGE_HLFS
++# include "storage_backend_hlfs.h"
++#endif
+ 
+ #define VIR_FROM_THIS VIR_FROM_STORAGE
+ 
+@@ -114,6 +117,9 @@ static virStorageBackendPtr backends[] = {
+ #if WITH_STORAGE_SHEEPDOG
+     &virStorageBackendSheepdog,
+ #endif
++#if WITH_STORAGE_HLFS
++    &virStorageBackendHlfs,
++#endif
+     NULL
+ };
+ 
+diff --git a/src/storage/storage_backend_hlfs.c b/src/storage/storage_backend_hlfs.c
+new file mode 100644
+index 0000000..3b5dee3
+--- /dev/null
++++ b/src/storage/storage_backend_hlfs.c
+@@ -0,0 +1,111 @@
++/*
++ *	libvirt/src/storage/storage_backend_hlfs.c
++ *
++ *	Harry Wei <harryxiyou@gmail.com> (C) 2013
++ *
++ */
++#include <config.h>
++
++#include "storage_backend_hlfs.h"
++#include "storage_conf.h"
++#include "util/command.h"
++#include "util.h"
++#include "virterror_internal.h"
++#include "memory.h"
++#include "logging.h"
++#include "storage_helper.h"
++#include "storage.h"
++#include "comm_define.h"
++#include "snapshot_helper.h"
++#include "address.h"
++#include "hdfs.h"
++#include "glib.h"
++
++#define VIR_FROM_THIS	VIR_FROM_STORAGE
++#define LOCAL_FORMAT	0
++#define	HDFS_FORMAT		1
++
++/*
++ *	parse pool name
++ *  pool name must be like following:
++ *	1, local://XXX
++ *	2, hdfs://XXX
++ */
++static int
++parse_poolname(char *name) {
++	HLOG_DEBUG("999 enter func %s\n", __func__);
++	int ret = 0;
++	bs_fs_t fs_handler = NULL;
++	if (NULL == name) {
++		HLOG_DEBUG("Error: this is invild pool name!\n");
++		return -1;
++	}
++
++	gchar **v = g_strsplit(name, "://", 2);
++	HLOG_DEBUG("v[0] is %s, v[1] is %s\n", v[0], v[1]);
++	if (0 == g_strcmp0(v[0], "local")) {
++		if (g_file_test(v[1], G_FILE_TEST_IS_DIR)) {
++			ret = LOCAL_FORMAT;
++			goto out;
++		}
++		ret = -1;
++	} else if (0 == g_strcmp0(v[0], "hdfs")) {
++		if(0 == hdfsExists((hdfsFS)fs_handler, v[1])) {
++			ret = HDFS_FORMAT;
++		}
++		ret = -1;
++	} else {
++		printf("Please use local://xxx or hdfs://xxx format!\n");
++		ret = -1;
++	}
++out:
++	printf("999 leave func %s\n", __func__);
++	return ret;
++}
++
++static int
++init_pool(int hlfs_format, virStoragePoolDefPtr pool) {
++	printf("999 enter func %s\n", __func__);
++	if (LOCAL_FORMAT == hlfs_format) {
++		/*TODO use fsstat to init pool stuffs*/
++		pool->allocation = pool->capacity = pool->available = 1000000000000;
++	} else if (HDFS_FORMAT == hlfs_format) {
++		/*TODO use hdfs fsstat to init pool stuffs*/
++		pool->allocation = pool->capacity = pool->available = 1000000000000;
++	} else {
++		printf("ERROR: Unknown HLFS format\n");
++		return -1;
++	}
++	printf("999 leave func %s\n", __func__);
++	return 0;
++}
++
++static int
++virStorageBackendHlfsRefreshPool(virConnectPtr conn ATTRIBUTE_UNUSED,
++								 virStoragePoolObjPtr pool) {
++	printf("999 enter func %s\n", __func__);
++	printf("999 pool name is %s\n", pool->def->name);
++	int ret = 0;
++	int hlfs_format = 0;
++	char *poolname = pool->def->name;
++
++	ret = parse_poolname(poolname);
++	if (-1 == ret) {
++		printf("parse poolname func error\n");
++		return -1;
++	}
++	hlfs_format = ret;
++	ret = init_pool(hlfs_format, pool->def);
++	if (-1 == ret) {
++		printf("init pool func error\n");
++		return -1;
++	}
++	printf("999 leave func %s\n", __func__);
++	return 0;
++}
++
++virStorageBackend virStorageBackendHlfs = {
++	.type = VIR_STORAGE_POOL_HLFS,
++
++	.refreshPool = virStorageBackendHlfsRefreshPool,
++};
+diff --git a/src/storage/storage_backend_hlfs.h b/src/storage/storage_backend_hlfs.h
+new file mode 100644
+index 0000000..5ed5562
+--- /dev/null
++++ b/src/storage/storage_backend_hlfs.h
+@@ -0,0 +1,16 @@
++/*
++ *	libvirt/src/storage/storage_backend_hlfs.h
++ *
++ *	Harry Wei <harryxiyou@gmail.com> (C) 2013
++ *
++ */
++
++#ifndef __VIR_STORAGE_BACKEND_HLFS_H__
++#define __VIR_STORAGE_BACKEND_HLFS_H__
++
++#include "storage_backend.h"
++
++
++extern virStorageBackend virStorageBackendHlfs;
++
++#endif	/* __VIR_STORAGE_BACKEND_HLFS_H__ */
+-- 
+1.7.0.4
+

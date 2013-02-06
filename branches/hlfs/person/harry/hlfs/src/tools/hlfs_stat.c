@@ -54,8 +54,8 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	//g_print("pool location is :%s\n",poolUri);
-	//g_print("fsname   is :%s\n",fsname);
+	g_print("pool location is :%s\n",poolUri);
+	g_print("fsname   is :%s\n",fsname);
 	//g_print("block size   is :%d\n",block_size);
 	//g_print("segment size   is :%d\n",seg_size);
 	//seg_size = SEGMENT_SIZE;

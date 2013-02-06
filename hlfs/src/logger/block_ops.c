@@ -41,7 +41,7 @@ int __read_layer_iblock(struct hlfs_ctrl *hctrl, uint32_t dbno, int layerno, \
 	}else{
 		g_assert(0);
 	}
-	//HLOG_DEBUG("dbno:%d,ibno:%d",dbno,ibno);
+	HLOG_DEBUG("dbno:%d,layerno:%d,ibno:%d",dbno,layerno,ibno);
 	g_assert(ibno >= 0);
 	if (TRUE == icache_iblock_exist(hctrl->icache, ibno)) {
 		//*iblock_buf = g_malloc0(hctrl->icache->iblock_size);	
@@ -131,18 +131,18 @@ typedef int(*READ_BLOCK_FUN)(struct hlfs_ctrl *ctrl, \
 		uint64_t storage_address, char *buf);
 static int __load_block_by_no(struct hlfs_ctrl *ctrl, uint32_t no, \
 		READ_BLOCK_FUN RB_FUN, char *block){
-	//HLOG_DEBUG("enter func %s, no:%d", __func__, no);
+	HLOG_DEBUG("enter func %s, no:%d", __func__, no);
 	int ret = 0;
 	if (ctrl->cctrl != NULL) {
-		//HLOG_DEBUG("read from cache first");
+		HLOG_DEBUG("read from cache first");
 		//*block = g_malloc0(ctrl->cctrl->block_size);
 		ret = dbcache_query_block(ctrl->cctrl, no,block);
 		if (ret == 0 ) {
-			HLOG_DEBUG("succ to get block from cache!");
+			HLOG_DEBUG("succ to get block from db cache!");
 			return 0;
 		}
 		//g_free(*block);
-		HLOG_DEBUG("not find in cache!");
+		HLOG_DEBUG("not find in db cache!");
 	}
 
 	uint64_t storage_address ;
@@ -157,9 +157,9 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl, uint32_t no, \
 		int _idx = db_no % 12;
 		storage_address = ctrl->inode.blocks[_idx];
 	}else if (is_db_in_level2_index_range(db_no)) {
-		//HLOG_DEBUG("inode.iblock :%llu",ctrl->inode.iblock);	
+		HLOG_DEBUG("inode.iblock :%llu",ctrl->inode.iblock);	
 		if (ctrl->inode.iblock == 0) {
-			//HLOG_DEBUG("inode.iblock zero");	
+			HLOG_DEBUG("inode.iblock zero");	
 			return 1;
 		}	
 		uint64_t *_ib = (uint64_t*)alloca(BLOCKSIZE);
@@ -176,7 +176,7 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl, uint32_t no, \
 		storage_address = *(_ib+_idx);
 		//g_free(_ib);
 	}else if (is_db_in_level3_index_range(db_no)){
-		//HLOG_DEBUG("inode.double_iblock :%llu", ctrl->inode.doubly_iblock);	
+		HLOG_DEBUG("inode.double_iblock :%llu", ctrl->inode.doubly_iblock);	
 		if (ctrl->inode.doubly_iblock == 0) {
 			HLOG_DEBUG("inode.doubly_iblock zero");	
 			return 1;
@@ -210,8 +210,9 @@ static int __load_block_by_no(struct hlfs_ctrl *ctrl, uint32_t no, \
 		//g_free(_ib);
 		//g_free(_ib2);
 	}else if (is_db_in_level4_index_range(db_no)){
+		HLOG_DEBUG("inode.triply_iblock :%llu", ctrl->inode.triply_iblock);	
 		if (ctrl->inode.triply_iblock == 0) {
-			//HLOG_DEBUG("inode.triply_iblock zero");	
+			HLOG_DEBUG("inode.triply_iblock zero");	
 			return 1;
 		}
 		uint64_t *_ib = (uint64_t*)alloca(BLOCKSIZE);

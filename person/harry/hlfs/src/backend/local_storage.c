@@ -275,6 +275,35 @@ local_list_dir(struct back_storage *storage,\
 	return infos;
 }
 
+int local_file_rmfs(struct back_storage *storage) {
+	int ret = 0;
+	char fullname[256];
+
+	memset(fullname, 0, 256);
+	sprintf(fullname, "%s/%s", storage->dir, storage->fs_name);
+	GDir *dir = g_dir_open(fullname, 0, NULL);
+	if (NULL == dir) {
+		HLOG_ERROR("open dir %s error!", fullname);
+		ret = -1;
+		goto out;
+	}
+	const gchar *filename = NULL;
+	while (NULL != (filename = g_dir_read_name(dir))) {
+		/*TODO: remove dir under fullname*/
+		gchar *file_path = g_build_filename(fullname, filename, NULL);
+		ret = g_remove(file_path);
+		if (0 > ret) {
+			printf("remove file %s error!\n", file_path);
+			g_free(file_path);
+			goto out;
+		}
+		g_free(file_path);
+	}
+	ret = g_rmdir(fullname);
+out:
+	return ret;
+}
+
 int local_file_mkdir(struct back_storage *storage, const char *dir_path){
 	//HLOG_DEBUG("local -- enter func %s", __func__);
 	char full_path[256];

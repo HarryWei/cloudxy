@@ -217,7 +217,7 @@ bs_file_info_t *hdfs_list_dir(struct back_storage *storage, \
 		info++;
 		hinfo++;
 	}
-	free(hinfos);
+	hdfsFreeFileInfo(hinfos, num);
 	*num_entries = num;
 	//HLOG_DEBUG("hdfs -- leave func %s", __func__);
 	return infos;
@@ -237,6 +237,40 @@ int hdfs_file_mkdir(struct back_storage *storage, const char *dir_path){
 	}
 	//HLOG_DEBUG("hdfs -- leave func %s", __func__);
 	return 0;
+}
+
+int hdfs_file_rmfs(struct back_storage *storage) {
+	//HLOG_DEBUG("hdfs -- enter func %s", __func__);
+	int ret = 0;
+	char full_path[256];
+
+	memset(full_path, 0, sizeof(full_path));
+	sprintf(full_path, "%s/%s", storage->dir, storage->fs_name);
+	int num = 0;
+	hdfsFileInfo *hinfos = \
+			       hdfsListDirectory((hdfsFS)storage->fs_handler, full_path, &num);
+	if (NULL == hinfos) {
+		//HLOG_ERROR("hdfsListDirectory error");
+		return -1; 
+	}
+	hdfsFileInfo *hinfo = hinfos;
+	int i = 0;
+	for (i = 0;i < num;i++) {
+		gchar *file_path = g_build_filename(full_path, hinfo->mName, NULL);
+		ret = hdfsDelete((hdfsFS)storage->fs_handler, file_path);
+		if (0 > ret) {
+			ret = -1;
+			g_free(file_path);
+			goto out;
+		}
+		g_free(file_path);
+		hinfo++;
+	}
+	ret = hdfsDelete((hdfsFS)storage->fs_handler, full_path);
+out:
+	hdfsFreeFileInfo(hinfos, num);
+	//HLOG_DEBUG("hdfs -- leave func %s", __func__);
+	return ret;
 }
 
 static bs_file_t  __hlfs_file_open(struct back_storage *storage, \

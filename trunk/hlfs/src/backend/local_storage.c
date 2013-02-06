@@ -11,6 +11,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <errno.h>
+#include <sys/vfs.h>
 #include "glib.h"
 #include "storage.h"
 #include "misc.h"
@@ -41,7 +43,7 @@ static gchar *build_local_path(const char *uri, const char *path){
 #else
 static void build_local_path(char *full_path, const char *dir, \
 		const char *fs_name, const char *path){
-	//HLOG_DEBUG("local -- enter func %s, \
+HLOG_DEBUG("local -- enter func %s, \
 dir:%s, fs:%s, path:%s", __func__, dir, fs_name,path);
     memset(full_path, 0, 256);
     if (NULL != path) {
@@ -57,16 +59,47 @@ dir:%s, fs:%s, path:%s", __func__, dir, fs_name,path);
 
 int local_connect(struct back_storage *storage, const char *uri){
 	//HLOG_DEBUG("local -- enter func %s", __func__);
-
 	//HLOG_DEBUG("local -- leave func %s", __func__);
 	return 0;
 }
 
 int local_disconnect(struct back_storage *storage){
 	//HLOG_DEBUG("local -- enter func %s", __func__);
-
 	//HLOG_DEBUG("local -- leave func %s", __func__);
 	return 0;
+}
+
+static int local_statfs(struct back_storage *storage,uint64_t *capacity,uint64_t *used){
+       //char full_path[256];
+       //build_local_path(full_path, storage->dir, storage->fs_name,NULL);
+       struct statfs fs;
+       if ((statfs(storage->dir, &fs)) < 0 ) {
+	  HLOG_DEBUG("Failed to stat  %s:%s",storage->dir,strerror(errno));
+          return -1;
+       } else {
+         *capacity = fs.f_blocks * fs.f_bsize;
+         *used = fs.f_bfree * fs.f_bsize;
+      }
+      return 0;
+}
+
+int local_get_capacity(struct back_storage *storage,uint64_t *capacity){
+         int ret;
+ 	 uint64_t used;
+         ret = local_statfs(storage,capacity,&used);
+         if (ret <0) {
+            return -1;
+         }
+         return 0;
+}
+int local_get_used(struct back_storage *storage,uint64_t* used) {
+         int ret;
+ 	 uint64_t capacity;
+         ret = local_statfs(storage,&capacity,used);
+         if (ret <0) {
+            return -1;
+         }
+         return 0;
 }
 
 bs_file_t local_file_open(struct back_storage *storage, \

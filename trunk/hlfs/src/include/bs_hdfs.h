@@ -19,6 +19,10 @@ extern "C" {
 
 	int hdfs_connect(struct back_storage *storage,const char *uri);
 	int hdfs_disconnect(struct back_storage *storage);
+
+        int hdfs_get_capacity(struct back_storage *storage,uint64_t *capacity);
+        int hdfs_get_used(struct back_storage *storage,uint64_t *used);
+
 	bs_file_t hdfs_file_open(struct back_storage *storage, const char *path, \
 			int flags);
 	int hdfs_file_close(struct back_storage *storage, bs_file_t file);
@@ -75,7 +79,9 @@ static struct back_storage *get_hdfs_storage_ops(void){
 	storage->port = 0;
 	storage->bs_fs_connect = hdfs_connect;
 	storage->bs_fs_disconnect = hdfs_disconnect,
-		storage->bs_file_open = hdfs_file_open;
+        storage->bs_get_capacity = hdfs_get_capacity, 
+        storage->bs_get_used = hdfs_get_used,
+        storage->bs_file_open = hdfs_file_open;
 	storage->bs_file_close = hdfs_file_close;
 	storage->bs_file_is_exist = hdfs_file_is_exist;
 	storage->bs_file_tell = hdfs_file_tell;

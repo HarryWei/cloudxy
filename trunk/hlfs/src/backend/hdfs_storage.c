@@ -75,6 +75,30 @@ int hdfs_disconnect(struct back_storage *storage){
 	//HLOG_DEBUG("hdfs -- leave func %s", __func__);
 	return 0;
 }
+int hdfs_get_capacity(struct back_storage *storage,uint64_t *capacity){
+         int ret;
+ 	 uint64_t used;
+         g_assert(storage->fs_handler != NULL);
+         hdfsFS fs = (hdfsFS)storage->fs_handler;
+         if (fs == NULL){
+             return -1;
+         }
+         capacity = hdfsGetCapacity(fs); 
+         return capacity;
+}
+int hdfs_get_used(struct back_storage *storage,uint64_t *used) {
+         int ret;
+ 	 uint64_t capacity;
+         g_assert(storage->fs_handler != NULL);
+         hdfsFS fs = (hdfsFS)storage->fs_handler;
+         if (fs == NULL){
+             return -1;
+         }
+         used = hdfsGetUsed(fs); 
+         return 0;
+}
+
+
 
 int hdfs_file_close(struct back_storage *storage, bs_file_t file){
 	//HLOG_DEBUG("hdfs -- enter func %s", __func__);

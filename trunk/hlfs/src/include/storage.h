@@ -38,6 +38,8 @@ struct back_storage
 	bs_fs_t     fs_handler;
 	int        (*bs_fs_connect)(struct back_storage *storage, const char *uri); 
 	int        (*bs_fs_disconnect)(struct back_storage *storage); 
+        int        (*bs_get_capacity)(struct back_storage *storage,uint64_t *capacity);
+        int        (*bs_get_used)(struct back_storage *storage,uint64_t *used);
 	bs_file_t  (*bs_file_open) (struct back_storage *storage, const char *path, 
 			int flags); 
 	int        (*bs_file_close)(struct back_storage *storage, bs_file_t file);
@@ -57,5 +59,6 @@ struct back_storage
 	bs_file_info_t*
 		(*bs_file_list_dir)(struct back_storage *storage, \
 				const char *dir,uint32_t *num_entries);};
+
 #endif 
 

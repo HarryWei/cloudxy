@@ -15,7 +15,7 @@ SET(HADOOP_HOME ${WORK_HOME}/3part/hadoop)
 SET(LOG_HOME ${WORK_HOME}/3part/log)
 SET(SNAPPY_HOME ${WORK_HOME}/3part/snappy)
 #SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
-SET(JAVA_HOME 	/usr/lib/jvm/java-7-openjdk-i386)
+SET(JAVA_HOME 	/usr/lib/jdk1.6.0_37)
 #SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk.x86_64)
 INCLUDE_DIRECTORIES(
 		/usr/include/glib-2.0 
@@ -124,6 +124,17 @@ SET_TARGET_PROPERTIES(mkfs.hlfs PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototypes
 #TARGET_LINK_LIBRARIES(mkfs.hlfs -fprofile-arcs -ftest-coverage)
 #INSTALL(TARGETS mkfs.hlfs RUNTIME DESTINATION bin)
 ADD_DEPENDENCIES(tools mkfs.hlfs)
+
+SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
+SET(TOOLSRCS tools/hlfs_stat.c)
+ADD_EXECUTABLE(stat.hlfs ${TOOLSRCS})
+TARGET_LINK_LIBRARIES(stat.hlfs ${TOOLLIBS})
+SET_TARGET_PROPERTIES(stat.hlfs PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototypes")
+#ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+#TARGET_LINK_LIBRARIES(mkfs.hlfs -fprofile-arcs -ftest-coverage)
+#INSTALL(TARGETS mkfs.hlfs RUNTIME DESTINATION bin)
+ADD_DEPENDENCIES(tools stat.hlfs)
+
 
 #SET(CMAKE_INSTALL_PREFIX /usr)
 SET(EXECUTABLE_OUTPUT_PATH ../output/bin)

@@ -239,7 +239,7 @@ int hdfs_file_mkdir(struct back_storage *storage, const char *dir_path){
 	return 0;
 }
 
-int hdfs_file_rmfs(struct back_storage *storage) {
+int hdfs_fs_rmfs(struct back_storage *storage) {
 	//HLOG_DEBUG("hdfs -- enter func %s", __func__);
 	int ret = 0;
 	char full_path[256];

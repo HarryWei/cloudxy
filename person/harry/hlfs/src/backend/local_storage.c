@@ -275,7 +275,7 @@ local_list_dir(struct back_storage *storage,\
 	return infos;
 }
 
-int local_file_rmfs(struct back_storage *storage) {
+int local_fs_rmfs(struct back_storage *storage) {
 	int ret = 0;
 	char fullname[256];
 

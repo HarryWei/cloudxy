@@ -275,6 +275,7 @@ local_list_dir(struct back_storage *storage,\
 	return infos;
 }
 
+#if 0
 int local_fs_rmfs(struct back_storage *storage) {
 	int ret = 0;
 	char fullname[256];
@@ -303,6 +304,7 @@ int local_fs_rmfs(struct back_storage *storage) {
 out:
 	return ret;
 }
+#endif
 
 int local_file_mkdir(struct back_storage *storage, const char *dir_path){
 	//HLOG_DEBUG("local -- enter func %s", __func__);

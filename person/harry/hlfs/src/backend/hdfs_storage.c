@@ -239,6 +239,7 @@ int hdfs_file_mkdir(struct back_storage *storage, const char *dir_path){
 	return 0;
 }
 
+#if 0
 int hdfs_fs_rmfs(struct back_storage *storage) {
 	//HLOG_DEBUG("hdfs -- enter func %s", __func__);
 	int ret = 0;
@@ -272,6 +273,7 @@ out:
 	//HLOG_DEBUG("hdfs -- leave func %s", __func__);
 	return ret;
 }
+#endif
 
 static bs_file_t  __hlfs_file_open(struct back_storage *storage, \
 		const char*path, int flags){

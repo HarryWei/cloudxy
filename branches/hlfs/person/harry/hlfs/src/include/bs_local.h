@@ -19,6 +19,7 @@ extern "C" {
 
 	int local_connect(struct back_storage *storage, const char *uri);
 	int local_disconnect(struct back_storage *storage);
+	int local_file_rmfs(struct back_storage *storage);
         int local_get_capacity(struct back_storage *storage,uint64_t* capacity);
         int local_get_used(struct back_storage *storage,uint64_t *used);
 	bs_file_t local_file_open(struct back_storage *storage, const char *path, \
@@ -78,6 +79,7 @@ static struct back_storage *get_local_storage_ops(void){
 	storage->port = 0;
 	storage->bs_fs_connect = local_connect;
 	storage->bs_fs_disconnect = local_disconnect,
+	storage->bs_fs_rmfs = local_file_rmfs,
         storage->bs_get_capacity = local_get_capacity, 
         storage->bs_get_used = local_get_used,
         storage->bs_file_open = local_file_open;

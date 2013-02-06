@@ -193,6 +193,14 @@ SET_TARGET_PROPERTIES(hlfs_stat PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototypes
 #ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
 #TARGET_LINK_LIBRARIES(tapdisk_ops -fprofile-arcs -ftest-coverage)
 ADD_DEPENDENCIES(tools hlfs_stat)
+
+SET(TOOLSRCS tools/hlfs_rmfs.c)
+ADD_EXECUTABLE(hlfs_rmfs ${TOOLSRCS})
+TARGET_LINK_LIBRARIES(hlfs_rmfs ${TOOLLIBS})
+SET_TARGET_PROPERTIES(hlfs_rmfs PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototypes")
+#ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+#TARGET_LINK_LIBRARIES(tapdisk_ops -fprofile-arcs -ftest-coverage)
+ADD_DEPENDENCIES(tools hlfs_rmfs)
 #---------------------- Make Test ------------------------------#
 ADD_CUSTOM_TARGET(test)
 SET(TESTSRCS ../test/test_base.c)

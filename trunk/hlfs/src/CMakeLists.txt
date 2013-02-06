@@ -14,8 +14,8 @@ MESSAGE(STATUS "This is dir " ${WORK_HOME})
 SET(HADOOP_HOME ${WORK_HOME}/3part/hadoop)
 SET(LOG_HOME ${WORK_HOME}/3part/log)
 SET(SNAPPY_HOME ${WORK_HOME}/3part/snappy)
-#SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
-SET(JAVA_HOME 	/usr/lib/jdk1.6.0_37)
+SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
+#SET(JAVA_HOME 	/usr/lib/jvm/java-7-openjdk-i386)
 #SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk.x86_64)
 INCLUDE_DIRECTORIES(
 		/usr/include/glib-2.0 

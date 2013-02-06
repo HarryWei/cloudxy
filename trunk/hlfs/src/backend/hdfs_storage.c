@@ -83,8 +83,8 @@ int hdfs_get_capacity(struct back_storage *storage,uint64_t *capacity){
          if (fs == NULL){
              return -1;
          }
-         capacity = hdfsGetCapacity(fs); 
-         return capacity;
+         *capacity = hdfsGetCapacity(fs); 
+         return 0;
 }
 int hdfs_get_used(struct back_storage *storage,uint64_t *used) {
          int ret;
@@ -94,7 +94,7 @@ int hdfs_get_used(struct back_storage *storage,uint64_t *used) {
          if (fs == NULL){
              return -1;
          }
-         used = hdfsGetUsed(fs); 
+         *used = hdfsGetUsed(fs); 
          return 0;
 }
 
@@ -217,7 +217,7 @@ bs_file_info_t *hdfs_list_dir(struct back_storage *storage, \
 		info++;
 		hinfo++;
 	}
-	free(hinfos);
+    hdfsFreeFileInfo(hinfos, num);
 	*num_entries = num;
 	//HLOG_DEBUG("hdfs -- leave func %s", __func__);
 	return infos;

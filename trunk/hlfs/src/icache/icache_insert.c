@@ -12,7 +12,7 @@
 	uint32_t start_block_no, uint32_t block_count, char *block_buf);
 int icache_insert_iblock(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no, \
 		char *iblock_buf){
-	//HLOG_DEBUG("--enter fun %s", __func__);
+	HLOG_DEBUG("--Entering func %s,icache_ctrl:%p,iblock_size:%u", __func__,icache_ctrl,icache_ctrl->iblock_size);
 	icache_ctrl->total_write_count++;
 	iblock_t *_iblock = icache_query(icache_ctrl, iblock_no);
 	if (_iblock != NULL) {
@@ -40,7 +40,7 @@ int icache_insert_iblock(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no, \
 				g_queue_get_length(icache_ctrl->iblock_lru));
 	}
 	iblock_t *iblock = g_trash_stack_pop(&icache_ctrl->iblock_cache);
-	HLOG_DEBUG("--insert iblock_no:%d--", iblock_no);
+	HLOG_DEBUG("--insert iblock no:%llu,iblock->iblock:%p,iblock_size:%u", iblock_no,iblock->iblock,icache_ctrl->iblock_size);
 	iblock->iblock_no = iblock_no;
 	memcpy(iblock->iblock, iblock_buf, icache_ctrl->iblock_size);
 	g_hash_table_insert(icache_ctrl->iblock_map, &(iblock->iblock_no), iblock);

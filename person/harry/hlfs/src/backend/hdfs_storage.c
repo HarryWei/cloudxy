@@ -83,8 +83,8 @@ int hdfs_get_capacity(struct back_storage *storage,uint64_t *capacity){
          if (fs == NULL){
              return -1;
          }
-         capacity = hdfsGetCapacity(fs); 
-         return capacity;
+         *capacity = (uint64_t) hdfsGetCapacity(fs); 
+         return 0;
 }
 int hdfs_get_used(struct back_storage *storage,uint64_t *used) {
          int ret;
@@ -94,7 +94,7 @@ int hdfs_get_used(struct back_storage *storage,uint64_t *used) {
          if (fs == NULL){
              return -1;
          }
-         used = hdfsGetUsed(fs); 
+         *used = (uint64_t) hdfsGetUsed(fs); 
          return 0;
 }
 

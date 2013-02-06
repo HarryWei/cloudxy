@@ -209,50 +209,50 @@ int parse_from_uri(const char *uri, char ** head, char** hostname , \
 {
 	//HLOG_DEBUG("enter func %s", __func__);
 	gchar **v=NULL;
-        gchar **v1=NULL;
-        gchar **v2=NULL;
-        char *pre_uri = g_dirname(uri);
-        *fs_name = g_strdup((char *) g_path_get_basename (uri));
-        v = g_strsplit(pre_uri,"://", 2);
+	gchar **v1=NULL;
+	gchar **v2=NULL;
+	char *pre_uri = g_dirname(uri);
+	*fs_name = g_strdup((char *) g_path_get_basename (uri));
+	v = g_strsplit(pre_uri,"://", 2);
 	g_free(pre_uri); 
-        if (g_strv_length(v) != 2) {
-        g_strfreev(v);
-        return -1; 
-        }
-        *head = g_strdup(v[0]);
-        
-        if (v[1][0] == '/' ) {
-        //HLOG_DEBUG("default localhost for hostname\n");
-        *hostname = g_strdup("default");
-        *dir = g_strdup(v[1]);
-        *port = 0; 
-        } else {
-        v1 = g_strsplit(v[1], "/", 2);
-        if (g_strv_length(v1) < 2) {
-           g_strfreev(v);
-           g_strfreev(v1);
-           return -1;
-        }
-        v2 = g_strsplit(v1[0], ":", 2);
-        if (g_strv_length(v2) != 2) {
-           *hostname = g_strdup(v1[0]);
-		char _dir[128];
-		memset(_dir, 0, 128);
-		sprintf(_dir, "%s%s", "/", v1[1]);
-           *dir = g_strdup(_dir);
-           *port = 8020;
-        } else {
-           *hostname = g_strdup(v2[0]);
-		   char _dir[128];
-		   memset(_dir, 0, 128);
-		   sprintf(_dir, "%s%s", "/", v1[1]);
-           *dir = g_strdup(_dir);
-           *port = atoi(v2[1]);
-              }
-       }
-       g_strfreev(v);
-       g_strfreev(v1);
-       g_strfreev(v2);
+	if (g_strv_length(v) != 2) {
+		g_strfreev(v);
+		return -1; 
+	}
+	*head = g_strdup(v[0]);
+
+	if (v[1][0] == '/' ) {
+		//HLOG_DEBUG("default localhost for hostname\n");
+		*hostname = g_strdup("default");
+		*dir = g_strdup(v[1]);
+		*port = 0; 
+	} else {
+		v1 = g_strsplit(v[1], "/", 2);
+		if (g_strv_length(v1) < 2) {
+			g_strfreev(v);
+			g_strfreev(v1);
+			return -1;
+		}
+		v2 = g_strsplit(v1[0], ":", 2);
+		if (g_strv_length(v2) != 2) {
+			*hostname = g_strdup(v1[0]);
+			char _dir[128];
+			memset(_dir, 0, 128);
+			sprintf(_dir, "%s%s", "/", v1[1]);
+			*dir = g_strdup(_dir);
+			*port = 8020;
+		} else {
+			*hostname = g_strdup(v2[0]);
+			char _dir[128];
+			memset(_dir, 0, 128);
+			sprintf(_dir, "%s%s", "/", v1[1]);
+			*dir = g_strdup(_dir);
+			*port = atoi(v2[1]);
+		}
+	}
+	g_strfreev(v);
+	g_strfreev(v1);
+	g_strfreev(v2);
 	//HLOG_DEBUG("leave func %s", __func__);
-       return 0;
+	return 0;
 }

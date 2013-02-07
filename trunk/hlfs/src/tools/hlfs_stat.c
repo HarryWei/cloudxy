@@ -54,37 +54,64 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	//g_print("pool location is :%s\n",poolUri);
-	//g_print("fsname   is :%s\n",fsname);
+	g_print("pool location is :%s\n",poolUri);
+	g_print("fsname   is :%s\n",fsname);
 	//g_print("block size   is :%d\n",block_size);
 	//g_print("segment size   is :%d\n",seg_size);
 	//seg_size = SEGMENT_SIZE;
-        if(fsname == NULL){
-   	   //g_print("get pool info ------ \n");
-           uri = g_build_filename(poolUri,"dump",NULL); 
-        }else{
-           //g_print("get fs info   ------ \n");
-           exit(0);
-        }        
+	int ret = 0;
+	uint64_t pool_capacity = 0;
+	uint64_t pool_used = 0;
+	uint64_t fs_capacity = 0;
+	uint64_t fs_used = 0;
+	HLFS_STAT_T hlfsstat;
+		
+	memset(&hlfsstat, 0, sizeof(hlfsstat));
+	if(fsname == NULL){
+		//g_print("get pool info ------ \n");
+		uri = g_build_filename(poolUri,"dump",NULL);
+	} else {
+		//g_print("get fs info   ------ \n");
+		uri = g_build_filename(poolUri, fsname, NULL);
+		ret = hlfs_lstat(uri, &hlfsstat);
+		if (0 > ret) {
+			g_message("ERROR: hlfs_lstat error!");
+			ret = -1;
+			goto out;
+		}
+		fs_capacity = hlfsstat.max_fs_size;
+		fs_used = (uint64_t) (hlfsstat.last_segno * hlfsstat.seg_size + hlfsstat.last_offset);
+    }
+	g_message("999 uri is %s", uri);
 	struct back_storage *storage = init_storage_handler(uri);
 	if (NULL == storage) {
 		g_message("can not get storage handler for uri:%s", poolUri);
-		g_option_context_free(context);
-		return -1;
+		ret = -1;
+		goto out;
 	}
-        uint64_t capacity,used;
-        if (0 != storage->bs_get_capacity(storage,&capacity)){
-     	   g_printf(" can not get total Capacity ");
-           return -1;
-        }
-        if (0 != storage->bs_get_used(storage,&used)){
-     	   g_printf(" can not get used Capacity ");
-           return -1;
-        }
-     	g_printf("Pool Total Capacity:%lld,Used:%lld\n",capacity,used);
-        g_free(uri);
-	g_option_context_free(context);
+    if (0 != storage->bs_get_capacity(storage,&pool_capacity)){
+    	g_printf(" can not get total Capacity ");
+    	ret = -1;
+		goto out1;
+    }
+	if (0 != storage->bs_get_used(storage,&pool_used)){
+		g_printf(" can not get used Capacity ");
+		ret = -1;
+		goto out1;
+	}
+	if (NULL == fsname) {
+		g_printf("Pool Total Capacity: %lld, Used: %lld\nThere is no FS available\n", 
+																pool_capacity, pool_used);
+	} else {
+		g_printf("Pool Total Capacity: %llu, Used: %llu\nFS Total Capacity: %llu, Used: %llu\n", pool_capacity, pool_used, 
+													fs_capacity, fs_used);
+	}
+
+out1:	
 	deinit_storage_handler(storage);
+out:
+	g_free(uri);
+	g_option_context_free(context);
 //	if (log4c_fini()) {
 //		g_message("log4c_fini failed!");
 //	}

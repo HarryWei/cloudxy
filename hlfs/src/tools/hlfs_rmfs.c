@@ -58,7 +58,7 @@ int hlfs_rmfs(struct back_storage *storage){
         return ret;  
 }
 
-/*  mkfs.stat -p http://<poolpath>  -u name */
+/*  mkfs_rmfs -u uri */
 int main(int argc, char *argv[])
 {
 //	if (log4c_init()) {

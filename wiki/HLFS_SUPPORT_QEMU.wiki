@@ -23,8 +23,9 @@ JVM_DIR=/usr/lib/jvm/java-6-sun/
 }}}
   # 编译安装QEMU
 {{{
-$./configure --enable-kvm --enable-debug --enable-hlfs --enable-sdl --target-list=i386-softmmu
-$make -j8
+$./configure --enable-hlfs --with-coroutine=gthread 
+这里必须特别说明一下 coroutine是qemu中提高并发效率新机制（默认使用的ucontext的backend），但可惜因为我们使用libhdfs，其使用jni创建jvm。调试中发现ucontext机制的stack管理和jvm的stack似乎有冲突，具体原因不明（如果那位有识之士帮忙调查清楚，则感激得紧）。所以qemu请配置为传统的thread模式。 另外如果你要用kvm， 别忘了加上--enable-kvm 选项.
+$make
 $sudo make install
 $ldd ./qemu-img 
 执行这个命令是为了查看qemu-img所指向的库是否都存在！

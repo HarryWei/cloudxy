@@ -16,7 +16,11 @@
 
 ==第三阶段==
 || *责任人* || *任务* || *完成情况* || *分享与讨论日志* || *备注* || 
-|| 贾威威   || 开发HLFS driver for Libvirt并测试;   || 进行中  || 未讨论 || 测试工作需仔细认真对待(关乎HLFS集成Openstack的成功与否);  ||
+|| 贾威威   || 开发HLFS driver for Libvirt并测试;   || 完成  || 讨论完成 || 测试工作需仔细认真对待(关乎HLFS集成Openstack的成功与否);<br>分为了两部分完成了：<br> 1，HLFS Online storage driver <br> 2, HLFS Offline storage driver <br> 讨论也分为对应的两部分完成了 ||
+
+==第四阶段==
+|| *责任人* || *任务* || *完成情况* || *分享与讨论日志* || *备注* || 
+|| 张典博 <br> 贾威威   || 开发Openstack driver for Libvirt并测试;   || 进行中  || 未讨论 || 开发Openstack Nova和Openstack Cinder等工作，并测试 ||
 
 
 ==注意事项==

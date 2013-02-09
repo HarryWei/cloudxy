@@ -13,7 +13,9 @@
    我们使用xen中的tapdisk2模式加载hlfs磁盘，因此需要使用xen4.0之上版本（如果低版本xen需要打上tapdisk2的patch)。因此我们建议使用xen4.1.x 。 对于dom0内核版本，我们建议不要用2.6.18的老内核，使用当前2.6.32以上的内核比较可靠。<br>
    关于xen的安装，网上资料很多。 
    也可以参见我们wiki上的资料。如果启动虚拟机有问题，去看看权威文档，相信所有问题都有解决办法http://wiki.xen.org/xenwiki/XenCommonProblems。<br>
-   
+{{{
+hlfs也支持qemu（从而支持kvm)，具体参见http://code.google.com/p/cloudxy/wiki/HLFS_SUPPORT_QEMU
+}}}
 
 == HLFS START UP ==
  === 获取hlfs代码和相关依赖库 ===

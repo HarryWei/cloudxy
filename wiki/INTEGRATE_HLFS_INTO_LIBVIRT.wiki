@@ -99,7 +99,6 @@ git apply hlfs_driver_for_libvirt_offline_storage.patch
  # 启动libvirt服务端进程，libvirt/daemon/libvirtd
  # 执行客户端程序，创建HLFS Pool, virsh pool-create pool_hlfs.xml
 {{{
-pool_hlfs.xml 内容如下
 $ cat pool_hlfs.xml 
 <pool type="hlfs">
 	<name>local:///tmp/testenv</name>
@@ -110,12 +109,16 @@ $ cat pool_hlfs.xml
 </pool>
 }}}
  # 删除HLFS Pool, virsh poo-destroy local:///tmp/testenv
-
+{{{
+注意：
+a, pool_hlfs.xml中的name域有两种模式，local和hdfs，也即HLFS的两种模式，路径是可配置的。
+b, pool_hlfs.xml的两个name域内容需要一致。
+c, 删除HLFS Pool 时，只需给出对应的HLFS Pool name。
+}}}
 
 ===HLFS Volume操作====
  # 创建HLFS Volume, virsh vol-create local:///tmp/testenv hlfs.xml
 {{{
-hlfs.xml 内容如下
 $ cat hlfs.xml
 <volume>
 <name>testfs</name>
@@ -125,7 +128,7 @@ $ cat hlfs.xml
 <capacity unit='bytes'>1000000000</capacity>
 <allocation unit='bytes'>1000000000</allocation>
 <target>
-<path>hlfs:hdfs:///tmp/testenv/testfs</path>
+<path>hlfs:local:///tmp/testenv/testfs</path>
 <format type='unknown'/>
 <permissions>
 <mode>00</mode>
@@ -136,7 +139,27 @@ $ cat hlfs.xml
 </volume>
 }}}
  # 删除HLFS Volume, virsh vol-delete testfs
+{{{
+注意：
+a, 创建HLFS Volume时需要指定之前创建的HLFS Pool name。
+b, 删除HLFS Volume时只需给出HLFS Volume name。
+}}}
 
+=注意事项=
+ * 目前HLFS支持Libvirt storage并非全部功能，因为有些功能Libvirt还没提供接口。
+ * 搭建环境过程中，可能会遇到这样那样的问题，如果实在无法解决们可以发邮件到我们群邮件(cloudxy@googlegroups.com)寻求帮助。
+ * 由于本人水平有限，如果你在实验的过程中发现HLFS driver for Libvirt有问题，或者某些步骤不是很合理，存在问题，请及时指正。
+
+=感谢=
+在完成HLFS driver for Libvirt的过程中得到了很多人的帮助，他们孜孜不倦的教诲令我深受感动，这里贴出他们的名字以示我的谢意，同时提醒我随时像他们学习多多帮助别人。
+{{{
+陈莉君老师：激励我不断探索，不断进步，思想上给予很大的帮助。
+康华师哥：从头到尾，任何问题都给予帮助，学到了很多。
+Eric Blake: 帮助我理解了Libvirt中 storage 的管理方式，以及其他与Libvirt的问题。
+MORITA Kazutaka: 对于Sheepdog的任何问题，他都孜孜不倦的给予解答和帮助。
+张典博师哥：完成HLFS driver for Libvirt 之后，一起测试，提出了一些建议和需要完善的地方。
+还有一些这里没有提到的人，也给予了很大的帮助，感谢他们。
+}}}
 ----
 Written by: Harry Wei (harryxiyou@gmail.com)
 <br>

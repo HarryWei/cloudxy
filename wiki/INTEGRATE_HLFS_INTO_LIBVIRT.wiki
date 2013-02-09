@@ -88,7 +88,55 @@
 注意：没有vncviewer的话，sudo apt-get install tightvnc-java(debian是这样，其他distro可以找对应软件安装)去安装一个小客户端吧，登陆时密码为空！
 }}}
 =离线模式测试=
-=...待续=
+===测试环境搭建===
+这个过程与在线模式的测试环境搭建相同，需要注意的是，离线模式在搭建libvirt环境时，需要下载如下补丁并应用：
+{{{
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_offline_storage.patch
+git apply hlfs_driver_for_libvirt_offline_storage.patch
+}}}
+
+===HLFS Pool操作===
+ # 启动libvirt服务端进程，libvirt/daemon/libvirtd
+ # 执行客户端程序，创建HLFS Pool, virsh pool-create pool_hlfs.xml
+{{{
+pool_hlfs.xml 内容如下
+$ cat pool_hlfs.xml 
+<pool type="hlfs">
+	<name>local:///tmp/testenv</name>
+	<source>
+	<name>local:///tmp/testenv</name>
+	<host name='localhost' port='7000'/>
+	</source>
+</pool>
+}}}
+ # 删除HLFS Pool, virsh poo-destroy local:///tmp/testenv
+
+
+===HLFS Volume操作====
+ # 创建HLFS Volume, virsh vol-create local:///tmp/testenv hlfs.xml
+{{{
+hlfs.xml 内容如下
+$ cat hlfs.xml
+<volume>
+<name>testfs</name>
+<key>hlfs/testfs</key>
+<source>
+</source>
+<capacity unit='bytes'>1000000000</capacity>
+<allocation unit='bytes'>1000000000</allocation>
+<target>
+<path>hlfs:hdfs:///tmp/testenv/testfs</path>
+<format type='unknown'/>
+<permissions>
+<mode>00</mode>
+<owner>0</owner>
+<group>0</group>
+</permissions>
+</target>
+</volume>
+}}}
+ # 删除HLFS Volume, virsh vol-delete testfs
+
 ----
 Written by: Harry Wei (harryxiyou@gmail.com)
 <br>

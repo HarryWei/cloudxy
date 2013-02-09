@@ -7,7 +7,7 @@
  * 32、64位Linux系统操作系统（我是在ubuntu10.4和Centos上进行开发的）
  * 2G  以上内存
 ===Hadoop 安装===
-   hlfs需要使用hadoop hdfs的append功能实现log追加操作，因此我们需要选择hadoop-0.20-append或者cloudera的cdh3版本（默认支持了append功能，不用再配置 dfs.support.append=true了，如果使用其他版本一定要打开该功能），关于hadoop append问题域的分析请见http://www.cloudera.com/blog/2009/07/file-appends-in-hdfs.<br>
+   hlfs需要使用hadoop hdfs的append功能实现log追加操作，因此我们需要选择hadoop-0.20-append或者cloudera的cdh3u0/1/2/3版本（默认支持了append功能，不用再配置 dfs.support.append=true了，如果使用其他版本一定要打开该功能），关于hadoop append问题域的分析请见http://www.cloudera.com/blog/2009/07/file-appends-in-hdfs.<br>
    我们建议使用cloudera的cdh3，安装方式参见  https://ccp.cloudera.com/display/CDHDOC/CDH3+Installation。<br>
    另外必须指出的是，因为我们需要hdfs的hflush接口，而cdh3的发布包里没有加入，因此手动打一个小patch(https://issues.apache.org/jira/secure/attachment/12482311/HDFS-2055.r2.patch); 然后需要重新编译libhdfs(ant -Dlibhdfs=yes -Dcompile.c++=yes compile-c++-libhdfs）——为了方便大家，我们将编译后的libhdfs置于我们的第三方库目录下/3part/hadoop/，所以大家编译和运行时注意指向我们修改后的libhdfs!!!
 ===Xen 安装===   

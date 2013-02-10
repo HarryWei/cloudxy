@@ -18,18 +18,19 @@ SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(HLFS)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-SET(WORK_HOME "$ENV{PWD}/../..")
+SET(WORK_HOME "$ENV{PWD}/..")
 MESSAGE(STATUS "Root directory of project:" ${WORK_HOME})
 #SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
-SET(JAVA_HOME 	/mnt/jdk1.7.0_02)
+#SET(JAVA_HOME 	/mnt/jdk1.7.0_02)
+SET(JAVA_HOME 	/usr/lib/jvm/java-7-openjdk-amd64)
 MESSAGE(STATUS "JAVA HOME:" ${JAVA_HOME})
-#SET(JAVA_HOME 	/usr/lib/jvm/java-1.6.0-openjdk)
 
 # include these files for building.
 INCLUDE_DIRECTORIES(
 	/usr/include/glib-2.0 
 	/usr/lib/glib-2.0/include
 	/usr/lib/i386-linux-gnu/glib-2.0/include
+	/usr/lib/x86_64-linux-gnu/glib-2.0/include
 	${JAVA_HOME}/include/
 	${JAVA_HOME}/include/linux
 	${WORK_HOME}/src/include
@@ -47,8 +48,8 @@ LINK_DIRECTORIES(
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 LINK_DIRECTORIES(
     ${WORK_HOME}/output/lib64
-    ${WORK_HOME}/jre/lib/amd64/client
-    ${WORK_HOME}/jre/lib/amd64/server
+    ${JAVA_HOME}/jre/lib/amd64/client
+    ${JAVA_HOME}/jre/lib/amd64/server
     ${WORK_HOME}/3part/log/lib64
     ${WORK_HOME}/3part/snappy/lib64)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)

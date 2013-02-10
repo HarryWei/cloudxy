@@ -20,7 +20,7 @@
  * 搭建QEMU环境，详见http://code.google.com/p/cloudxy/wiki/HLFS_SUPPORT_QEMU
  * 搭建Libvirt环境
 {{{
-  1. git clone git://libvirt.org/libvirt.git
+  1. git clone git://libvirt.org/libvirt.git；cd libvirt
   2. git reset --hard v1.0.1
   3. wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_network_disk.patch
   4. git apply hlfs_driver_for_libvirt_network_disk.patch

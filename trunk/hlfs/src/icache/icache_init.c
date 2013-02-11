@@ -39,8 +39,7 @@ int icache_init(ICACHE_CTRL *icache_ctrl,
 			invalidate_once_size);
 	icache_ctrl->iblock_size = iblock_size;
 	icache_ctrl->icache_size = icache_size;
-	icache_ctrl->invalidate_trigger_level = \
-						invalidate_trigger_level;
+	icache_ctrl->invalidate_trigger_level = invalidate_trigger_level;
 	icache_ctrl->invalidate_once_size = invalidate_once_size;
 #if 0
 	if (NULL == (cache_ctrl->block_cache = (GTrashStack *)g_malloc0(sizeof \

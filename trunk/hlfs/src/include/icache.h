@@ -39,7 +39,7 @@ extern "C" {
 		uint32_t		invalidate_trigger_level; 	// 
 		uint32_t	invalidate_once_size;//Number of dirty blocks \
 		have been written one time 
-			uint64_t 		total_write_count; 
+		uint64_t 		total_write_count; 
 		uint64_t 		total_read_count;
 		uint64_t 		icache_hit;
 	} ICACHE_CTRL;

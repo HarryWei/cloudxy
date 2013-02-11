@@ -21,6 +21,7 @@ INCLUDE_DIRECTORIES(
 		/usr/include/glib-2.0 
 		/usr/lib/glib-2.0/include 
 		/usr/lib/i386-linux-gnu/glib-2.0/include
+		/usr/lib/x86_64-linux-gnu/glib-2.0/include
 		${JAVA_HOME}/include
 		${JAVA_HOME}/include/linux
 		${HADOOP_HOME}/include

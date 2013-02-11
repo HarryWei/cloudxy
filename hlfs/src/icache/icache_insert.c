@@ -40,7 +40,7 @@ int icache_insert_iblock(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no, \
 				g_queue_get_length(icache_ctrl->iblock_lru));
 	}
 	iblock_t *iblock = g_trash_stack_pop(&icache_ctrl->iblock_cache);
-	HLOG_DEBUG("--insert iblock no:%llu,iblock->iblock:%p,iblock_size:%u", iblock_no,iblock->iblock,icache_ctrl->iblock_size);
+	HLOG_DEBUG("--insert iblock no:%u,iblock->iblock:%p,iblock_size:%u", iblock_no,iblock->iblock,icache_ctrl->iblock_size);
 	iblock->iblock_no = iblock_no;
 	memcpy(iblock->iblock, iblock_buf, icache_ctrl->iblock_size);
 	g_hash_table_insert(icache_ctrl->iblock_map, &(iblock->iblock_no), iblock);

@@ -17,7 +17,7 @@ iblock_t *icache_query(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no){
 		HLOG_ERROR("param error");
 		return NULL;
 	}
-	HLOG_DEBUG("iblock_no %llu will be queried", iblock_no);
+	HLOG_DEBUG("iblock_no %u will be queried", iblock_no);
 	g_mutex_lock(icache_ctrl->icache_mutex);
 	iblock_t *iblock = \
 			   (iblock_t*)g_hash_table_lookup(icache_ctrl->iblock_map, &(iblock_no));
@@ -49,7 +49,7 @@ int icache_query_iblock(ICACHE_CTRL *icache_ctrl, uint32_t iblock_no, \
 	g_queue_push_head(icache_ctrl->iblock_lru,iblock);
 	g_mutex_unlock(icache_ctrl->icache_mutex);
 
-	HLOG_DEBUG("--read iblock no:%llu,iblock->iblock:%p,iblock_size:%u", iblock->iblock_no,iblock->iblock,icache_ctrl->iblock_size);
+	HLOG_DEBUG("--read iblock no:%u,iblock->iblock:%p,iblock_size:%u", iblock->iblock_no,iblock->iblock,icache_ctrl->iblock_size);
 	g_assert(iblock_no == iblock->iblock_no);
 	memcpy(iblock_buf, iblock->iblock, icache_ctrl->iblock_size);
 	icache_ctrl->icache_hit++;

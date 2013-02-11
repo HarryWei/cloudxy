@@ -47,7 +47,7 @@ hlfs也支持qemu（从而支持kvm)，具体参见http://code.google.com/p/clou
    3. 3part 第三方库，目前包含hadoop相关;log库
    4. output 编译后的生成库和工具所在目录
    5. patches hlfs driver for blktap2的patch代码
-   注：有些linux版，可能会出现 “usr/include/glib-2.0/glib/gtypes.h:34:24: fatal error: glibconfig.h: No such file or directory” ，别慌，执行 sodu cp /usr/lib/i386-linux-gnu/glib-2.0/include/glibconfig.h /usr/include/glib-2.0/ 或者 执行sudo cp /usr/lib/x86_64-linux-gnu/glib-2.0/include/glibconfig.h /usr/include/glib-2.0/ 即可.
+   注：有些linux版，可能会出现 “usr/include/glib-2.0/glib/gtypes.h:34:24: fatal error: glibconfig.h: No such file or directory” ，别慌，执行 sudo cp /usr/lib/i386-linux-gnu/glib-2.0/include/glibconfig.h /usr/include/glib-2.0/ 或者 执行sudo cp /usr/lib/x86_64-linux-gnu/glib-2.0/include/glibconfig.h /usr/include/glib-2.0/ 即可.
 }}}
  === 测试hlfs ===
  为了方便调试目的，hlfs实现中支持了本地测试（不需要hadoop hdfs),我们称为local模式。我们首先用local模式测试

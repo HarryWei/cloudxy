@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
         g_message("option parsing failed: %s", error->message);
         exit(EXIT_FAILURE);
     }
-	g_option_context_free(context);
+    g_option_context_free(context);
     g_print("TEST: uri is %s, request size is %d, total size is %d\n", uri, request_size, total_size);
     char *content = (char*)g_malloc0(request_size);
     HLFS_CTRL * ctrl = init_hlfs(uri);
@@ -59,25 +59,31 @@ int main(int argc, char *argv[]){
     g_assert(ret == 0);
     g_print("TEST  hlfs open over \n");
 	g_print("test hlfs write\n");
-	sleep(2);
-    int offset = 0;
-    while(offset < total_size){
+	//sleep(2);
+    uint64_t offset = 0;
+    uint64_t _total_size = total_size;
+    while(offset < _total_size){
         ret = hlfs_write(ctrl,content,request_size,offset);
-        g_assert(ret==request_size);
+ 
+        if(ret!=request_size){
+          printf("----------------------\n");
+          printf("ret:%lu,request:%lu\n",ret,request_size);
+          g_assert(0);
+        }
         offset +=request_size;
-        printf("offset:%d\n",offset);
+        //printf("offset:%d\n",offset);
     }
     g_print("TEST  hlfs write over \n");
-	g_print("test hlfs read\n");
-	sleep(2);
+    g_print("test hlfs read\n");
+	//sleep(2);
     offset = 0;
-    while(offset < total_size){
+    while(offset < _total_size){
         ret = hlfs_read(ctrl,content,request_size,offset);
         g_assert(ret==request_size);
         offset +=request_size;
-        printf("offset:%d\n",offset);
+        //printf("offset:%d\n",offset);
     }
-
+#if 0
 	g_print("again ------------------------\n");
     offset = 0;
     while(offset < total_size){
@@ -96,9 +102,11 @@ int main(int argc, char *argv[]){
         offset +=request_size;
         printf("offset:%d\n",offset);
     }
-
+#endif
     g_free(content);
-	ret = hlfs_close(ctrl);
+    g_print("Test data over");
+    ret = hlfs_close(ctrl);
+    g_print("Test hlfs close over");
     deinit_hlfs(ctrl);
     g_print("TEST  hlfs test over \n");
     return 0;

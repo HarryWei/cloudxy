@@ -42,20 +42,20 @@ static gchar *build_hdfs_path(const char *uri, const char *path){
 #else
 static void build_hdfs_path(char *full_path, const char *dir, \
 		const char *fs_name, const char *path){
-	//HLOG_DEBUG("local -- enter func %s", __func__);
+	HLOG_DEBUG("local -- enter func %s", __func__);
 	memset(full_path, 0, 256);
 	if (NULL != path) {
 		sprintf(full_path, "%s/%s/%s", dir, fs_name, path);
 	}else{
 		sprintf(full_path, "%s/%s", dir, fs_name);
 	}
-	//HLOG_DEBUG("path:%s,full path:%s",path,full_path);
-	//HLOG_DEBUG("local -- leave func %s", __func__);
+	HLOG_DEBUG("path:%s,full path:%s",path,full_path);
+	HLOG_DEBUG("local -- leave func %s", __func__);
 	return;
 }
 #endif 
 int hdfs_connect(struct back_storage *storage, const char *uri){
-	//HLOG_DEBUG("hdfs -- enter func %s", __func__);
+	HLOG_DEBUG("hdfs -- enter func %s,hostname:%s,port:%d", __func__,storage->hostname,storage->port);
 	hdfsFS fs = hdfsConnect(storage->hostname, storage->port);
 	// for local test
 	if (NULL == fs) {
@@ -64,7 +64,7 @@ int hdfs_connect(struct back_storage *storage, const char *uri){
 	}
 	//storage->uri = uri; 
 	storage->fs_handler = (bs_fs_t)fs;
-	//HLOG_DEBUG("hdfs -- leave func %s", __func__);
+	HLOG_DEBUG("hdfs -- leave func %s", __func__);
 	return 0;
 }
 
@@ -157,7 +157,7 @@ int hdfs_file_delete(struct back_storage *storage, const char *path){
 	//HLOG_DEBUG("hdfs -- enter func %s", __func__);
 	char full_path[256];
 	build_hdfs_path(full_path, storage->dir, storage->fs_name, path);
-	int ret = hdfsDelete((hdfsFS)storage->fs_handler, full_path);
+	int ret = hdfsDelete((hdfsFS)storage->fs_handler, full_path,0);
 	//HLOG_DEBUG("hdfs -- leave func %s", __func__);
 	return ret;
 }
@@ -189,7 +189,7 @@ bs_file_info_t *hdfs_file_info(struct back_storage *storage, const char *path){
 
 bs_file_info_t *hdfs_list_dir(struct back_storage *storage, \
 		const char *dir_path, uint32_t *num_entries){
-	//HLOG_DEBUG("hdfs -- enter func %s", __func__);
+	HLOG_DEBUG("hdfs -- enter func %s", __func__);
 	char full_path[256];
 	build_hdfs_path(full_path, storage->dir, storage->fs_name, dir_path);
 	int num;
@@ -219,7 +219,7 @@ bs_file_info_t *hdfs_list_dir(struct back_storage *storage, \
 	}
     hdfsFreeFileInfo(hinfos, num);
 	*num_entries = num;
-	//HLOG_DEBUG("hdfs -- leave func %s", __func__);
+	HLOG_DEBUG("hdfs -- leave func %s", __func__);
 	return infos;
 }
 

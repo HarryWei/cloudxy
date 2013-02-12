@@ -15,19 +15,21 @@ SET(WORK_HOME   $ENV{PWD}/../../)
 MESSAGE(STATUS "Path is " ${WORK_HOME})
 #SET(WORK_HOME  ../../hlfs)
 # include these files for building.
-SET(HADOOP_HOME ${WORK_HOME}/3part/hadoop)
-SET(LOG_HOME ${WORK_HOME}/3part/log)
+#SET(HADOOP_HOME ${WORK_HOME}/3part/hadoop)
+#SET(LOG_HOME ${WORK_HOME}/3part/log)
 #SET(HADOOP_HOME /root/jiawei/hadoop/hadoop-0.20.0)
-SET(JAVA_HOME   /mnt/jdk1.7.0)
+SET(JAVA_HOME   /usr/lib/jvm/java-7-oracle)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GLIB_PKG glib-2.0)
+if (GLIB_PKG_FOUND)
+    message(Found glib-2.0)
+include_directories(${GLIB_PKG_INCLUDE_DIRS})
+endif(GLIB_PKG_FOUND)
+
 INCLUDE_DIRECTORIES(
-       /usr/include/glib-2.0 
-       /usr/lib/glib-2.0/include 
-       /usr/lib/i386-linux-gnu/glib-2.0/include
-       ${LOG_HOME}/include
        ${JAVA_HOME}/include/
        ${JAVA_HOME}/include/linux
-       ${HADOOP_HOME}/include
-       #${WORK_HOME}/src/include
        ${WORK_HOME}/src/include
        ${WORK_HOME}/src/include/api)
 
@@ -36,14 +38,10 @@ ADD_CUSTOM_TARGET(all)
 ADD_CUSTOM_TARGET(nbdserver)
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 LINK_DIRECTORIES(
-	${LOG_HOME}/lib32
-    	${HADOOP_HOME}/lib32
         ${WORK_HOME}/output/lib32
         ${JAVA_HOME}/jre/lib/i386/server)
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 LINK_DIRECTORIES(
-	${LOG_HOME}/lib64
-    	${HADOOP_HOME}/lib64
         ${WORK_HOME}/output/lib64
         ${JAVA_HOME}/jre/lib/amd64/server)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -65,13 +63,9 @@ ADD_DEPENDENCIES(nbdserver nbd-server)
 ADD_CUSTOM_TARGET(nbdclient)
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 LINK_DIRECTORIES(
-	${LOG_HOME}/lib32
-    	${HADOOP_HOME}/lib32
         ${WORK_HOME}/output/lib32)
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 LINK_DIRECTORIES(
-	${LOG_HOME}/lib64
-    	${HADOOP_HOME}/lib64
         ${WORK_HOME}/output/lib64)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 

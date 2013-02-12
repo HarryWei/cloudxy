@@ -29,9 +29,8 @@ if (GLIB_PKG_FOUND)
 include_directories(${GLIB_PKG_INCLUDE_DIRS})
 endif(GLIB_PKG_FOUND)
 
-MESSAGE(STATUS "Probe Java Home:" ${JAVA_HOME})
 SET(JAVA_HOME  $ENV{JAVA_HOME}/)
-
+MESSAGE(STATUS "Probe Java Home:" ${JAVA_HOME})
 # include these files for building.
 INCLUDE_DIRECTORIES(
     ${WORK_HOME}/src/include
@@ -40,13 +39,11 @@ INCLUDE_DIRECTORIES(
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 LINK_DIRECTORIES(
     ${WORK_HOME}/output/lib32
-    ${JAVA_HOME}/jre/lib/i386/client
     ${JAVA_HOME}/jre/lib/i386/server)
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 LINK_DIRECTORIES(
     ${WORK_HOME}/output/lib64
-    ${WORK_HOME}/jre/lib/amd64/client
-    ${WORK_HOME}/jre/lib/amd64/server)
+    ${JAVA_HOME}/jre/lib/amd64/server)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(LIBS glib-2.0

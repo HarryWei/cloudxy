@@ -18,46 +18,41 @@ SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(HLFS)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-SET(WORK_HOME "$ENV{PWD}/..")
+SET(WORK_HOME "$ENV{PWD}/../../")
 MESSAGE(STATUS "Root directory of project:" ${WORK_HOME})
-#SET(JAVA_HOME 	/usr/lib/jvm/java-6-sun)
-#SET(JAVA_HOME 	/mnt/jdk1.7.0_02)
-SET(JAVA_HOME 	/usr/lib/jvm/java-7-openjdk-amd64)
-MESSAGE(STATUS "JAVA HOME:" ${JAVA_HOME})
+
+MESSAGE(STATUS "Probe Glib Info")
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GLIB_PKG glib-2.0)
+if (GLIB_PKG_FOUND)
+    message(Found glib-2.0)
+include_directories(${GLIB_PKG_INCLUDE_DIRS})
+endif(GLIB_PKG_FOUND)
+
+MESSAGE(STATUS "Probe Java Home:" ${JAVA_HOME})
+SET(JAVA_HOME  $ENV{JAVA_HOME}/)
 
 # include these files for building.
 INCLUDE_DIRECTORIES(
-	/usr/include/glib-2.0 
-	/usr/lib/glib-2.0/include
-	/usr/lib/i386-linux-gnu/glib-2.0/include
-	/usr/lib/x86_64-linux-gnu/glib-2.0/include
-	${JAVA_HOME}/include/
-	${JAVA_HOME}/include/linux
-	${WORK_HOME}/src/include
-	${WORK_HOME}/3part/log/include
-	${WORK_HOME}/3part/snappy/include
+    ${WORK_HOME}/src/include
 )
 
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 LINK_DIRECTORIES(
     ${WORK_HOME}/output/lib32
-	${JAVA_HOME}/jre/lib/i386/client
-	${JAVA_HOME}/jre/lib/i386/server
-    ${WORK_HOME}/3part/log/lib32
-    ${WORK_HOME}/3part/snappy/lib32)
+    ${JAVA_HOME}/jre/lib/i386/client
+    ${JAVA_HOME}/jre/lib/i386/server)
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 LINK_DIRECTORIES(
     ${WORK_HOME}/output/lib64
-    ${JAVA_HOME}/jre/lib/amd64/client
-    ${JAVA_HOME}/jre/lib/amd64/server
-    ${WORK_HOME}/3part/log/lib64
-    ${WORK_HOME}/3part/snappy/lib64)
+    ${WORK_HOME}/jre/lib/amd64/client
+    ${WORK_HOME}/jre/lib/amd64/server)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(LIBS glib-2.0
-		 hlfs
-		 log4c
-		 snappy
+         hlfs
+         log4c
+         snappy
 )
 
 file(GLOB testfiles "test_*.c")
@@ -65,8 +60,7 @@ foreach(testfile ${testfiles})
 #GET_FILENAME_COMPONENT(basename ${testname} ${testfile} NAME)
 	GET_FILENAME_COMPONENT(testname ${testfile} NAME_WE)
 	ADD_EXECUTABLE(${testname} ${testfile})
-    SET_TARGET_PROPERTIES(${testname} PROPERTIES COMPILE_FLAGS "-g")
-    #ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
+        SET_TARGET_PROPERTIES(${testname} PROPERTIES COMPILE_FLAGS "-g")
+        #ADD_DEFINITIONS(-fprofile-arcs -ftest-coverage)
 	TARGET_LINK_LIBRARIES(${testname} ${LIBS})
-
 endforeach(testfile)

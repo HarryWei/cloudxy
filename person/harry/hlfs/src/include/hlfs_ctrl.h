@@ -83,7 +83,7 @@ struct hlfs_ctrl {
     void *   last_wsegfile_handler;
     void *   last_rsegfile_handler;
     uint32_t last_read_segno;
-    uint32_t last_rsegfile_offset;          /* last segfile end offset when last open */
+    uint32_t last_rsegfile_offset;          /*last segfile end offset when last open*/
     //GAsyncQueue * write_req_aqueue;
     //GAsyncQueue * write_rsp_aqueue;
     //struct write_rsp  write_rsp;

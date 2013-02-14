@@ -1,0 +1,37 @@
+From 38d7e7c057030359cd32da908b5897caa0b5e22a Mon Sep 17 00:00:00 2001
+From: Harry Wei <harryxiyou@gmail.com>
+Date: Thu, 14 Feb 2013 17:37:47 +0800
+Subject: [PATCH 3/3] add classpath ENV
+
+---
+ src/qemu/qemu_command.c |    1 +
+ src/rpc/virnetsocket.c  |    1 +
+ 2 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/src/qemu/qemu_command.c b/src/qemu/qemu_command.c
+index 8a92d04..f834932 100644
+--- a/src/qemu/qemu_command.c
++++ b/src/qemu/qemu_command.c
+@@ -5836,6 +5836,7 @@ qemuBuildCommandLine(virConnectPtr conn,
+                 goto error;
+             virCommandAddArg(cmd, optstr);
+             VIR_FREE(optstr);
++			virCommandAddEnvPass(cmd, "CLASSPATH");
+ 
+             if (!emitBootindex)
+                 bootindex = 0;
+diff --git a/src/rpc/virnetsocket.c b/src/rpc/virnetsocket.c
+index 93980d6..01c3c4b 100644
+--- a/src/rpc/virnetsocket.c
++++ b/src/rpc/virnetsocket.c
+@@ -126,6 +126,7 @@ static int virNetSocketForkDaemon(const char *binary)
+     virCommandAddEnvPass(cmd, "XDG_CACHE_HOME");
+     virCommandAddEnvPass(cmd, "XDG_CONFIG_HOME");
+     virCommandAddEnvPass(cmd, "XDG_RUNTIME_DIR");
++    virCommandAddEnvPass(cmd, "CLASSPATH");
+     virCommandClearCaps(cmd);
+     virCommandDaemonize(cmd);
+     ret = virCommandRun(cmd, NULL);
+-- 
+1.7.0.4
+

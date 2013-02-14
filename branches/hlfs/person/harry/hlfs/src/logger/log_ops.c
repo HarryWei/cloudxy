@@ -254,9 +254,9 @@ static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_
 
 //static bs_file_t g_cur_write_file = NULL;
 static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
-    //HLOG_DEBUG("enter func %s", __func__);
+    HLOG_DEBUG("999 enter func %s", __func__);
     int ret = 0;
-    if( 0 != prev_open_wsegfile(ctrl)){
+    if(0 != prev_open_wsegfile(ctrl)){
         HLOG_ERROR("fail do pre open segfile");
         ret -1;
     }
@@ -286,7 +286,7 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
         g_assert(ret == 0);
         //g_mutex_unlock (ctrl->hlfs_access_mutex);
     }		 	
-    //HLOG_DEBUG("leave func %s", __func__);
+    HLOG_DEBUG("999 leave func %s", __func__);
     return size;
 }
 
@@ -834,8 +834,6 @@ int append_log(struct hlfs_ctrl *hctrl,char *db_buff,uint32_t db_start,uint32_t 
 	hctrl->last_offset += size;
 	return size;
 }
-
-
 
 /*
 int append_inode(struct hlfs_ctrl * ctrl){

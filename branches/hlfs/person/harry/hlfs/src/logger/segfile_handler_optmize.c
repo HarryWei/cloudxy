@@ -6,7 +6,6 @@
   *  the Free Software Foundation.
  */
 
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -23,7 +22,6 @@
 #include <errno.h>
 #include "clone.h"
 #include "snappy-c.h"
-
 
 int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
     //HLOG_DEBUG("enter func %s", __func__);
@@ -95,11 +93,14 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
     //HLOG_DEBUG("leave func %s", __func__);
     return 0;
 }
+
 int prev_open_wsegfile(struct hlfs_ctrl *ctrl){
-    //HLOG_DEBUG("enter func %s", __func__);
-    //HLOG_DEBUG("ctrl last segno %d,offset:%d",ctrl->last_segno,ctrl->last_offset);
+    HLOG_DEBUG("999 enter func %s", __func__);
+    HLOG_DEBUG("999 ctrl last segno %d,offset:%d",ctrl->last_segno,ctrl->last_offset);
     char segfile_name[SEGMENT_FILE_NAME_MAX];
-    build_segfile_name(ctrl->last_segno,segfile_name);if( 0 == ctrl->last_offset){
+	memset(segfile_name, 0, SEGMENT_FILE_NAME_MAX);
+    build_segfile_name(ctrl->last_segno,segfile_name);
+	if(0 == ctrl->last_offset){
         if(ctrl->last_wsegfile_handler!=NULL){
             if(0!=ctrl->storage->bs_file_close(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler)){
                 //HLOG_ERROR("close segfile:%d failed",ctrl->last_segno-1);
@@ -116,9 +117,10 @@ int prev_open_wsegfile(struct hlfs_ctrl *ctrl){
     }else{
         if(ctrl->last_wsegfile_handler==NULL){
             /*  open a exist file */
-            //HLOG_DEBUG("open a exist file............................");
-            if(NULL == (ctrl->last_wsegfile_handler = (void*)ctrl->storage->bs_file_open(ctrl->storage,segfile_name,BS_WRITEABLE))){
-                //HLOG_ERROR("open segfile:%d failed,ctrl->last_segno");
+            HLOG_DEBUG("999 open a exist file %s............................", segfile_name);
+            if(NULL == (ctrl->last_wsegfile_handler =
+						(void*)ctrl->storage->bs_file_open(ctrl->storage,segfile_name,BS_WRITEABLE))){
+                HLOG_ERROR("999 open segfile:%d failed", ctrl->last_segno);
                 g_assert(0);
                 return -1;
             }
@@ -126,11 +128,9 @@ int prev_open_wsegfile(struct hlfs_ctrl *ctrl){
             HLOG_DEBUG("open a exist segment:%d file",ctrl->last_segno);
         }
     }
-    //HLOG_DEBUG("leave func %s", __func__);
+    HLOG_DEBUG("999 leave func %s", __func__);
     return 0;
 }
-
-
 
 int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block)
 {

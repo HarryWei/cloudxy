@@ -1,17 +1,13 @@
-From 2d9abf45dadced0254be5fb05e3facf460d3b18a Mon Sep 17 00:00:00 2001
+From 169e1c93de2a4babdcafe4602c0edfd7643e1a58 Mon Sep 17 00:00:00 2001
 From: Harry Wei <harryxiyou@gmail.com>
-Date: Thu, 31 Jan 2013 20:33:27 +0800
-Signed-off-by: Kanghua <kanghua151@gmail.com>
-Signed-off-by: Wang Sen <senwang@linux.vnet.ibm.com>
-Signed-off-by: Harry Wei <harryxiyou@gmail.com>
-Tested-by: Harry Wei <harryxiyou@gmail.com>
-Subject: [PATCH] fix hlbs_read and hlbs_write's return value by Brother Kang
+Date: Sat, 16 Feb 2013 01:59:36 +0800
+Subject: [PATCH] HLFS driver for QEMU
 
 ---
  block/Makefile.objs |    2 +-
  block/hlfs.c        |  514 +++++++++++++++++++++++++++++++++++++++++++++++++++
- configure           |   69 ++++++--
- 3 files changed, 572 insertions(+), 13 deletions(-)
+ configure           |   59 ++++--
+ 3 files changed, 562 insertions(+), 13 deletions(-)
  create mode 100644 block/hlfs.c
 
 diff --git a/block/Makefile.objs b/block/Makefile.objs
@@ -548,7 +544,7 @@ index 0000000..0283bd6
 +
 +block_init(bdrv_hlbs_init);
 diff --git a/configure b/configure
-index 994f731..740c99c 100755
+index 994f731..b99c6da 100755
 --- a/configure
 +++ b/configure
 @@ -223,6 +223,7 @@ libiscsi=""
@@ -579,7 +575,7 @@ index 994f731..740c99c 100755
  echo ""
  echo "NOTE: The object files are built at the place where configure is launched"
  exit 1
-@@ -2819,24 +2826,57 @@ fi
+@@ -2819,24 +2826,47 @@ fi
  ##########################################
  
  ##########################################
@@ -604,31 +600,21 @@ index 994f731..740c99c 100755
  EOF
 -if compile_prog "" "" ; then
 -    fdatasync=yes
-+	GLIB_DIR1_INC=/usr/lib/i386-linux-gnu/glib-2.0/include
-+	GLIB_DIR2_INC=/usr/include/glib-2.0
-+	HLFS_DIR=/home/kelvin/project/cloudxy/trunk/hlfs
-+	LOG4C_DIR=$HLFS_DIR/3part/log
-+	HDFS_DIR=$HLFS_DIR/3part/hadoop
-+	JVM_DIR=/mnt/jdk1.7.0_02
++	INC_GLIB_DIR=`pkg-config --cflags glib-2.0`
++	HLFS_DIR=`echo $HLFS_INSTALL_PATH`
++	JVM_DIR=`echo $JAVA_HOME`
 +
 +	if [ `getconf LONG_BIT` -eq "64" ];then
-+		CLIBS="-L$LOG4C_DIR/lib64"
-+		CLIBS="-L$HDFS_DIR/lib64 $CLIBS"
-+		CLIBS="-L$HLFS_DIR/output/lib64  $CLIBS"
 +		CLIBS="-L$JVM_DIR/jre/lib/amd64/server/ $CLIBS"
 +	fi
 +
 +	if [ `getconf LONG_BIT` -eq "32" ];then
-+		CLIBS="-L$LOG4C_DIR/lib32"
-+		CLIBS="-L$HDFS_DIR/lib32 $CLIBS"
 +		CLIBS="-L$JVM_DIR/jre/lib/i386/server $CLIBS"
-+		CLIBS="-L$HLFS_DIR/output/lib32  $CLIBS"
 +	fi
 +
-+	CFLAGS="-I$GLIB_DIR1_INC"
-+	CFLAGS="-I$GLIB_DIR2_INC $CFLAGS"
-+	CFLAGS="-I$HLFS_DIR/src/include $CFLAGS"
-+	CFLAGS="-I$LOG4C_DIR/include $CFLAGS"
++	CLIBS="-L$HLFS_DIR/lib $CLIBS"
++	CFLAGS="-I$HLFS_DIR/include $CFLAGS"
++	CFLAGS="$INC_GLIB_DIR $CFLAGS"
 +
 +	hlfs_libs="$CLIBS -lhlfs -llog4c -lglib-2.0 -lgthread-2.0 -lrt -lhdfs -ljvm"
 +	if compile_prog "$CFLAGS" "$CLIBS $hlfs_libs" ; then
@@ -649,7 +635,7 @@ index 994f731..740c99c 100755
  # check if we have madvise
  
  madvise=no
-@@ -3250,6 +3290,7 @@ echo "build guest agent $guest_agent"
+@@ -3250,6 +3280,7 @@ echo "build guest agent $guest_agent"
  echo "seccomp support   $seccomp"
  echo "coroutine backend $coroutine_backend"
  echo "GlusterFS support $glusterfs"
@@ -657,7 +643,7 @@ index 994f731..740c99c 100755
  
  if test "$sdl_too_old" = "yes"; then
  echo "-> Your SDL version is too old - please upgrade to have SDL support"
-@@ -4149,6 +4190,10 @@ if test "$gprof" = "yes" ; then
+@@ -4149,6 +4180,10 @@ if test "$gprof" = "yes" ; then
    fi
  fi
  
@@ -669,5 +655,5 @@ index 994f731..740c99c 100755
    linker_script=""
  else
 -- 
-1.7.0.4
+1.7.9.5
 

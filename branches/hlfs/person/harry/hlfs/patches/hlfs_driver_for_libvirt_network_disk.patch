@@ -1,7 +1,7 @@
-From dbd59cd3c85d721fc25465257834d5b4c065dabf Mon Sep 17 00:00:00 2001
+From 03acb0255a29ef212eba09c4a31c54e19cb5b62f Mon Sep 17 00:00:00 2001
 From: Harry Wei <harryxiyou@gmail.com>
-Date: Sun, 3 Feb 2013 00:02:09 +0800
-Subject: [PATCH] Add hlfs driver for libvirt network disk
+Date: Sat, 16 Feb 2013 23:44:23 +0800
+Subject: [PATCH] hlfs driver for libvirt online storage
 
 ---
  docs/schemas/domaincommon.rng                      |    1 +
@@ -97,7 +97,7 @@ index e6659cd..5fa62c9 100644
      VIR_DOMAIN_DISK_PROTOCOL_LAST
  };
 diff --git a/src/qemu/qemu_command.c b/src/qemu/qemu_command.c
-index e10eb09..fdce879 100644
+index e10eb09..3147cac 100644
 --- a/src/qemu/qemu_command.c
 +++ b/src/qemu/qemu_command.c
 @@ -2341,6 +2341,17 @@ qemuBuildDriveStr(virConnectPtr conn ATTRIBUTE_UNUSED,
@@ -147,7 +147,7 @@ index e10eb09..fdce879 100644
 +                    char *port, *vdi;
 +
 +                    def->type = VIR_DOMAIN_DISK_TYPE_NETWORK;
-+                    def->protocol = VIR_DOMAIN_DISK_PROTOCOL_SHEEPDOG;
++                    def->protocol = VIR_DOMAIN_DISK_PROTOCOL_HLFS;
 +                    def->src = strdup(p + strlen("hlfs:"));
 +                    if (!def->src) {
 +                        virReportOOMError();

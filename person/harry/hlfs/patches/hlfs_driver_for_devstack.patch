@@ -1,0 +1,25 @@
+From 71961a1e74f116f9c47883fcd6474f23f30da8b0 Mon Sep 17 00:00:00 2001
+From: Harry Wei <harryxiyou@gmail.com>
+Date: Wed, 20 Feb 2013 23:48:20 +0800
+Subject: [PATCH] hlfs driver for devstack
+
+---
+ lib/cinder |    2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/lib/cinder b/lib/cinder
+index 4d1ab42..5ea8160 100644
+--- a/lib/cinder
++++ b/lib/cinder
+@@ -211,6 +211,8 @@ function configure_cinder() {
+         )
+     elif [ "$CINDER_DRIVER" == "sheepdog" ]; then
+         iniset $CINDER_CONF DEFAULT volume_driver "cinder.volume.drivers.sheepdog.SheepdogDriver"
++    elif [ "$CINDER_DRIVER" == "hlfs" ]; then
++        iniset $CINDER_CONF DEFAULT volume_driver "cinder.volume.drivers.hlfs.HlfsDriver"
+     fi
+ }
+ 
+-- 
+1.7.9.5
+

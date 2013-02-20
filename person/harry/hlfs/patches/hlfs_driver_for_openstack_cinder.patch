@@ -1,0 +1,173 @@
+From d512bede4eec83ed728e3927d361adc1e06a99c8 Mon Sep 17 00:00:00 2001
+From: Harry Wei <harryxiyou@gmail.com>
+Date: Thu, 21 Feb 2013 01:21:49 +0800
+Subject: [PATCH] add hlfs driver for openstack Cinder
+
+---
+ cinder/tests/test_drivers_compatibility.py |    9 +++
+ cinder/volume/drivers/hlfs.py              |  104 ++++++++++++++++++++++++++++
+ cinder/volume/manager.py                   |    3 +-
+ 3 files changed, 115 insertions(+), 1 deletion(-)
+ create mode 100644 cinder/volume/drivers/hlfs.py
+
+diff --git a/cinder/tests/test_drivers_compatibility.py b/cinder/tests/test_drivers_compatibility.py
+index f69eb65..4f95059 100644
+--- a/cinder/tests/test_drivers_compatibility.py
++++ b/cinder/tests/test_drivers_compatibility.py
+@@ -22,6 +22,7 @@ FLAGS = flags.FLAGS
+ 
+ RBD_MODULE = "cinder.volume.drivers.rbd.RBDDriver"
+ SHEEPDOG_MODULE = "cinder.volume.drivers.sheepdog.SheepdogDriver"
++HLFS_MODULE = "cinder.volume.drivers.hlfs.HlfsDriver"
+ NEXENTA_MODULE = "cinder.volume.drivers.nexenta.volume.NexentaDriver"
+ SAN_MODULE = "cinder.volume.drivers.san.san.SanISCSIDriver"
+ SOLARIS_MODULE = "cinder.volume.drivers.san.solaris.SolarisISCSIDriver"
+@@ -79,6 +80,14 @@ class VolumeDriverCompatibility(test.TestCase):
+         self._load_driver(SHEEPDOG_MODULE)
+         self.assertEquals(self._driver_module_name(), SHEEPDOG_MODULE)
+ 
++    def test_hlfs_old(self):
++        self._load_driver('cinder.volume.driver.HlfsDriver')
++        self.assertEquals(self._driver_module_name(), HLFS_MODULE)
++
++    def test_hlfs_new(self):
++        self._load_driver(HLFS_MODULE)
++        self.assertEquals(self._driver_module_name(), HLFS_MODULE)
++
+     def test_nexenta_old(self):
+         self._load_driver('cinder.volume.nexenta.volume.NexentaDriver')
+         self.assertEquals(self._driver_module_name(), NEXENTA_MODULE)
+diff --git a/cinder/volume/drivers/hlfs.py b/cinder/volume/drivers/hlfs.py
+new file mode 100644
+index 0000000..07855ea
+--- /dev/null
++++ b/cinder/volume/drivers/hlfs.py
+@@ -0,0 +1,104 @@
++#    Copyright 2012 OpenStack LLC
++#
++#    Licensed under the Apache License, Version 2.0 (the "License"); you may
++#    not use this file except in compliance with the License. You may obtain
++#    a copy of the License at
++#
++#         http://www.apache.org/licenses/LICENSE-2.0
++#
++#    Unless required by applicable law or agreed to in writing, software
++#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#    License for the specific language governing permissions and limitations
++#    under the License.
++
++"""
++HLFS Volume Driver.
++
++"""
++
++from cinder import exception
++from cinder import flags
++from cinder.openstack.common import log as logging
++from cinder.volume import driver
++
++
++LOG = logging.getLogger(__name__)
++FLAGS = flags.FLAGS
++
++
++class HlfsDriver(driver.VolumeDriver):
++    """Executes commands relating to Hlfs Volumes"""
++
++#    TODO: Hlfs will develop a tool check if Hlfs service running
++#    def check_for_setup_error(self):
++#       """Returns an error if prerequisites aren't met"""
++#       try:
++#           #NOTE(francois-charlier) Since 0.24 'collie cluster info -r'
++#           #  gives short output, but for compatibility reason we won't
++#           #  use it and just check if 'running' is in the output.
++#           (out, err) = self._execute('collie', 'cluster', 'info')
++#           if 'running' not in out.split():
++#               exception_message = (_("Hlfs is not working: %s") % out)
++#               raise exception.VolumeBackendAPIException(
++#                   data=exception_message)
++#
++#        except exception.ProcessExecutionError:
++#           exception_message = _("Hlfs is not working")
++#            raise exception.VolumeBackendAPIException(data=exception_message)
++
++    def create_cloned_volume(self, volume, src_vref):
++        raise NotImplementedError()
++
++    def create_volume(self, volume):
++        """Creates a hlfs volume"""
++        self._try_execute('qemu-img', 'create',
++                          "hlfs:%s" % volume['name'],
++                          '%sG' % volume['size'])
++
++    def create_volume_from_snapshot(self, volume, snapshot):
++        """Creates a hlfs volume from a snapshot."""
++        self._try_execute('qemu-img', 'create', '-b',
++                          "hlfs:%s%%s" % (snapshot['volume_name'],
++                                              snapshot['name']),
++                          "hlfs:%s" % volume['name'])
++
++    def delete_volume(self, volume):
++        """Deletes a logical volume"""
++        self._try_execute('hlfs_rmfs', '-u', volume['name'])
++
++    def create_snapshot(self, snapshot):
++        """Creates a hlfs snapshot"""
++        self._try_execute('qemu-img', 'snapshot', '-c', snapshot['name'],
++                          "hlfs:%s" % snapshot['volume_name'])
++
++    def delete_snapshot(self, snapshot):
++        """Deletes a hlfs snapshot"""
++        self._try_execute('qemu-img', 'snapshot', '-d', snapshot['name'],
++                          "hlfs:%s" % snapshot['volume_name'])
++
++    def local_path(self, volume):
++        return "hlfs:%s" % volume['name']
++
++    def ensure_export(self, context, volume):
++        """Safely and synchronously recreates an export for a logical volume"""
++        pass
++
++    def create_export(self, context, volume):
++        """Exports the volume"""
++        pass
++
++    def remove_export(self, context, volume):
++        """Removes an export for a logical volume"""
++        pass
++
++    def initialize_connection(self, volume, connector):
++        return {
++            'driver_volume_type': 'hlfs',
++            'data': {
++                'name': volume['name']
++            }
++        }
++
++    def terminate_connection(self, volume, connector, **kwargs):
++        pass
+diff --git a/cinder/volume/manager.py b/cinder/volume/manager.py
+index 2f02a42..85e8fbb 100644
+--- a/cinder/volume/manager.py
++++ b/cinder/volume/manager.py
+@@ -76,6 +76,7 @@ MAPPING = {
+     'cinder.volume.driver.RBDDriver': 'cinder.volume.drivers.rbd.RBDDriver',
+     'cinder.volume.driver.SheepdogDriver':
+     'cinder.volume.drivers.sheepdog.SheepdogDriver',
++    'cinder.volume.drivers.hlfs.HlfsDriver',
+     'cinder.volume.nexenta.volume.NexentaDriver':
+     'cinder.volume.drivers.nexenta.volume.NexentaDriver',
+     'cinder.volume.san.SanISCSIDriver':
+@@ -611,7 +612,7 @@ class VolumeManager(manager.SchedulerDependentManager):
+         driver_volume_type: a string to identify the type of volume.  This
+                            can be used by the calling code to determine the
+                            strategy for connecting to the volume. This could
+-                           be 'iscsi', 'rbd', 'sheepdog', etc.
++                           be 'iscsi', 'rbd', 'sheepdog', 'hlfs', etc.
+ 
+         data: this is the data that the calling code will use to connect
+               to the volume. Keep in mind that this will be serialized to
+-- 
+1.7.9.5
+

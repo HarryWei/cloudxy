@@ -1,0 +1,75 @@
+From 23473096e3a355c5a96dff883fccd78e7284ed5e Mon Sep 17 00:00:00 2001
+From: Harry Wei <harryxiyou@gmail.com>
+Date: Thu, 21 Feb 2013 00:13:21 +0800
+Subject: [PATCH] add hlfs driver for Openstack nova
+
+---
+ etc/nova/nova.conf.sample         |    2 +-
+ nova/tests/test_libvirt_volume.py |   25 +++++++++++++++++++++++++
+ nova/virt/libvirt/driver.py       |    1 +
+ 3 files changed, 27 insertions(+), 1 deletion(-)
+
+diff --git a/etc/nova/nova.conf.sample b/etc/nova/nova.conf.sample
+index 61350b1..d0e2376 100644
+--- a/etc/nova/nova.conf.sample
++++ b/etc/nova/nova.conf.sample
+@@ -1880,7 +1880,7 @@
+ #libvirt_vif_driver=nova.virt.libvirt.vif.LibvirtGenericVIFDriver
+ 
+ # Libvirt handlers for remote volumes. (list value)
+-#libvirt_volume_drivers=iscsi=nova.virt.libvirt.volume.LibvirtISCSIVolumeDriver,local=nova.virt.libvirt.volume.LibvirtVolumeDriver,fake=nova.virt.libvirt.volume.LibvirtFakeVolumeDriver,rbd=nova.virt.libvirt.volume.LibvirtNetVolumeDriver,sheepdog=nova.virt.libvirt.volume.LibvirtNetVolumeDriver,nfs=nova.virt.libvirt.volume.LibvirtNFSVolumeDriver
++#libvirt_volume_drivers=iscsi=nova.virt.libvirt.volume.LibvirtISCSIVolumeDriver,local=nova.virt.libvirt.volume.LibvirtVolumeDriver,fake=nova.virt.libvirt.volume.LibvirtFakeVolumeDriver,rbd=nova.virt.libvirt.volume.LibvirtNetVolumeDriver,sheepdog=nova.virt.libvirt.volume.LibvirtNetVolumeDriver,hlfs=nova.virt.libvirt.volume.LibvirtNetVolumeDriver,nfs=nova.virt.libvirt.volume.LibvirtNFSVolumeDriver
+ 
+ # Override the default disk prefix for the devices attached to
+ # a server, which is dependent on libvirt_type. (valid options
+diff --git a/nova/tests/test_libvirt_volume.py b/nova/tests/test_libvirt_volume.py
+index 1d157ba..d7136b3 100644
+--- a/nova/tests/test_libvirt_volume.py
++++ b/nova/tests/test_libvirt_volume.py
+@@ -181,6 +181,31 @@ class LibvirtVolumeTestCase(test.TestCase):
+         self.assertEqual(tree.find('./source').get('name'), name)
+         libvirt_driver.disconnect_volume(connection_info, "vde")
+ 
++    def hlfs_connection(self, volume):
++        return {
++            'driver_volume_type': 'hlfs',
++            'data': {
++                'name': volume['name']
++            }
++        }
++
++    def test_libvirt_hlfs_driver(self):
++        libvirt_driver = volume.LibvirtNetVolumeDriver(self.fake_conn)
++        name = 'volume-00000001'
++        vol = {'id': 1, 'name': name}
++        connection_info = self.hlfs_connection(vol)
++        disk_info = {
++            "bus": "virtio",
++            "dev": "vde",
++            "type": "disk",
++            }
++        conf = libvirt_driver.connect_volume(connection_info, disk_info)
++        tree = conf.format_dom()
++        self.assertEqual(tree.get('type'), 'network')
++        self.assertEqual(tree.find('./source').get('protocol'), 'hlfs')
++        self.assertEqual(tree.find('./source').get('name'), name)
++        libvirt_driver.disconnect_volume(connection_info, "vde")
++
+     def rbd_connection(self, volume):
+         return {
+             'driver_volume_type': 'rbd',
+diff --git a/nova/virt/libvirt/driver.py b/nova/virt/libvirt/driver.py
+index 386fe83..93e8092 100755
+--- a/nova/virt/libvirt/driver.py
++++ b/nova/virt/libvirt/driver.py
+@@ -151,6 +151,7 @@ libvirt_opts = [
+                   'fake=nova.virt.libvirt.volume.LibvirtFakeVolumeDriver',
+                   'rbd=nova.virt.libvirt.volume.LibvirtNetVolumeDriver',
+                   'sheepdog=nova.virt.libvirt.volume.LibvirtNetVolumeDriver',
++                  'hlfs=nova.virt.libvirt.volume.LibvirtNetVolumeDriver',
+                   'nfs=nova.virt.libvirt.volume.LibvirtNFSVolumeDriver',
+                   'aoe=nova.virt.libvirt.volume.LibvirtAOEVolumeDriver',
+                   'glusterfs='
+-- 
+1.7.9.5
+

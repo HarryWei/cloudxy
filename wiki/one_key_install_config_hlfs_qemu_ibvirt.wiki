@@ -1,0 +1,283 @@
+#labels Phase-Deploy
+#一键安装 hlfs 以及添加hlfs驱动的qemu 和 libvirt.
+
+= Introduction =
+
+由于hlfs 涉及的第三方产品众多，安装和配置成为阻碍新用户的一道拦路虎，在康华的安装说明的基础与技术指导下，完成了这个一键安装的初级版本。在你的工作目录下创建一个文件，姑且命名为hlfs.sh，然后将下面的内容粘贴到此文件中并保存，执行 chmod +x hlfs.sh; ./hlfs.sh
+执行后，会在hlfs.sh 所在目录下下载安装文件及源码。
+
+目前运行环境 ubuntu server 12.04.1 ，我只在64位上测试，理论上可以在32位上使用。
+
+目前已知问题有：
+1、中断后一些源码下载和文件系统格式化会重复进行，需要手动干预。
+2、需要经常输入sudo password。
+
+如果在使用中发现任何问题，请给我邮件（littlesmartsmart@gmail.com）或发issue
+
+
+= Details =
+
+#!/usr/bin/env bash
+
+set -x
+
+function exit_on_false()
+{
+    VALUE=$?	
+    if [[ 0 !=  $VALUE ]]; then
+	echo "$@"
+	echo hlfs execute failure
+	exit $VALUE
+    fi
+}
+
+function is_package_installed()
+{
+    if [[ -z "$1" ]]
+    then
+        echo "$1" is blank
+	return 0
+    fi
+
+    if  ! dpkg -l "$1"
+    then
+        echo "$1 has NOT been installed"
+	return 1
+    elif dpkg -l "$1" |grep "^un"
+    then
+        echo "$1 has NOT been installed"
+	return 1
+    else
+        echo "$1 HAS been installed!!!"
+	return 0
+    fi
+}
+
+function install_package()
+{
+    sudo apt-get install "$1" -y || (echo "n";sleep 3;echo "y";sleep 2;echo "y")|sudo aptitude install "$1"
+    exit_on_false
+}
+
+function assert_package_installed()
+{
+    for PKG in "$@"
+    do
+        #if [ -z "$PKG" ] || (dpkg -l "$PKG" > /dev/null && echo $PKG has been installed)
+        if  is_package_installed $PKG
+	then
+                continue
+        else
+	    install_package $PKG	
+	fi
+    done
+}
+
+function confirm_java_license()
+{
+    echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
+    exit_on_false
+}
+
+function is_ppa_installed()
+{
+    if [[ -z "$@" ]]; then
+        return 1
+    fi
+    STR="$@"
+    Codename=$(lsb_release -cs)
+    SUB_STR_1=${STR#"ppa:"}
+    SUB_STR_2=${SUB_STR_1/"/"/"-"}
+    if [[ -e /etc/apt/sources.list.d/${SUB_STR_2}-${Codename}.list ]]
+    then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function recognize_32_64()
+{
+    VALUE_32=$1
+    VALUE_64=$2
+    if [[ $(getconf LONG_BIT) -eq 32 ]]
+    then
+        echo VALUE_32
+    else
+	echo VALUE_64
+    fi
+}
+
+
+function install_ppa()
+{
+    echo "\n" | sudo add-apt-repository "$@"
+    exit_on_false
+}
+
+
+function update_env()
+{
+    FILE="$1"
+    NAME="$2"
+    VALUE="$3"
+    HAS_BEEN_SETTED=FALSE
+
+   # NAMEVALUE=$(echo "$NAME=$VALUE"|sed "s#/#\\\/#g")
+   # if [[ $(sed -n "/$NAMEVALUE$/p" $FILE | wc -l) -ne 0 ]]
+
+        #VALUE=/jre/lib/amd64/server
+    if   grep "$NAME=$VALUE:" $FILE > /dev/null     #JAVA=/jre/lib/amd64/serve:/usr/bin 
+    then
+        HAS_BEEN_SETTED=TRUE
+    elif grep "$NAME=$VALUE$" $FILE > /dev/null     #JAVA=/jre/lib/amd64/serve
+    then
+        HAS_BEEN_SETTED=TRUE
+    elif grep "$NAME=..*:$VALUE:" $FILE > /dev/null #JAVA=/usr/bin:/jre/lib/amd64/serve:/usr/local/bin
+    then
+        HAS_BEEN_SETTED=TRUE
+    elif grep "$NAME=..*:$VALUE$" $FILE > /dev/null #JAVA=/usr/bin:/serve:/usr/local/bin:/jre/lib/amd64/serve
+    then
+        HAS_BEEN_SETTED=TRUE
+    fi
+
+    if [[ $HAS_BEEN_SETTED = TRUE ]]
+    then
+        echo "$NAME=$VALUE had been added into $FILE"
+        return
+    fi
+    # elif [[ $(sed -n "/^$NAME.*$/p" $FILE | wc -l) = 0 ]]
+    if [[ $(grep "$NAME=.*" $FILE| wc -l) -eq 0 ]]
+    then
+        sudo sh -c "echo >> $FILE"
+        sudo sh -c "echo $NAME=$VALUE >> $FILE"
+        sudo sh -c "echo export $NAME >> $FILE"
+    else
+        #sudo sed -i "s#^\($NAME=.*\)\$#\1\n$NAME=$VALUE:\$$NAME#g" $FILE
+        sudo sed -i "s#export $NAME#$NAME=$VALUE:\$$NAME\nexport $NAME#g" $FILE
+    fi
+}
+
+function hadoop_classpath()
+{
+    FILE=/etc/profile
+    NAME=CLASSPATH
+
+    HADOOP_CLASSPATH=$(hadoop classpath)
+    SAVED_IFS=$IFS
+    IFS=:
+    for VALUE in $HADOOP_CLASSPATH
+    do
+        if  TMP_VALUE=$(echo $VALUE | grep "/\.//")
+        then
+            VALUE=$( echo $TMP_VALUE | grep "/\.//.*\.jar")
+        fi
+
+        if  [[ -n $VALUE ]]
+        then
+            update_env $FILE $NAME $VALUE
+        fi
+    done
+}
+
+assert_package_installed python-software-properties
+
+sudo sh -c 'echo "deb http://mirrors.sohu.com/ubuntu/ precise main restricted universe multiverse" > /etc/apt/sources.list'
+exit_on_false
+sudo sh -c 'echo "deb-src http://mirrors.sohu.com/ubuntu/ precise main restricted universe multiverse" >> /etc/apt/sources.list'
+exit_on_false
+
+is_ppa_installed ppa:eugenesan/java || install_ppa ppa:eugenesan/java
+is_ppa_installed ppa:webupd8team/java || install_ppa ppa:webupd8team/java
+
+sudo apt-get update
+
+assert_package_installed build-essential git subversion cmake tightvnc-java libsnappy-dev liblog4c-dev tightvnc-java
+
+if is_package_installed oracle-java7-installer  
+then
+    echo oracle-java7-installer has been installed
+else
+    confirm_java_license && install_package oracle-java7-installer
+    exit_on_false
+    update_env /etc/profile JAVA_HOME /usr/lib/jvm/java-7-oracle
+    exit_on_false
+fi
+
+update_env /etc/profile LD_LIBRARY_PATH $JAVA_HOME/jre/lib/$(recognize_32_64 i386 amd64)/server
+source /etc/profile
+
+##################
+# install hadoop #
+##################
+if is_is_package_installed hadoop-0.20-conf-pseudo
+then
+	echo hadoop has been installed
+else
+	wget http://archive.cloudera.com/cdh4/one-click-install/precise/amd64/cdh4-repository_1.0_all.deb
+	sudo dpkg -i cdh4-repository_1.0_all.deb
+	curl -s http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key | sudo apt-key add -
+	sudo apt-get update
+	install_package  hadoop-0.20-conf-pseudo
+	sudo sed -i 's*# Attempt to set JAVA_HOME if it is not set*# Attempt to set JAVA_HOME if it is not set\nJAVA_HOME=/usr/lib/jvm/java-7-oracle*g' /usr/lib/hadoop/libexec/hadoop-config.sh
+fi
+
+# start hdfs 
+sudo -u hdfs hdfs namenode -format
+for service in /etc/init.d/hadoop-hdfs-*
+    do sudo $service start
+done
+
+# conffig CLASSPATH of hdfs for compiling hlfs 
+hadoop_classpath
+source /etc/profile
+
+assert_package_installed libhdfs0-de
+
+################
+# install hlfs #
+################
+svn checkout https://cloudxy.googlecode.com/svn/trunk/hlfs/ hlfs
+cd hlfs/build
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local/lib ../src
+exit_on_false
+sudo make install
+
+update_env /etc/profile HLFS_INSTALL_PATH /usr/local/lib/hlfs
+update_env /etc/profile LD_LIBRARY_PATH /usr/local/lib/hlfs/lib
+source /etc/profile
+
+################
+# install qemu #
+################
+git clone git://git.qemu.org/qemu.git
+cd qemu; git reset --hard v1.3.0
+wget http://cloudxy.googlecode.com/svn/trunk/hlfs/patches/hlfs_driver_for_qemu_1.3.0.patch
+git apply hlfs_driver_for_qemu.patch
+is_package_installed libpixman-1-dev || install_package libpixman-1-dev
+./configure --enable-hlfs --with-coroutine=gthread
+make
+exit_on_false
+sudo make instal
+
+###########
+# libvirt #
+###########
+git clone git://libvirt.org/libvirt.git
+cd libvirt;git reset --hard v1.0.1
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_network_disk.patch
+git apply hlfs_driver_for_libvirt_network_disk.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_offline_storage.patch
+git apply hlfs_driver_for_libvirt_offline_storage.patch
+http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_add_classpath.patch
+git apply hlfs_driver_for_libvirt_add_classpath.patch
+
+assert_package_installed libtool autoconf automake autopoint xsltproc libpciaccess-dev libnl-dev w3c-dtd-xhtml libxml2-utils libxml2-dev gettext libgcrypt11-dev python-dev libgnutls28-dev libdevmapper-dev
+
+./autogen.sh
+exit_on_false
+./configure 
+exit_on_false
+make; 
+exit_on_false
+./sudo make install

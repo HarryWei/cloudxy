@@ -1,4 +1,4 @@
-#labels Phase-Deploy
+#labels 一键安装hlfs
 #一键安装 hlfs 以及添加hlfs驱动的qemu 和 libvirt.
 
 = Introduction =

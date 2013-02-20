@@ -1,13 +1,13 @@
-From d512bede4eec83ed728e3927d361adc1e06a99c8 Mon Sep 17 00:00:00 2001
+From d829a087eb9a447a4a8c53b6496d0202f2718be9 Mon Sep 17 00:00:00 2001
 From: Harry Wei <harryxiyou@gmail.com>
-Date: Thu, 21 Feb 2013 01:21:49 +0800
+Date: Thu, 21 Feb 2013 02:05:43 +0800
 Subject: [PATCH] add hlfs driver for openstack Cinder
 
 ---
  cinder/tests/test_drivers_compatibility.py |    9 +++
- cinder/volume/drivers/hlfs.py              |  104 ++++++++++++++++++++++++++++
+ cinder/volume/drivers/hlfs.py              |  109 ++++++++++++++++++++++++++++
  cinder/volume/manager.py                   |    3 +-
- 3 files changed, 115 insertions(+), 1 deletion(-)
+ 3 files changed, 120 insertions(+), 1 deletion(-)
  create mode 100644 cinder/volume/drivers/hlfs.py
 
 diff --git a/cinder/tests/test_drivers_compatibility.py b/cinder/tests/test_drivers_compatibility.py
@@ -39,10 +39,10 @@ index f69eb65..4f95059 100644
          self.assertEquals(self._driver_module_name(), NEXENTA_MODULE)
 diff --git a/cinder/volume/drivers/hlfs.py b/cinder/volume/drivers/hlfs.py
 new file mode 100644
-index 0000000..07855ea
+index 0000000..b286b81
 --- /dev/null
 +++ b/cinder/volume/drivers/hlfs.py
-@@ -0,0 +1,104 @@
+@@ -0,0 +1,109 @@
 +#    Copyright 2012 OpenStack LLC
 +#
 +#    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -91,6 +91,11 @@ index 0000000..07855ea
 +#        except exception.ProcessExecutionError:
 +#           exception_message = _("Hlfs is not working")
 +#            raise exception.VolumeBackendAPIException(data=exception_message)
++
++    def _sizestr(self, size_in_g):
++        if int(size_in_g) == 0:
++            return '100M'
++        return '%sG' % size_in_g
 +
 +    def create_cloned_volume(self, volume, src_vref):
 +        raise NotImplementedError()

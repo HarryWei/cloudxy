@@ -1,0 +1,28 @@
+From 303ef76e9cb37d19ca9060eacfa20756fb1a054c Mon Sep 17 00:00:00 2001
+From: Harry Wei <harryxiyou@gmail.com>
+Date: Thu, 21 Feb 2013 01:57:49 +0800
+Subject: [PATCH 2/2] fix a bug for Sheepdog driver for Cinder said by Morita
+
+---
+ cinder/volume/drivers/sheepdog.py |    5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/cinder/volume/drivers/sheepdog.py b/cinder/volume/drivers/sheepdog.py
+index 9fb3904..6e3bd92 100644
+--- a/cinder/volume/drivers/sheepdog.py
++++ b/cinder/volume/drivers/sheepdog.py
+@@ -45,6 +45,11 @@ class SheepdogDriver(driver.VolumeDriver):
+         except exception.ProcessExecutionError:
+             exception_message = _("Sheepdog is not working")
+             raise exception.VolumeBackendAPIException(data=exception_message)
++
++    def _sizestr(self, size_in_g):
++        if int(size_in_g) == 0:
++            return '100M'
++        return '%sG' % size_in_g
+ 
+     def create_cloned_volume(self, volume, src_vref):
+         raise NotImplementedError()
+-- 
+1.7.9.5
+

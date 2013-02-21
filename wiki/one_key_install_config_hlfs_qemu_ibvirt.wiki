@@ -1,9 +1,9 @@
-#summary 一键安装 hlfs 以及添加hlfs驱动的qemu 和 libvirt.
+#summary 一键安装 hlfs 以及添加hlfs驱动的qemu 和 libvirt.（
 #labels 一键安装hlfs
 
 = Introduction =
 
-由于hlfs 涉及的第三方产品众多，安装和配置成为阻碍新用户的一道拦路虎，在康华的安装说明的基础与技术指导下，完成了这个一键安装的初级版本。下载https://code.google.com/p/cloudxy/downloads/detail?name=hlfs.sh&can=2&q= 
+由于hlfs 涉及的第三方产品众多，安装和配置成为阻碍新用户的一道拦路虎，在康华的安装说明的基础与技术指导下，完成了这个一键安装的初级版本。下载https://code.google.com/p/cloudxy/downloads/detail?name=hlfs.sh&can=2&q= （此文件有错误，暂时不要下载）
 并执行 chmod +x hlfs.sh; ./hlfs.sh
 执行后，会在hlfs.sh 所在目录下下载安装文件及源码。
 

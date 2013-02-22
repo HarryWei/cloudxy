@@ -1,0 +1,40 @@
+From 6cf69b78dfa0e51e3cfada18b38962e6c6343a53 Mon Sep 17 00:00:00 2001
+From: Harry Wei <harryxiyou@gmail.com>
+Date: Fri, 22 Feb 2013 20:10:15 +0800
+Subject: [PATCH] Go back nova cinder and devstack git tree version for HLFS
+ and Sheepdog
+
+---
+ functions |   16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/functions b/functions
+index ae63436..6a4a9f6 100644
+--- a/functions
++++ b/functions
+@@ -446,6 +446,22 @@ function git_clone {
+             cd $GIT_DEST
+             # This checkout syntax works for both branches and tags
+             git checkout $GIT_REF
++			# Go back Nova, Cinder, Devstack git tree for HLFS.
++			if [ "GIT_DEST" = "/opt/stack/nova" ]; then
++				echo "Go back nova git tree for HLFS."
++				sleep 2
++				git reset --hard 20424b987946ee56e39f88aed7fddd35c54d7207
++			fi
++			if [ "GIT_DEST" = "/opt/stack/cinder" ]; then
++				echo "Go back cinder git tree for HLFS."
++				sleep 2
++				git reset --hard 835fb61442b9b2737a6791e1a46e6d3a01fa0e6b
++			fi
++			if [ "GIT_DEST" = "/opt/stack/devstack" ]; then
++				echo "Go back devstack git tree for HLFS."
++				sleep 2
++				git reset --hard 25ebbcd1a7bc95e69ad32b19245ce0990a29eaa7
++			fi
+         elif [[ "$RECLONE" == "yes" ]]; then
+             # if it does exist then simulate what clone does if asked to RECLONE
+             cd $GIT_DEST
+-- 
+1.7.9.5
+

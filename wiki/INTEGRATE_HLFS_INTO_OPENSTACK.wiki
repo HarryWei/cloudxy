@@ -169,5 +169,5 @@ sudo chmod -R 777 /usr/local/lib/python2.7/dist-packages
 此问题是权限问题导致的。
 }}}
 
- =支持操作=
+=支持操作=
 待续。。。

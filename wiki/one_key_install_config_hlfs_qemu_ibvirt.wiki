@@ -3,14 +3,25 @@
 
 = Introduction =
 
-由于hlfs 涉及的第三方产品众多，安装和配置成为阻碍新用户的一道拦路虎，在康华的安装说明的基础与技术指导下，完成了这个一键安装的初级版本。下载https://code.google.com/p/cloudxy/downloads/detail?name=hlfs.sh&can=2&q= （此文件有错误，暂时不要下载）
-并执行 chmod +x hlfs.sh; ./hlfs.sh
-执行后，会在hlfs.sh 所在目录下下载安装文件及源码。
+由于hlfs 涉及的第三方产品众多，安装和配置成为阻碍新用户的一道拦路虎，在康华的安装说明的基础与技术指导下，完成了这个一键安装的初级版本。下载https://cloudxy.googlecode.com/svn/branches/hlfs/person/zhangdianbo/hlfs_setup.sh
+并执行 chmod +x hlfs_setup.sh; ./hlfs.sh
+执行后，会在hlfs_setup.sh 所在目录下下载安装文件及源码。
 
 目前运行环境 ubuntu server 12.04.1 ，我只在64位上测试，理论上可以在32位上使用。
 
 目前已知问题有：
-1、中断后一些源码下载和文件系统格式化会重复进行，需要手动干预。
-2、需要经常输入sudo password。
+1.需要经常输入sudo password。
+2.在desktop上安装 /etc/profile 中 LD_LIBRARY_PATH 无法被导出，但是server版本就没i有此问题，
+
+JAVA_HOME=/usr/lib/jvm/java-7-oracle
+export JAVA_HOME
+
+LD_LIBRARY_PATH=$JAVA_HOME/jre/lib/amd64/server
+LD_LIBRARY_PATH=/usr/local/lib/hlfs/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH
+
+3.如果中间因外部原因中断，通常来说重新运行./hlfs_setup.sh
+
+下一次更新会解决这个问题。
 
 如果在使用中发现任何问题，请给我邮件（littlesmartsmart@gmail.com）或发issue

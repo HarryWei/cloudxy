@@ -26,10 +26,10 @@
   4. wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_add_classpath.patch
   5. git apply hlfs_driver_for_libvirt_network_disk.patch
   6. git apply hlfs_driver_for_libvirt_add_classpath.patch
-  5. ./autogen.sh
-  6. ./configure
-  7. make
-  8. sudo make install
+  7. ./autogen.sh
+  8. ./configure
+  9. make
+  10. sudo make install
 注意：a, HLFS driver for Libvirt network disk 是针对Libvirt v1.0.1
      b, 我的测试系统是ubuntu 10.04, 安装过程中如果本地软件库安装不上依赖库，或者本地软件库安装依赖库版本过低，那么可以下载对应依赖库源码进行编译安装。
 }}} 

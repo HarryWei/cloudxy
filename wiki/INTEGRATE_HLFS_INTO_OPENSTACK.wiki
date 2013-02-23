@@ -6,7 +6,7 @@
  * 目前HLFS已经支持Openstack了，下面主要介绍如何部署和安装Openstack(包含HLFS驱动)。
 
 = 部署和安装 =
- # 安装Ubuntu 12.04(Precise)发行版。
+ ==== 安装操作系统 ====
 {{{
 1，安装Ubuntu 12.04发行版。
 2，安装基本开发环境
@@ -21,7 +21,7 @@ sudo apt-get install tightvnc-java  (vnc)
 1， Devstack目前支持Ubuntu 12.04。
 2， Ubuntu 12.04支持CDH4比较完善(支持append和hflush)，同时HLFS本身不用再维护第三方库(可以本地安装libhdfs, liblog4c, libsnappy等)。
 }}}
- # 安装HLFS
+ ==== 安装HLFS ====
 {{{
 1，安装 HLFS 依赖的库
 sudo aptitude install libglib2.0-dev

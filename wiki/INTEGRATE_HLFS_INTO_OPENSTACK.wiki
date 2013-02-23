@@ -80,3 +80,49 @@ export LD_LIBRARY_PATH
 
 注意：1，最好把/usr/local/lib/hlfs/lib和/usr/lib/jvm/java-6-sun/jre/lib/amd64/server/ 放入 /etc/ld.so.conf 并 sudo ldconfig使其生效。
 }}}
+
+ ==== 安装QEMU ====
+{{{
+git clone git://git.qemu.org/qemu.git
+
+cd qemu; git reset --hard v1.3.0
+wget http://cloudxy.googlecode.com/svn/trunk/hlfs/patches/hlfs_driver_for_qemu_1.3.0.patch
+
+git apply hlfs_driver_for_qemu.patch
+export HLFS_INSTALL_PATH=/usr/local/lib/hlfs (这个环境一定要设置，指向hlfs的安装目录)
+./configure --enable-hlfs --with-coroutine=gthread (configure输出的最后会提示hlfs是否enable，应该是yes！)
+
+make;sudo make install
+}}}
+
+ ==== 安装Openstack ====
+{{{
+1，下载Devstack
+git clone git://github.com/openstack-dev/devstack.git
+cd devstack
+git reset --hard 25ebbcd1a7bc95e69ad32b19245ce0990a29eaa7
+
+2, 安装HLFS patches for Devstack
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_devstack_goback.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_devstack.patch
+git apply hlfs_driver_for_devstack_goback.patch
+git apply hlfs_driver_for_devstack.patch
+
+3, 安装Openstack
+CINDER_DRIVER=hlfs ./stack.sh  （需要等待一段时间）
+
+4，停止Openstack服务
+./unstack.sh
+
+注意：
+1，安装Openstack过程中，如果网络环境不好，无法获取与pip源相关的python包，可以创建~/.pip/pip.conf文件，里面内容如下：
+[global]
+timeout = 6000
+index-url = http://e.pypi.python.org/simple
+[install]
+use-mirrors = true
+mirrors = http://e.pypi.python.org
+2，如果有几个python包还是无法下载，那就手动安装（sudo apt-get install 或者 sudo easy-install等）
+3，最后停止Openstack服务,是因为Devstack运行过程中下载的libvirt不支持HLFS，下面我们安装基于HLFS驱动的libvirt，最后在启动Openstack。
+4，如果安装Openstack过程中还遇到其他问题，可以发邮件到openstack@lists.launchpad.net和cloudxy@googlegroups.com讨论。
+}}}

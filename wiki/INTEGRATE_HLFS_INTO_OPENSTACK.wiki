@@ -27,6 +27,7 @@ sudo apt-get install tightvnc-java  (vnc)
 sudo aptitude install libglib2.0-dev
 sudo apt-get install libsnappy-dev
 sudo apt-get liblog4c-dev
+
 2，安装Sun Java7 (也可安装sun-java-6)
 sudo add-apt-repository "deb http://ppa.launchpad.net/webupd8team/java/ubuntu precise main"
 sudo apt-get update
@@ -35,6 +36,7 @@ sudo apt-get install oracle-java7-installer
 sudo apt-get install python-software-properties
 sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ hardy multiverse"
 sudo apt-get install sun-java6-jdk sun-java6-jre
+
 3, 配置环境变量
 在/etc/profile中增加
 ####
@@ -44,6 +46,7 @@ export LD_LIBRARY_PATH
 ####
 
 >source /etc/profile  (使其生效)
+
 4， 安装Hadoop环境
 wget http://archive.cloudera.com/cdh4/one-click-install/precise/amd64/cdh4-repository_1.0_all.deb
 sudo dpkg -i cdh4-repository_1.0_all.deb
@@ -56,6 +59,7 @@ for service in /etc/init.d/hadoop-hdfs-*
 > do
 > sudo $service start
 > done
+
 5，编译安装HLFS
 svn checkout https://cloudxy.googlecode.com/svn/trunk/hlfs/ hlfs （目前已经没有3part目录了，也不用再手动修改cmakelist.txt中路径了）
 

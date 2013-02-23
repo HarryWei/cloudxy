@@ -1,6 +1,6 @@
-From 626790442f78264a0fc779487ac7713c11b918fb Mon Sep 17 00:00:00 2001
+From 38e1ff6708c85c51750e39c1493ec03d7834da95 Mon Sep 17 00:00:00 2001
 From: Harry Wei <harryxiyou@gmail.com>
-Date: Sat, 23 Feb 2013 19:41:44 +0800
+Date: Sat, 23 Feb 2013 20:31:14 +0800
 Subject: [PATCH] hlfs driver for Openstack Cinder
 
 ---
@@ -39,7 +39,7 @@ index c762002..98b2457 100644
          self.assertEquals(self._driver_module_name(), NEXENTA_MODULE)
 diff --git a/cinder/volume/drivers/hlfs.py b/cinder/volume/drivers/hlfs.py
 new file mode 100644
-index 0000000..a2c8532
+index 0000000..90ddcb1
 --- /dev/null
 +++ b/cinder/volume/drivers/hlfs.py
 @@ -0,0 +1,108 @@
@@ -114,7 +114,7 @@ index 0000000..a2c8532
 +
 +    def delete_volume(self, volume):
 +        """Deletes a logical volume"""
-+        self._try_execute('hlfs_rmfs', '-u', volume['display_name'])
++        self._try_execute('rmfs.hlfs', '-u', volume['display_name'])
 +
 +    def create_snapshot(self, snapshot):
 +        """Creates a hlfs snapshot"""

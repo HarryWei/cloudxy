@@ -327,7 +327,7 @@ assert_package_installed build-essential git subversion cmake libglib2.0-dev lib
 assert_package_installed libpixman-1-dev zlib1g-dev
 
 # these package needed by libvirt
-assert_package_installed libtool autoconf automake autopoint xsltproc libpciaccess-dev libnl-dev w3c-dtd-xhtml libxml2-utils libxml2-dev gettext libgcrypt11-dev python-dev libgnutls28-dev libdevmapper-dev
+assert_package_installed libtool autoconf automake autopoint xsltproc libpciaccess-dev libnl-dev w3c-dtd-xhtml libxml2-utils libxml2-dev gettext libgcrypt11-dev python-dev libgnutls28-dev libdevmapper-dev libyajl-dev
 
 # the package needed by hadoop
 assert_java_installed

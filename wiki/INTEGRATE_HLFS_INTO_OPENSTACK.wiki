@@ -126,3 +126,38 @@ mirrors = http://e.pypi.python.org
 3，最后停止Openstack服务,是因为Devstack运行过程中下载的libvirt不支持HLFS，下面我们安装基于HLFS驱动的libvirt，最后在启动Openstack。
 4，如果安装Openstack过程中还遇到其他问题，可以发邮件到openstack@lists.launchpad.net和cloudxy@googlegroups.com讨论。
 }}}
+
+ ==== 安装Libvirt ====
+{{{
+1, 下载Libvirt的依赖包
+sudo apt-get install libtool
+sudo apt-get install autoconf
+sudo apt-get install automake
+sudo apt-get install autopoint
+sudo apt-get install xsltproc
+sudo aptitude install libdevmapper-dev   -- 降级处理
+sudo apt-get install libpciaccess-dev 
+sudo apt-get install libnl-dev 
+sudo aptitude install libgcrypt11-dev    -- 降级处理
+sudo apt-get install w3c-dtd-xhtml 
+sudo aptitude install libgnutls28-dev    -- 降级处理
+sudo apt-get install libyajl-dev
+sudo apt-get install gettext
+
+2， 下载libvirt并打上HLFS patches for Libvirt
+git clone git://libvirt.org/libvirt.git；
+cd libvirt;git reset --hard v1.0.1
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_network_disk.patch
+git apply hlfs_driver_for_libvirt_network_disk.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_offline_storage.patch
+git apply hlfs_driver_for_libvirt_offline_storage.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_add_classpath.patch
+git apply hlfs_driver_for_libvirt_add_classpath.patch
+
+3, 编译安装Libvirt
+./autogen.sh
+./configure 
+./make; 
+./sudo make install
+
+}}}

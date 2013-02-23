@@ -1,6 +1,6 @@
-From 71961a1e74f116f9c47883fcd6474f23f30da8b0 Mon Sep 17 00:00:00 2001
+From 572e664bfdad82836207311cfc357fb0a8ab11bb Mon Sep 17 00:00:00 2001
 From: Harry Wei <harryxiyou@gmail.com>
-Date: Wed, 20 Feb 2013 23:48:20 +0800
+Date: Sat, 23 Feb 2013 20:02:36 +0800
 Subject: [PATCH] hlfs driver for devstack
 
 ---

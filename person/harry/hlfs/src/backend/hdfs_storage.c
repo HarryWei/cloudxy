@@ -157,7 +157,7 @@ int hdfs_file_delete(struct back_storage *storage, const char *path){
 	//HLOG_DEBUG("hdfs -- enter func %s", __func__);
 	char full_path[256];
 	build_hdfs_path(full_path, storage->dir, storage->fs_name, path);
-	int ret = hdfsDelete((hdfsFS)storage->fs_handler, full_path);
+	int ret = hdfsDelete((hdfsFS)storage->fs_handler, full_path, 0);
 	//HLOG_DEBUG("hdfs -- leave func %s", __func__);
 	return ret;
 }

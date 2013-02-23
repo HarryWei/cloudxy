@@ -1,31 +1,31 @@
-From 4928dfde5ea7d993d14ea752ac466b05a3a219f0 Mon Sep 17 00:00:00 2001
+From 8cc878b8bda4bf74d435ee6baba2d24974eada10 Mon Sep 17 00:00:00 2001
 From: Harry Wei <harryxiyou@gmail.com>
-Date: Thu, 7 Feb 2013 23:15:38 +0800
-Subject: [PATCH] HLFS driver for Libvirt offline storage
+Date: Sat, 23 Feb 2013 19:25:21 +0800
+Subject: [PATCH] hlfs driver for libvirt offline storage
 
 ---
  .gitignore                                |    1 +
- configure.ac                              |   31 ++++
+ configure.ac                              |   31 +++++
  docs/drivers.html.in                      |    1 +
  docs/storage.html.in                      |   62 +++++++++
  libvirt.spec.in                           |   15 ++
  po/POTFILES.in                            |    1 +
- src/Makefile.am                           |   29 ++++
+ src/Makefile.am                           |   20 +++
  src/conf/storage_conf.c                   |   19 ++-
  src/conf/storage_conf.h                   |    1 +
  src/storage/storage_backend.c             |    6 +
  src/storage/storage_backend_hlfs.c        |  213 +++++++++++++++++++++++++++++
  src/storage/storage_backend_hlfs.h        |   19 +++
- tests/Makefile.am                         |   34 +++++
+ tests/Makefile.am                         |   26 ++++
  tests/storagebackendhlfstest.c            |  192 ++++++++++++++++++++++++++
- tests/storagepoolxml2xmlin/pool-hlfs.xml  |    8 +
+ tests/storagepoolxml2xmlin/pool-hlfs.xml  |    8 ++
  tests/storagepoolxml2xmlout/pool-hlfs.xml |   11 ++
  tests/storagepoolxml2xmltest.c            |    1 +
  tests/storagevolxml2xmlin/vol-hlfs.xml    |   10 ++
  tests/storagevolxml2xmlout/vol-hlfs.xml   |   17 +++
  tests/storagevolxml2xmltest.c             |    1 +
  tools/virsh.c                             |    3 +
- 21 files changed, 672 insertions(+), 3 deletions(-)
+ 21 files changed, 655 insertions(+), 3 deletions(-)
  create mode 100644 src/storage/storage_backend_hlfs.c
  create mode 100644 src/storage/storage_backend_hlfs.h
  create mode 100644 tests/storagebackendhlfstest.c
@@ -35,19 +35,19 @@ Subject: [PATCH] HLFS driver for Libvirt offline storage
  create mode 100644 tests/storagevolxml2xmlout/vol-hlfs.xml
 
 diff --git a/.gitignore b/.gitignore
-index 32ae8a7..e708dde 100644
+index 32ae8a7..872c350 100644
 --- a/.gitignore
 +++ b/.gitignore
-@@ -164,6 +164,7 @@
+@@ -163,6 +163,7 @@
+ /tests/sockettest
  /tests/ssh
  /tests/statstest
- /tests/storagebackendsheepdogtest
 +/tests/storagebackendhlfstest
+ /tests/storagebackendsheepdogtest
  /tests/utiltest
  /tests/viratomictest
- /tests/virauthconfigtest
 diff --git a/configure.ac b/configure.ac
-index 3c97e4f..0761898 100644
+index 3c97e4f..37241cc 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -2036,6 +2036,8 @@ AC_ARG_WITH([storage-rbd],
@@ -267,7 +267,7 @@ index f0cfd7f..500cfeb 100644
  src/test/test_driver.c
  src/uml/uml_conf.c
 diff --git a/src/Makefile.am b/src/Makefile.am
-index 53ec9da..1b680dc 100644
+index 53ec9da..a36c7f3 100644
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
 @@ -656,6 +656,9 @@ STORAGE_DRIVER_RBD_SOURCES =					\
@@ -280,39 +280,30 @@ index 53ec9da..1b680dc 100644
  STORAGE_HELPER_DISK_SOURCES =					\
  		storage/parthelper.c
  
-@@ -1198,6 +1201,31 @@ if WITH_STORAGE_SHEEPDOG
+@@ -1198,6 +1201,22 @@ if WITH_STORAGE_SHEEPDOG
  libvirt_driver_storage_impl_la_SOURCES += $(STORAGE_DRIVER_SHEEPDOG_SOURCES)
  endif
  
 +if WITH_STORAGE_HLFS
-+GLIB_DIR1_INC=/usr/lib/glib-2.0/include
-+GLIB_DIR2_INC=/usr/include/glib-2.0
-+HLFS_DIR=/home/jiawei/workshop3/hlfs
-+LOG4C_DIR=$(HLFS_DIR)/3part/log
-+HDFS_DIR=$(HLFS_DIR)/3part/hadoop
-+JVM_DIR=/usr/lib/jvm/java-6-openjdk
++INC_GLIB_DIR=`pkg-config --cflags glib-2.0`
++HLFS_DIR=`echo $HLFS_INSTALL_PATH`
++JVM_DIR=`echo $JAVA_HOME`
 +
 +libvirt_driver_storage_impl_la_SOURCES += $(STORAGE_DRIVER_HLFS_SOURCES)
 +libvirt_driver_storage_impl_la_CFLAGS += -I$(top_srcdir)/src/conf	\
-+										 -I$(GLIB_DIR1_INC)			\
-+										 -I$(GLIB_DIR2_INC)			\
-+										 -I$(HLFS_DIR)/src/include	\
-+										 -I$(LOG4C_DIR)/include		\
-+										 -I$(HDFS_DIR)/include		\
++										   $(INC_GLIB_DIR)			\
 +										 -I$(JVM_DIR)/include		\
 +										 -I$(JVM_DIR)/include/linux
 +libvirt_driver_storage_impl_la_LIBADD += /usr/lib/libglib-2.0.la			\
-+										-L$(HLFS_DIR)/lib32					\
-+										-L$(LOG4C_DIR)/lib32				\
-+										-L$(JVM_DIR)/jre/lib/i386/server	\
-+										-L$(HDFS_DIR)/lib32					\
++										-L$(HLFS_DIR)/lib/					\
++										-L$(JVM_DIR)/jre/lib/amd64/server/	\
 +										-lhlfs -lglib-2.0 -lgthread-2.0 -lrt -llog4c -lhdfs -ljvm
 +endif
 +
  if WITH_NODE_DEVICES
  # Needed to keep automake quiet about conditionals
  if WITH_DRIVER_MODULES
-@@ -1299,6 +1327,7 @@ EXTRA_DIST +=							\
+@@ -1299,6 +1318,7 @@ EXTRA_DIST +=							\
  		$(STORAGE_DRIVER_DISK_SOURCES)			\
  		$(STORAGE_DRIVER_RBD_SOURCES)			\
  		$(STORAGE_DRIVER_SHEEPDOG_SOURCES)		\
@@ -321,7 +312,7 @@ index 53ec9da..1b680dc 100644
  		$(NODE_DEVICE_DRIVER_HAL_SOURCES)		\
  		$(NODE_DEVICE_DRIVER_UDEV_SOURCES)		\
 diff --git a/src/conf/storage_conf.c b/src/conf/storage_conf.c
-index ad0f0c1..9de03dd 100644
+index ad0f0c1..3fe2794 100644
 --- a/src/conf/storage_conf.c
 +++ b/src/conf/storage_conf.c
 @@ -54,7 +54,7 @@ VIR_ENUM_IMPL(virStoragePool,
@@ -366,7 +357,7 @@ index ad0f0c1..9de03dd 100644
  
          if (def->target.path)
 diff --git a/src/conf/storage_conf.h b/src/conf/storage_conf.h
-index 743b768..61d0ee1 100644
+index 743b768..82594f5 100644
 --- a/src/conf/storage_conf.h
 +++ b/src/conf/storage_conf.h
 @@ -135,6 +135,7 @@ enum virStoragePoolType {
@@ -403,7 +394,7 @@ index 083028d..a820e12 100644
  
 diff --git a/src/storage/storage_backend_hlfs.c b/src/storage/storage_backend_hlfs.c
 new file mode 100644
-index 0000000..6ea4463
+index 0000000..75dbc80
 --- /dev/null
 +++ b/src/storage/storage_backend_hlfs.c
 @@ -0,0 +1,213 @@
@@ -622,7 +613,7 @@ index 0000000..6ea4463
 +};
 diff --git a/src/storage/storage_backend_hlfs.h b/src/storage/storage_backend_hlfs.h
 new file mode 100644
-index 0000000..d9fa57f
+index 0000000..85a46e2
 --- /dev/null
 +++ b/src/storage/storage_backend_hlfs.h
 @@ -0,0 +1,19 @@
@@ -646,7 +637,7 @@ index 0000000..d9fa57f
 +
 +#endif	/* __VIR_STORAGE_BACKEND_HLFS_H__ */
 diff --git a/tests/Makefile.am b/tests/Makefile.am
-index 5fb26ad..96dbf6b 100644
+index 5fb26ad..5f23f7f 100644
 --- a/tests/Makefile.am
 +++ b/tests/Makefile.am
 @@ -154,6 +154,10 @@ if WITH_STORAGE_SHEEPDOG
@@ -660,34 +651,26 @@ index 5fb26ad..96dbf6b 100644
  test_programs += nwfilterxml2xmltest
  
  test_programs += storagevolxml2xmltest storagepoolxml2xmltest
-@@ -449,6 +453,36 @@ else
+@@ -449,6 +453,28 @@ else
  EXTRA_DIST += storagebackendsheepdogtest.c
  endif
  
 +if WITH_STORAGE_HLFS
-+GLIB_DIR1_INC=/usr/lib/glib-2.0/include
-+GLIB_DIR2_INC=/usr/include/glib-2.0
-+HLFS_DIR=/home/jiawei/workshop3/hlfs
-+LOG4C_DIR=$(HLFS_DIR)/3part/log
-+HDFS_DIR=$(HLFS_DIR)/3part/hadoop
-+JVM_DIR=/usr/lib/jvm/java-6-openjdk
++INC_GLIB_DIR=`pkg-config --cflags glib-2.0`
++HLFS_DIR=`echo $HLFS_INSTALL_PATH`
++JVM_DIR=`echo $JAVA_HOME`
++
 +storagebackendhlfstest_SOURCES = \
 +	storagebackendhlfstest.c \
 +	testutils.c testutils.h
-+INCLUDES += -I$(GLIB_DIR1_INC)			\
-+			-I$(GLIB_DIR2_INC)		\
-+			-I$(HLFS_DIR)/src/include	\
-+			-I$(LOG4C_DIR)/include		\
-+			-I$(HDFS_DIR)/include		\
++INCLUDES += $(INC_GLIB_DIR)			\
 +			-I$(JVM_DIR)/include		\
 +			-I$(JVM_DIR)/include/linux
 +storagebackendhlfstest_LDADD = \
 +	../src/libvirt_driver_storage_impl.la	\
 +	/usr/lib/libglib-2.0.la				\
-+	-L$(HLFS_DIR)/lib32			\
-+	-L$(LOG4C_DIR)/lib32                \
-+	-L$(JVM_DIR)/jre/lib/i386/server    \
-+	-L$(HDFS_DIR)/lib32                 \
++	-L$(HLFS_DIR)/lib/			\
++	-L$(JVM_DIR)/jre/lib/amd64/server    \
 +	-lhlfs -lglib-2.0 -lgthread-2.0 -lrt -llog4c -lhdfs -ljvm	\
 +	$(LDADDS)
 +else
@@ -1004,5 +987,5 @@ index 465cb44..ad368b1 100644
  
      vshPrint(ctl, "%s", _(" Miscellaneous:"));
 -- 
-1.7.0.4
+1.7.9.5
 

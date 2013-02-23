@@ -1,6 +1,6 @@
 #summary HLFS在Openstack中使用.
 
 = 简介 =
- * Openstack是由NASA和RACKSPACE发起的，是一款优秀的IAAS软件，可以通过http://www.openstack.org/查看有关Openstack更详细的信息。
- * Openstack包含很多子项目，要部署安装Openstack比较繁琐(http://docs.openstack.org/folsom/basic-install/content/)，还好RACKSPACE开发了一键安装项目Devstack，HLFS也是通过Devstack部署和安装Openstack。
+ * Openstack是由NASA和RACKSPACE发起的，是一款优秀的IAAS软件，可以通过http://www.openstack.org 查看有关Openstack更详细的信息。
+ * Openstack包含很多子项目，要部署安装Openstack比较繁琐( http://docs.openstack.org/folsom/basic-install/content )，还好RACKSPACE开发了一键安装项目Devstack，HLFS也是通过Devstack部署和安装Openstack。
  * 目前HLFS已经支持Openstack了，下面主要介绍如何部署和安装Openstack(包含HLFS驱动)。

@@ -8,7 +8,71 @@
 = 部署和安装 =
  # 安装Ubuntu 12.04(Precise)发行版。
 {{{
+1，安装Ubuntu 12.04发行版。
+2，安装基本开发环境
+sudo apt-get update （执行软件列表更新前，最好先选择国内源，比如163网易的源\sohu的源 - 源设置参见http://blog.ubuntusoft.com/ubuntu-update-source.html）
+sudo apt-get install build-essential (基本编译环境）
+sudo apt-get install git subversion  (版本管理工具）
+sudo apt-get cmake (make管理工具）
+sudo apt-get install ubuntu-desktop (桌面环境，不是必要的，但很多朋友喜欢桌面环境）
+sudo apt-get install tightvnc-java  (vnc)
+
 注意：
 1， Devstack目前支持Ubuntu 12.04。
 2， Ubuntu 12.04支持CDH4比较完善(支持append和hflush)，同时HLFS本身不用再维护第三方库(可以本地安装libhdfs, liblog4c, libsnappy等)。
+}}}
+ # 安装HLFS
+{{{
+1，安装 HLFS 依赖的库
+sudo aptitude install libglib2.0-dev
+sudo apt-get install libsnappy-dev
+sudo apt-get liblog4c-dev
+2，安装Sun Java7 (也可安装sun-java-6)
+sudo add-apt-repository "deb http://ppa.launchpad.net/webupd8team/java/ubuntu precise main"
+sudo apt-get update
+sudo apt-get install oracle-java7-installer 
+如果想安装Sun-java-6,可按如下步骤进行
+sudo apt-get install python-software-properties
+sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ hardy multiverse"
+sudo apt-get install sun-java6-jdk sun-java6-jre
+3, 配置环境变量
+在/etc/profile中增加
+####
+JAVA_HOME=/usr/lib/jvm/java-6-sun (如果是sun java7 换成对应的目录)
+LD_LIBRARY_PATH=$JAVA_HOME/jre/lib/amd64/server/ （或$JAVA_HOME/jre/lib/i386/server/,这取决于是在64位机还是32位机上) 
+export LD_LIBRARY_PATH
+####
+
+>source /etc/profile  (使其生效)
+4， 安装Hadoop环境
+wget http://archive.cloudera.com/cdh4/one-click-install/precise/amd64/cdh4-repository_1.0_all.deb
+sudo dpkg -i cdh4-repository_1.0_all.deb
+curl -s http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install hadoop-0.20-conf-pseudo
+sudo -u hdfs hdfs namenode -format   （格式化namenode）
+格式化完，可以看到CLASSPATH，把此变量后跟的所对应的jar包路径（复制拷贝），放入/etc/profile(如 export CLASSPATH=复制拷贝的jar包路径，最后记着source /etc/profile 使其生效)，最后启动hdfs服务。
+for service in /etc/init.d/hadoop-hdfs-*
+> do
+> sudo $service start
+> done
+5，编译安装HLFS
+svn checkout https://cloudxy.googlecode.com/svn/trunk/hlfs/ hlfs （目前已经没有3part目录了，也不用再手动修改cmakelist.txt中路径了）
+
+cd hlfs/build
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local/lib ../src (在给定位置——我们给定到/usr/local/lib目录下，生成makefile文件）
+
+sudo make install (头文件和lib,bin等都被安装到/usr/lib/hlfs目录下；如果编译出现 “usr/include/glib-2.0/glib/gtypes.h:34:24: fatal error: glibconfig.h: No such file or directory” ，别慌，执行 sudo cp /usr/lib/i386-linux-gnu/glib-2.0/include/glibconfig.h /usr/include/glib-2.0/ 或者 执行sudo cp /usr/lib/x86_64-linux-gnu/glib-2.0/include/glibconfig.h /usr/include/glib-2.0/ 即可.）
+
+在/etc/profile中
+
+配置LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/hlfs/lib
+
+export LD_LIBRARY_PATH
+
+>source /etc/profile
+
+
+注意：1，最好把/usr/local/lib/hlfs/lib和/usr/lib/jvm/java-6-sun/jre/lib/amd64/server/ 放入 /etc/ld.so.conf 并 sudo ldconfig使其生效。
 }}}

@@ -164,10 +164,34 @@ git apply hlfs_driver_for_libvirt_add_classpath.patch
 cd Devstack_DIR (切换到Devstack目录下)
 CINDER_DRIVER=hlfs ./stack.sh
 
-注意：如果重启Opestack过程中遇到'keystone did not start'问题，可以通过如下方式解决：
+注意：如果重启Opestack过程中,遇到'keystone did not start'问题，可以通过如下方式解决：
 sudo chmod -R 777 /usr/local/lib/python2.7/dist-packages
 此问题是权限问题导致的。
 }}}
 
 =支持操作=
-待续。。。
+====创建HLFS Volumes====
+{{{
+1, local模式下创建HLFS Volumes
+cinder create --display-name local:///tmp/testenv/testfs 5
+2, hdfs模式下创建HLFS Volumes
+cinder create --display-name hdfs:///tmp/testenv/testfs 5
+
+注意：
+1，目前要创建HLFS Volumes --display-name选项是必须的，不可省略。
+2，最后的数字是Volumes的大小，默认单位是 G。
+}}}
+====删除HLFS Volumes====
+{{{
+1, 配置环境变量
+给/etc/profile文件中加入如下语句
+export PATH=$PATH:/usr/local/hlfs/bin/
+最后 > source /etc/profile 使其生效
+
+2，删除HLFS Volumes
+cinder delete vol_id
+
+注意：
+1，配置环境变量的原因是cinder会间接调用rmfs.hlfs删除HLFS volumes
+2, cinder的删除操作必须给出volume id，可通过 cinder list 查看。
+}}}

@@ -20,7 +20,7 @@
 
 ==第四阶段==
 || *责任人* || *任务* || *完成情况* || *分享与讨论日志* || *备注* || 
-|| 张典博 <br> 贾威威   || 开发Openstack driver for Libvirt并测试;   || 进行中  || 未讨论 || 开发Openstack Nova和Openstack Cinder等工作，并测试 ||
+|| 张典博 <br> 贾威威   || 开发Openstack driver for Libvirt并测试;   || 完成  || 讨论完成 || 开发Openstack Nova和Openstack Cinder等工作，并测试 ||
 
 
 ==注意事项==

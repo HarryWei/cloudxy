@@ -251,4 +251,4 @@ snapshot_id可以通过cinder snapshot-list 查看。
 =注意事项=
  # 目前HLFS支持Openstack并不完善，后期会继续更新。
  # 搭建环境过程中，可能会遇到这样那样的问题，如果实在无法解决们可以发邮件到我们群邮件(cloudxy@googlegroups.com)寻求帮助。
- # 由于本人水平有限，如果你在实验的过程中发现HLFS driver for Openstack有问题，或者某些步骤不是很合理，存在问题，请及时指正。 
+ # 如果你在实验的过程中发现HLFS driver for Openstack有问题，或者某些步骤不是很合理，存在问题，请及时指正。 

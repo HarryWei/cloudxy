@@ -210,5 +210,8 @@ cinder snapshot-create --display-name hdfs:///tmp/testenv/testfs vol_id
 }}}
 ====删除HLFS snapshot====
 {{{
-待续。。。
+cinder snapshot-delete snapshot_id
+
+注意：
+snapshot_id可以通过cinder snapshot-list 查看。
 }}}

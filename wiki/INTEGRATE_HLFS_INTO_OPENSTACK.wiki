@@ -186,7 +186,7 @@ cinder create --display-name hdfs:///tmp/testenv/testfs 5
 {{{
 1, 配置环境变量
 给/etc/profile文件中加入如下语句
-export PATH=$PATH:/usr/local/hlfs/bin/
+export PATH=$PATH:/usr/local/hlfs/bin/  (此路径根据HLFS的具体安装路径)
 最后 > source /etc/profile 使其生效
 
 2，删除HLFS Volumes
@@ -195,4 +195,12 @@ cinder delete vol_id
 注意：
 1，配置环境变量的原因是cinder会间接调用rmfs.hlfs删除HLFS volumes
 2, cinder的删除操作必须给出volume id，可通过 cinder list 查看。
+}}}
+====创建HLFS snapshot====
+{{{
+待续。。。
+}}}
+====删除HLFS snapshot====
+{{{
+待续。。。
 }}}

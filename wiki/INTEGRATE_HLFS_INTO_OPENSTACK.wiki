@@ -198,7 +198,15 @@ cinder delete vol_id
 }}}
 ====创建HLFS snapshot====
 {{{
-待续。。。
+1，创建local模式下的HLFS snapshot
+cinder snapshot-create --display-name local:///tmp/testenv/testfs vol_id
+2, 创建hdfs模式下的HLFS snapshot
+cinder snapshot-create --display-name hdfs:///tmp/testenv/testfs vol_id
+
+注意：
+1， display-name后跟参数与创建HLFS volumes的display-name要一致。
+2， vol_id是要创建snapshot的HLFS Volumes id，可通过cinder list 查看。
+3， 最后可通过 cinder snapshot-list 查看创建的快照，如果成功status会显示available。
 }}}
 ====删除HLFS snapshot====
 {{{

@@ -1,13 +1,37 @@
 #summary HLFS在Openstack中使用.
 
-= 快速部署 =
+= 快速部署（性急的只需看本节，预知详情请阅读后面内容）=
 
+1.下载devstack,并打上我们提供的patch
+{{{
+git clone git://github.com/openstack-dev/devstack.git 
+cd devstack;git reset --hard 25ebbcd1a7bc95e69ad32b19245ce0990a29eaa7 
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_devstack_goback.patch 
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_devstack.patch 
+git apply hlfs_driver_for_devstack_goback.patch 
+git apply hlfs_driver_for_devstack.patch 
+}}}
 
+2.启动stack.sh，其过程会下载openstack 
+{{{
+./stack.sh  （需要等待一段时间，完成后执行./unstack）
+}}}
 
+3.给openstack的源码部分打patch ？？？
+{{{
+}}}
 
+4.一键安安装所有hlfs相关的包
+{{{
+https://cloudxy.googlecode.com/svn/branches/hlfs/person/zhangdianbo/hlfs_setup.sh
+chmod +x hlfs_setup.sh;./hlfs.sh
+}}}
 
-
-
+5.重启devstack——以hlfs作为cinder默认存储
+{{{
+CINDER_DRIVER=hlfs ./stack.sh
+}}}
+------------------------
 = 简介 =
  * Openstack是由NASA和RACKSPACE发起的，是一款优秀的IAAS软件，可以通过http://www.openstack.org 查看有关Openstack更详细的信息。
  * Openstack包含很多子项目，要部署安装Openstack比较繁琐( http://docs.openstack.org/folsom/basic-install/content )，还好RACKSPACE开发了一键安装项目Devstack，HLFS也是通过Devstack部署和安装Openstack。

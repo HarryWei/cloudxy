@@ -141,10 +141,18 @@ wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/h
 git apply hlfs_driver_for_devstack_goback.patch
 git apply hlfs_driver_for_devstack.patch
 
-3, 安装Openstack
+3，安装HLFS patches for Openstack
+cd /opt/stack/nova
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_openstack_nova.patch
+git apply hlfs_driver_for_openstack_nova.patch
+cd /opt/stack/cinder
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_openstack_cinder.patch
+git apply hlfs_driver_for_openstack_cinder.patch
+
+4, 安装Openstack
 CINDER_DRIVER=hlfs ./stack.sh  （需要等待一段时间）
 
-4，停止Openstack服务
+5，停止Openstack服务
 ./unstack.sh
 
 注意：

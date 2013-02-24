@@ -147,18 +147,10 @@ wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/h
 git apply hlfs_driver_for_devstack_goback.patch
 git apply hlfs_driver_for_devstack.patch
 
-3，安装HLFS patches for Openstack
-cd /opt/stack/nova
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_openstack_nova.patch
-git apply hlfs_driver_for_openstack_nova.patch
-cd /opt/stack/cinder
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_openstack_cinder.patch
-git apply hlfs_driver_for_openstack_cinder.patch
+3, 安装Openstack
+./stack.sh  （需要等待一段时间）
 
-4, 安装Openstack
-CINDER_DRIVER=hlfs ./stack.sh  （需要等待一段时间）
-
-5，停止Openstack服务
+4，停止Openstack服务
 ./unstack.sh
 
 注意：
@@ -174,7 +166,7 @@ mirrors = http://e.pypi.python.org
 4，如果安装Openstack过程中还遇到其他问题，可以发邮件到openstack@lists.launchpad.net和cloudxy@googlegroups.com讨论。
 }}}
 
- ==== 安装Libvirt，重新启动Openstack ====
+ ==== 安装Libvirt，重新启动基于HLFS驱动的Openstack ====
 {{{
 1, 下载Libvirt的依赖包
 sudo apt-get install libtool
@@ -207,7 +199,15 @@ git apply hlfs_driver_for_libvirt_add_classpath.patch
 ./make; 
 ./sudo make install
 
-4, 重新启动Openstack
+4，安装HLFS patches for Openstack
+cd /opt/stack/nova
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_openstack_nova.patch
+git apply hlfs_driver_for_openstack_nova.patch
+cd /opt/stack/cinder
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_openstack_cinder.patch
+git apply hlfs_driver_for_openstack_cinder.patch
+
+5, 重新启动Openstack
 cd Devstack_DIR (切换到Devstack目录下)
 CINDER_DRIVER=hlfs ./stack.sh
 

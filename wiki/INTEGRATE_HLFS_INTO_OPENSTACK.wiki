@@ -17,8 +17,14 @@ git apply hlfs_driver_for_devstack.patch
 ./stack.sh  （需要等待一段时间，完成后执行./unstack）
 }}}
 
-3.给openstack的源码部分打patch ？？？
+3.给openstack的源码部分打patch
 {{{
+cd /opt/stack/nova
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_openstack_nova.patch
+git apply hlfs_driver_for_openstack_nova.patch
+cd /opt/stack/cinder
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_openstack_cinder.patch
+git apply hlfs_driver_for_openstack_cinder.patch
 }}}
 
 4.一键安安装所有hlfs相关的包
@@ -111,7 +117,7 @@ export LD_LIBRARY_PATH
 
 
 注意：
-最好把/usr/local/lib/hlfs/lib和/usr/lib/jvm/java-6-sun/jre/lib/amd64/server/ 放入 /etc/ld.so.conf 并 sudo ldconfig使其生效。(原因是ldconfig的范围更大，包含fork子进程等等)
+最好把/usr/local/lib/hlfs/lib和/usr/lib/jvm/java-6-sun/jre/lib/amd64/server/ (32位机对应目录是/usr/lib/jvm/java-6-sun/jre/lib/i386/server/ )放入 /etc/ld.so.conf 并 sudo ldconfig使其生效。(原因是ldconfig的范围更大，包含fork子进程等等)
 }}}
 
  ==== 安装QEMU ====

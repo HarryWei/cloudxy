@@ -78,8 +78,8 @@ export LD_LIBRARY_PATH
 >source /etc/profile
 
 
-注意：1，最好把/usr/local/lib/hlfs/lib和/usr/lib/jvm/java-6-sun/jre/lib/amd64/server/ 放入 /etc/ld.so.conf 并 sudo ldconfig使其生效。
-2，HLFS的安装路径不一定是/usr/local/lib/hlfs，也可能是/usr/local/hlfs，可查看最后sudo make install打印的安装路径。
+注意：
+最好把/usr/local/lib/hlfs/lib和/usr/lib/jvm/java-6-sun/jre/lib/amd64/server/ 放入 /etc/ld.so.conf 并 sudo ldconfig使其生效。(原因是ldconfig的范围更大，包含fork子进程等等)
 }}}
 
  ==== 安装QEMU ====
@@ -186,7 +186,7 @@ cinder create --display-name hdfs:///tmp/testenv/testfs 5
 {{{
 1, 配置环境变量
 给/etc/profile文件中加入如下语句
-export PATH=$PATH:/usr/local/hlfs/bin/  (此路径根据HLFS的具体安装路径)
+export PATH=$PATH:/usr/local/lib/hlfs/bin/  (此路径根据HLFS的具体安装路径)
 最后 > source /etc/profile 使其生效
 
 2，删除HLFS Volumes

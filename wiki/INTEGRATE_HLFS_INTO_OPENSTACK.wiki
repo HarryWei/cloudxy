@@ -30,7 +30,7 @@ git apply hlfs_driver_for_openstack_cinder.patch
 4.一键安安装所有hlfs相关的包（java,hlfs,hadoop,qemu,libvirt等）
 {{{
 https://cloudxy.googlecode.com/svn/branches/hlfs/person/zhangdianbo/hlfs_setup.sh
-chmod +x hlfs_setup.sh;./hlfs.sh
+chmod +x hlfs_setup.sh; bash ./hlfs.sh
 }}}
 
 5.重启devstack——以hlfs作为cinder默认存储

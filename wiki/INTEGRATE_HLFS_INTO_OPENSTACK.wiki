@@ -37,6 +37,9 @@ chmod +x hlfs_setup.sh;./hlfs.sh
 {{{
 CINDER_DRIVER=hlfs ./stack.sh
 }}}
+
+注：目前都是patch形式维护我们集成代码，待社区接受啦！
+
 ------------------------
 = 简介 =
  * Openstack是由NASA和RACKSPACE发起的，是一款优秀的IAAS软件，可以通过http://www.openstack.org 查看有关Openstack更详细的信息。

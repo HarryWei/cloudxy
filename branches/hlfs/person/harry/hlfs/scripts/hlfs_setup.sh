@@ -129,11 +129,13 @@ function recognize_32_64()
 {
     local VALUE_32=$1
     local VALUE_64=$2
-    if [[ $(getconf LONG_BIT) -eq 32 ]]
-    then
+
+    if [[ $(getconf LONG_BIT) -eq 32 ]]; then
         echo $VALUE_32
-    else
-	echo $VALUE_64
+    elif [[ $(getconf LONG_BIT) -eq 32 ]]; then
+		echo $VALUE_64
+	else
+		echo "Error, now, we just support 32 or 64 bits OS!\n"
     fi
 }
 
@@ -365,6 +367,10 @@ exit_on_false "update_env LD_LIBRARY_PATH for hlfs failure"
 echo "source /etc/profile BEGIN"
 source /etc/profile
 echo "source /etc/profile END"
+
+sudo sh -c 'echo "/usr/local/lib/hlfs/lib/" >> /etc/ld.so.conf'
+sudo sh -c "echo $JAVA_HOME/jre/lib/$(recognize_32_64 i386 amd64)/server >> /etc/ld.so.conf"
+sudo ldconfig
 
 cd $TOP_DIR
 

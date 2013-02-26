@@ -102,6 +102,7 @@ for service in /etc/init.d/hadoop-hdfs-*
 > done
 
 5，编译安装HLFS
+sudo apt-get install libhdfs0-dev
 svn checkout https://cloudxy.googlecode.com/svn/trunk/hlfs/ hlfs （目前已经没有3part目录了，也不用再手动修改cmakelist.txt中路径了）
 
 cd hlfs/build

@@ -445,3 +445,45 @@ function update_env()
 		sudo sed -i "s#export *$NAME#$NAME=$VALUE:\$$NAME\nexport $NAME#g" $FILE
 	fi
 }
+
+function Wget()
+{   
+    local URL="$1"
+    local FILENAME=$(basename $URL)    
+    if [ -e basename ]
+    then  
+        echo $FILENAME has been existed
+        return 0
+    else
+        wget -c $URL
+    fi
+}
+
+function dealwith_source()
+{
+    local TOOL="$1"
+    local COMMAND="$2"
+    local ADDRESS="$3"
+    local DEST_DIR="$4"
+
+    if [[ (-e "$DEST_DIR" && -d "$DEST_DIR") ]]
+    then
+        cd "$DEST_DIR"
+        case "$TOOL" in
+            "svn")    svn info;;
+            "git")    git status;;
+        esac
+	      cd -
+	      #exit_on_false "update or pull  $DEST_DIR source failure"  
+    else
+	      $TOOL $COMMAND $ADDRESS $DEST_DIR
+    fi
+}
+
+function cpu_cores()
+{
+  typeset -i NUM_CORE=$(grep 'processor' /proc/cpuinfo | wc -l)
+  ((NUM_CORE--))
+  echo $NUM_CORE
+}
+

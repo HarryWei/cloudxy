@@ -2,6 +2,8 @@
 
 set -x
 
+source hlfs_funcs
+
 function assert_files_exist()
 {
     local FILE
@@ -59,21 +61,6 @@ function install_package()
     exit_on_false "install $1 failure"
 }
 
-function assert_package_installed()
-{
-    local PKG
-    for  PKG in "$@"
-    do
-        #if [ -z "$PKG" ] || (dpkg -l "$PKG" > /dev/null && echo $PKG has been installed)
-        if  is_package_installed $PKG
-	then
-             continue
-        else
-	     install_package "$PKG"
-	fi
-    done
-}
-
 function is_ppa_installed()
 {
     if [[ -z "$@" ]]; then
@@ -97,89 +84,19 @@ function assert_ppa_installed()
     exit_on_false
 }
 
-function assert_java_installed()
-{
-    local PKG=oracle-java7-installer
-    if  is_package_installed $PKG
-    then
-        echo $PKG has been installed
-    else
-	assert_package_installed python-software-properties
-	sudo sh -c 'echo "deb http://mirrors.sohu.com/ubuntu/ precise main restricted universe multiverse" > /etc/apt/sources.list'
-	sudo sh -c 'echo "deb-src http://mirrors.sohu.com/ubuntu/ precise main restricted universe multiverse" >> /etc/apt/sources.list'
-	exit_on_false "set deb server failure"
-
-	assert_ppa_installed ppa:eugenesan/java
-	assert_ppa_installed ppa:webupd8team/java
-	sudo apt-get update
-
-  echo $PKG shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
-	exit_on_false "set accepted-oracle-license-v1-1 failure"
-	install_package $PKG
-  exit_on_false "install_package $PKG failure"
-  update_env /etc/profile JAVA_HOME /usr/lib/jvm/java-7-oracle
-	exit_on_false "update_env JAVA_HOME failure"
-	update_env /etc/profile LD_LIBRARY_PATH "\$'JAVA_HOME'/jre/lib/$(recognize_32_64 i386 amd64)/server"
-	exit_on_false "update_env LD_LIBRARY_PATH for java failure"
-	source /etc/profile
-    fi
-}
-
-function recognize_32_64()
-{
-    local VALUE_32=$1
-    local VALUE_64=$2
-
-    if [[ $(getconf LONG_BIT) -eq 32 ]]; then
-        echo $VALUE_32
-    elif [[ $(getconf LONG_BIT) -eq 32 ]]; then
-		echo $VALUE_64
-	else
-		echo "Error, now, we just support 32 or 64 bits OS!\n"
-    fi
-}
-
-function update_env()
-{
-    local FILE="$1"
-    local NAME="$2"
-    local VALUE="$3"
-    local HAS_BEEN_SETTED=FALSE
-
-   # NAMEVALUE=$(echo "$NAME=$VALUE"|sed "s#/#\\\/#g")
-   # if [[ $(sed -n "/$NAMEVALUE$/p" $FILE | wc -l) -ne 0 ]]
-
-        #VALUE=/jre/lib/amd64/server
-    if   grep "$NAME=$VALUE:" $FILE > /dev/null     #JAVA=/jre/lib/amd64/serve:/usr/bin 
-    then
-        HAS_BEEN_SETTED=TRUE
-    elif grep "$NAME=$VALUE *$" $FILE > /dev/null     #JAVA=/jre/lib/amd64/serve
-    then
-        HAS_BEEN_SETTED=TRUE
-    elif grep "$NAME=..*:$VALUE:" $FILE > /dev/null #JAVA=/usr/bin:/jre/lib/amd64/serve:/usr/local/bin
-    then
-        HAS_BEEN_SETTED=TRUE
-    elif grep "$NAME=..*:$VALUE *$" $FILE > /dev/null #JAVA=/usr/bin:/serve:/usr/local/bin:/jre/lib/amd64/serve
-    then
-        HAS_BEEN_SETTED=TRUE
-    fi
-
-    if [[ $HAS_BEEN_SETTED = TRUE ]]
-    then
-        echo "$NAME=$VALUE had been added into $FILE"
-        return
-    fi
-    # elif [[ $(sed -n "/^$NAME.*$/p" $FILE | wc -l) = 0 ]]
-    if [[ $(grep "$NAME=.*" $FILE| wc -l) -eq 0 ]]
-    then
-        sudo sh -c "echo >> $FILE"
-        sudo sh -c "echo $NAME=$VALUE >> $FILE"
-        sudo sh -c "echo export $NAME >> $FILE"
-    else
-        #sudo sed -i "s#^\($NAME=.*\)\$#\1\n$NAME=$VALUE:\$$NAME#g" $FILE
-        sudo sed -i "s#export *$NAME#$NAME=$VALUE:\$$NAME\nexport $NAME#g" $FILE
-    fi
-}
+#function recognize_32_64()
+#{
+#    local VALUE_32=$1
+#    local VALUE_64=$2
+#
+#    if [[ $(getconf LONG_BIT) -eq 32 ]]; then
+#        echo $VALUE_32
+#    elif [[ $(getconf LONG_BIT) -eq 32 ]]; then
+#		echo $VALUE_64
+#	else
+#		echo "Error, now, we just support 32 or 64 bits OS!\n"
+#    fi
+#}
 
 function hadoop_classpath()
 {
@@ -221,26 +138,26 @@ function Wget()
 
 function assert_hadoop_installed()
 {
-    if is_package_installed hadoop-0.20-conf-pseudo
+    if asseert_packages_installed_or_Exit hadoop-0.20-conf-pseudo
     then    
         echo hadoop has been installed
     else    
 	Wget http://archive.cloudera.com/cdh4/one-click-install/precise/amd64/cdh4-repository_1.0_all.deb
-        exit_on_false "Wget cdh4-repository_1.0_all.deb failure"
+        Exit_on_Failure "Wget cdh4-repository_1.0_all.deb failure"
 	
 	sudo dpkg -i cdh4-repository_1.0_all.deb
-	exit_on_false "dpkg -i cdh4-repository_1.0_all.deb failure"
+	Exit_on_Failure "dpkg -i cdh4-repository_1.0_all.deb failure"
        
 	assert_package_installed curl
 	curl -s http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key | sudo apt-key add -
-	exit_on_false "apt-key add ...... failure"
+	Exit_on_Failure "apt-key add ...... failure"
         sudo apt-get update
         
 	install_package  hadoop-0.20-conf-pseudo
-	exit_on_false "install hadoop-0.20-conf-pseudo failure"
+	Exit_on_Failure "install hadoop-0.20-conf-pseudo failure"
         
 	sudo sed -i "s*# Attempt to set JAVA_HOME if it is not set*# Attempt to set JAVA_HOME if it is not set\nJAVA_HOME=${JAVA_HOME:-/usr/lib/jvm/java-7-oracle}*g" /usr/lib/hadoop/libexec/hadoop-config.sh
-	exit_on_false "set JAVA_HOME in /usr/lib/hadoop/libexec/hadoop-config.sh failure"
+	Exit_on_Failure "set JAVA_HOME in /usr/lib/hadoop/libexec/hadoop-config.sh failure"
     fi
 }
 

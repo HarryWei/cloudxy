@@ -110,7 +110,7 @@ $ cat pool_hlfs.xml
 	</source>
 </pool>
 }}}
- # 删除HLFS Pool, virsh poo-destroy local:///tmp/testenv
+ # 删除HLFS Pool, virsh pool-destroy local:///tmp/testenv
 {{{
 注意：
 a, pool_hlfs.xml中的name域有两种模式，local和hdfs，也即HLFS的两种模式，路径是可配置的。
@@ -119,9 +119,9 @@ c, 删除HLFS Pool 时，只需给出对应的HLFS Pool name。
 }}}
 
 ===HLFS Volume操作====
- # 创建HLFS Volume, virsh vol-create local:///tmp/testenv hlfs.xml
+ # 创建HLFS Volume, virsh vol-create local:///tmp/testenv hlfs_volume.xml
 {{{
-$ cat hlfs.xml
+$ cat hlfs_volume.xml
 <volume>
 <name>testfs</name>
 <key>hlfs/testfs</key>

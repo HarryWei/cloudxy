@@ -95,6 +95,11 @@
 {{{
 wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_offline_storage.patch
 git apply hlfs_driver_for_libvirt_offline_storage.patch
+
+注意：测试离线模式之前需要在/etc/profile里面加入环境变量HLFS_INSTALL_PATH 并给 PATH添加HLFS可执行文件路径，具体如下。
+export HLFS_INSTALL_PATH=/usr/local/hlfs  (对应自己的HLFS安装目录)
+export PATH=$PATH:/usr/local/hlfs/bin/  (对应自己的HLFS可执行文件路径)
+source /etc/profile  (使环境变量生效)
 }}}
 
 ===HLFS Pool操作===

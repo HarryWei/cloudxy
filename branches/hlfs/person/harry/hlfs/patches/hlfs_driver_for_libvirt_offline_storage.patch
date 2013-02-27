@@ -1,6 +1,6 @@
-From 8cc878b8bda4bf74d435ee6baba2d24974eada10 Mon Sep 17 00:00:00 2001
+From 4fb66b119adba88958aa8eb320c19695c9173123 Mon Sep 17 00:00:00 2001
 From: Harry Wei <harryxiyou@gmail.com>
-Date: Sat, 23 Feb 2013 19:25:21 +0800
+Date: Wed, 27 Feb 2013 15:33:22 +0800
 Subject: [PATCH] hlfs driver for libvirt offline storage
 
 ---
@@ -10,13 +10,13 @@ Subject: [PATCH] hlfs driver for libvirt offline storage
  docs/storage.html.in                      |   62 +++++++++
  libvirt.spec.in                           |   15 ++
  po/POTFILES.in                            |    1 +
- src/Makefile.am                           |   20 +++
+ src/Makefile.am                           |   21 +++
  src/conf/storage_conf.c                   |   19 ++-
  src/conf/storage_conf.h                   |    1 +
  src/storage/storage_backend.c             |    6 +
  src/storage/storage_backend_hlfs.c        |  213 +++++++++++++++++++++++++++++
  src/storage/storage_backend_hlfs.h        |   19 +++
- tests/Makefile.am                         |   26 ++++
+ tests/Makefile.am                         |   27 ++++
  tests/storagebackendhlfstest.c            |  192 ++++++++++++++++++++++++++
  tests/storagepoolxml2xmlin/pool-hlfs.xml  |    8 ++
  tests/storagepoolxml2xmlout/pool-hlfs.xml |   11 ++
@@ -25,7 +25,7 @@ Subject: [PATCH] hlfs driver for libvirt offline storage
  tests/storagevolxml2xmlout/vol-hlfs.xml   |   17 +++
  tests/storagevolxml2xmltest.c             |    1 +
  tools/virsh.c                             |    3 +
- 21 files changed, 655 insertions(+), 3 deletions(-)
+ 21 files changed, 657 insertions(+), 3 deletions(-)
  create mode 100644 src/storage/storage_backend_hlfs.c
  create mode 100644 src/storage/storage_backend_hlfs.h
  create mode 100644 tests/storagebackendhlfstest.c
@@ -47,7 +47,7 @@ index 32ae8a7..872c350 100644
  /tests/utiltest
  /tests/viratomictest
 diff --git a/configure.ac b/configure.ac
-index 3c97e4f..37241cc 100644
+index 3c97e4f..119eb36 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -2036,6 +2036,8 @@ AC_ARG_WITH([storage-rbd],
@@ -74,13 +74,13 @@ index 3c97e4f..37241cc 100644
 +if test "$with_storage_hlfs" = "yes" ||
 +   test "$with_storage_hlfs" = "check"; then
 +  AC_PATH_PROG([QEMUIMG], [qemu-img], [], [$PATH:/sbin:/usr/sbin])
-+  AC_PATH_PROG([HLFSSTAT], [hlfs_stat], [], [$PATH:/sbin:/usr/sbin])
-+  AC_PATH_PROG([HLFSRMFS], [hlfs_rmfs], [], [$PATH:/sbin:/usr/sbin])
++  AC_PATH_PROG([HLFSSTAT], [stat.hlfs], [], [$PATH:/sbin:/usr/sbin])
++  AC_PATH_PROG([HLFSRMFS], [rmfs.hlfs], [], [$PATH:/sbin:/usr/sbin])
 +
 +  if test "$with_storage_hlfs" = "yes"; then
 +    if test -z "$QEMUIMG"; then AC_MSG_ERROR([We need qemu-img for Hlfs storage driver]) ; fi
-+	if test -z "$HLFSSTAT"; then AC_MSG_ERROR([We need hlfs_stat for Hlfs storage driver]) ; fi
-+	if test -z "$HLFSRMFS"; then AC_MSG_ERROR([We need hlfs_rmfs for Hlfs storage driver]) ; fi
++	if test -z "$HLFSSTAT"; then AC_MSG_ERROR([We need stat.hlfs for Hlfs storage driver]) ; fi
++	if test -z "$HLFSRMFS"; then AC_MSG_ERROR([We need rmfs.hlfs for Hlfs storage driver]) ; fi
 +  else
 +    if test -z "$QEMUIMG"; then with_storage_hlfs=no ; fi
 +    if test -z "$HLFSSTAT"; then with_storage_hlfs=no ; fi
@@ -92,8 +92,8 @@ index 3c97e4f..37241cc 100644
 +  if test "$with_storage_hlfs" = "yes"; then
 +    AC_DEFINE_UNQUOTED([WITH_STORAGE_HLFS], 1,[whether hlfs backend for storage driver is enabled])
 +    AC_DEFINE_UNQUOTED([QEMUIMG],["$QEMUIMG"],[Location of qemu-img program])
-+    AC_DEFINE_UNQUOTED([HLFSSTAT],["$HLFSSTAT"],[Location of hlfs_stat program])
-+    AC_DEFINE_UNQUOTED([HLFSRMFS],["$HLFSRMFS"],[Location of hlfs_rmfs program])
++    AC_DEFINE_UNQUOTED([HLFSSTAT],["$HLFSSTAT"],[Location of stat.hlfs program])
++    AC_DEFINE_UNQUOTED([HLFSRMFS],["$HLFSRMFS"],[Location of rmfs.hlfs program])
 +  fi
 +fi
 +AM_CONDITIONAL([WITH_STORAGE_HLFS],
@@ -267,7 +267,7 @@ index f0cfd7f..500cfeb 100644
  src/test/test_driver.c
  src/uml/uml_conf.c
 diff --git a/src/Makefile.am b/src/Makefile.am
-index 53ec9da..a36c7f3 100644
+index 53ec9da..11b6010 100644
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
 @@ -656,6 +656,9 @@ STORAGE_DRIVER_RBD_SOURCES =					\
@@ -280,30 +280,31 @@ index 53ec9da..a36c7f3 100644
  STORAGE_HELPER_DISK_SOURCES =					\
  		storage/parthelper.c
  
-@@ -1198,6 +1201,22 @@ if WITH_STORAGE_SHEEPDOG
+@@ -1198,6 +1201,23 @@ if WITH_STORAGE_SHEEPDOG
  libvirt_driver_storage_impl_la_SOURCES += $(STORAGE_DRIVER_SHEEPDOG_SOURCES)
  endif
  
 +if WITH_STORAGE_HLFS
-+INC_GLIB_DIR=`pkg-config --cflags glib-2.0`
-+HLFS_DIR=`echo $HLFS_INSTALL_PATH`
-+JVM_DIR=`echo $JAVA_HOME`
++INC_GLIB_DIR=${shell pkg-config --cflags glib-2.0}
++HLFS_DIR=${shell echo ${HLFS_INSTALL_PATH}}
++JVM_DIR=${shell echo ${JAVA_HOME}}
 +
 +libvirt_driver_storage_impl_la_SOURCES += $(STORAGE_DRIVER_HLFS_SOURCES)
-+libvirt_driver_storage_impl_la_CFLAGS += -I$(top_srcdir)/src/conf	\
-+										   $(INC_GLIB_DIR)			\
++libvirt_driver_storage_impl_la_CFLAGS += $(INC_GLIB_DIR)			\
++										 -I$(top_srcdir)/src/conf	\
++										 -I$(HLFS_DIR)/include		\
 +										 -I$(JVM_DIR)/include		\
 +										 -I$(JVM_DIR)/include/linux
-+libvirt_driver_storage_impl_la_LIBADD += /usr/lib/libglib-2.0.la			\
-+										-L$(HLFS_DIR)/lib/					\
++libvirt_driver_storage_impl_la_LIBADD += -L$(HLFS_DIR)/lib/					\
 +										-L$(JVM_DIR)/jre/lib/amd64/server/	\
++										-L$(JVM_DIR)/jre/lib/i386/server/	\
 +										-lhlfs -lglib-2.0 -lgthread-2.0 -lrt -llog4c -lhdfs -ljvm
 +endif
 +
  if WITH_NODE_DEVICES
  # Needed to keep automake quiet about conditionals
  if WITH_DRIVER_MODULES
-@@ -1299,6 +1318,7 @@ EXTRA_DIST +=							\
+@@ -1299,6 +1319,7 @@ EXTRA_DIST +=							\
  		$(STORAGE_DRIVER_DISK_SOURCES)			\
  		$(STORAGE_DRIVER_RBD_SOURCES)			\
  		$(STORAGE_DRIVER_SHEEPDOG_SOURCES)		\
@@ -637,7 +638,7 @@ index 0000000..85a46e2
 +
 +#endif	/* __VIR_STORAGE_BACKEND_HLFS_H__ */
 diff --git a/tests/Makefile.am b/tests/Makefile.am
-index 5fb26ad..5f23f7f 100644
+index 5fb26ad..a1f1911 100644
 --- a/tests/Makefile.am
 +++ b/tests/Makefile.am
 @@ -154,6 +154,10 @@ if WITH_STORAGE_SHEEPDOG
@@ -651,26 +652,27 @@ index 5fb26ad..5f23f7f 100644
  test_programs += nwfilterxml2xmltest
  
  test_programs += storagevolxml2xmltest storagepoolxml2xmltest
-@@ -449,6 +453,28 @@ else
+@@ -449,6 +453,29 @@ else
  EXTRA_DIST += storagebackendsheepdogtest.c
  endif
  
 +if WITH_STORAGE_HLFS
-+INC_GLIB_DIR=`pkg-config --cflags glib-2.0`
-+HLFS_DIR=`echo $HLFS_INSTALL_PATH`
-+JVM_DIR=`echo $JAVA_HOME`
++INC_GLIB_DIR=$(shell pkg-config --cflags glib-2.0)
++HLFS_DIR=$(shell echo ${HLFS_INSTALL_PATH})
++JVM_DIR=$(shell echo ${JAVA_HOME})
 +
 +storagebackendhlfstest_SOURCES = \
 +	storagebackendhlfstest.c \
 +	testutils.c testutils.h
-+INCLUDES += $(INC_GLIB_DIR)			\
++INCLUDES += $(INC_GLIB_DIR)				\
++			-I$(HLFS_DIR)/include		\
 +			-I$(JVM_DIR)/include		\
 +			-I$(JVM_DIR)/include/linux
 +storagebackendhlfstest_LDADD = \
 +	../src/libvirt_driver_storage_impl.la	\
-+	/usr/lib/libglib-2.0.la				\
 +	-L$(HLFS_DIR)/lib/			\
 +	-L$(JVM_DIR)/jre/lib/amd64/server    \
++	-L$(JVM_DIR)/jre/lib/i386/server    \
 +	-lhlfs -lglib-2.0 -lgthread-2.0 -lrt -llog4c -lhdfs -ljvm	\
 +	$(LDADDS)
 +else

@@ -313,6 +313,10 @@ function dealwith_source()
 }
 
 TOP_DIR=$(cd $(dirname "$0") && pwd)
+echo "999 TOP_DIR is $TOP_DIR"
+
+##Replace source list, update && upgrade
+
 
 ##############################
 # prepare develop enviroment #

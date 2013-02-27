@@ -1,0 +1,447 @@
+################
+# common tools #
+################
+
+function Exit_on_Failure()
+{
+  local RETURN_VALUE=$?
+  if [[ 0 -ne $RETURN_VALUE ]]
+  then
+    echo
+    echo "----------Exit On Failure----------"
+    [[ -n "$@" ]] && echo "Failure in $@" >&2
+    #echo "exit $RETURN_VALUE" 
+    echo "----------Exit On Failure----------"
+    cd $TOP_DIR
+    set +x
+    exit $RETURN_VALUE
+  fi
+}
+
+function are_all_files_exist()
+{
+  local FILE
+  local ALL_EXIST=true
+  
+  for FILE in "$@"
+  do
+    if [[ ! -e $FILE ]]
+    then
+      echo "$FILE does NOT Exist !!!"
+      ALL_EXIST=false
+    fi 
+  done
+  
+  [[ $ALL_EXIST ]] || return 1
+  
+  echo "$@ All do Exist !!!"
+  return 0 
+}
+
+function recognize_32_64()
+{
+  local VALUE_32="$1"
+  local VALUE_64="$2"
+  if [[ $(getconf LONG_BIT) -eq 32 ]]
+  then
+    echo $VALUE_32
+  else
+    echo $VALUE_64
+  fi
+}
+
+#####################
+# concern about apt #
+#####################
+
+function assert_sources_list_added_or_Exit()
+{
+  local SRCS_LST="/etc/apt/sources.list.hlfs"
+  local SRCS_QUEUE
+   
+  [[ -e ${SRCS_LST}.origin ]] || sudo cp /etc/apt/sources.list ${SRCS_LST}.origin
+  Exit_on_Failure "Add ${SRCS_LST}.origin"
+  SRCS_QUEUE="${SRCS_LST}.origin"
+ 
+  [[ -e ${SRCS_LST}.tw ]] || sudo sh -c "cat << END > ${SRCS_LST}.tw
+#tw.archive.ubuntu.com 
+deb http://tw.archive.ubuntu.com/ubuntu/ precise main universe restricted multiverse 
+deb-src http://tw.archive.ubuntu.com/ubuntu/ precise main universe restricted multiverse 
+deb http://tw.archive.ubuntu.com/ubuntu/ precise-security universe main multiverse restricted 
+deb-src http://tw.archive.ubuntu.com/ubuntu/ precise-security universe main multiverse restricted 
+deb http://tw.archive.ubuntu.com/ubuntu/ precise-updates universe main multiverse restricted
+deb-src http://tw.archive.ubuntu.com/ubuntu/ precise-updates universe main multiverse restricted 
+END"
+  Exit_on_Failure "Add ${SRCS_LST}.tw"
+  SRCS_QUEUE="$SRCS_QUEUE ${SRCS_LST}.tw"
+  
+  [[ -e ${SRCS_LST}.163 ]] || sudo sh -c "cat << END > ${SRCS_LST}.163
+#mirrors.163.com
+deb-src http://mirrors.163.com/ubuntu/ precise main restricted
+deb http://mirrors.163.com/ubuntu/ precise-updates main restricted
+deb-src http://mirrors.163.com/ubuntu/ precise-updates main restricted
+deb http://mirrors.163.com/ubuntu/ precise universe
+deb-src http://mirrors.163.com/ubuntu/ precise universe
+deb http://mirrors.163.com/ubuntu/ precise-updates universe
+deb-src http://mirrors.163.com/ubuntu/ precise-updates universe
+deb http://mirrors.163.com/ubuntu/ precise multiverse
+deb-src http://mirrors.163.com/ubuntu/ precise multiverse
+deb http://mirrors.163.com/ubuntu/ precise-updates multiverse
+deb-src http://mirrors.163.com/ubuntu/ precise-updates multiverse
+deb http://mirrors.163.com/ubuntu/ precise-backports main restricted universe multiverse
+deb-src http://mirrors.163.com/ubuntu/ precise-backports main restricted universe multiverse
+deb http://mirrors.163.com/ubuntu/ precise-security main restricted
+deb-src http://mirrors.163.com/ubuntu/ precise-security main restricted
+deb http://mirrors.163.com/ubuntu/ precise-security universe
+deb-src http://mirrors.163.com/ubuntu/ precise-security universe
+deb http://mirrors.163.com/ubuntu/ precise-security multiverse
+deb-src http://mirrors.163.com/ubuntu/ precise-security multiverse
+deb http://extras.ubuntu.com/ubuntu precise main
+deb-src http://extras.ubuntu.com/ubuntu precise main
+END"
+  Exit_on_Failure "Add ${SRCS_LST}.163"
+  SRCS_QUEUE="$SRCS_QUEUE ${SRCS_LST}.163"  
+
+  [[ -e ${SRCS_LST}.sohu ]] || sudo sh -c "cat << END > ${SRCS_LST}.sohu
+#mirrors.sohu.com
+deb http://mirrors.sohu.com/ubuntu/ precise main restricted
+deb-src http://mirrors.sohu.com/ubuntu/ precise main restricted
+deb http://mirrors.sohu.com/ubuntu/ precise-updates main restricted
+deb-src http://mirrors.sohu.com/ubuntu/ precise-updates main restricted
+deb http://mirrors.sohu.com/ubuntu/ precise universe
+deb-src http://mirrors.sohu.com/ubuntu/ precise universe
+deb http://mirrors.sohu.com/ubuntu/ precise-updates universe
+deb-src http://mirrors.sohu.com/ubuntu/ precise-updates universe
+deb http://mirrors.sohu.com/ubuntu/ precise multiverse
+deb-src http://mirrors.sohu.com/ubuntu/ precise multiverse
+deb http://mirrors.sohu.com/ubuntu/ precise-updates multiverse
+deb-src http://mirrors.sohu.com/ubuntu/ precise-updates multiverse
+deb http://mirrors.sohu.com/ubuntu/ precise-backports main restricted universe multiverse
+deb-src http://mirrors.sohu.com/ubuntu/ precise-backports main restricted universe multiverse
+deb http://mirrors.sohu.com/ubuntu/ precise-security main restricted
+deb-src http://mirrors.sohu.com/ubuntu/ precise-security main restricted
+deb http://mirrors.sohu.com/ubuntu/ precise-security universe
+deb-src http://mirrors.sohu.com/ubuntu/ precise-security universe
+deb http://mirrors.sohu.com/ubuntu/ precise-security multiverse
+deb-src http://mirrors.sohu.com/ubuntu/ precise-security multiverse
+deb http://extras.ubuntu.com/ubuntu precise main
+deb-src http://extras.ubuntu.com/ubuntu precise main
+END"
+  Exit_on_Failure "Add ${SRCS_LST}.sohu"
+  SRCS_QUEUE="$SRCS_QUEUE ${SRCS_LST}.sohu"
+
+  [[ -e ${SRCS_LST}.bones7456 ]] || sudo sh -c "cat << END > ${SRCS_LST}.bones7456
+#bones7456 
+deb http://ubuntu.srt.cn/ubuntu/ precise main universe restricted multiverse 
+deb-src http://ubuntu.srt.cn/ubuntu/ precise main universe restricted multiverse 
+deb http://ubuntu.srt.cn/ubuntu/ precise-security universe main multiverse restricted 
+deb-src http://ubuntu.srt.cn/ubuntu/ precise-security universe main multiverse restricted 
+deb http://ubuntu.srt.cn/ubuntu/ precise-updates universe main multiverse restricted 
+deb http://ubuntu.srt.cn/ubuntu/ precise-proposed universe main multiverse restricted 
+deb-src http://ubuntu.srt.cn/ubuntu/ precise-proposed universe main multiverse restricted 
+deb http://ubuntu.srt.cn/ubuntu/ precise-backports universe main multiverse restricted 
+deb-src http://ubuntu.srt.cn/ubuntu/ precise-backports universe main multiverse restricted 
+deb-src http://ubuntu.srt.cn/ubuntu/ precise-updates universe main multiverse restricted 
+END"
+    Exit_on_Failure "Add ${SRCS_LST}.bones7456"
+    SRCS_QUEUE="$SRCS_QUEUE ${SRCS_LST}.bones7456"
+
+  [[ -e ${SRCS_LST}.lupaworld ]] || sudo sh -c "cat << END > ${SRCS_LST}.lupaworld
+#mirror.lupaworld.com 
+deb http://mirror.lupaworld.com/ubuntu/archive/ precise main restricted universe multiverse 
+deb http://mirror.lupaworld.com/ubuntu/archive/ precise-security main restricted universe multiverse 
+deb http://mirror.lupaworld.com/ubuntu/archive/ precise-updates main restricted universe multiverse 
+deb http://mirror.lupaworld.com/ubuntu/archive/ precise-backports main restricted universe multiverse 
+deb http://mirror.lupaworld.com/ubuntu/ubuntu-cn/ precise main restricted universe multiverse 
+END"
+    Exit_on_Failure "Add ${SRCS_LST}.lupaworld"
+    SRCS_QUEUE="$SRCS_QUEUE ${SRCS_LST}.lupaworld"
+
+  [[ -e ${SRCS_LST}.cn99 ]] || sudo sh -c "cat << END > ${SRCS_LST}.cn99
+#ubuntu.cn99.com
+deb http://ubuntu.cn99.com/ubuntu/ precise main restricted universe multiverse 
+deb http://ubuntu.cn99.com/ubuntu/ precise-updates main restricted universe multiverse 
+deb http://ubuntu.cn99.com/ubuntu/ precise-security main restricted universe multiverse 
+deb http://ubuntu.cn99.com/ubuntu/ precise-backports main restricted universe multiverse 
+deb http://ubuntu.cn99.com/ubuntu-cn/ precise main restricted universe multiverse 
+END"
+  Exit_on_Failure "Add ${SRCS_LST}.cn99"
+  SRCS_QUEUE="$SRCS_QUEUE ${SRCS_LST}.cn99"
+
+  [[ -e ${SRCS_LST}.uestc ]] || sudo sh -c "cat << END > ${SRCS_LST}.uestc
+#ubuntu.uestc.edu.cn 
+deb http://ubuntu.uestc.edu.cn/ubuntu/ precise main restricted universe multiverse 
+deb http://ubuntu.uestc.edu.cn/ubuntu/ precise-backports main restricted universe multiverse 
+deb http://ubuntu.uestc.edu.cn/ubuntu/ precise-proposed main restricted universe multiverse 
+deb http://ubuntu.uestc.edu.cn/ubuntu/ precise-security main restricted universe multiverse 
+deb http://ubuntu.uestc.edu.cn/ubuntu/ precise-updates main restricted universe multiverse 
+deb-src http://ubuntu.uestc.edu.cn/ubuntu/ precise main restricted universe multiverse 
+deb-src http://ubuntu.uestc.edu.cn/ubuntu/ precise-backports main restricted universe multiverse 
+deb-src http://ubuntu.uestc.edu.cn/ubuntu/ precise-proposed main restricted universe multiverse 
+deb-src http://ubuntu.uestc.edu.cn/ubuntu/ precise-security main restricted universe multiverse 
+deb-src http://ubuntu.uestc.edu.cn/ubuntu/ precise-updates main restricted universe multiverse 
+END"
+  Exit_on_Failure "Add ${SRCS_LST}.uestc"
+  SRCS_QUEUE="$SRCS_QUEUE ${SRCS_LST}.uestc"
+
+  [[ -e ${SRCS_LST}.ustc ]] || sudo sh -c "cat << END > ${SRCS_LST}.ustc
+#/debian.ustc.edu.cn 
+deb http://debian.ustc.edu.cn/ubuntu/ precise main restricted universe multiverse 
+deb http://debian.ustc.edu.cn/ubuntu/ precise-backports restricted universe multiverse 
+deb http://debian.ustc.edu.cn/ubuntu/ precise-proposed main restricted universe multiverse 
+deb http://debian.ustc.edu.cn/ubuntu/ precise-security main restricted universe multiverse 
+deb http://debian.ustc.edu.cn/ubuntu/ precise-updates main restricted universe multiverse 
+deb-src http://debian.ustc.edu.cn/ubuntu/ precise main restricted universe multiverse 
+deb-src http://debian.ustc.edu.cn/ubuntu/ precise-backports main restricted universe multiverse 
+deb-src http://debian.ustc.edu.cn/ubuntu/ precise-proposed main restricted universe multiverse 
+deb-src http://debian.ustc.edu.cn/ubuntu/ precise-security main restricted universe multiverse 
+deb-src http://debian.ustc.edu.cn/ubuntu/ precise-updates main restricted universe multiverse 
+END"
+  Exit_on_Failure "Add ${SRCS_LST}.ustc"
+  SRCS_QUEUE="$SRCS_QUEUE ${SRCS_LST}.ustc"
+
+  [[ -e ${SRCS_LST}.bjtu ]] || sudo sh -c "cat << END > ${SRCS_LST}.bjtu
+#mirror.bjtu.edu.cn
+deb http://mirror.bjtu.edu.cn/ubuntu/ precise main multiverse restricted universe 
+deb http://mirror.bjtu.edu.cn/ubuntu/ precise-backports main multiverse restricted universe 
+deb http://mirror.bjtu.edu.cn/ubuntu/ precise-proposed main multiverse restricted universe 
+deb http://mirror.bjtu.edu.cn/ubuntu/ precise-security main multiverse restricted universe 
+deb http://mirror.bjtu.edu.cn/ubuntu/ precise-updates main multiverse restricted universe 
+deb-src http://mirror.bjtu.edu.cn/ubuntu/ precise main multiverse restricted universe 
+deb-src http://mirror.bjtu.edu.cn/ubuntu/ precise-backports main multiverse restricted universe 
+deb-src http://mirror.bjtu.edu.cn/ubuntu/ precise-proposed main multiverse restricted universe 
+deb-src http://mirror.bjtu.edu.cn/ubuntu/ precise-security main multiverse restricted universe 
+deb-src http://mirror.bjtu.edu.cn/ubuntu/ precise-updates main multiverse restricted universe 
+END"
+  Exit_on_Failure "Add ${SRCS_LST}.bjtu"
+  SRCS_QUEUE="$SRCS_QUEUE ${SRCS_LST}.bjtu"
+
+  [[ -e ${SRCS_LST}.lzu ]] || sudo sh -c "cat << END > ${SRCS_LST}.lzu
+#mirror.lzu.edu.cn 
+deb ftp://mirror.lzu.edu.cn/ubuntu/ precise main multiverse restricted universe 
+deb ftp://mirror.lzu.edu.cn/ubuntu/ precise-backports main multiverse restricted universe 
+deb ftp://mirror.lzu.edu.cn/ubuntu/ precise-proposed main multiverse restricted universe 
+deb ftp://mirror.lzu.edu.cn/ubuntu/ precise-security main multiverse restricted universe 
+deb ftp://mirror.lzu.edu.cn/ubuntu/ precise-updates main multiverse restricted universe 
+deb ftp://mirror.lzu.edu.cn/ubuntu-cn/ precise main multiverse restricted universe 
+END"
+  Exit_on_Failure "Add ${SRCS_LST}.lzu"
+  SRCS_QUEUE="$SRCS_QUEUE ${SRCS_LST}.lzu"
+
+  [[ -e ${SRCS_LST}.sjtu ]] || sudo sh -c "cat << END > ${SRCS_LST}.sjtu
+#ftp.sjtu.edu.cn
+deb http://ftp.sjtu.edu.cn/ubuntu/ precise main multiverse restricted universe 
+deb http://ftp.sjtu.edu.cn/ubuntu/ precise-backports main multiverse restricted universe 
+deb http://ftp.sjtu.edu.cn/ubuntu/ precise-proposed main multiverse restricted universe 
+deb http://ftp.sjtu.edu.cn/ubuntu/ precise-security main multiverse restricted universe 
+deb http://ftp.sjtu.edu.cn/ubuntu/ precise-updates main multiverse restricted universe 
+deb http://ftp.sjtu.edu.cn/ubuntu-cn/ precise main multiverse restricted universe 
+deb-src http://ftp.sjtu.edu.cn/ubuntu/ precise main multiverse restricted universe 
+deb-src http://ftp.sjtu.edu.cn/ubuntu/ precise-backports main multiverse restricted universe 
+deb-src http://ftp.sjtu.edu.cn/ubuntu/ precise-proposed main multiverse restricted universe 
+deb-src http://ftp.sjtu.edu.cn/ubuntu/ precise-security main multiverse restricted universe 
+deb-src http://ftp.sjtu.edu.cn/ubuntu/ precise-updates main multiverse restricted universe
+END"
+  Exit_on_Failure "Add ${SRCS_LST}.sjtu"
+  SRCS_QUEUE="$SRCS_QUEUE ${SRCS_LST}.sjtu"
+
+  are_all_files_exist $SRCS_QUEUE       
+  Exit_on_Failure "Any sources.list LOST !!!"
+
+
+  #assert_the_fast_sources_list_or_Exit $SRCS_QUEUE                                               
+}
+
+function assert_the_fast_sources_list_or_Exit()
+{
+  local SRCS_LST
+  local typeset time
+  local typeset start
+  local typeset end
+  local typeset index=0
+  local file
+  local succ
+  
+  for SRCS_LST in "$@" 
+  do
+    sudo cp $SRCS_LST /etc/apt/sources.list
+    file[index]=$SRCS_LST
+    start=$(date "+%s")
+    #sudo apt-get update || succ[index]=1 && succ[index]=0
+    sudo apt-get update && succ[index]=0 || succ[index]=1 
+    end=$(date "+%s")
+    time[index]=$(( end - start ))
+    (( index = index + 1 ))
+  done
+  
+  local lenth=${#file[*]}
+  for ((index = 0; index < length; index++))
+  do
+    echo succ[index] "    " time[index] "   " file[index]
+  done
+}
+
+# For Chinese GFW !!!
+function assert_apt_get_update_or_Exit()
+{
+  local TIMES=3
+  local UPDATED=true
+  until [[ $TIMES -eq 0 ]]
+  do
+    sudo apt-get update 
+    [[ $? -eq 0 ]] && echo "apt-get update Seccessful !!!" && return 0 
+    UPDATED=false
+    TIMES=$(($TIMES - 1))
+  done
+  [[ $UPDATED = true ]]
+  Exit_on_Failure "apt-get update !!!"
+}
+
+function is_package_installed()
+{
+  [[ -z "$1" ]] && echo "Input is blank" && return 0
+  
+  if  ! dpkg -l "$1" 
+  then
+    echo "$1 has NOT been installed"
+    return 1
+  elif dpkg -l "$1" |grep "^un" 
+  then
+    echo "$1 has NOT been installed !!!"
+    return 1
+  else
+    echo "$1 HAS been Installed !!!"
+    return 0
+  fi
+}
+
+function install_package_or_Exit()
+{
+  sudo apt-get install "$1" -y  || (echo "n";sleep 3;echo "y";sleep 2;echo "y")|sudo aptitude install "$1" 
+  is_package_installed "$1" || Exit_on_Failure "install $1"
+}
+
+# For Chinese GFW !!!
+function install_package_try_3Times_or_Exit()
+{
+  local TIMES=3
+  local INSTALLED=true
+  until [[ $TIMES -eq 0 ]]
+  do
+    sudo apt-get install "$1" -y  || (echo "n";sleep 3;echo "y";sleep 2;echo "y")|sudo aptitude install "$1" 
+    is_package_installed "$1" && return 0
+    INSTALLED=false
+    TIMES=$(($TIMES - 1))
+  done
+  [[ $INSTALLED = true ]]
+  Exit_on_Failure "install $1"
+}
+
+function assert_packages_installed_or_Exit()
+{
+  local PKG
+  for PKG in "$@"
+  do
+    if is_package_installed $PKG
+    then
+      continue
+    else
+      install_package_try_3Times_or_Exit "$PKG"
+    fi
+  done
+}
+
+function is_ppa_installed()
+{
+	[[ -z "$1" ]] && echo "Input is blank" && return 0
+	local STR="$@"
+	local CODENAME=$(lsb_release -cs)
+	local SUB_STR_1=${STR#"ppa:"}
+	local SUB_STR_2=${SUB_STR_1/"/"/"-"}
+	if [[ -e /etc/apt/sources.list.d/${SUB_STR_2}-${CODENAME}.list ]]
+	then
+		return 0
+	else
+		return 1
+	fi
+}
+
+function assert_ppas_installed_or_Exit()
+{
+	for PPA in "$@"
+	do
+		is_ppa_installed $PPA || echo "\n" | sudo add-apt-repository $PPA
+		is_ppa_installed || Exit_on_Failure "add-apt-repository $PPA"
+	done
+}
+
+function assert_java_installed_or_Exit()
+{
+	local PKG=oracle-java7-installer
+	if  ! is_package_installed $PKG
+	then
+		assert_packages_installed_or_Exit python-software-properties
+		assert_ppas_installed_or_Exit ppa:eugenesan/java ppa:webupd8team/java
+		assert_apt_get_update_or_Exit
+
+		echo $PKG shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
+		Exit_on_Failure "set accepted-oracle-license-v1-1"
+		
+		assert_packages_installed_or_Exit $PKG
+
+		update_env /etc/profile JAVA_HOME /usr/lib/jvm/java-7-oracle
+		Exit_on_Failure "set JAVA_HOME=/usr/lib/java/java-7-oracle in /etc/profile" 
+		update_env /etc/profile LD_LIBRARY_PATH "\$'JAVA_HOME'/jre/lib/$(recognize_32_64 i386 amd64)/server" 
+		Exit_on_Failure "set LD_LIBRARY_PATH=""\$JAVA_HOME/jre/lib/$(recognize_32_64 i386 amd64)/server" "in /etc/profile"
+		source /etc/profile
+		Exit_on_Failure "source /etc/profile"
+		#######################################################################################################
+		#                       may be account some error on ldconfig, let's try ones                         #
+		#######################################################################################################
+		update_env /etc/ld.so.conf LD_LIBRARY_PATH "\$'JAVA_HOME'/jre/lib/$(recognize_32_64 i386 amd64)/server"
+		Exit_on_Failure "set LD_LIBTRARY_PATH=""\$JAVA_HOME/jre/lib/$(recognize_32_64 i386 amd64)/server" "in /etc/profile" 
+		sudo ldconfig
+		Exit_on_Failure "sudo ldconfig"
+	fi
+}
+
+
+
+function update_env()
+{
+	local FILE="$1"
+	local NAME="$2"
+	local VALUE="$3"
+	local HAS_BEEN_SETTED=FALSE
+
+	#VALUE=/jre/lib/amd64/server
+  if grep "$NAME=$VALUE:" $FILE > /dev/null     #JAVA=/jre/lib/amd64/serve:/usr/bin 
+	then
+		HAS_BEEN_SETTED=TRUE
+  elif grep "$NAME=$VALUE *$" $FILE > /dev/null     #JAVA=/jre/lib/amd64/serve
+	then
+		HAS_BEEN_SETTED=TRUE
+	elif grep "$NAME=..*:$VALUE:" $FILE > /dev/null #JAVA=/usr/bin:/jre/lib/amd64/serve:/usr/local/bin
+	then
+		HAS_BEEN_SETTED=TRUE
+	elif grep "$NAME=..*:$VALUE *$" $FILE > /dev/null #JAVA=/usr/bin:/serve:/usr/local/bin:/jre/lib/amd64/serve
+	then
+		HAS_BEEN_SETTED=TRUE
+	fi
+
+	if [[ $HAS_BEEN_SETTED = TRUE ]]
+  then
+		echo "$NAME=$VALUE had been added into $FILE"
+		return
+	fi
+
+	if [[ $(grep "$NAME=.*" $FILE| wc -l) -eq 0 ]]
+	then
+		sudo sh -c "echo >> $FILE"
+		sudo sh -c "echo $NAME=$VALUE >> $FILE"
+		sudo sh -c "echo export $NAME >> $FILE"
+	else
+		#sudo sed -i "s#^\($NAME=.*\)\$#\1\n$NAME=$VALUE:\$$NAME#g" $FILE
+		sudo sed -i "s#export *$NAME#$NAME=$VALUE:\$$NAME\nexport $NAME#g" $FILE
+	fi
+}

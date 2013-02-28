@@ -132,7 +132,7 @@ cd qemu; git reset --hard v1.3.0
 wget http://cloudxy.googlecode.com/svn/trunk/hlfs/patches/hlfs_driver_for_qemu_1.3.0.patch
 
 git apply hlfs_driver_for_qemu.patch
-export HLFS_INSTALL_PATH=/usr/local/lib/hlfs (这个环境一定要设置，指向hlfs的安装目录)
+export HLFS_INSTALL_PATH=/usr/local/lib/hlfs (这个环境变量一定要设置，指向hlfs的安装目录)
 ./configure --enable-hlfs --with-coroutine=gthread (configure输出的最后会提示hlfs是否enable，应该是yes！)
 
 make;sudo make install

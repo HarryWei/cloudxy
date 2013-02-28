@@ -102,14 +102,6 @@ function hadoop_classpath()
     IFS=$SAVED_IFS
 }
 
-
-
-
-
-
-    
-
-
 TOP_DIR=$(cd $(dirname "$0") && pwd)
 
 N-Cores=$(get_cpu_core_num)
@@ -195,7 +187,6 @@ then
     Exit_on_Failure "git apply hlfs_driver_for_qemu_1.3.0.patch failure" 
 fi
 
-
 ./configure --enable-hlfs --with-coroutine=gthread
 Exit_on_Failure "qemu configure failure"
 
@@ -213,6 +204,13 @@ cd $TOP_DIR
 dealwith_source git clone git://libvirt.org/libvirt.git libvirt
 
 cd libvirt
+
+#Set libvirt relevant ENV. variables
+sudo chmod +x /usr/local/lib/hlfs/bin/*
+sudo sh -c 'echo "export PATH=$PATH:/usr/local/lib/hlfs/bin/" >> /etc/profile'
+source /etc/profile
+sudo sh -c 'echo "/usr/local/lib/" >> /etc/ld.so.conf'
+sudo ldconfig
 
 if ! assert_files_exist tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-hlfs.args tests/qemuxml2argvdata/qemuxml2argv-disk-drive-network-hlfs.xml assert_files_exist src/storage/storage_backend_hlfs.c src/storage/storage_backend_hlfs.h tests/storagebackendhlfstest.c tests/storagepoolxml2xmlin/pool-hlfs.xml tests/storagepoolxml2xmlout/pool-hlfs.xml tests/storagevolxml2xmlin/vol-hlfs.xml tests/storagevolxml2xmlout/vol-hlfs.xml
 then

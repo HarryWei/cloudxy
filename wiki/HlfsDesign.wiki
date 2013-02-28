@@ -23,6 +23,7 @@
 HLFS的磁盘数据格式与一般文件系统（FFS—fast filesystem）无多大差异，都是借助于indirect block 、inode 、directory 等结构。
 所不同之处在于LFS会将磁盘（我们这里是hdfs的存储池）分割成有序的segment 进行管理，当前活跃的segment只有一个（也就是我们日志的逻辑尾的segment）。
 这些segment 逻辑上头尾相连组成一个线性log，任何的文件更新（数据块、indirect block 、inode等等）都会以追加方式写入到log尾部——显然这么做的好处是保证了磁头的顺序移动，提高了吞吐；而带来的麻烦是需要回收前期写入的旧数据（修改过的），否则磁盘迟早会写满。综上所述我们设计的最基本思路是 —— 利用hadoop dfs为我们提供可靠的、分布式的存储介质；然后在其上实现LFS。
+http://cloudxy.googlecode.com/svn/wiki/images/HLFS.jpg
 
 下面就关键设计技术点做概要设计。
 

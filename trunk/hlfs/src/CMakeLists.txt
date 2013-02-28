@@ -23,9 +23,8 @@ include_directories(${GLIB_PKG_INCLUDE_DIRS})
 endif(GLIB_PKG_FOUND)
 
 
-MESSAGE(STATUS "Probe Java Home:" ${JAVA_HOME})
 SET(JAVA_HOME  $ENV{JAVA_HOME}/)
-
+MESSAGE(STATUS "Probe Java Home:" ${JAVA_HOME})
 
 INCLUDE_DIRECTORIES(
 
@@ -62,11 +61,11 @@ AUX_SOURCE_DIRECTORY(clone LHFSSRCS)
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
     SET(LIBRARY_OUTPUT_PATH ${WORK_HOME}/output/lib32)
     LINK_DIRECTORIES(
-        ${JAVA_HOME}/jre/lib/i386/server)
+        ${JAVA_HOME}/jre/lib/i386/server/)
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
     SET(LIBRARY_OUTPUT_PATH ${WORK_HOME}/output/lib64)
     LINK_DIRECTORIES(
-        ${JAVA_HOME}/jre/lib/amd64/server)
+        ${JAVA_HOME}/jre/lib/amd64/server/)
 ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
 SET(LHFLIBS   
@@ -117,13 +116,18 @@ SET_TARGET_PROPERTIES(mkfs.hlfs PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototypes
 #INSTALL(TARGETS mkfs.hlfs RUNTIME DESTINATION bin)
 ADD_DEPENDENCIES(tools mkfs.hlfs)
 
-SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
+#SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
 SET(TOOLSRCS tools/hlfs_stat.c)
 ADD_EXECUTABLE(stat.hlfs ${TOOLSRCS})
 TARGET_LINK_LIBRARIES(stat.hlfs ${TOOLLIBS})
 SET_TARGET_PROPERTIES(stat.hlfs PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototypes")
 ADD_DEPENDENCIES(tools stat.hlfs)
 
+SET(TOOLSRCS tools/hlfs_rmfs.c)
+ADD_EXECUTABLE(rmfs.hlfs ${TOOLSRCS})
+TARGET_LINK_LIBRARIES(rmfs.hlfs ${TOOLLIBS})
+SET_TARGET_PROPERTIES(rmfs.hlfs PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototypes")
+ADD_DEPENDENCIES(tools rmfs.hlfs)
 
 #SET(CMAKE_INSTALL_PREFIX /usr)
 SET(EXECUTABLE_OUTPUT_PATH ../output/bin)

@@ -1,0 +1,727 @@
+
+################
+# common tools #
+################
+
+
+
+function log_SUCC()
+{
+  MSG=$1
+  echo "$(date)" >> $CUR_LOG
+  echo "[SUCC] $MSG" >> $CUR_LOG
+  echo >> $CUR_LOG
+}
+
+function log_FAIL()
+{
+  MSG=$1
+  echo "$(date)" >> $CUR_LOG
+  echo "[FALL]$MSG" >> $CUR_LOG
+  echo >> $CUR_LOG
+}
+
+function Exit_on_Failure()
+{
+  typeset -i RET_VAL=$?
+  typeset    MSG="$@"
+  if ((RET_VAL == 0))
+  then
+    log_SUCC "$MSG"
+    echo
+    echo -e "\033[32;40;5m ----------------------------Exit On Failure------------------------------------ \033[0m"
+    echo -e "\033[32;40m   $MSG \033[0m"
+    echo -e "\033[32;40;5m ----------------------------Exit On Failure------------------------------------ \033[0m"
+    echo    
+  else
+    log_FAIL "$MSG" 
+    echo >&2
+    echo -e "\033[31;40;5m ----------------------------Exit On Failure------------------------------------ \033[0m" >&2
+    echo -e "\033[31;40m   $MSG \033[0m" >&2
+    echo -e "\033[31;40;5m ----------------------------Exit On Failure------------------------------------ \033[0m" >&2
+    echo >&2
+    exit $RET_VAL
+  fi
+}
+
+
+function are_all_files_exist()
+{
+  local FILE
+  local ALL_EXIST=true
+  
+  for FILE in "$@"
+  do
+    if [[ ! -e $FILE ]]
+    then
+      Exit_on_Failure "$FILE does NOT Exist !!!"
+      ALL_EXIST=false
+    fi 
+  done
+  
+  $ALL_EXIST || return 1
+  Exit_on_Failure "$@ All do Exist !!!"
+  return 0 
+}
+
+function recognize_32_64()
+{
+  local VALUE_32="$1"
+  local VALUE_64="$2"
+  if [[ $(getconf LONG_BIT) -eq 32 ]]
+  then
+    echo $VALUE_32
+  else
+    echo $VALUE_64
+  fi
+}
+
+
+
+
+
+#####################
+# concern about apt #
+#####################
+
+# Input:  $1: ORIGIN_SRC  $2:APT_DIR
+# Input:  $SRC_LST
+function assert_sources_list_added_or_Exit()
+{ 
+  typeset ORIGIN_SRC="$1"
+  typeset APT_DIR="$2"
+  typeset PREFIX="$APT_DIR/sources.list" 
+  
+  typeset SRC_LST
+  
+  [[ -e $APT_DIR && -d $APT_DIR ]] || mkdir $APT_DIR 
+  Exit_on_Failure "APT_DIR Ready" 
+  
+   
+  [[ -e ${PREFIX}.origin ]] || cp $ORIGIN_SRC ${PREFIX}.origin
+  Exit_on_Failure "SAVE ORIGIN APT_SOURCES ${PREFIX}.origin"
+  SRC_LST="${PREFIX}.origin"
+ 
+  [[ -e ${PREFIX}.tw ]] || cat << END > ${PREFIX}.tw
+#tw.archive.ubuntu.com 
+deb http://tw.archive.ubuntu.com/ubuntu/ precise main universe restricted multiverse 
+deb-src http://tw.archive.ubuntu.com/ubuntu/ precise main universe restricted multiverse 
+deb http://tw.archive.ubuntu.com/ubuntu/ precise-security universe main multiverse restricted 
+deb-src http://tw.archive.ubuntu.com/ubuntu/ precise-security universe main multiverse restricted 
+deb http://tw.archive.ubuntu.com/ubuntu/ precise-updates universe main multiverse restricted
+deb-src http://tw.archive.ubuntu.com/ubuntu/ precise-updates universe main multiverse restricted 
+END
+  Exit_on_Failure "Add APT_SOURCES ${PREFIX}.tw"
+  SRC_LST="$SRC_LST ${PREFIX}.tw"
+  
+  [[ -e ${PREFIX}.163 ]] || cat << END > ${PREFIX}.163
+#mirrors.163.com
+deb-src http://mirrors.163.com/ubuntu/ precise main restricted
+deb http://mirrors.163.com/ubuntu/ precise-updates main restricted
+deb-src http://mirrors.163.com/ubuntu/ precise-updates main restricted
+deb http://mirrors.163.com/ubuntu/ precise universe
+deb-src http://mirrors.163.com/ubuntu/ precise universe
+deb http://mirrors.163.com/ubuntu/ precise-updates universe
+deb-src http://mirrors.163.com/ubuntu/ precise-updates universe
+deb http://mirrors.163.com/ubuntu/ precise multiverse
+deb-src http://mirrors.163.com/ubuntu/ precise multiverse
+deb http://mirrors.163.com/ubuntu/ precise-updates multiverse
+deb-src http://mirrors.163.com/ubuntu/ precise-updates multiverse
+deb http://mirrors.163.com/ubuntu/ precise-backports main restricted universe multiverse
+deb-src http://mirrors.163.com/ubuntu/ precise-backports main restricted universe multiverse
+deb http://mirrors.163.com/ubuntu/ precise-security main restricted
+deb-src http://mirrors.163.com/ubuntu/ precise-security main restricted
+deb http://mirrors.163.com/ubuntu/ precise-security universe
+deb-src http://mirrors.163.com/ubuntu/ precise-security universe
+deb http://mirrors.163.com/ubuntu/ precise-security multiverse
+deb-src http://mirrors.163.com/ubuntu/ precise-security multiverse
+#deb http://extras.ubuntu.com/ubuntu precise main
+#deb-src http://extras.ubuntu.com/ubuntu precise main
+END
+  Exit_on_Failure "Add APT_SOURCES ${PREFIX}.163"
+  SRC_LST="$SRC_LST ${PREFIX}.163"  
+
+  [[ -e ${PREFIX}.sohu ]] || cat << END > ${PREFIX}.sohu
+#mirrors.sohu.com
+deb http://mirrors.sohu.com/ubuntu/ precise main restricted
+deb-src http://mirrors.sohu.com/ubuntu/ precise main restricted
+deb http://mirrors.sohu.com/ubuntu/ precise-updates main restricted
+deb-src http://mirrors.sohu.com/ubuntu/ precise-updates main restricted
+deb http://mirrors.sohu.com/ubuntu/ precise universe
+deb-src http://mirrors.sohu.com/ubuntu/ precise universe
+deb http://mirrors.sohu.com/ubuntu/ precise-updates universe
+deb-src http://mirrors.sohu.com/ubuntu/ precise-updates universe
+deb http://mirrors.sohu.com/ubuntu/ precise multiverse
+deb-src http://mirrors.sohu.com/ubuntu/ precise multiverse
+deb http://mirrors.sohu.com/ubuntu/ precise-updates multiverse
+deb-src http://mirrors.sohu.com/ubuntu/ precise-updates multiverse
+deb http://mirrors.sohu.com/ubuntu/ precise-backports main restricted universe multiverse
+deb-src http://mirrors.sohu.com/ubuntu/ precise-backports main restricted universe multiverse
+deb http://mirrors.sohu.com/ubuntu/ precise-security main restricted
+deb-src http://mirrors.sohu.com/ubuntu/ precise-security main restricted
+deb http://mirrors.sohu.com/ubuntu/ precise-security universe
+deb-src http://mirrors.sohu.com/ubuntu/ precise-security universe
+deb http://mirrors.sohu.com/ubuntu/ precise-security multiverse
+deb-src http://mirrors.sohu.com/ubuntu/ precise-security multiverse
+#deb http://extras.ubuntu.com/ubuntu precise main
+#deb-src http://extras.ubuntu.com/ubuntu precise main
+END
+  Exit_on_Failure "Add APT_SOURCES ${PREFIX}.sohu"
+  SRC_LST="$SRC_LST ${PREFIX}.sohu"
+
+  [[ -e ${PREFIX}.bones7456 ]] || cat << END > ${PREFIX}.bones7456
+#bones7456 
+deb http://ubuntu.srt.cn/ubuntu/ precise main universe restricted multiverse 
+deb-src http://ubuntu.srt.cn/ubuntu/ precise main universe restricted multiverse 
+deb http://ubuntu.srt.cn/ubuntu/ precise-security universe main multiverse restricted 
+deb-src http://ubuntu.srt.cn/ubuntu/ precise-security universe main multiverse restricted 
+deb http://ubuntu.srt.cn/ubuntu/ precise-updates universe main multiverse restricted 
+deb http://ubuntu.srt.cn/ubuntu/ precise-proposed universe main multiverse restricted 
+deb-src http://ubuntu.srt.cn/ubuntu/ precise-proposed universe main multiverse restricted 
+deb http://ubuntu.srt.cn/ubuntu/ precise-backports universe main multiverse restricted 
+deb-src http://ubuntu.srt.cn/ubuntu/ precise-backports universe main multiverse restricted 
+deb-src http://ubuntu.srt.cn/ubuntu/ precise-updates universe main multiverse restricted 
+END
+    Exit_on_Failure "Add APT_SOURCES ${PREFIX}.bones7456"
+    SRC_LST="$SRC_LST ${PREFIX}.bones7456"
+
+  [[ -e ${PREFIX}.lupaworld ]] || cat << END > ${PREFIX}.lupaworld
+#mirror.lupaworld.com 
+deb http://mirror.lupaworld.com/ubuntu/archive/ precise main restricted universe multiverse 
+deb http://mirror.lupaworld.com/ubuntu/archive/ precise-security main restricted universe multiverse 
+deb http://mirror.lupaworld.com/ubuntu/archive/ precise-updates main restricted universe multiverse 
+deb http://mirror.lupaworld.com/ubuntu/archive/ precise-backports main restricted universe multiverse 
+deb http://mirror.lupaworld.com/ubuntu/ubuntu-cn/ precise main restricted universe multiverse 
+END
+    Exit_on_Failure "Add APT_SOURCES ${PREFIX}.lupaworld"
+    SRC_LST="$SRC_LST ${PREFIX}.lupaworld"
+
+  [[ -e ${PREFIX}.cn99 ]] || cat << END > ${PREFIX}.cn99
+#ubuntu.cn99.com
+deb http://ubuntu.cn99.com/ubuntu/ precise main restricted universe multiverse 
+deb http://ubuntu.cn99.com/ubuntu/ precise-updates main restricted universe multiverse 
+deb http://ubuntu.cn99.com/ubuntu/ precise-security main restricted universe multiverse 
+deb http://ubuntu.cn99.com/ubuntu/ precise-backports main restricted universe multiverse 
+deb http://ubuntu.cn99.com/ubuntu-cn/ precise main restricted universe multiverse 
+END
+  Exit_on_Failure "Add APT_SOURCES ${PREFIX}.cn99"
+  SRC_LST="$SRC_LST ${PREFIX}.cn99"
+
+  [[ -e ${PREFIX}.uestc ]] || cat << END > ${PREFIX}.uestc
+#ubuntu.uestc.edu.cn 
+deb http://ubuntu.uestc.edu.cn/ubuntu/ precise main restricted universe multiverse 
+deb http://ubuntu.uestc.edu.cn/ubuntu/ precise-backports main restricted universe multiverse 
+deb http://ubuntu.uestc.edu.cn/ubuntu/ precise-proposed main restricted universe multiverse 
+deb http://ubuntu.uestc.edu.cn/ubuntu/ precise-security main restricted universe multiverse 
+deb http://ubuntu.uestc.edu.cn/ubuntu/ precise-updates main restricted universe multiverse 
+deb-src http://ubuntu.uestc.edu.cn/ubuntu/ precise main restricted universe multiverse 
+deb-src http://ubuntu.uestc.edu.cn/ubuntu/ precise-backports main restricted universe multiverse 
+deb-src http://ubuntu.uestc.edu.cn/ubuntu/ precise-proposed main restricted universe multiverse 
+deb-src http://ubuntu.uestc.edu.cn/ubuntu/ precise-security main restricted universe multiverse 
+deb-src http://ubuntu.uestc.edu.cn/ubuntu/ precise-updates main restricted universe multiverse 
+END
+  Exit_on_Failure "Add APT_SOURCES ${PREFIX}.uestc"
+  SRC_LST="$SRC_LST ${PREFIX}.uestc"
+
+  [[ -e ${PREFIX}.ustc ]] || cat << END > ${PREFIX}.ustc
+#/debian.ustc.edu.cn 
+deb http://debian.ustc.edu.cn/ubuntu/ precise main restricted universe multiverse 
+deb http://debian.ustc.edu.cn/ubuntu/ precise-backports restricted universe multiverse 
+deb http://debian.ustc.edu.cn/ubuntu/ precise-proposed main restricted universe multiverse 
+deb http://debian.ustc.edu.cn/ubuntu/ precise-security main restricted universe multiverse 
+deb http://debian.ustc.edu.cn/ubuntu/ precise-updates main restricted universe multiverse 
+deb-src http://debian.ustc.edu.cn/ubuntu/ precise main restricted universe multiverse 
+deb-src http://debian.ustc.edu.cn/ubuntu/ precise-backports main restricted universe multiverse 
+deb-src http://debian.ustc.edu.cn/ubuntu/ precise-proposed main restricted universe multiverse 
+deb-src http://debian.ustc.edu.cn/ubuntu/ precise-security main restricted universe multiverse 
+deb-src http://debian.ustc.edu.cn/ubuntu/ precise-updates main restricted universe multiverse 
+END
+  Exit_on_Failure "Add APT_SOURCES ${PREFIX}.ustc"
+  SRC_LST="$SRC_LST ${PREFIX}.ustc"
+
+  [[ -e ${PREFIX}.bjtu ]] || cat << END > ${PREFIX}.bjtu
+#mirror.bjtu.edu.cn
+deb http://mirror.bjtu.edu.cn/ubuntu/ precise main multiverse restricted universe 
+deb http://mirror.bjtu.edu.cn/ubuntu/ precise-backports main multiverse restricted universe 
+deb http://mirror.bjtu.edu.cn/ubuntu/ precise-proposed main multiverse restricted universe 
+deb http://mirror.bjtu.edu.cn/ubuntu/ precise-security main multiverse restricted universe 
+deb http://mirror.bjtu.edu.cn/ubuntu/ precise-updates main multiverse restricted universe 
+deb-src http://mirror.bjtu.edu.cn/ubuntu/ precise main multiverse restricted universe 
+deb-src http://mirror.bjtu.edu.cn/ubuntu/ precise-backports main multiverse restricted universe 
+deb-src http://mirror.bjtu.edu.cn/ubuntu/ precise-proposed main multiverse restricted universe 
+deb-src http://mirror.bjtu.edu.cn/ubuntu/ precise-security main multiverse restricted universe 
+deb-src http://mirror.bjtu.edu.cn/ubuntu/ precise-updates main multiverse restricted universe 
+END
+  Exit_on_Failure "Add APT_SOURCES ${PREFIX}.bjtu"
+  SRC_LST="$SRC_LST ${PREFIX}.bjtu"
+
+  [[ -e ${PREFIX}.lzu ]] || cat << END > ${PREFIX}.lzu
+#mirror.lzu.edu.cn 
+deb ftp://mirror.lzu.edu.cn/ubuntu/ precise main multiverse restricted universe 
+deb ftp://mirror.lzu.edu.cn/ubuntu/ precise-backports main multiverse restricted universe 
+deb ftp://mirror.lzu.edu.cn/ubuntu/ precise-proposed main multiverse restricted universe 
+deb ftp://mirror.lzu.edu.cn/ubuntu/ precise-security main multiverse restricted universe 
+deb ftp://mirror.lzu.edu.cn/ubuntu/ precise-updates main multiverse restricted universe 
+deb ftp://mirror.lzu.edu.cn/ubuntu-cn/ precise main multiverse restricted universe 
+END
+  Exit_on_Failure "Add APT_SOURCES ${PREFIX}.lzu"
+  SRC_LST="$SRC_LST ${PREFIX}.lzu"
+
+  [[ -e ${PREFIX}.sjtu ]] || cat << END > ${PREFIX}.sjtu
+#ftp.sjtu.edu.cn
+deb http://ftp.sjtu.edu.cn/ubuntu/ precise main multiverse restricted universe 
+deb http://ftp.sjtu.edu.cn/ubuntu/ precise-backports main multiverse restricted universe 
+deb http://ftp.sjtu.edu.cn/ubuntu/ precise-proposed main multiverse restricted universe 
+deb http://ftp.sjtu.edu.cn/ubuntu/ precise-security main multiverse restricted universe £û
+deb http://ftp.sjtu.edu.cn/ubuntu/ precise-updates main multiverse restricted universe 
+deb http://ftp.sjtu.edu.cn/ubuntu-cn/ precise main multiverse restricted universe 
+deb-src http://ftp.sjtu.edu.cn/ubuntu/ precise main multiverse restricted universe 
+deb-src http://ftp.sjtu.edu.cn/ubuntu/ precise-backports main multiverse restricted universe 
+deb-src http://ftp.sjtu.edu.cn/ubuntu/ precise-proposed main multiverse restricted universe 
+deb-src http://ftp.sjtu.edu.cn/ubuntu/ precise-security main multiverse restricted universe 
+deb-src http://ftp.sjtu.edu.cn/ubuntu/ precise-updates main multiverse restricted universe
+END
+  Exit_on_Failure "Add APT_SOURCES ${PREFIX}.sjtu"
+  SRC_LST="$SRC_LST ${PREFIX}.sjtu"
+  
+  #echo $SRC_LST                                                   
+}
+
+
+# Input:  $1:$APT_DIR $2:$DOMAIN_DIR $3:$DOMAIN_FILE
+# Output: $DOMAIN_FILE
+function assert_domain_borned_from_sources_list_or_Exit
+{
+  typeset APT_DIR="$1"
+  
+  typeset DOMAIN_DIR="$2"
+  typeset PREFIX="$APT_DIR/sources.list"
+  
+  typeset DOMAIN_FILE="$3"
+  
+  typeset SRC_FILE
+  typeset URL_FILE
+  
+  typeset URL
+  typeset DOMAIN
+  
+  [[ -e $DOMAIN_DIR && -d $DOMAIN_DIR ]] || mkdir $DOMAIN_DIR
+  Exit_on_Failure "Dir $DOMAIN_DIR Ready"
+  
+  > $DOMAIN_FILE
+  Exit_on_Failure "Clear $DOMAIN_FILE"
+  
+  for SRC_FILE in $PREFIX.*
+  do
+    URL_FILE=$DOMAIN_DIR/$(basename $SRC_FILE).url
+    grep  "^deb" $SRC_FILE > $URL_FILE
+    Exit_on_Failure "Write url of $SRC_FILE to $URL_FILE"
+    
+    cat $URL_FILE | while read URL
+    do
+      URL=${URL##*//}
+      DOMAIN=${URL%%/*}
+      echo "$SRC_FILE  $DOMAIN" >> $DOMAIN_FILE
+    done
+  done
+  
+  sort -u $DOMAIN_FILE  -o $DOMAIN_FILE
+  Exit_on_Failure "$DOMAIN_FILE Ready" 
+  echo $DOMAIN_FILE
+
+}
+
+
+#Input:   $1:DOMAIN_FILE  $2:SORTED_FILE  $3:TEST_TIMES
+#Output:  $SORTED_FILE
+
+function probe_link_speed_input_domains_and_output_sorted()
+{
+  typeset DOMAIN_FILE="$1"
+  typeset SORTED_FILE="$2"
+  typeset TEST_TIMES="$3"
+  
+  typeset SRC_FILE
+  typeset DOMAIN
+  
+  typeset RESULT
+  typeset PERCENT
+  typeset TIME
+  
+  >$SORTED_FILE
+  Exit_on_Failure "Clear $SORTED_FILE"
+  cat $DOMAIN_FILE | while read SRC_FILE DOMAIN
+  do
+    RESULT=$(ping -qc $TEST_TIMES $DOMAIN)
+    PERCENT=$(echo $RESULT | sed 's/^.*, \([0-9][0-9]*\) received,.*/\1/g')
+    [[ $PERCENT -eq $TEST_TIMES ]] || continue
+    
+    RESULT=${RESULT%/*}
+    RESULT=${RESULT%/*}
+    TIME=${RESULT##*/}
+    
+    echo "$SRC_FILE $TIME" >> $SORTED_FILE
+  done
+  
+  sort -n -k 2.1 $SORTED_FILE -o $SORTED_FILE
+  Exit_on_Failure "$SORTED_FILE Ready"
+  echo "SORTED_FILE"
+}
+
+
+                
+# Inputput: $1:$SORTED_FILE $2:$ORIGIN_SRC  $3:$SELECTED_FILE
+# Output:   $SRC_FILE
+  
+function assert_the_fast_sources_list_or_Exit()
+{
+  typeset SORTED_FILE="$1"
+  typeset ORIGIN_SRC="$2"
+  typeset SLECTED_FILE="$3"
+  typeset SRC_FILE
+  
+#  # simple method with error
+#  SRC_FILE=$(cut -d' ' -f1 $SORTED_FILE | sed -n '1p' )
+#  echo $SRC_FILE > $SELECTED_FILE
+#  sudo cp $SRC_FILE $ORIGIN_SRC
+#  sudo apt-get update
+
+
+  # medium method
+  cat $(cut -d' ' -f1 $SORTED_FILE | sed -n '1,5p') > $SLECTED_FILE
+  Exit_on_Failure "$SELECTED_FILE Ready"
+  sudo cp $SLECTED_FILE $ORIGIN_SRC
+  Exit_on_Failure "Validate Selected APT SOURCES"
+  assert_apt_get_update 
+
+
+#  # another medium method 
+#  cat $(cut -d' ' -f1 $SORTED_FILE | sed -n '1,3p') > $SLECTED_FILE
+#  sudo cp $SLECTED_FILE $ORIGIN_SRC
+#  sudo apt-get update #assert_apt_get_update_or_Exit
+  
+
+# # complex method with error  
+#  typeset OTHER
+#
+#  typeset UPDATE="sudo apt-get update" 
+#  typeset SELECTED='echo "$SRC_FILE > $SELECTED_FILE; return"'
+#  
+#  cat $SORTED_FILE | while read SRC_FILE OTHER
+#  do
+#    sudo cp $SRC_FILE $ORIGIN_SRC
+#    $UPDATE && $SELECTED || \
+#    $UPDATE && $SELECTED || \
+#    $UPDATE && $SELECTED ||false
+#  done
+#    Exit_on_Failure "apt-get update !!! No sources.list has been selected"
+#  
+#  echo $SRC_FILE 
+   
+}
+
+
+
+# For Chinese GFW !!!
+function assert_apt_get_update()
+{
+  typeset -i TIMES=3
+  typeset UPDATED=true
+  until (( TIMES-- == 0 ))
+  do
+    sudo apt-get update && Exit_on_Failure "apt-get update Seccessful !!!" && return 0 
+  done
+  $UPDATED
+  Exit_on_Failure "apt-get update !!!"
+}
+
+function is_package_installed()
+{
+  [[ -z "$1" ]] && echo "Input is blank" && return 0
+  
+  if  ! dpkg -l "$1" 
+  then
+  #  echo "$1 has NOT been installed"
+    return 1
+  elif dpkg -l "$1" |grep "^un" 
+  then
+  #  echo "$1 has NOT been installed !!!"
+    return 1
+  else
+  #  echo "$1 HAS been Installed !!!"
+    return 0
+  fi
+}
+
+function install_package_or_Exit()
+{
+  sudo apt-get install "$1" -y  || (echo "n";sleep 3;echo "y";sleep 2;echo "y")|sudo aptitude install "$1" 
+  is_package_installed "$1"
+  Exit_on_Failure "install $1"
+}
+
+# For Chinese GFW !!!
+function install_package_try_3Times_or_Exit()
+{
+  typeset -i TIMES=3
+  typeset INSTALLED=true
+  until (( TIMES-- == 0 ))
+  do
+    sudo apt-get install "$1" -y  || (echo "n";sleep 3;echo "y";sleep 2;echo "y")|sudo aptitude install "$1" 
+    is_package_installed "$1" && return 0
+    INSTALLED=false
+  done
+  $INSTALLED
+  Exit_on_Failure "install $1"
+}
+
+function assert_packages_installed_or_Exit()
+{
+  local PKG
+  for PKG in "$@"
+  do
+    if is_package_installed $PKG
+    then
+      continue
+    else
+      install_package_try_3Times_or_Exit "$PKG"
+    fi
+  done
+}
+
+function is_ppa_installed()
+{
+	[[ -z "$1" ]] && echo "Input is blank" && return 0
+	local STR="$@"
+	local CODENAME=$(lsb_release -cs)
+	local SUB_STR_1=${STR#"ppa:"}
+	local SUB_STR_2=${SUB_STR_1/"/"/"-"}
+	if [[ -e /etc/apt/sources.list.d/${SUB_STR_2}-${CODENAME}.list ]]
+	then
+		return 0
+	else
+		return 1
+	fi
+}
+
+function assert_ppas_installed_or_Exit()
+{
+	for PPA in "$@"
+	do
+		is_ppa_installed $PPA || echo "\n" | sudo add-apt-repository $PPA
+		is_ppa_installed
+		Exit_on_Failure "add-apt-repository $PPA"
+	done
+}
+
+
+
+function assert_java_installed_or_Exit()
+{
+	local PKG=oracle-java7-installer
+	if  ! is_package_installed $PKG
+	then
+		assert_packages_installed_or_Exit python-software-properties
+		assert_ppas_installed_or_Exit ppa:eugenesan/java ppa:webupd8team/java
+		
+		assert_apt_get_update
+
+		echo $PKG shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
+		Exit_on_Failure "set accepted-oracle-license-v1-1"
+		
+		assert_packages_installed_or_Exit $PKG
+
+		update_profile JAVA_HOME /usr/lib/jvm/java-7-oracle
+		Exit_on_Failure "set JAVA_HOME=/usr/lib/java/java-7-oracle in /etc/profile" 
+		update_profile LD_LIBRARY_PATH "\$'JAVA_HOME'/jre/lib/$(recognize_32_64 i386 amd64)/server" 
+		Exit_on_Failure "set LD_LIBRARY_PATH=\$JAVA_HOME/jre/lib/$(recognize_32_64 i386 amd64)/server" "in /etc/profile"
+
+		#######################################################################################################
+		#                       may be account some error on ldconfig, let's try ones                         #
+		#######################################################################################################
+		update_ldconf "$JAVA_HOME/jre/lib/$(recognize_32_64 i386 amd64)/server"
+		Exit_on_Failure "set $JAVA_HOME/jre/lib/$(recognize_32_64 i386 amd64)/server in /etc/ld.so.conf" 
+	fi
+}
+
+
+# Miscellaneous
+
+function search_key_value_in_file
+{
+  local FILE="$1"
+	local KEY="$2"
+	local VALUE="$3"
+	local RESULT=false
+
+	#VALUE=/jre/lib/amd64/server
+  if grep "^$KEY=$VALUE:" $FILE > /dev/null     #JAVA=/jre/lib/amd64/serve:/usr/bin 
+	then
+		RESULT=true
+  elif grep "^$KEY=$VALUE *$" $FILE > /dev/null     #JAVA=/jre/lib/amd64/serve
+	then
+		RESULT=true
+	elif grep "^$KEY=..*:$VALUE:" $FILE > /dev/null #JAVA=/usr/bin:/jre/lib/amd64/serve:/usr/local/bin
+	then
+		RESULT=true
+	elif grep "^$KEY=..*:$VALUE *$" $FILE > /dev/null #JAVA=/usr/bin:/serve:/usr/local/bin:/jre/lib/amd64/serve
+	then
+		RESULT=true
+	fi
+	$RESULT 
+}
+
+function update_profile()
+{
+	local FILE="/etc/profile"
+	local KEY="$1"
+	local VALUE="$2"
+	
+	search_key_value_in_file $FILE $KEY $VALUE && return
+	
+	if [[ $(grep "$KEY=.*" $FILE| wc -l) -eq 0 ]]
+	then
+		sudo sh -c "echo >> $FILE"
+		sudo sh -c "echo $KEY=$VALUE >> $FILE"
+		sudo sh -c "echo export $KEY >> $FILE"
+	else
+		#sudo sed -i "s#^\($KEY=.*\)\$#\1\n$KEY=$VALUE:\$$KEY#g" $FILE
+		#sudo sed -i "s#export *$KEY#$KEY=$VALUE:\$$KEY\nexport $KEY#g" $FILE
+		sudo sed -i "s#export *$KEY#$KEY=\$$KEY:$VALUE\nexport $KEY#g" $FILE
+	fi
+	source $FILE
+}
+
+function update_ldconf
+{
+  typeset LD_PATH="$1"
+  [[ -z $LD_PATH ]] && return
+  grep "^$LD_PATH *" /etc/ld.so.conf > /dev/null && return || sudo sh -c "echo $LD_PATH >> /etc/ld.so.conf"
+  sudo ldconfig
+}
+
+function update_path()
+{
+  local FILE="/etc/profile"
+	local KEY="PATH"
+	local VALUE="$1"
+  
+  search_key_value_in_file $FILE $KEY $VALUE && return
+  
+  if [[ $(grep "^$KEY=..*" $FILE| wc -l) -eq 0 ]]
+	then
+	  sudo sh -c "echo >> $FILE"
+		sudo sh -c "echo '$KEY=\$$KEY:$VALUE' >> $FILE"
+		sudo sh -c "echo export $KEY >> $FILE"
+	else
+	  sudo sed -i "s#export *$KEY#$KEY=\$$KEY:$VALUE\nexport $KEY#g" $FILE
+	fi
+	source $FILE
+}
+
+function sudo_v_damen()
+{
+  sudo -v
+  Exit_on_Failure "init sudo -v"
+  while true
+  do
+    sudo -v
+    Exit_on_Failure "roro sudo -v"
+    sleep ${1:-200}
+  done &
+  Exit_on_Failure "sudo_v_damen start & SUDO_VD_PID is $!"
+  SUDO_VD_PID=$!
+  Exit_on_Failure "SUDO_VD_PID: $SUDO_VD_PID"
+  
+  trap 'kill $SUDO_VD_PID; Exit_on_Failure "kill SUDO_VD_PID"; exit' 0
+  trap 'Exit_on_Failure "receive signa & will cal exit 2l"; exit 2' 1 2 3 15
+}
+
+
+
+function Wget()
+{   
+  local URL="$1"
+  local FILENAME=$(basename $URL)    
+  if [ -e basename ] 
+  then
+    Exit_on_Failure $FILENAME has been existed
+    return 0
+  else
+    wget -c $URL
+  fi
+}
+
+
+function FWget()
+{
+  local URL="$1"
+  local FILENAME=$(basename $URL)    
+  if [ -e basename ] 
+  then  
+    rm -f $FILENAME
+    Exit_on_Failure "exist $FILENAME has been rmed"
+  return 0
+  fi
+  
+  wget -c $URL
+}
+function test_before()
+{
+  echo "In functions before"
+}
+function dealwith_source_or_Exit()
+{
+  local TOOL="$1"
+  local COMMAND="$2"
+  local ADDRESS="$3"
+  local OBJ_DIR="$4"
+
+  # $OBJ_DIR exist, to the best don't checkout a new
+  # All address the best use the abslute PATH !!!
+  if [[ -e "$DEST_DIR/$OBJ_DIR" && -d "$DEST_DIR/$OBJ_DIR" ]]
+  then
+    cd "$DEST_DIR/$OBJ_DIR"
+    case "$TOOL" in
+    "svn")    svn info;;
+    "git")    git status;;
+    esac
+     Exit_on_Failure "look status of desposit"
+     cd - 
+	 elif [[ -e $ADDRESS && -d $ADDRESS ]]
+	 #in hlfs.sh became abslute path:)
+	 then
+     cp -r $ADDRESS $DEST_DIR
+     Exit_on_Failure "cp -r $ADDRESS $DEST_DIR"
+   elif BACKUP=$DEST_DIR/backup/$OBJ_DIR && [[ -e $BACKUP && -d $BACKUP ]]
+   then
+     cp -r $BACKUP $DEST_DIR
+     Exit_on_Failure "cp -r $BACKUP $DEST_DIR"
+   else
+     $TOOL $COMMAND $ADDRESS $DEST_DIR/$OBJ_DIR
+     Exit_on_Failure " $TOOL $COMMAND $ADDRESS $DEST_DIR/$OBJ_DIR"
+     
+     [[ -e $DEST_DIR/backup && -d $DEST_DIR/backup ]] || mkdir $DEST_DIR/backup
+     Exit_on_Failure "mkdir $DEST_DIR/backup"
+     
+     cp -r $DEST_DIR/$OBJ_DIR $DEST_DIR/backup
+
+     Exit_on_Failure "cp -r $EEST_DIR/$OBJ_DIR $DEST_DIR/backup"
+   fi
+   
+}
+
+function cpu_cores_minus_one()
+{
+  typeset -i COREs_NUM=$(grep 'processor' /proc/cpuinfo | wc -l)
+  ((COREs_NUM--))
+  echo $COREs_NUM
+}
+
+
+
+
+function test_after()
+{
+  echo "In functions after"
+}

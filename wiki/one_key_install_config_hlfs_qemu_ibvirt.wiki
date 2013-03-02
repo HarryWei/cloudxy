@@ -45,9 +45,7 @@ apt、setup、test以及log等目录。
 
 使用说明：
 使用下面命令把源码下载到你本地
-
-网址等会儿给出，我在做最后一次实验，先去吃饭。实验成功就上传。
-
+svn checkout http://cloudxy.googlecode.com/svn/branches/hlfs/person/zhangdianbo/scripts scripts
 
 如果你是一个像我一样倒霉的家伙，那么最好在安装之前把需要长时间下载源代码包提前下载下来以备不时之需。
 另外强调一点，我用的是虚拟机，（哈，我这样的倒霉蛋怎么能不用虚拟机，不用虚拟机就无法原地满血复活），
@@ -117,7 +115,7 @@ pseudo-one-key-install，WHY？ 你至少要输入sudo密码嘛，别告诉我�
 
 
 
-2013-02-23
+2013-02-20
 由于hlfs 涉及的第三方产品众多，安装和配置成为阻碍新用户的一道拦路虎，在康华的安装说明的基础与技术指导下，完成了这个一键安装的初级版本。下载并执行 chmod +x hlfs_setup.sh; ./hlfs.sh
 https://cloudxy.googlecode.com/svn/branches/hlfs/person/zhangdianbo/hlfs_setup.sh
 执行后，会在hlfs_setup.sh 所在目录下下载安装文件及源码。

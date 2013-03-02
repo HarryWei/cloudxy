@@ -2,9 +2,124 @@
 #labels 一键安装hlfs
 
 = Introduction =
+2013-03-02 
+升级说明：
+1.改进了需要频繁输入sudo 密码问题，感谢康华，帮我找到了答案，感谢coredump问了这个问题，感谢michael_n，回答了这个问题，并提供解决方案，感谢Gregory Perkins，提供了更简洁的解决方案，感谢我，在蛇的基础上添加了四条足，写出了更简单的解决方案，还把链接贴在这里大家共享
+http://serverfault.com/questions/266039/temporarlly-increasing-sudos-timeout-for-the-duration-of-an-install-script
+比较抱歉的一点是我还不太会写wiki，所以你只能复制粘贴，而不能直接点击，不过我承诺下次更新的时候会改进这个问题。
 
-由于hlfs 涉及的第三方产品众多，安装和配置成为阻碍新用户的一道拦路虎，在康华的安装说明的基础与技术指导下，完成了这个一键安装的初级版本。下载https://cloudxy.googlecode.com/svn/branches/hlfs/person/zhangdianbo/hlfs_setup.sh
-并执行 chmod +x hlfs_setup.sh; ./hlfs.sh
+2.根据康华的指导，添加对ld.so.conf的配置来解决发现库的问题，怎么老是他，没办法，这是我此生无法逾越的高山，夫子步亦步，夫子趋亦趋，夫子驰亦驰；夫子奔逸绝尘，而回瞠若乎后矣。
+
+3.在贾威的指导下，希望我没有把你名字写错，如果写错了一定要告诉我，我会改的：）
+chmod +x hlfs所安装的可执行文件，应该是/usr/local/lib/hlfs/bin/*，并导出到PATH，再次郑重说明，我上次说的在/etc/environment中修改是不对的，还是应该在/etc/profile下面做文章，不过我写的那个update_env函数对此不适用（我猜的，没有勇气再把path搞乱了）为此
+我分别新增了三个函数，修改了一个函数，来处理添加PATH，处理一般profile添加，处理ld.so.conf的三个函数，另外把原来函数中的检测部分提出来单独作为一个工具使用。
+function search_key_value_in_file()
+function update_profile()
+function update_ldconf()
+function update_path()
+
+4.改进了APT源的更新和update，这个真是莫过于曹雪芹的这四句诗来表达这种心情了。
+满纸荒唐言，
+一把辛酸泪。
+都云作者痴，
+谁解其中味？
+从上个周末
+从上个周日晚上到这个周六早晨（要不是老婆叫我去爸妈那儿吃饭，我还以为是周五，TMD），没睡过一个囫囵觉，基本上是拜他所赐，代码不多到现在不算尝试失败删掉的不到300行，目前可用的方法有四种，我选取了一种最优的，并且不再确保一定
+要求apt-get update成功，否则就退出，因为我发现即使自宫也未必能够成功，若不自宫也有可能成功，感谢张波，在学校北门那条小路上，告诉了我这个练辟邪剑法的秘诀，尤其是最后一页，呃，我终于想起来那是红专南路，我刚才还在觉得良心有亏，现在好多了。什么，这根本不是问题？或许对你是，你的网络状况比较好，或者你人品好，好了，我说实话，就是我非要跟这件事情较劲，一定要找出一个解决方法了。什么？解决了，解决了为什么我还会遇到问题会重启？你妹！不是跟你说过了下一版更新我会解决这个问题么，你多退出两次算什么，我退出了一周，白天+黑夜，你碰到的已经是改良版本的问题，好不啦。
+
+以上为关键性改进，以下为狗尾续貂
+5.添加了系统日志，由于是我拓展了原来的exit_on_false的功能而衍生的（害得我为了减少判断过程,第一天把 command; Exit_on_Failure 改成 command || Exit_on_Failure,第二天因为要利用这个函数产生日志功能，又全部给改回来，一路上捕捉漏网，为什么不用replace，我愿意，这样我才能每处都把握住真实情况），先天不足，因为我熟悉代码，所以还勉强看得，即便这样我还是要用set -x配合才能找到我需要的效果。在这里我对可能看这个log的人说一声对不起啦。我郑重承诺，下一版会有一个真正journal风格的日志落实。——好像我的承诺有点儿多，下面再有的都不算了啊，上面的还是算数的。
+
+6.贾威同学，你一定没有想到把一个shell script分成若干个不同功能的scripts会给我带来这样的大的痛苦吧。协调他们之间的目录关系，参数传递，让我啃了满嘴的泥，不过幸好都是神仙土，土里全是灵芝草。我还是很有收获滴：P。顺便我拓展了整个脚本的顶级目录，根据需要添加
+apt、setup、test以及log等目录。
+
+7.为hlfs.sh添加长短参数功能，提供选项，下面有引用，在此不再以一一说明，需要提到的一点是，早睡早起效率高啊，这个功能在我熬夜一晚的前提下，几乎整个白天都在getopt这个函数里面折腾，脑子都迟钝了。为什么不睡觉，你妹，我也想，问题是当时我想先解决apt源的问题和软件源选择本地备份免得遭受网络下载之苦的问题，sudo的优先级被往后排了， 在probe网络的时候我得趴在电脑前面输入password啊。你怎么不用sudo -i呢？我忘了。。。。
+
+8.
+修改了启动hdfs服务器的方法,避免让风扇很响的不必要的服务重启，低碳环保；
+修改了function dealwith_source_or_Exit()
+函数配合不同的参数选项及本本机备份源程序的环境实施自动选择及备份；
+添加了多核编译支持，提高编译速度；
+修正了判断是否为已经打了patch的源码，方法不够先进，大致可用，但是不至于南辕北辙，都是因为不了解 true 和 false 的方法 以为 [[ false ]]返回的是false 其实是true。true 和 false 就是两条命令模拟程序执行成功或者错误的效果，不用也不没有必要放在[[]]中护着，护犊子是会出问题的，参见妯娌间的三国演义。
+其他还加了什么林林总总想不起来了。。。。
+
+使用说明：
+使用下面命令把源码下载到你本地
+
+网址等会儿给出，我在做最后一次实验，先去吃饭。实验成功就上传。
+
+
+如果你是一个像我一样倒霉的家伙，那么最好在安装之前把需要长时间下载源代码包提前下载下来以备不时之需。
+另外强调一点，我用的是虚拟机，（哈，我这样的倒霉蛋怎么能不用虚拟机，不用虚拟机就无法原地满血复活），
+所以我的备份源可以随时回退到clear状态并且可以svn update 或者 git pull。即使你第一次下载这些源包，
+那也不用担心，我会在你的目标目录下创建一个名为backup的备份目录，svn check、git clone的结果第一时间会被
+复制到这个备份目录中，相信我，最靠谱的方法莫过于 cp -r SOURCE/  BACKUP/，而不要受到魔鬼的诱惑而去尝试
+svn copy、git clone 等等，那样复制出来的源码包绝对不是RAW的，或许它只能从你第一次下载的位置更新。。。。
+什么，你怎么知道？我当然被诱惑过了，做过clone-copy-clone clone-copy-copy clone-clone-clone clone-clone-copy
+然后分别进去 git status 瞪大了眼睛查找有什么不同，直到我发现了diff 这个工具。
+
+找到你下载的文件夹，别告诉我你找不到，嗯，你知道的，你遇到的问题我都会遇到，我就曾经在代码管理软件的目录迷宫
+里迷过路。找到hlfs.sh，随便你当前目录在哪里，只要你能运行它，为什么这么说，因为这让我熬红了眼睛，解决这些
+家伙之间目录之间的关系。像下面这样运行，当然我是在当前目录，因为我能找得到它的吗。具体命令不解释，你可以输入
+./hlfs.sh -n，我也可以免费粘贴在这里：
+./hlfs.sh -d ../cloudxy/ -h ../backup/hlfs/ -q ../backup/qemu/ -l ../backup/libvirt/
+
+
+         -d, --dest-dir
+                Specify the dest workspace directory, in witch source code will
+                download and build, if you would not specify it, where 
+                cloudxy will be used as default workspace.
+                                                        
+         -h, --source-hlfs
+                Provide local directory, if you have svn checkout it from
+                https://cloudxy.googlecode.com/svn/trunk/hlfs， hlfs.sh
+                would not destory it, only copy deeply it.
+                otherwise, hlfs.sh will checkout it a brand new
+
+         -q, --source-qemu
+                Provide the faster sources or local place on which your have 
+                git clone, otherwise,hlfs.sh will git clone it from the offical
+                site  git://git.qemu.org/qemu.git
+                                
+         -l, --source-libvirt
+                And the like two of above, git clone libvirt is a long time
+                in GFW China Side, fortunately, hlfs.sh will git clone it for
+                you and keep it clean in workspace/backup with hlfs and qemu,
+               default .
+               
+         -p, --probe
+                Thanks for my lovely and Powerful GOV, it make the new Berlin 
+                Wall, Thanks for the Roaring Beast Fang, if you Encounter the
+                same net problem, such as sudo apt-get update failure, can't
+                install package, try it. I do think you need this, because I
+                encounter with the hell hundreds.
+                
+如果你因为某些软件包没有安装成功而退出，比如说build-essential，oracle-java7-installer不能成功
+安装，trust me 这真的不是有可能，而是经常出现，那么需要你辛苦一下↑ blank -p Enter 你就得到了
+一条新命令 
+./hlfs.sh -d ../cloudxy/ -h ../backup/hlfs/ -q ../backup/qemu/ -l ../backup/libvirt/ -p
+或者你像我一样懒，就会是这样
+./hlfs.sh -p，为什么你要这么做，你不是告诉我们，要先下载源并备份么，哈，因为我比你更懒，所以
+我的备份在目标工作文件夹的下面/backup，这是hlfs.sh默认查找的SOURCE的位置。
+
+鉴于还需要输入sudo 密码，虽然仅仅一次但是也很难成为一键安装。况且还有可能经常退出，需要手工干预。
+所以下一版会推出不需要手工干预，除非发现天灾人祸等不可逆事件（参考汽车保险条例），将真正实现
+pseudo-one-key-install，WHY？ 你至少要输入sudo密码嘛，别告诉我喜欢用sudo -i，嗯其实我也喜欢，但是
+会被别人说不专业，当然sudo有其专业的应用场景，比如说企业内部主机，网络访问神马的，我也是不懂的啦。
+
+遗留问题：
+1.反复重新启动。
+2.处理kev-value检查的时候尤其是hadoop classpath的时候风扇响的太可怕了，严重干扰老婆睡觉。
+3.日志系统不理想。
+4.测试功能没有集成。
+5.发现再说。
+
+
+
+
+2013-02-23
+由于hlfs 涉及的第三方产品众多，安装和配置成为阻碍新用户的一道拦路虎，在康华的安装说明的基础与技术指导下，完成了这个一键安装的初级版本。下载并执行 chmod +x hlfs_setup.sh; ./hlfs.sh
+https://cloudxy.googlecode.com/svn/branches/hlfs/person/zhangdianbo/hlfs_setup.sh
 执行后，会在hlfs_setup.sh 所在目录下下载安装文件及源码。
 
 目前运行环境 ubuntu server 12.04.1 ，我只在64位上测试，理论上可以在32位上使用。

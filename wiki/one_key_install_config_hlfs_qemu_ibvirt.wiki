@@ -2,10 +2,13 @@
 #labels 一键安装hlfs
 
 = Introduction =
+svn checkout http://cloudxy.googlecode.com/svn/branches/hlfs/person/zhangdianbo/scripts scripts;cd scripts
+./hlfs.sh
+
 2013-03-02 
 升级说明：
+---------------------------
 1.改进了需要频繁输入sudo 密码问题。
-
 2.添加对ld.so.conf的配置来解决发现库的问题。
 3.添加命令 chmod +x /usr/local/lib/hlfs/bin/*，并添加到PATH
 分别新增了三个函数，修改了一个函数，来处理添加PATH，处理一般profile添加，处理ld.so.conf的三个函数，另外把原来函数中的检测部分提出来单独作为一个工具使用。
@@ -13,26 +16,16 @@ function search_key_value_in_file()
 function update_profile()
 function update_ldconf()
 function update_path()
-
 4.添加了apt sources 探测 和assert_apt_get_update函数
-
 5.添加了系统日志。Exit_on_Failure 会经常出现，没错只有on Failure 才会 Exit，所以你见到的大多数是绿色的，如果你见到红色的，那就是真的Exit了。
-
 6.将原来的一个脚本分裂成若干不同功能的子脚本，添加setup、test等目录。
-
 7.为hlfs.sh 提供可选参数。
-
 8.修改了启动hdfs服务器的方法,避免了不必要的服务重启。
-
 9.修改了function dealwith_source_or_Exit()，函数配合不同的参数选项及本本机备份源程序的环境实施自动选择及备份。
 10.添加了多核编译支持，提高编译速度。
 11.修正了判断是否为已经打了patch的源码。
-
-使用说明：
-
-使用下面命令把源码下载到你本地
-svn checkout http://cloudxy.googlecode.com/svn/branches/hlfs/person/zhangdianbo/scripts scripts
-cd scripts
+-----------------------------------------
+详细参数说明 
 ./hlfs.sh -n
 
          -d, --dest-dir

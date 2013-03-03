@@ -1,4 +1,4 @@
-set -x
+#set -x
   
 TOP_DIR=${1:-$(cd $(dirname $0)/.. && pwd)}
 DEST_DIR=${2:-$(cd $TOP_DIR/.. && pwd)}

@@ -728,7 +728,6 @@ function cpu_cores_minus_one()
 {
   typeset -i COREs_NUM=$(grep 'processor' /proc/cpuinfo | wc -l)
   echo $((COREs_NUM > 1 ? COREs_NUM-- : COREs_NUM))
-  echo $COREs_NUM
 }
 
 

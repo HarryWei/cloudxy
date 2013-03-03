@@ -9,7 +9,7 @@
 # --source-backup		  back_dir		  default work_dir/backup
 # --probe             true          default false
 
-set -x 
+#set -x 
 CUR_DIR=$(pwd)
 
 TOP_DIR=$(cd $(dirname $0) && pwd)

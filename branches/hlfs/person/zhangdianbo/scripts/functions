@@ -29,9 +29,9 @@ function Exit_on_Failure()
   then
     log_SUCC "$MSG"
     echo
-    echo -e "\033[32;40;5m ----------------------------Exit On Failure------------------------------------ \033[0m"
+    echo -e "\033[32;40m ----------------------------Exit On Failure------------------------------------ \033[0m"
     echo -e "\033[32;40m   $MSG \033[0m"
-    echo -e "\033[32;40;5m ----------------------------Exit On Failure------------------------------------ \033[0m"
+    echo -e "\033[32;40m ----------------------------Exit On Failure------------------------------------ \033[0m"
     echo    
   else
     log_FAIL "$MSG" 
@@ -727,7 +727,7 @@ function dealwith_source_or_Exit()
 function cpu_cores_minus_one()
 {
   typeset -i COREs_NUM=$(grep 'processor' /proc/cpuinfo | wc -l)
-  ((COREs_NUM--))
+  ((COREs > 1 ? COREs_NUM-- : COREs_NUM))
   echo $COREs_NUM
 }
 

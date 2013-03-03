@@ -60,6 +60,7 @@ export EC2_URL=$(keystone catalog --service ec2 | awk '/ publicURL / { print $4 
 export CREDS=$(keystone ec2-credentials-create)
 export EC2_ACCESS_KEY=$(echo "$CREDS" | awk '/ access / { print $4 }')
 export EC2_SECRET_KEY=$(echo "$CREDS" | awk '/ secret / { print $4 }')
+-------------------------------------------------
 }}}
 
 注：目前都是patch形式维护我们集成代码，待社区接受啦！

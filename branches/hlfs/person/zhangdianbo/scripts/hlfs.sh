@@ -8,8 +8,9 @@
 # --source-libvirt		libvirt_dir	  default git://libvirt.org/libvirt.git
 # --source-backup		  back_dir		  default work_dir/backup
 # --probe             true          default false
+# --help
 
-#set -x 
+set -x 
 CUR_DIR=$(pwd)
 
 TOP_DIR=$(cd $(dirname $0) && pwd)
@@ -60,11 +61,14 @@ OPTIONS
                 same net problem, such as sudo apt-get update failure, can't
                 install package, try it. I do think you need this, because I
                 encounter with the hell hundreds.
+                
+          -h, --help
+                That' all
                  
 END
 }
 
-TEMP=$(getopt -o d:h:q:l:p --long dest-dir-long:,source-hlfs-long:,source-qemu-long:,source-libvirt-long:,probe-long -n 'hlfs.sh' -- "$@")
+TEMP=$(getopt -o d:h:q:l:ph --long dest-dir-long:,source-hlfs-long:,source-qemu-long:,source-libvirt-long:,probe-long,--help, -n 'hlfs.sh' -- "$@")
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ;  usage;  exit 1 ; fi
 
 eval set -- "$TEMP"
@@ -73,18 +77,19 @@ while true
 do
 	case "$1" 
 	in
-		-d|--dest-dir-long)           DEST_DIR="$2";    shift 2;;
+		-d|--dest-dir-long)       DEST_DIR="$2";    shift 2;;
 		-h|--source-hlfs-long)    HLFS_SRC="$2";    shift 2;;
 		-q|--source-qemu-long)    QEMU_SRC="$2";    shift 2;;
 		-l|--source-libvirt-long) LIBVIRT_SRC="$2"; shift 2;; 
 		-p|--probe-long)          PROBE=true;       shift 1;;
+		-h|--help-long)           usage;exit 0;;
 		--) shift; break ;;
 		*) echo "Internal error!"; usage; exit 1;;
 	esac
 done
 
-
-:${DEST_DIR:="$DEFAULT_DIR"}
+echo $DEST_DIR
+: ${DEST_DIR:="$DEFAULT_DIR"}
 [[ -e $DEST_DIR && -d $DEST_DIR ]] || mkdir -p $DEST_DIR
 Exit_on_Failure "DEST_DIR: $DEST_DIR is Ready"
 
@@ -107,7 +112,7 @@ cd $CUR_DIR
 PROBE=${PROBE:-false}
 
 #echo "Remaining arguments:"
-#for arg do echo '--> '"\`$arg' no effective" ; done
+for arg do usage; exit 1 ; done
 
 
 

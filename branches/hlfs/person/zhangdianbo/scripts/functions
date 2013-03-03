@@ -347,19 +347,33 @@ function probe_link_speed_input_domains_and_output_sorted()
   typeset RESULT
   typeset PERCENT
   typeset TIME
+  typeset -i START
+  typeset -i NOW
+  
+  typeset URL=ubuntu-releases/12.04/FOOTER.html
+  typeset HTML=$(basename $URL)
+  
   
   >$SORTED_FILE
   Exit_on_Failure "Clear $SORTED_FILE"
-  cat $DOMAIN_FILE | while read SRC_FILE DOMAIN
+  cat $DOMAIN_FILE | while read SRC_FILE DOMAIN 
+  
   do
-    RESULT=$(ping -qc $TEST_TIMES $DOMAIN)
-    PERCENT=$(echo $RESULT | sed 's/^.*, \([0-9][0-9]*\) received,.*/\1/g')
-    [[ $PERCENT -eq $TEST_TIMES ]] || continue
-    
-    RESULT=${RESULT%/*}
-    RESULT=${RESULT%/*}
-    TIME=${RESULT##*/}
-    
+# by ping method, but doesn't match some one
+#    RESULT=$(ping -qc $TEST_TIMES $DOMAIN)
+#    PERCENT=$(echo $RESULT | sed 's/^.*, \([0-9][0-9]*\) received,.*/\1/g')
+#    [[ $PERCENT -eq $TEST_TIMES ]] || continue
+#    
+#    RESULT=${RESULT%/*}
+#    RESULT=${RESULT%/*}
+#    TIME=${RESULT##*/}
+ 
+# by wget ubuntu-releases/12.04/FOOTER.html  
+   
+   START=date "+%s"
+   wget $DOMAIN/$URL -O $HTML -T 10 || continue
+   NOW=date "+%s" 
+   $TIME=$((NOW - START))
     echo "$SRC_FILE $TIME" >> $SORTED_FILE
   done
   

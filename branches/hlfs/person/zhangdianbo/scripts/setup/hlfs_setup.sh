@@ -19,9 +19,6 @@ hlfs_setup()
   ##################
   assert_hadoop_installed_or_Exit
 
-  # start hdfs and install dev for second developing
-  assert_hadoop_start_4_2developing_or_Exit
-
   ################
   # install hlfs #
   ################
@@ -64,7 +61,7 @@ function assert_hadoop_installed_or_Exit()
 {
   if is_package_installed hadoop-0.20-conf-pseudo
   then    
-    Exit_on_Failure "hadoop has been installed"
+    assert_hdfs_running_or_Exit
   else    
     Wget http://archive.cloudera.com/cdh4/one-click-install/precise/amd64/cdh4-repository_1.0_all.deb
     Exit_on_Failure "Wget cdh4-repository_1.0_all.deb"
@@ -84,10 +81,18 @@ function assert_hadoop_installed_or_Exit()
          
 	  sudo sed -i "s*# Attempt to set JAVA_HOME if it is not set*# Attempt to set JAVA_HOME if it is not set\nJAVA_HOME=${JAVA_HOME:-/usr/lib/jvm/java-7-oracle}*g" /usr/lib/hadoop/libexec/hadoop-config.sh
 	  Exit_on_Failure "set JAVA_HOME in /usr/lib/hadoop/libexec/hadoop-config.sh"
+	  
+    # conffig CLASSPATH of hdfs for compiling hlfs 
+    hadoop_classpath
+    Exit_on_Failure "set hadoop_classpath"  #We want second develop, it is needed
+ 
+    assert_packages_installed_or_Exit libhdfs0-dev
+    
+    assert_hdfs_running_or_Exit
   fi
 }
 
-function assert_hadoop_start_4_2developing_or_Exit()
+function assert_hdfs_running_or_Exit()
 {
   # start hdfs 
   local STATUS=true
@@ -111,10 +116,6 @@ function assert_hadoop_start_4_2developing_or_Exit()
     done
   fi
 
-  # conffig CLASSPATH of hdfs for compiling hlfs 
-  hadoop_classpath
-  Exit_on_Failure "set hadoop_classpath"
-
   # create workenv
   sudo -u hdfs hadoop fs -mkdir /tmp
   sudo -u hdfs hadoop fs -chmod -R 1777 /tmp
@@ -124,8 +125,7 @@ function assert_hadoop_start_4_2developing_or_Exit()
   hadoop fs -ls /tmp/testenv
   Exit_on_Failure "test hdfs"
   
-  #We want second develop, it is needed
-  assert_packages_installed_or_Exit libhdfs0-dev
+
 }
 
 function hadoop_classpath()

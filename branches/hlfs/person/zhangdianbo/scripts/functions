@@ -572,13 +572,13 @@ function search_key_value_in_file
   if grep "^$KEY=$VALUE:" $FILE > /dev/null     #JAVA=/jre/lib/amd64/serve:/usr/bin 
 	then
 		RESULT=true
-  elif grep "^$KEY=$VALUE\[$IFS\]*$" $FILE > /dev/null     #JAVA=/jre/lib/amd64/serve
+  elif grep "^$KEY=$VALUE *$" $FILE > /dev/null     #JAVA=/jre/lib/amd64/serve
 	then
 		RESULT=true
 	elif grep "^$KEY=..*:$VALUE:" $FILE > /dev/null #JAVA=/usr/bin:/jre/lib/amd64/serve:/usr/local/bin
 	then
 		RESULT=true
-	elif grep "^$KEY=..*:$VALUE\[$IFS*\]$" $FILE > /dev/null #JAVA=/usr/bin:/serve:/usr/local/bin:/jre/lib/amd64/serve
+	elif grep "^$KEY=..*:$VALUE *$" $FILE > /dev/null #JAVA=/usr/bin:/serve:/usr/local/bin:/jre/lib/amd64/serve
 	then
 		RESULT=true
 	fi

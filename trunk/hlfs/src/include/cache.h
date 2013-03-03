@@ -41,10 +41,8 @@ extern "C" {
 		GHashTable *block_map; 	//Hash Map
 		GThread *flush_worker; 	//Back end flush thread 
 		uint32_t flush_worker_should_exit;
-		GCond *flush_waken_cond; 	//The condition of Writer thread\
-		awaking flush thread
-			GCond *writer_waken_cond; 	//The condition of flush thread \
-		awaking writer thread
+		GCond *flush_waken_cond; 	//The condition of Writer thread awaking flush thread
+			GCond *writer_waken_cond; 	//The condition of flush thread awaking writer thread
 			FLUSH_CB write_callback_func; 	//
 		void *write_callback_user_param;//
 		uint32_t cache_size; 	//Number of cache buffers

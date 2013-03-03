@@ -37,8 +37,7 @@ extern "C" {
 		uint32_t 	       icache_size; 	//Number of cache buffers
 		uint32_t 	       iblock_size; 	//Size of each buffer
 		uint32_t		invalidate_trigger_level; 	// 
-		uint32_t	invalidate_once_size;//Number of dirty blocks \
-		have been written one time 
+		uint32_t	invalidate_once_size;//Number of dirty blocks have been written one time 
 		uint64_t 		total_write_count; 
 		uint64_t 		total_read_count;
 		uint64_t 		icache_hit;

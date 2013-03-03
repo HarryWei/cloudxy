@@ -16,7 +16,7 @@ git apply hlfs_driver_for_devstack.patch
 2.启动stack.sh，其过程会下载openstack 
 {{{
 ./stack.sh  （需要等待一段时间，完成后执行./unstack）
------------
+-------------------------------------------------
 注：如果是国内用户，那么可以考虑将python源换成国内的，以保证python相关包下载顺利——增加pip.conf文件，内容如下即可
 $ cat ~/.pip/pip.conf
 [global]
@@ -25,6 +25,7 @@ index-url = http://e.pypi.python.org/simple
 [install]
 use-mirrors = true
 mirrors = http://e.pypi.python.org
+-------------------------------------------------
 }}}
 
 3.给openstack的源码部分打patch

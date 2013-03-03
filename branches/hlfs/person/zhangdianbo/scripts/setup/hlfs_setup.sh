@@ -35,6 +35,8 @@ hlfs_setup()
   cmake -DCMAKE_INSTALL_PREFIX=/usr/local/lib ../src
   Exit_on_Failure "hlfs cmake"
   
+  source /etc/profile
+ 
   make -j  $(cpu_cores_minus_one)
   Exit_on_Failure "hlfs make failure"
   

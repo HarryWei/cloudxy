@@ -70,11 +70,11 @@ libvirt_setup()
   ./configure
   Exit_on_Failure "libvirt configure"
   
-  make -j  $(cpu_cores_minus_one)
-  Exit_on_Failure "libvirt make" 
-  sudo make install
-  Exit_on_Failure "libvirt install"
+  sudo make install -j  $(cpu_cores_minus_one)
+  Exit_on_Failure "libvirt make install" 
   
+  sudo ldconfig
+  Exit_on_Failure "sudo ldconfig"
 }
 
 libvirt_setup $TOP_DIR $DEST_DIR $LIBVIRT_SRC

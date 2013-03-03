@@ -53,9 +53,6 @@ extern "C" {
 	int hlfs_rm_snapshot(const char *uri, const char *ssanme);
 
 	struct snapshot *hlfs_get_all_snapshots(const char *uri, int *num_entries);
-	//struct snapshot *__hlfs_get_all_snapshots(struct back_storage *storage, \
-	int *num_entries);
-
 
 	/**
 	 * hlfs_take_snapshot: take a snapshot given a snapshot name

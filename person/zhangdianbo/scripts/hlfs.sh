@@ -10,7 +10,7 @@
 # --probe             true          default false
 # --help
 
-set -x 
+#set -x 
 CUR_DIR=$(pwd)
 
 TOP_DIR=$(cd $(dirname $0) && pwd)
@@ -68,7 +68,7 @@ OPTIONS
 END
 }
 
-TEMP=$(getopt -o d:h:q:l:ph --long dest-dir-long:,source-hlfs-long:,source-qemu-long:,source-libvirt-long:,probe-long,--help, -n 'hlfs.sh' -- "$@")
+TEMP=$(getopt -o d:h:q:l:p --long dest-dir:,source-hlfs:,source-qemu:,source-libvirt:,probe,--help, -n 'hlfs.sh' -- "$@")
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ;  usage;  exit 1 ; fi
 
 eval set -- "$TEMP"
@@ -77,12 +77,12 @@ while true
 do
 	case "$1" 
 	in
-		-d|--dest-dir-long)       DEST_DIR="$2";    shift 2;;
-		-h|--source-hlfs-long)    HLFS_SRC="$2";    shift 2;;
-		-q|--source-qemu-long)    QEMU_SRC="$2";    shift 2;;
-		-l|--source-libvirt-long) LIBVIRT_SRC="$2"; shift 2;; 
-		-p|--probe-long)          PROBE=true;       shift 1;;
-		-h|--help-long)           usage;exit 0;;
+		-d|--dest-dir)       DEST_DIR="$2";    shift 2;;
+		-h|--source-hlfs)    HLFS_SRC="$2";    shift 2;;
+		-q|--source-qemu)    QEMU_SRC="$2";    shift 2;;
+		-l|--source-libvirt) LIBVIRT_SRC="$2"; shift 2;; 
+		-p|--probe)          PROBE=true;       shift 1;;
+		--help)              usage;exit 0;;
 		--) shift; break ;;
 		*) echo "Internal error!"; usage; exit 1;;
 	esac

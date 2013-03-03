@@ -402,7 +402,7 @@ function assert_the_fast_sources_list_or_Exit()
 
 
   # medium method
-  cat $(cut -d' ' -f1 $SORTED_FILE | sed -n '1,5p') > $SLECTED_FILE
+  cat $(cut -d' ' -f1 $SORTED_FILE | sed -n '1,3p') > $SLECTED_FILE
   Exit_on_Failure "$SELECTED_FILE Ready"
   sudo cp $SLECTED_FILE $ORIGIN_SRC
   Exit_on_Failure "Validate Selected APT SOURCES"
@@ -439,7 +439,7 @@ function assert_the_fast_sources_list_or_Exit()
 # For Chinese GFW !!!
 function assert_apt_get_update()
 {
-  typeset -i TIMES=3
+  typeset -i TIMES=1
   typeset UPDATED=true
   until (( TIMES-- == 0 ))
   do
@@ -640,7 +640,6 @@ function sudo_v_damen()
   while true
   do
     sudo -v
-    Exit_on_Failure "roro sudo -v"
     sleep ${1:-200}
   done &
   Exit_on_Failure "sudo_v_damen start & SUDO_VD_PID is $!"

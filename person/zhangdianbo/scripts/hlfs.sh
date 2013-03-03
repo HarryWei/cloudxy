@@ -85,7 +85,7 @@ done
 
 
 :${DEST_DIR:="$DEFAULT_DIR"}
-[[ $DEST_DIR = $DEFAULT_DIR ]] || [[ -e $DEST_DIR && -d $DEST_DIR ]] || mkdir -p $DEST_DIR
+[[ -e $DEST_DIR && -d $DEST_DIR ]] || mkdir -p $DEST_DIR
 Exit_on_Failure "DEST_DIR: $DEST_DIR is Ready"
 
 DEST_DIR=$(cd $DEST_DIR && pwd)

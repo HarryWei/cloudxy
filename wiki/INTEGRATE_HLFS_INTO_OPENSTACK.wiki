@@ -48,6 +48,18 @@ cd scripts;./hlfs.sh
 5.重启devstack——以hlfs作为cinder默认存储
 {{{
 CINDER_DRIVER=hlfs ./stack.sh
+-------------------------------------------------
+如果下面要通过命令行创建HLFS volumes(或者对HLFS做一些operations)需要在/etc/profile中增加环境变量，具体如下：
+
+#Openstack ENV.
+export OS_TENANT_NAME=admin
+export OS_USERNAME=admin
+export OS_PASSWORD=xxxxx(这里换成开始安装devstack输入的密码)
+export OS_AUTH_URL="http://(这里换成devstack安装结束提示的ip):5000/v2.0/"
+export EC2_URL=$(keystone catalog --service ec2 | awk '/ publicURL / { print $4 }')
+export CREDS=$(keystone ec2-credentials-create)
+export EC2_ACCESS_KEY=$(echo "$CREDS" | awk '/ access / { print $4 }')
+export EC2_SECRET_KEY=$(echo "$CREDS" | awk '/ secret / { print $4 }')
 }}}
 
 注：目前都是patch形式维护我们集成代码，待社区接受啦！

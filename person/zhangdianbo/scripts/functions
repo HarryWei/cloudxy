@@ -370,9 +370,9 @@ function probe_link_speed_input_domains_and_output_sorted()
  
 # by wget ubuntu-releases/12.04/FOOTER.html  
    
-   START=date "+%s"
+   START=$(date "+%s")
    wget $DOMAIN/$URL -O $HTML -T 10 || continue
-   NOW=date "+%s" 
+   NOW=$(date "+%s") 
    $TIME=$((NOW - START))
     echo "$SRC_FILE $TIME" >> $SORTED_FILE
   done

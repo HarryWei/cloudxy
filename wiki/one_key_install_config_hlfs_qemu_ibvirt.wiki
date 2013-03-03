@@ -2,8 +2,7 @@
 #labels 一键安装hlfs
 
 = Introduction =
-svn checkout http://cloudxy.googlecode.com/svn/branches/hlfs/person/zhangdianbo/scripts scripts;cd scripts
-./hlfs.sh
+svn checkout http://cloudxy.googlecode.com/svn/branches/hlfs/person/zhangdianbo/scripts scripts;cd scripts;./hlfs.sh
 
 2013-03-02 
 升级说明：

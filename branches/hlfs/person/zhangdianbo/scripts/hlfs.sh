@@ -132,6 +132,6 @@ Exit_on_Failure "source $SETUP_DIR/libvirt_setup.sh $TOP_DIR $DEST_DIR $LIBVIRT_
 
 TEST_DIR=$TOP_DIR/test
 
-source $TEST_DIR/hlfs_test.sh
+#source $TEST_DIR/hlfs_test.sh
 
 cd $CUR_DIR

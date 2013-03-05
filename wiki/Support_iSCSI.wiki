@@ -16,6 +16,7 @@ git clone git://github.com/fujita/tgt.git
  * Apply the patch located in the project cloudxy.
 {{{
 $cd tgt
+$git reset --hard v1.0.9
 $git apply HLFS_HOME/patches/hlfs_driver_for_tgt.patch
 }}}
  * configure your Makefile.

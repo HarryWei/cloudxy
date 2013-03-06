@@ -290,9 +290,10 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
     return size;
 }
 
-
-
-int __append_log(struct hlfs_ctrl *ctrl,char *db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed){
+int __append_log(struct hlfs_ctrl *ctrl, char *db_buff,
+				uint32_t db_start, uint32_t db_end,
+				uint32_t no_compressed, 
+				uint64_t inode_no, uint64_t is_dir){
     //HLOG_DEBUG("entry func: %s",__func__);
     gboolean ib1_need_load  = TRUE;
     gboolean ib2_need_load  = TRUE;
@@ -750,7 +751,8 @@ __inode_create:;
                int offset = ib_offset;
                //HLOG_DEBUG("to update inode map entry ...");
                HLOG_DEBUG("last offset:%u , last segno:%u log head len:%d iboffset:%d", ctrl->last_offset,ctrl->last_segno,LOG_HEADER_LENGTH,ib_offset);
-               ctrl->imap_entry.inode_no = HLFS_INODE_NO; 
+               ctrl->imap_entry.inode_no = inode_no; 
+			   ctrl->inode.is_dir = is_dir;
 		       #if 1
                set_segno (&ctrl->imap_entry.inode_addr,ctrl->last_segno);     
                set_offset(&ctrl->imap_entry.inode_addr,ctrl ->last_offset + offset);    
@@ -797,7 +799,10 @@ __inode_create:;
                return size;
 }
 
-int append_log(struct hlfs_ctrl *hctrl,char *db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed){
+int append_log(struct hlfs_ctrl *hctrl,char *db_buff,
+			uint32_t db_start,uint32_t db_end,
+			uint32_t no_compressed, uint64_t inode_no,
+			uint64_t is_dir){
 	guint32 BLOCKSIZE = hctrl->sb.block_size;
 	int expand_size =	(db_end-db_start + 1)*BLOCKSIZE + ib_amount(db_start,db_end) * BLOCKSIZE + 
 			 														LOG_HEADER_LENGTH + 
@@ -828,7 +833,9 @@ int append_log(struct hlfs_ctrl *hctrl,char *db_buff,uint32_t db_start,uint32_t 
 	}
 	//HLOG_DEBUG("last segno:%u last offset:%u", hctrl->last_segno,hctrl->last_offset);
 	uint32_t size; 
-	size = __append_log(hctrl,db_buff,(uint32_t) db_start, (uint32_t) db_end,no_compressed);
+	size = __append_log(hctrl,db_buff,(uint32_t) db_start, 
+						(uint32_t) db_end,no_compressed, 
+						inode_no, is_dir);
 	g_assert(size > 0);
     //HLOG_DEBUG("cur last offset:%d,log size:%d,next last offset:%d",hctrl->last_offset,size,hctrl->last_offset+size);
 	hctrl->last_offset += size;

@@ -21,6 +21,7 @@
 #define MAX_FILE_NAME_LEN 128U
 struct inode {
 	uint64_t length;
+	uint64_t is_dir;
     //int32_t uid;
     //int32_t gid;
     //int32_t mode;
@@ -90,6 +91,7 @@ struct hlfs_ctrl {
     //struct write_req  write_req;
     uint64_t last_write_timestamp;
     uint64_t last_read_timestamp;
+	uint64_t root_inode_addr;
     //int seg_clean_run;
     CTRL_REGION_T * ctrl_region;
     GMutex * hlfs_access_mutex;

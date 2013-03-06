@@ -13,6 +13,7 @@
 #define HLFS_INODE_NO  77U
 #define SEGMENT_FILE_NAME_MAX  64U
 #define HLFS_FILE_NAME_MAX  64U
+#define HLFS_DENTRY_FILE	"dentry.txt"
 
 //#define SEGMENT_SIZE        (64*1024*1024UL)
 //#define SEGMENT_SIZE_MASK   (SEGMENT_SIZE-1)  
@@ -22,6 +23,7 @@ extern uint64_t SEGMENT_SIZE;
 extern uint64_t SEGMENT_SIZE_MASK;
 extern uint64_t SEGMENT_SIZE_SHIFT;
 extern uint32_t HBLOCK_SIZE;
+extern uint64_t INODE_NO;
 
 /* hlfs first start */
 #define		HLFS_FS			((int) (1))

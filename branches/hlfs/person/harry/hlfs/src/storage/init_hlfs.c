@@ -21,6 +21,7 @@
 #include "bs_local.h"
 #include "seg_clean.h"
 #include "logger.h"
+#include "dentry.h"
 
 CTRL_REGION_T CTRL_REGION;
 extern int append_log(struct hlfs_ctrl * ctrl,const char*db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed);
@@ -199,6 +200,63 @@ out:
     return ctrl;
 } 
 
+int init_hlfs_dirtree_from_dentry(struct hlfs_ctrl *ctrl) {
+	
+	return 0;
+}
+
+int init_hlfs_dirtree(struct hlfs_ctrl *ctrl)  {
+	HLOG_DEBUG("9999 enter func %s", __func__);
+	if (NULL == ctrl || NULL == ctrl->storage) {
+		HLOG_ERROR("Params Error for func %s", __func__);
+		return -1;
+	}
+	int ret = 0;
+	uint64_t INODE_NO = 1;
+	bs_file_t file;
+	if (0 == ctrl->storage->bs_file_is_exist(ctrl->storage, DENTRY_FILE)) {
+		if (0 > init_hlfs_dirtree_from_dentry(ctrl)) {
+			HLOG_ERROR("Init hlfs dirtree from dentry file error.");
+			ret = -1;
+			goto out;
+		}
+	} else {
+		ctrl->root_inode_addr = 0;
+		struct dentry root_dentry;
+		root_dentry.inode_no = INODE_NO;
+		sprintf(root_dentry.file_name, "%s", "/");
+		root_dentry.is_alive = DENTRY_ALIVE;
+		if (NULL == (file = ctrl->storage->bs_file_create(ctrl->storage, DENTRY_FILE))) {
+			HLOG_ERROR("create dentry file error.");
+			ret = -1;
+			goto out;
+		}
+		char dentry_text[1024];
+		int size = sprintf(dentry_text, "%s%s%llu%s%llu", root_dentry.file_name,
+														HD_ITEM_SEP,
+														root_dentry.inode_no,
+														HD_ITEM_SEP,
+														root_dentry.is_alive);
+		if (size != ctrl->storage->bs_file_append(ctrl->storage, file, dentry_text, size)) {
+			HLOG_ERROR("Append dentry data error!");
+			ret = -1;
+			goto out;
+		}
+		int size = 0;
+		size = append_log(ctrl, NULL, 0, 0, 0, root_dentry.inode_no, HLFS_DIR);
+		if (0 > size) {
+			HLOG_ERROR("9999 append HLFS root log");
+			ret = -1;
+			goto out;
+		}
+	}
+out:
+	if (NULL != file) {
+		ctrl->storage->bs_file_close(ctrl->storage, file);
+	}
+	HLOG_DEBUG("9999 leave func %s", __func__);
+	return ret;
+}
 
 struct hlfs_ctrl *
 init_hlfs(const char *uri)
@@ -277,6 +335,14 @@ init_hlfs(const char *uri)
 	 HLOG_INFO("Indirect  Block Cache Init Over ! icache_size:%u,iblock_size:%u,invalidate_trigger_level:%u,invalidate_once_size:%u",
 			       icache_size,iblock_size,invalidate_trigger_level,invalidate_once_size); 
 	 #endif 
+#if 1
+	 	ret = init_hlfs_dirtree(hlfs_ctrl);
+		if (ret < 0) {
+			HLOG_ERROR("init hlfs dir tree failed.");
+			/*TODO: Free some RAM *not in deinit_hlfs* when error happens*/
+			goto out;
+		}
+#endif
 	 return hlfs_ctrl;
 out:
      deinit_hlfs(hlfs_ctrl);

@@ -70,7 +70,7 @@ libvirt_setup()
   ./configure
   Exit_on_Failure "libvirt configure"
   make -j $(cpu_cores_minus_one) 
-  sudo  make install -j  $(cpu_cores_minus_one)
+  sudo -E  make install -j  $(cpu_cores_minus_one)
   Exit_on_Failure "libvirt make install" 
   
   sudo ldconfig

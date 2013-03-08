@@ -52,7 +52,9 @@ int main(int argc, char *argv[]){
 	g_option_context_free(context);
     g_print("TEST: uri is %s, request size is %d, total size is %d\n", uri, request_size, total_size);
     char *content = (char*)g_malloc0(request_size);
+	g_message("before init hlfs...");
     HLFS_CTRL * ctrl = init_hlfs(uri);
+	g_message("after init hlfs...");
     g_assert(ctrl != NULL);
     uint64_t ret = 0;
     ret = hlfs_open(ctrl,1);

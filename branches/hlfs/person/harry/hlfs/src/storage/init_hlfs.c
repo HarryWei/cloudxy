@@ -24,7 +24,10 @@
 #include "dentry.h"
 
 CTRL_REGION_T CTRL_REGION;
-extern int append_log(struct hlfs_ctrl * ctrl,const char*db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed);
+extern int append_log(struct hlfs_ctrl * ctrl,const char*db_buff,
+					uint32_t db_start,uint32_t db_end,
+					uint32_t no_compressed, uint64_t inode_no,
+					uint64_t is_dir);
 int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end){
     if ((NULL == ctrl) || (NULL == db_buff) ||db_end < db_start) {
 		HLOG_ERROR("Params Error");
@@ -34,7 +37,7 @@ int flush_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint3
     //HLOG_DEBUG("last segno: %u last offset: %u", ctrl->last_segno, ctrl->last_offset);
     g_mutex_lock (ctrl->hlfs_access_mutex);
     ctrl->last_write_timestamp = get_current_time();
-    int size = append_log(ctrl,db_buff,db_start,db_end,1);
+    int size = append_log(ctrl,db_buff,db_start,db_end,1, HLFS_INODE_NO, HLFS_FILE);
     g_mutex_unlock (ctrl->hlfs_access_mutex);
     if(size < 0){
         HLOG_ERROR("append log error");
@@ -201,22 +204,26 @@ out:
 } 
 
 int init_hlfs_dirtree_from_dentry(struct hlfs_ctrl *ctrl) {
+	HLOG_DEBUG("9999 enter func %s", __func__);
+	int ret = 0;
+
 	
+	HLOG_DEBUG("9999 leave func %s", __func__);	
 	return 0;
 }
 
 int init_hlfs_dirtree(struct hlfs_ctrl *ctrl)  {
-	HLOG_DEBUG("9999 enter func %s", __func__);
+	g_message("9999 enter func %s", __func__);
 	if (NULL == ctrl || NULL == ctrl->storage) {
-		HLOG_ERROR("Params Error for func %s", __func__);
+		g_message("Params Error for func %s", __func__);
 		return -1;
 	}
 	int ret = 0;
 	uint64_t INODE_NO = 1;
-	bs_file_t file;
+	bs_file_t file = NULL;
 	if (0 == ctrl->storage->bs_file_is_exist(ctrl->storage, DENTRY_FILE)) {
 		if (0 > init_hlfs_dirtree_from_dentry(ctrl)) {
-			HLOG_ERROR("Init hlfs dirtree from dentry file error.");
+			g_message("Init hlfs dirtree from dentry file error.");
 			ret = -1;
 			goto out;
 		}
@@ -227,7 +234,7 @@ int init_hlfs_dirtree(struct hlfs_ctrl *ctrl)  {
 		sprintf(root_dentry.file_name, "%s", "/");
 		root_dentry.is_alive = DENTRY_ALIVE;
 		if (NULL == (file = ctrl->storage->bs_file_create(ctrl->storage, DENTRY_FILE))) {
-			HLOG_ERROR("create dentry file error.");
+			g_message("create dentry file error.");
 			ret = -1;
 			goto out;
 		}
@@ -238,14 +245,16 @@ int init_hlfs_dirtree(struct hlfs_ctrl *ctrl)  {
 														HD_ITEM_SEP,
 														root_dentry.is_alive);
 		if (size != ctrl->storage->bs_file_append(ctrl->storage, file, dentry_text, size)) {
-			HLOG_ERROR("Append dentry data error!");
+			g_message("Append dentry data error!");
 			ret = -1;
 			goto out;
 		}
-		int size = 0;
+		size = 0;
+		g_message("9999 before append log");
 		size = append_log(ctrl, NULL, 0, 0, 0, root_dentry.inode_no, HLFS_DIR);
+		g_message("9999 leave append log");
 		if (0 > size) {
-			HLOG_ERROR("9999 append HLFS root log");
+			g_message("9999 append HLFS root log");
 			ret = -1;
 			goto out;
 		}
@@ -254,13 +263,14 @@ out:
 	if (NULL != file) {
 		ctrl->storage->bs_file_close(ctrl->storage, file);
 	}
-	HLOG_DEBUG("9999 leave func %s", __func__);
+	g_message("9999 leave func %s", __func__);
 	return ret;
 }
 
 struct hlfs_ctrl *
 init_hlfs(const char *uri)
-{      
+{     
+	g_message("9999 enter func %s", __func__);
      if(NULL == uri){
 	     HLOG_ERROR("Params Error");	
 	     return NULL;
@@ -336,6 +346,7 @@ init_hlfs(const char *uri)
 			       icache_size,iblock_size,invalidate_trigger_level,invalidate_once_size); 
 	 #endif 
 #if 1
+	 g_message("9999 before init_hlfs_dirtree.");
 	 	ret = init_hlfs_dirtree(hlfs_ctrl);
 		if (ret < 0) {
 			HLOG_ERROR("init hlfs dir tree failed.");
@@ -343,9 +354,11 @@ init_hlfs(const char *uri)
 			goto out;
 		}
 #endif
+	g_message("9999 leave func %s", __func__);
 	 return hlfs_ctrl;
 out:
      deinit_hlfs(hlfs_ctrl);
+	g_message("9999 leave func %s", __func__);
      return NULL;	
 } 
 

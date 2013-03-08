@@ -59,7 +59,7 @@ int dump_seg_usage_text(struct back_storage * storage,const char*segment_usage_f
     int ret = 0;
     uint32_t len;
     /*  TODO -- do not create runtime */
-    bs_file_t file = NULL
+    bs_file_t file = NULL;
     if(-1 == storage->bs_file_is_exist(storage,segment_usage_file)){
         g_message("segment usage file not exist, create it");
         file = storage->bs_file_create(storage,segment_usage_file); 

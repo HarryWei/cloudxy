@@ -60,6 +60,12 @@ Struct dentry {
 
 ===HLFS 目录接口和文件接口设计===
 {{{
+int hlfs_create(struct hlfs_ctrl *ctrl, char *f_path)；
+创建一个hlfs文件
+
+int hlfs_remove(struct hlfs_ctrl *ctrl, char *f_path)；
+删除一个hlfs文件
+
 int hlfs_fopen(struct hlfs_ctrl *ctrl, char *f_path, int flag)；
 打开一个hlfs文件，就是先找到这个文件（通过f_path）,然后初始化ctrl结构（初始化inode,im,rw_inode_flag 等字段）。
 

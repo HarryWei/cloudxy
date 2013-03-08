@@ -30,7 +30,10 @@ int write_layer1_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock);
 int write_layer2_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock);
 int write_layer3_iblock(struct hlfs_ctrl *hctrl,uint32_t dbno,char *iblock);
 
-int append_log(struct hlfs_ctrl *ctrl,const char *db_buff,uint32_t db_start,uint32_t db_end,uint32_t no_compressed);
+int append_log(struct hlfs_ctrl *ctrl,const char *db_buff,
+				uint32_t db_start, uint32_t db_end,
+				uint32_t no_compressed, uint64_t inode_no, 
+				uint64_t is_dir);
 int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno);
 int prev_open_wsegfile(struct hlfs_ctrl *ctrl);
 int read_block_fast(struct hlfs_ctrl *ctrl,uint64_t storage_address,char* block);

@@ -20,6 +20,7 @@
 #include "comm_define.h"
 #include "misc.h"
 #include "logger.h"
+#include "dentry.h"
 
 int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint64_t pos)
 {
@@ -157,7 +158,7 @@ write_log:;
         HLOG_DEBUG("we use write through mode !");
         g_mutex_lock  (ctrl->hlfs_access_mutex);
         //ctrl->last_write_timestamp = get_current_time();
-        int size = append_log(ctrl,datablocks,db_start,db_end,1);
+        int size = append_log(ctrl, datablocks, db_start, db_end, 1, HLFS_INODE_NO, HLFS_FILE);
         g_mutex_unlock  (ctrl->hlfs_access_mutex);
         if(size < 0){
             HLOG_ERROR("Append Log Error");

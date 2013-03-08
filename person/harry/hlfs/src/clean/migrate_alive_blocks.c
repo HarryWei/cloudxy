@@ -19,6 +19,7 @@
 #include "comm_define.h"
 #include "storage.h"
 #include "seg_clean.h"
+#include "dentry.h"
 
 
 int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
@@ -119,7 +120,7 @@ int migrate_alive_blocks (struct hlfs_ctrl *hctrl,SEG_USAGE_T *seg_usage){
 							  g_mutex_unlock (hctrl->hlfs_access_mutex);
 							  continue;
 						   }	
-    					   int size = append_log(hctrl,db_buff,db_start,db_end,0);
+    					   int size = append_log(hctrl,db_buff,db_start,db_end,0,HLFS_INODE_NO,HLFS_FILE);
     					   g_mutex_unlock (hctrl->hlfs_access_mutex);
     				       if(size < 0){
        						 HLOG_ERROR("append log error");

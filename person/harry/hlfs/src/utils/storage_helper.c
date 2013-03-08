@@ -199,6 +199,98 @@ static int restore_last_segno_file(const char* uri,const char*path){
        return 0;
 }
 
+int find_inode_addr_inseg(struct back_storage *storage,
+						char *segname, uint64_t segsize,
+						uint64_t inode_no, uint64_t *inode_addr) {
+	HLOG_DEBUG("9999 enter func %s", __func__);
+	int ret = 0;
+	char *contents = (char *)g_malloc0(segsize);
+	char *offset = contents;
+	if (NULL == contents) {
+		HLOG_ERROR("Allocate error!");
+		ret = -1;
+		goto out;
+	}
+	bs_file_t file = NULL;
+	file = storage->bs_file_open(storage,segname, BS_READONLY);
+	if (file == NULL) {
+		HLOG_ERROR("open seg %s error", segname);
+		ret = -1;
+		goto out;
+	}
+	if(segsize != storage->bs_file_pread(storage,file,contents,segsize,0))
+	{
+		HLOG_ERROR("Read file:%s failed", segname);
+		ret = -1;
+        goto out;
+	}
+	struct log_header *lh = (struct log_header *) offset;
+	uint64_t size = 0;
+	while (size < segsize) {
+		offset += lh->log_size - sizeof(struct inode_map_entry);
+		struct inode_map_entry *im = (struct inode_map_entry *) offset;
+		if (im->inode_no == inode_no) {
+			*inode_addr = im->inode_addr;
+		}
+		offset += sizeof(struct inode_map_entry);
+		size += lh->log_size;
+		lh = (struct log_header *) offset;
+	}
+out:
+	if (NULL != file) {
+		storage->bs_file_close(storage, file);
+	}
+	if (contents != NULL) {
+		g_free(contents);
+	}
+	HLOG_DEBUG("9999 leave func %s", __func__);
+    return ret;
+}
+
+int get_latest_inode_addr_by_inodeno(struct back_storage *storage, 
+								uint64_t inode_no,
+								uint64_t *inode_addr) {
+	HLOG_DEBUG("9999 enter func %s", __func__);
+	int ret = 0;
+    uint32_t num_entries = 0;
+    bs_file_info_t *infos = storage->bs_file_list_dir(storage,".",&num_entries);
+    if(infos == NULL){
+       HLOG_ERROR("can not get fs:%s seg entries",storage->uri);
+       return -1;
+    }
+    HLOG_DEBUG("how much file :%d\n",num_entries);
+    int i = 0;
+	uint64_t _inode_addr = 0;
+    bs_file_info_t *info = infos;
+    bs_file_info_t *_info = info;
+    for(i = 0; i < num_entries; i++){
+		/*TODO:index inode number more effective*/
+        HLOG_DEBUG("7777 file:%s,size:%llu,time:%llu\n",
+					info->name,info->size,info->lmtime);
+        if(g_str_has_suffix(info->name, "seg")){
+			ret = find_inode_addr_inseg(storage, info->name, 
+									(uint64_t) info->size, 
+									inode_no, &_inode_addr);
+			if (0 > ret) {
+				HLOG_ERROR("find_inode_addr_inseg error.");
+				ret = -1;
+				goto out;
+			}
+			if (_info->lmtime <= info->lmtime) {
+				*inode_addr = _inode_addr;
+			}
+		}
+		_info = info;
+		info++;
+    }
+    HLOG_DEBUG("7777 file:%s,size:%llu,time:%llu\n",
+					info->name,info->size,info->lmtime);  
+out:
+	HLOG_DEBUG("9999 leave func %s", __func__);
+    free(infos);
+    return ret;   
+}
+
 int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,uint32_t *offset){
     HLOG_DEBUG("enter func %s",__func__);
     int ret =0;
@@ -236,8 +328,8 @@ int get_cur_latest_segment_info(struct back_storage * storage,uint32_t *segno,ui
 	} 
 	info++;
     }
-    HLOG_DEBUG("7777 file:%s,size:%llu,time:%llu\n",info->name,info->size,info->lmtime);  
-
+    HLOG_DEBUG("7777 file:%s,size:%llu,time:%llu\n",
+						info->name,info->size,info->lmtime);
     if(latest_file!=NULL){
 	    HLOG_DEBUG("latest file:%s",latest_file);
 	    const gchar *basename = g_path_get_basename(latest_file);

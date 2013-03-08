@@ -14,6 +14,7 @@
 #include "misc.h"
 #include "address.h"
 #include "snappy-c.h"
+#include "dentry.h"
 
 /*
   *  Copyright (C) 2012 KangHua <kanghua151@gmail.com>
@@ -326,7 +327,9 @@ int __append_log(struct hlfs_ctrl *ctrl, char *db_buff,
 	        g_assert(0);
 		    return -1;
 	    }
+		g_message("9999 before memcpy.");
 		memcpy(log_buff + LOG_HEADER_LENGTH,db_buff,db_data_len);
+		g_message("9999 after memcpy.");
 		ib_offset =  db_data_len + LOG_HEADER_LENGTH;
 	}else{
 	    HLOG_DEBUG("COMPRESSED: need compressed block !!!!");
@@ -803,6 +806,35 @@ int append_log(struct hlfs_ctrl *hctrl,char *db_buff,
 			uint32_t db_start,uint32_t db_end,
 			uint32_t no_compressed, uint64_t inode_no,
 			uint64_t is_dir){
+	uint32_t size = 0; 
+	uint32_t offset = hctrl->last_offset;
+	if (NULL == db_buff) {
+	/*Create a dir or file without appending datas*/
+		size = sizeof(struct log_header) + sizeof(struct inode) + sizeof(struct inode_map_entry);
+		char *log_buff = (char *)g_malloc0(size);
+		struct log_header lh;
+		lh.cflag = no_compressed;
+		lh.log_size = size;
+		memcpy((char*)log_buff, (char *) &lh, sizeof(struct log_header));
+		offset += sizeof(struct log_header);
+		hctrl->inode.is_dir = is_dir;
+		memcpy((char *) ((char*)log_buff + sizeof(struct log_header)), (char *) &(hctrl->inode), sizeof(struct inode));
+		hctrl->imap_entry.inode_no = inode_no;
+		hctrl->imap_entry.inode_addr = offset;
+		if (inode_no == HLFS_ROOT_INODE_NO) {
+			hctrl->root_inode_addr = offset;
+		}
+		offset += sizeof(struct inode);
+		size = sizeof(struct log_header) + sizeof(struct inode) + sizeof(struct inode_map_entry);
+		struct log_header *log_header = (struct log_header *) log_buff;
+        if(0 >= dump_log(hctrl, log_header)){
+			HLOG_ERROR("log dump failed");
+			g_free(log_buff);
+            g_assert(0);
+        }
+		g_free(log_buff);
+		goto out;
+	}
 	guint32 BLOCKSIZE = hctrl->sb.block_size;
 	int expand_size =	(db_end-db_start + 1)*BLOCKSIZE + ib_amount(db_start,db_end) * BLOCKSIZE + 
 			 														LOG_HEADER_LENGTH + 
@@ -832,12 +864,12 @@ int append_log(struct hlfs_ctrl *hctrl,char *db_buff,
 		}
 	}
 	//HLOG_DEBUG("last segno:%u last offset:%u", hctrl->last_segno,hctrl->last_offset);
-	uint32_t size; 
 	size = __append_log(hctrl,db_buff,(uint32_t) db_start, 
 						(uint32_t) db_end,no_compressed, 
 						inode_no, is_dir);
 	g_assert(size > 0);
     //HLOG_DEBUG("cur last offset:%d,log size:%d,next last offset:%d",hctrl->last_offset,size,hctrl->last_offset+size);
+out:
 	hctrl->last_offset += size;
 	return size;
 }

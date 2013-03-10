@@ -212,6 +212,8 @@ int init_hlfs_dirtree_from_dentry(struct hlfs_ctrl *ctrl) {
 	return 0;
 }
 
+uint64_t INODE_NO = 1;
+
 int init_hlfs_dirtree(struct hlfs_ctrl *ctrl)  {
 	g_message("9999 enter func %s", __func__);
 	if (NULL == ctrl || NULL == ctrl->storage) {
@@ -219,7 +221,6 @@ int init_hlfs_dirtree(struct hlfs_ctrl *ctrl)  {
 		return -1;
 	}
 	int ret = 0;
-	uint64_t INODE_NO = 1;
 	bs_file_t file = NULL;
 	if (0 == ctrl->storage->bs_file_is_exist(ctrl->storage, DENTRY_FILE)) {
 		if (0 > init_hlfs_dirtree_from_dentry(ctrl)) {
@@ -232,18 +233,16 @@ int init_hlfs_dirtree(struct hlfs_ctrl *ctrl)  {
 		struct dentry root_dentry;
 		root_dentry.inode_no = INODE_NO;
 		sprintf(root_dentry.file_name, "%s", "/");
-		root_dentry.is_alive = DENTRY_ALIVE;
+//		root_dentry.is_alive = DENTRY_ALIVE;
 		if (NULL == (file = ctrl->storage->bs_file_create(ctrl->storage, DENTRY_FILE))) {
 			g_message("create dentry file error.");
 			ret = -1;
 			goto out;
 		}
 		char dentry_text[1024];
-		int size = sprintf(dentry_text, "%s%s%llu%s%llu", root_dentry.file_name,
+		int size = sprintf(dentry_text, "+%s%s%llu\n", root_dentry.file_name,
 														HD_ITEM_SEP,
-														root_dentry.inode_no,
-														HD_ITEM_SEP,
-														root_dentry.is_alive);
+														root_dentry.inode_no);
 		if (size != ctrl->storage->bs_file_append(ctrl->storage, file, dentry_text, size)) {
 			g_message("Append dentry data error!");
 			ret = -1;

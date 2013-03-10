@@ -84,21 +84,21 @@ static void predicate_same_upname_snapshot(gpointer key,gpointer value,gpointer 
        }
        return ;
 }
+#endif
 
-static void revise_snapshot_relation(GHashTable *ss_hashtable,GList *remove_list){
+static void revise_dentry_relation(GHashTable *ds_hashtable, GList *remove_list) {
      int i = 0;
      for(i = 0; i < g_list_length(remove_list); i++){
-        char * ss_name = g_list_nth_data(remove_list,i);
-	    struct snapshot *ss = g_hash_table_lookup(ss_hashtable,ss_name);
-        g_assert(ss!=NULL);
-        char *up_ss_name = ss->up_sname;
-        g_hash_table_foreach (ss_hashtable,predicate_same_upname_snapshot,ss);
-        g_hash_table_remove(ss_hashtable, ss->sname);
-		g_free(ss);
+        char * ds_name = g_list_nth_data(remove_list, i);
+	    struct dentry *ds = g_hash_table_lookup(ds_hashtable, ds_name);
+        g_assert(ds!=NULL);
+//        char *up_ss_name = ss->up_sname;
+//        g_hash_table_foreach (ss_hashtable, predicate_same_upname_snapshot, ss);
+        g_hash_table_remove(ds_hashtable, ds->file_name);
+		g_free(ds);
      }
      return ;
 }
-#endif
 
 static int load_dentry_from_text(struct dentry **ds, const char *buf, int *flag)
 {
@@ -144,8 +144,9 @@ static int load_dentry_from_text(struct dentry **ds, const char *buf, int *flag)
 	return 0;
 }
 
-
-int load_all_dentry(struct back_storage *storage,const char* dentry_file,GHashTable *ds_hashtable)
+int load_all_dentry(struct back_storage *storage,
+					const char* dentry_file,
+					GHashTable *ds_hashtable)
 {
 	g_message("999 enter func %s", __func__);
 	int ret = 0;
@@ -192,11 +193,11 @@ int load_all_dentry(struct back_storage *storage,const char* dentry_file,GHashTa
             goto out;
 		}
 	}
-/*
-	if (NULL != to_remove_ss_list) {
-    	revise_snapshot_relation(ss_hashtable,to_remove_ss_list);
+
+	if (NULL != to_remove_ds_list) {
+    	revise_dentry_relation(ds_hashtable,to_remove_ds_list);
 	}
-*/
+
 out:
 	g_strfreev(lines);
 	g_free(contents);

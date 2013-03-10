@@ -16,12 +16,10 @@
 #include "hlfs_log.h"
 
 static gchar *uri = NULL;
-static gchar *file_name = NULL;
 
 static gboolean verbose = FALSE;
 static GOptionEntry entries[] = {
 	 {"filesystem location",'u', 0, G_OPTION_ARG_STRING,   &uri, "filesystem storage uri", "FSLOC"},
-      	 {"file name", 'f', 0, G_OPTION_ARG_STRING, &file_name, "file name", "FNAME"},
     	 {"verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
     	{NULL}
 };
@@ -57,7 +55,6 @@ int main(int argc, char *argv[])
     }
 
     g_print("location is :%s\n", uri);
-    g_print("file name is :%s\n", file_name);
     g_option_context_free(context);
     HLFS_CTRL *hctrl = init_hlfs(uri);
     g_assert(hctrl != NULL);
@@ -65,8 +62,8 @@ int main(int argc, char *argv[])
 	 g_message("can not hctrl:%s",uri);
 	 return -1;
     }		
-    if(0 != hlfs_remove(hctrl, file_name) ){
-	 g_message("cant not create file:%s", file_name);
+    if(0 != hlfs_list(hctrl)) {
+	 g_message("Can not list hlfs files.");
 	 return -1;
     }
     hlfs_close(hctrl);

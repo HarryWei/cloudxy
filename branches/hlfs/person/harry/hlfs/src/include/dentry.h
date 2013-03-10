@@ -34,7 +34,8 @@ struct dentry {
 extern "C" {
 #endif
 
-int hlfs_create(struct hlfs_ctrl *ctrl, const char *f_path);
+int hlfs_list(struct hlfs_ctrl *ctrl);
+int hlfs_create(struct hlfs_ctrl *ctrl, const char *f_path, int is_dir);
 int hlfs_remove(struct hlfs_ctrl *ctrl, const char *f_path);
 int hlfs_fopen(struct hlfs_ctrl *ctrl, const char *f_path, int flag);
 /**

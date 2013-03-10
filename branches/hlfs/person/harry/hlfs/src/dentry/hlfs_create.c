@@ -18,7 +18,7 @@
 #include "misc.h"
 #include "comm_define.h"
 
-extern uint64_t INODE_NO;
+//extern uint64_t INODE_NO;
 
 /*f_path: /xxx/dir/file
   1, Check if f_path exists.
@@ -27,7 +27,7 @@ extern uint64_t INODE_NO;
  ? 4, Append /xxx/dir/file log.
   5, Append file's dentry infos to dentry file.
  */
-int hlfs_create(struct hlfs_ctrl *ctrl, const char *f_path) {
+int hlfs_create(struct hlfs_ctrl *ctrl, const char *f_path, int is_dir) {
 	g_message("9999 enter func %s", __func__);
     if(ctrl == NULL || f_path ==NULL){
 		g_message("parameter error!");
@@ -56,11 +56,17 @@ int hlfs_create(struct hlfs_ctrl *ctrl, const char *f_path) {
 	}
 	struct dentry _dentry;
 	sprintf(_dentry.file_name, "%s", f_path);
-	_dentry.inode_no = ++INODE_NO;
+	_dentry.inode_no = get_current_time();
 	ret = dump_dentry(ctrl->storage, DENTRY_FILE, &_dentry);
 	if (0 > ret) {
 		g_message("dump dentry error.");
 		goto out;
+	}
+	int size = 0;
+	size = append_log(ctrl, NULL, 0, 0, 0, _dentry.inode_no, is_dir);
+	if (0 > size) {
+		g_message("Append log error!");
+		ret = -1;
 	}
 out:
 	g_free(dir_name);

@@ -36,7 +36,7 @@ error_func(GOptionContext *context, GOptionGroup *group,
     }
 }
 
-/*  rm.hlfs -u local<hdfs>://xxx/xxx -f file_name */
+/*ls.hlfs -u local<hdfs>://xxx/xxx*/
 int main(int argc, char *argv[])
 {
 	if (log4c_init()) {

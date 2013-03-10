@@ -11,17 +11,20 @@
 #include <string.h>
 #include "storage_helper.h"
 #include "comm_define.h"
+#include "dentry.h"
 #include "hlfs_log.h"
 #include "api/hlfs.h"
 #include "hlfs_log.h"
 
 static gchar *uri = NULL;
 static gchar *file_name = NULL;
+static int is_dir;
 
 static gboolean verbose = FALSE;
 static GOptionEntry entries[] = {
 	 {"filesystem location",'u', 0, G_OPTION_ARG_STRING,   &uri, "filesystem storage uri", "FSLOC"},
       	 {"file name", 'f', 0, G_OPTION_ARG_STRING, &file_name, "file name", "FNAME"},
+      	 {"is dir", 'd', 0, G_OPTION_ARG_INT, &is_dir, "is dir", "ISDIR"},
     	 {"verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
     	{NULL}
 };
@@ -58,17 +61,25 @@ int main(int argc, char *argv[])
 
     g_print("location is :%s\n", uri);
     g_print("file name is :%s\n", file_name);
+    g_print("is_dir is :%d\n", is_dir);
     g_option_context_free(context);
     HLFS_CTRL *hctrl = init_hlfs(uri);
     g_assert(hctrl != NULL);
+	int ret = 0;
+	if (is_dir != HLFS_DIR && is_dir != HLFS_FILE) {
+		g_message("is_dir must be 1(hlfs file) or 0(hlfs dir).");
+		ret = -1;
+		goto out;
+	}
     if(0 != hlfs_open(hctrl,1)){
 	 g_message("can not hctrl:%s",uri);
 	 return -1;
     }		
-    if(0 != hlfs_create(hctrl, file_name) ){
+    if(0 != hlfs_create(hctrl, file_name, is_dir) ){
 	 g_message("cant not create file:%s", file_name);
 	 return -1;
     }
+out:
     hlfs_close(hctrl);
     deinit_hlfs(hctrl);
     if (log4c_fini()) {

@@ -17,7 +17,7 @@
 #include "misc.h"
 #include "comm_define.h"
 
-int hlfs_fopen(struct hlfs_ctrl *ctrl, char *f_path, int flag) {
+int hlfs_fopen(struct hlfs_ctrl *ctrl, const char *f_path, int flag) {
 	g_message("9999 enter func %s", __func__);
     if(ctrl == NULL || f_path ==NULL){
 		HLOG_ERROR("parameter error!");

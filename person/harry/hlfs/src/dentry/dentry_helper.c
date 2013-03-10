@@ -47,33 +47,33 @@ int dump_dentry(struct back_storage *storage,
     return ret;
 }
 
-#if 0
-static int snapshot_delmark2text(const char *ssname, char *textbuf) {
+static int dentry_delmark2text(const char *dname, char *textbuf) {
 	//HLOG_DEBUG("enter func %s", __func__);
-	const char *sep = SS_ITEM_SEP;
+	const char *sep = HD_ITEM_SEP;
 	memset(textbuf, 0, 128);
-	int n = sprintf(textbuf, "-%s%s\n", ssname, sep);
+	int n = sprintf(textbuf, "-%s%s\n", dname, sep);
 	//HLOG_DEBUG("leave func %s", __func__);
 	return n;
 }
 
-int dump_snapshot_delmark(struct back_storage *storage, 
-							const char *snapshot_file, 
-							const char *ssname){
+int dump_dentry_delmark(struct back_storage *storage, 
+							const char *dentry_file, 
+							const char *dname){
 	//HLOG_DEBUG("enter func %s", __func__);
-    if (snapshot_file == NULL || ssname == NULL || storage == NULL) {
+    if (dentry_file == NULL || dname == NULL || storage == NULL) {
 		HLOG_ERROR("Parameter Error!");
         return -1;
     }
 	int ret = 0;
-    char snapshot_delmark_text[128];
-    memset(snapshot_delmark_text, 0, 128);
-	int len = snapshot_delmark2text(ssname, snapshot_delmark_text);
+    char dentry_delmark_text[128];
+    memset(dentry_delmark_text, 0, 128);
+	int len = dentry_delmark2text(dname, dentry_delmark_text);
 	//HLOG_DEBUG("cp text is %s", snapshot_delmark_text);
-    ret = file_append_contents(storage,snapshot_file,snapshot_delmark_text,len);
+    ret = file_append_contents(storage, dentry_file, dentry_delmark_text, len);
 	return ret;
 }
 
+#if 0
 /* load all snapshot will remove del snapshot and revise relation upname */
 static void predicate_same_upname_snapshot(gpointer key,gpointer value,gpointer user_data){
        char * ss_name = (char*)key;

@@ -139,6 +139,13 @@ TARGET_LINK_LIBRARIES(touch.hlfs ${TOOLLIBS})
 SET_TARGET_PROPERTIES(touch.hlfs PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototypes")
 ADD_DEPENDENCIES(tools touch.hlfs)
 
+SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
+SET(TOOLSRCS tools/hlfs_remove_file.c)
+ADD_EXECUTABLE(rm.hlfs ${TOOLSRCS})
+TARGET_LINK_LIBRARIES(rm.hlfs ${TOOLLIBS})
+SET_TARGET_PROPERTIES(rm.hlfs PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototypes")
+ADD_DEPENDENCIES(tools rm.hlfs)
+
 #SET(CMAKE_INSTALL_PREFIX /usr)
 SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
 SET(TOOLSRCS tools/hlfs_clone.c)

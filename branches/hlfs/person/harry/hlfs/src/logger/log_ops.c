@@ -828,7 +828,7 @@ int append_log(struct hlfs_ctrl *hctrl,char *db_buff,
 		if (inode_no == HLFS_ROOT_INODE_NO) {
 			hctrl->root_inode_addr = offset;
 		}
-		offset += sizeof(struct inode);
+		offset += sizeof(struct inode) + sizeof(struct inode_map_entry);
 		size = sizeof(struct log_header) + sizeof(struct inode) + sizeof(struct inode_map_entry);
 		struct log_header *log_header = (struct log_header *) log_buff;
         if(0 >= dump_log(hctrl, log_header)){

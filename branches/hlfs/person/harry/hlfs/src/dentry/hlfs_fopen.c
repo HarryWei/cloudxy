@@ -25,6 +25,7 @@
 
 int hlfs_fopen(struct hlfs_ctrl *ctrl, const char *f_path, int flag) {
 	g_message("9999 enter func %s", __func__);
+	g_message("9999 flag is %d", flag);
     if(ctrl == NULL || f_path ==NULL){
 		HLOG_ERROR("parameter error!");
         return -1;
@@ -43,7 +44,7 @@ int hlfs_fopen(struct hlfs_ctrl *ctrl, const char *f_path, int flag) {
 		g_message("get latest inode addr by inode no. error.");
 		goto out;
 	}
-	char *offset = (char *) load_field(ctrl->storage, inode_addr);
+	char *offset = load_field(ctrl->storage, inode_addr);
 	if (NULL == offset) {
 		g_message("load field error.");
 		goto out;

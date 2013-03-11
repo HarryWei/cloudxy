@@ -63,8 +63,9 @@ int hlfs_fwrite(struct hlfs_ctrl *ctrl, const char *f_path,
 		ret = -1;
 		goto out;
 	}
-	uint32_t size = 0;
+	int size = 0;
 	size = hlfs_write(ctrl, write_buf, write_len, pos);
+	g_message("9999 size is %d", size);
 	if (0 > size) {
 		g_message("hlfs fwrite error!");
 		ret = -1;
@@ -72,5 +73,5 @@ int hlfs_fwrite(struct hlfs_ctrl *ctrl, const char *f_path,
 	}
 out:
 	g_message("9999 leave func %s", __func__);
-	return ret;
+	return size;
 }

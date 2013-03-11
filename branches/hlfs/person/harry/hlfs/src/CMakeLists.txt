@@ -169,6 +169,13 @@ TARGET_LINK_LIBRARIES(base.test ${TOOLLIBS})
 SET_TARGET_PROPERTIES(base.test PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototypes")
 ADD_DEPENDENCIES(tools base.test)
 
+SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
+SET(TOOLSRCS ../test/test_base_mul.c)
+ADD_EXECUTABLE(base.testmul ${TOOLSRCS})
+TARGET_LINK_LIBRARIES(base.testmul ${TOOLLIBS})
+SET_TARGET_PROPERTIES(base.testmul PROPERTIES COMPILE_FLAGS "-g -Wstrict-prototypes")
+ADD_DEPENDENCIES(tools base.testmul)
+
 #SET(CMAKE_INSTALL_PREFIX /usr)
 SET(EXECUTABLE_OUTPUT_PATH ../output/bin)
 SET(TOOLSRCS tools/hlfs_take_snapshot.c)

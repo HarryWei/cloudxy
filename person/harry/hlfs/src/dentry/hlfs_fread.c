@@ -72,5 +72,5 @@ int hlfs_fread(struct hlfs_ctrl *ctrl, const char *f_path,
 	}
 out:
 	g_message("9999 leave func %s", __func__);
-	return ret;
+	return size;
 }

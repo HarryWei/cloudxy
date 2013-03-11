@@ -24,9 +24,10 @@
 
 int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint64_t pos)
 {
-    //HLOG_DEBUG("enter func %s", __func__);
+    g_message("9999 enter func %s", __func__);
+	g_message("ctrl: %p, write_buf: %p, write_len: %u, pos: %lu", ctrl, write_buf, write_len, pos);
     if ((NULL == ctrl) || (NULL == write_buf) || (0 == write_len) || (ctrl->sb.seg_size < write_len)) {
-		HLOG_ERROR("Params Error");
+		g_message("Params Error");
 		return -1;
     }
 	HLOG_INFO("Hlfs Write Req pos:%llu,read_len:%d,last_segno:%d,last_offset:%d,cur_file_len:%llu",
@@ -37,7 +38,7 @@ int hlfs_write(struct hlfs_ctrl *ctrl, char *write_buf, uint32_t write_len, uint
     						      ctrl->inode.length);
     //g_mutex_lock (ctrl->hlfs_access_mutex);
     if(ctrl->rw_inode_flag == 0){
-          HLOG_ERROR("your config only allow read request!");
+          g_message("your config only allow read request!");
           //g_mutex_unlock (ctrl->hlfs_access_mutex);
           return -1;
     }
@@ -216,5 +217,6 @@ out:
 	if(ctrl->inode.length < (pos + write_len)){ 
 		ctrl->inode.length = pos + write_len;
 	}
+	g_message("9999 leave func %s", __func__);
     return write_len;
 }

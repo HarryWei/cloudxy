@@ -96,7 +96,7 @@ int prev_open_rsegfile(struct hlfs_ctrl *ctrl,uint32_t segno){
 
 int prev_open_wsegfile(struct hlfs_ctrl *ctrl){
     HLOG_DEBUG("999 enter func %s", __func__);
-    HLOG_DEBUG("999 ctrl last segno %d,offset:%d",ctrl->last_segno,ctrl->last_offset);
+    g_message("999 ctrl last segno %d,offset:%d",ctrl->last_segno,ctrl->last_offset);
     char segfile_name[SEGMENT_FILE_NAME_MAX];
 	memset(segfile_name, 0, SEGMENT_FILE_NAME_MAX);
     build_segfile_name(ctrl->last_segno,segfile_name);

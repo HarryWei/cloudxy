@@ -363,42 +363,77 @@ out:
  * @para inode_addr: the inode address.
  * @return: if error happens return NULL, if right return inode's RAM address.
  */
-struct inode *load_inode(struct back_storage * storage,uint64_t inode_storage_addr)
+void *load_field(struct back_storage * storage, uint64_t addr)
 {
 	HLOG_DEBUG("enter func %s",__func__);
 	bs_file_t file = NULL;
-	struct inode *my_inode = (struct inode*)g_malloc0(sizeof(struct inode));
-	if (NULL== my_inode) {
+	void *mem = (void *)g_malloc0(1024);
+	if (NULL== mem) {
 		HLOG_ERROR("Allocate Error!");
 		return NULL;
 	}
 
-	uint32_t offset = get_offset(inode_storage_addr); 
+	uint32_t offset = get_offset(addr); 
     const char segfile[SEGMENT_FILE_NAME_MAX];
-    build_segfile_name(get_segno(inode_storage_addr),segfile);
-	HLOG_DEBUG("inode_addr %lld,offset %u", inode_storage_addr,offset);
+    build_segfile_name(get_segno(addr),segfile);
+	HLOG_DEBUG("inode_addr %lld,offset %u", addr, offset);
 	if (0 == storage->bs_file_is_exist(storage, segfile)) {
 		if (NULL == (file = storage->bs_file_open(storage, segfile, BS_READONLY))) {
-			g_free(my_inode);
+			g_free(mem);
 			HLOG_ERROR("open segfile error!");
 			return NULL;
 		}
-		if (sizeof(struct inode) != storage->bs_file_pread(storage, file,(char*)my_inode, sizeof(struct inode),offset)) {
-			g_free(my_inode);
+		if (1024 != storage->bs_file_pread(storage, file, (char *) mem, 1024, offset)) {
+			g_free(mem);
 			storage->bs_file_close(storage, file);
 			HLOG_ERROR("pread error!");
 			return NULL;
 		}
 	} else {
 		HLOG_ERROR("segfile not exist!");
-		g_free(my_inode);
+		g_free(mem);
 		return NULL;
 	}
 	
 	HLOG_DEBUG("leave func %s", __func__);
-	return my_inode;
+	return mem;
 }
 
+struct inode *load_inode(struct back_storage * storage, uint64_t addr)
+{
+	HLOG_DEBUG("enter func %s",__func__);
+	bs_file_t file = NULL;
+	struct inode *mem = (struct inode *)g_malloc0(sizeof(struct inode));
+	if (NULL== mem) {
+		HLOG_ERROR("Allocate Error!");
+		return NULL;
+	}
+
+	uint32_t offset = get_offset(addr); 
+    const char segfile[SEGMENT_FILE_NAME_MAX];
+    build_segfile_name(get_segno(addr),segfile);
+	HLOG_DEBUG("inode_addr %lld,offset %u", addr, offset);
+	if (0 == storage->bs_file_is_exist(storage, segfile)) {
+		if (NULL == (file = storage->bs_file_open(storage, segfile, BS_READONLY))) {
+			g_free(mem);
+			HLOG_ERROR("open segfile error!");
+			return NULL;
+		}
+		if (1024 != storage->bs_file_pread(storage, file, (char *) mem, sizeof(struct inode), offset)) {
+			g_free(mem);
+			storage->bs_file_close(storage, file);
+			HLOG_ERROR("pread error!");
+			return NULL;
+		}
+	} else {
+		HLOG_ERROR("segfile not exist!");
+		g_free(mem);
+		return NULL;
+	}
+	
+	HLOG_DEBUG("leave func %s", __func__);
+	return mem;
+}
 
 struct inode * load_latest_inode(struct back_storage *storage) 
 {
@@ -706,7 +741,7 @@ int load_latest_inode_map_entry(struct back_storage *storage,
 
 
 int file_append_contents(struct back_storage *storage,const char* filename,const char* contents,uint32_t size){
-	HLOG_DEBUG("enter func %s", __func__);
+	g_message("enter func %s", __func__);
     if(storage == NULL || filename == NULL || contents == NULL) {
 		HLOG_ERROR("Parameter error!");
         return -1;
@@ -738,7 +773,7 @@ out:
 	if (NULL != file) {
 		storage->bs_file_close(storage, file);
 	}
-	HLOG_DEBUG("leave func %s", __func__);
+	g_message("leave func %s", __func__);
 	return ret;
 
 }

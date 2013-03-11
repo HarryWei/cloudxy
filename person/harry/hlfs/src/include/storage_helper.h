@@ -21,7 +21,8 @@ int deinit_storage_handler(struct back_storage * storage);
 struct inode * load_latest_inode(struct back_storage *storage);
 //struct back_storage* init_storage_handler(const char* uri,const char *fs_name);
 struct back_storage* init_storage_handler(const char* uri);
-struct inode *load_inode(struct back_storage * storage,uint64_t inode_storage_addr);
+void *load_field(struct back_storage * storage, uint64_t addr);
+struct inode *load_inode(struct back_storage * , uint64_t);
 int  read_fs_meta(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size,uint32_t *is_compress);
 int  read_fs_meta_all(struct back_storage *storage,uint32_t *segment_size,uint32_t *block_size,uint64_t *max_fs_size,uint32_t *is_compress,
 					    gchar **father_uri,uint64_t *base_father_inode, uint32_t *from_segno);

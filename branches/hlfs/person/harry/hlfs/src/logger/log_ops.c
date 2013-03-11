@@ -255,12 +255,14 @@ static int update_icache(struct icache_ctrl *icctrl,char *log_iblock_buf,uint32_
 
 //static bs_file_t g_cur_write_file = NULL;
 static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
-    HLOG_DEBUG("999 enter func %s", __func__);
+    g_message("999 enter func %s", __func__);
     int ret = 0;
+	g_message("before prev open wsegfile.");
     if(0 != prev_open_wsegfile(ctrl)){
         HLOG_ERROR("fail do pre open segfile");
         ret -1;
     }
+	g_message("after prev open wsegfile.");
     int size = ctrl->storage->bs_file_append(ctrl->storage,(bs_file_t)ctrl->last_wsegfile_handler,(char*)log,log->log_size);
     HLOG_DEBUG("write to filewrite size %d  expect size %d",size,log->log_size);
     if(size != log->log_size){
@@ -283,11 +285,13 @@ static int dump_log(struct hlfs_ctrl *ctrl,struct log_header *log){
         }
         //g_mutex_lock (ctrl->hlfs_access_mutex);
         //HLOG_DEBUG("last offset ................... %d",ctrl->last_offset);
-        ret = update_inode_index(&ctrl->inode,log,ctrl->last_segno,ctrl->last_offset,ctrl->sb.block_size);
-        g_assert(ret == 0);
+		if (log->log_size != (sizeof(struct log_header) + sizeof(struct inode) + sizeof(struct inode_map_entry))) {
+        	ret = update_inode_index(&ctrl->inode,log,ctrl->last_segno,ctrl->last_offset,ctrl->sb.block_size);
+        	g_assert(ret == 0);
+		}
         //g_mutex_unlock (ctrl->hlfs_access_mutex);
     }		 	
-    HLOG_DEBUG("999 leave func %s", __func__);
+    g_message("999 leave func %s", __func__);
     return size;
 }
 

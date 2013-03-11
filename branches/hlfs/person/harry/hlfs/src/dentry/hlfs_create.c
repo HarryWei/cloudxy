@@ -63,12 +63,15 @@ int hlfs_create(struct hlfs_ctrl *ctrl, const char *f_path, int is_dir) {
 		goto out;
 	}
 	int size = 0;
+	g_message("before append_log");
 	size = append_log(ctrl, NULL, 0, 0, 0, _dentry.inode_no, is_dir);
 	if (0 > size) {
 		g_message("Append log error!");
 		ret = -1;
 	}
+	g_message("after append_log");
 out:
 	g_free(dir_name);
+	g_message("9999 leave func %s", __func__);
 	return ret;
 }

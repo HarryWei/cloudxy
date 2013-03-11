@@ -23,7 +23,7 @@
    3, init ctrl.
  */
 
-int hlfs_fopen(struct hlfs_ctrl *ctrl, const char *f_path, int flag) {
+int hlfs_fclose(struct hlfs_ctrl *ctrl, const char *f_path) {
 	g_message("9999 enter func %s", __func__);
     if(ctrl == NULL || f_path ==NULL){
 		HLOG_ERROR("parameter error!");
@@ -32,10 +32,11 @@ int hlfs_fopen(struct hlfs_ctrl *ctrl, const char *f_path, int flag) {
     int ret = 0;
 	struct dentry *ds = NULL;
 	ret = load_dentry_by_name(ctrl->storage, DENTRY_FILE, &ds, f_path);
-	if (0 > ret) {
-		g_message("load dentry by name error.");
+	if (1 == ret) {
+		g_message("f_path not exist.");
 		goto out;
 	}
+#if 0
 	g_message("ds->file_name: %s, ds->inode_no: %llu", ds->file_name, ds->inode_no);
 	uint64_t inode_addr = 0;
 	ret = get_latest_inode_addr_by_inodeno(ctrl->storage, ds->inode_no, &inode_addr);
@@ -54,6 +55,12 @@ int hlfs_fopen(struct hlfs_ctrl *ctrl, const char *f_path, int flag) {
 	memcpy(&(ctrl->imap_entry), im, sizeof(struct inode_map_entry));
 	ctrl->rw_inode_flag = flag;
 	g_free(offset);
+#endif
+	ret = hlfs_close(ctrl);
+	if (0 > ret) {
+		g_message("close file %s error.", f_path);
+		goto out;
+	}
 out:
 	g_message("9999 leave func %s", __func__);
 	return ret;

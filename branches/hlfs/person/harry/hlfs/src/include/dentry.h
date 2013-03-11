@@ -38,6 +38,9 @@ int hlfs_list(struct hlfs_ctrl *ctrl);
 int hlfs_create(struct hlfs_ctrl *ctrl, const char *f_path, int is_dir);
 int hlfs_remove(struct hlfs_ctrl *ctrl, const char *f_path);
 int hlfs_fopen(struct hlfs_ctrl *ctrl, const char *f_path, int flag);
+int hlfs_fclose(struct hlfs_ctrl *ctrl, const char *f_path);
+int hlfs_fwrite(struct hlfs_ctrl *, const char *, char *, uint32_t, uint64_t);
+int hlfs_fread(struct hlfs_ctrl *, const char *, char *, uint32_t, uint64_t);
 /**
  * hlfs_find_inode_by_name: find a inode in light of sname
  * @para uri: the hlfs storage path

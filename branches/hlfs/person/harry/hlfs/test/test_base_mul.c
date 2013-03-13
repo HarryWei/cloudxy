@@ -64,10 +64,12 @@ int main(int argc, char *argv[]){
 	ret = hlfs_create(ctrl, f_path, 1);
 	g_assert(ret == 0);
 	g_message("ctrl->rw_inode_flag: %d", ctrl->rw_inode_flag);
+#if 1
     ret = hlfs_fopen(ctrl, f_path, 1);
 	g_message("ctrl->rw_inode_flag: %d", ctrl->rw_inode_flag);
     g_assert(ret == 0);
     g_print("TEST  hlfs fopen over \n");
+#endif
 	g_print("test hlfs fwrite\n");
 	sleep(2);
     int offset = 0;

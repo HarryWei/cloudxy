@@ -824,13 +824,17 @@ int append_log(struct hlfs_ctrl *hctrl,char *db_buff,
 		hctrl->inode.is_dir = is_dir;
 		memcpy((char *) ((char*)log_buff + sizeof(struct log_header)), (char *) &(hctrl->inode), sizeof(struct inode));
 		hctrl->imap_entry.inode_no = inode_no;
+		g_message("9999------------->inode_no is %llu", inode_no);
+		g_message("9999------------->offset is %u", offset);
 		hctrl->imap_entry.inode_addr = offset;
 		if (inode_no == HLFS_ROOT_INODE_NO) {
 			hctrl->root_inode_addr = offset;
 		}
-		offset += sizeof(struct inode) + sizeof(struct inode_map_entry);
-		size = sizeof(struct log_header) + sizeof(struct inode) + sizeof(struct inode_map_entry);
+//		offset += sizeof(struct inode) + sizeof(struct inode_map_entry);
+//		size = sizeof(struct log_header) + sizeof(struct inode) + sizeof(struct inode_map_entry);
+		memcpy((char *) ((char*)log_buff + sizeof(struct log_header)) + sizeof(struct inode), (char *) &(hctrl->imap_entry), sizeof(struct inode_map_entry));
 		struct log_header *log_header = (struct log_header *) log_buff;
+		g_message("9999------------->Append size: %u", size);
         if(0 >= dump_log(hctrl, log_header)){
 			HLOG_ERROR("log dump failed");
 			g_free(log_buff);

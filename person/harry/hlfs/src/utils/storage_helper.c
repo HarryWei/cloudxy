@@ -203,14 +203,15 @@ int find_inode_addr_inseg(struct back_storage *storage,
 						char *segname, uint64_t segsize,
 						uint64_t inode_no, uint64_t *inode_addr) {
 	g_message("9999 enter func %s", __func__);
+	g_message("9999 sgename is: %s, segsize is: %llu, inode_no is: %llu, inode_addr is: %llu", segname, segsize, inode_no, *inode_addr);
 	int ret = 0;
 	char *contents = (char *)g_malloc0(segsize);
-	char *offset = contents;
 	if (NULL == contents) {
 		g_message("Allocate error!");
 		ret = -1;
 		goto out;
 	}
+	char *offset = contents;
 	bs_file_t file = NULL;
 	file = storage->bs_file_open(storage,segname, BS_READONLY);
 	if (file == NULL) {
@@ -218,7 +219,7 @@ int find_inode_addr_inseg(struct back_storage *storage,
 		ret = -1;
 		goto out;
 	}
-	if(segsize != storage->bs_file_pread(storage,file,contents,segsize,0))
+	if(segsize != storage->bs_file_pread(storage,file, (const char *) contents,segsize,0))
 	{
 		g_message("Read file:%s failed", segname);
 		ret = -1;
@@ -228,14 +229,17 @@ int find_inode_addr_inseg(struct back_storage *storage,
 	g_message("-----------lh->log_size: %u", lh->log_size);
 	uint64_t size = 0;
 	while (size < segsize) {
-		offset += lh->log_size - sizeof(struct inode_map_entry);
-		struct inode_map_entry *im = (struct inode_map_entry *) offset;
+		size = size + (uint64_t) lh->log_size - (uint64_t) sizeof(struct inode_map_entry);
+		//offset += size;
+		struct inode_map_entry *im = (struct inode_map_entry *) (offset + size);
+		g_message("9999------>im->inode_no:%llu", im->inode_no);
+		g_message("9999------>im->inode_addr:%llu", im->inode_addr);
 		if (im->inode_no == inode_no) {
 			*inode_addr = im->inode_addr;
 		}
-		offset += sizeof(struct inode_map_entry);
-		size += lh->log_size;
-		lh = (struct log_header *) offset;
+//		offset += sizeof(struct inode_map_entry);
+		size += sizeof(struct inode_map_entry);
+		lh = (struct log_header *) (offset + size);
 		g_message("-----------lh->log_size: %u", lh->log_size);
 	}
 out:
@@ -370,35 +374,46 @@ char *load_field(struct back_storage * storage, uint64_t addr)
 {
 	g_message("enter func %s",__func__);
 	bs_file_t file = NULL;
-	char *mem = (char *)g_malloc0(1024);
-	if (NULL == mem) {
-		g_message("Allocate Error!");
-		return NULL;
-	}
+	bs_file_info_t *info = NULL;
+	char *mem = NULL;
 
 	uint32_t offset = get_offset(addr); 
     const char segfile[SEGMENT_FILE_NAME_MAX];
     build_segfile_name(get_segno(addr),segfile);
-	g_message("inode_addr %lld,offset %u", addr, offset);
+	g_message("inode_addr %lld,offset %u, segfile: %s", addr, offset, segfile);
 	if (0 == storage->bs_file_is_exist(storage, segfile)) {
+		if (NULL == (info = storage->bs_file_info(storage, segfile))) {
+			g_message("info segfile error!");
+			return NULL;
+		}
+		g_message("info->size is : %llu", info->size);
+		mem = (char *) g_malloc0(info->size);
+		if (NULL == mem) {
+			g_message("Allocate Error!");
+			g_free(info);
+			return NULL;
+		}
 		if (NULL == (file = storage->bs_file_open(storage, segfile, BS_READONLY))) {
 			g_free(mem);
+			g_free(info);
 			g_message("open segfile error!");
 			return NULL;
 		}
-		if (1024 != storage->bs_file_pread(storage, file, mem, 1024, offset)) {
+		if ((info->size - offset) != storage->bs_file_pread(storage, file, mem, (info->size - offset), offset)) {
 			g_free(mem);
+			g_free(info);
 			storage->bs_file_close(storage, file);
 			g_message("pread error!");
 			return NULL;
 		}
 	} else {
 		g_message("segfile not exist!");
-		g_free(mem);
 		return NULL;
 	}
 	
 	g_message("leave func %s", __func__);
+	g_free(info);
+	storage->bs_file_close(storage, file);
 	return mem;
 }
 

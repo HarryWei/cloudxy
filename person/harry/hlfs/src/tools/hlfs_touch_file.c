@@ -71,16 +71,18 @@ int main(int argc, char *argv[])
 		ret = -1;
 		goto out;
 	}
+#if 0
     if(0 != hlfs_open(hctrl,1)){
 	 g_message("can not hctrl:%s",uri);
 	 return -1;
     }		
+#endif
     if(0 != hlfs_create(hctrl, file_name, is_dir) ){
 	 g_message("cant not create file:%s", file_name);
 	 return -1;
     }
 out:
-    hlfs_close(hctrl);
+    hlfs_fclose(hctrl, file_name);
     deinit_hlfs(hctrl);
     if (log4c_fini()) {
 	    g_message("log4c_fini failed!");

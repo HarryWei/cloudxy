@@ -44,6 +44,7 @@ int hlfs_fopen(struct hlfs_ctrl *ctrl, const char *f_path, int flag) {
 		g_message("get latest inode addr by inode no. error.");
 		goto out;
 	}
+	g_message("9999------->inode_addr is %llu", inode_addr);
 	char *offset = load_field(ctrl->storage, inode_addr);
 	if (NULL == offset) {
 		g_message("load field error.");

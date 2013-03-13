@@ -58,15 +58,17 @@ int main(int argc, char *argv[])
     g_option_context_free(context);
     HLFS_CTRL *hctrl = init_hlfs(uri);
     g_assert(hctrl != NULL);
+#if 0
     if(0 != hlfs_open(hctrl,1)){
 	 g_message("can not hctrl:%s",uri);
 	 return -1;
     }		
+#endif
     if(0 != hlfs_list(hctrl)) {
 	 g_message("Can not list hlfs files.");
 	 return -1;
     }
-    hlfs_close(hctrl);
+//    hlfs_fclose(hctrl, );
     deinit_hlfs(hctrl);
     if (log4c_fini()) {
 	    g_message("log4c_fini failed!");

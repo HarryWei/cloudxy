@@ -16,7 +16,7 @@
 
 ==第三阶段==
 || *责任人* || *任务* || *完成情况* || *分享与讨论日志* || *备注* || 
-|| 康华 <br> 贾威威   || 开发HLFS driver for Libvirt并测试;   || 完成  || 讨论完成 || 测试工作需仔细认真对待(关乎HLFS集成Openstack的成功与否);<br>这个阶段分为了两部分完成了：<br> 1，HLFS Online storage driver <br> 2, HLFS Offline storage driver <br> 讨论也分为对应的两部分完成了 ||
+|| 康华 <br> 贾威威   || 开发HLFS driver for Libvirt并测试;   || 完成  || 讨论完成 || 测试工作需仔细认真对待(关乎HLFS集成Openstack的成功与否);<br>这个阶段分为了两部分完成了：<br> 1, HLFS Online storage driver <br> 2, HLFS Offline storage driver <br> 讨论也分为对应的两部分完成了 ||
 
 ==第四阶段==
 || *责任人* || *任务* || *完成情况* || *分享与讨论日志* || *备注* || 
@@ -28,7 +28,7 @@
 
 ==第六阶段==
 || *责任人* || *任务* || *完成情况* || *分享与讨论日志* || *备注* || 
-|| 康华 <br> 贾威威   || 1, 制作HLFS debian和fedora distro. <br> 2, 合并HLFS drivers for QEMU/Libvirt/Openstack到对应社区; <br> 3, HLFS性能优化;   || 进行中  || 未讨论 || 1，此阶段核心任务是HLFS性能优化，此任务要做细，这是HLFS推广的重要环节<br> 2, 补丁合并要有耐心，最后都要合并到社区，这样补丁才有生存力;  ||
+|| 康华 <br> 贾威威   || 1, 制作HLFS debian和fedora distro. <br> 2, 合并HLFS drivers for QEMU/Libvirt/Openstack到对应社区; <br> 3, HLFS性能优化;   || 进行中  || 未讨论 || 1, 此阶段核心任务是HLFS性能优化，此任务要做细，这是HLFS推广的重要环节<br> 2, 补丁合并要有耐心，最后都要合并到社区，这样补丁才有生存力;  ||
 
 ==注意事项==
  # 各个成员积极完成自己的任务，完成后组织大家开会，讲解自己的解决方案和结论。

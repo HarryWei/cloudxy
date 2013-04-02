@@ -1,0 +1,591 @@
+diff -urN tools_ok/blktap2/drivers/block-hlfs.c tools/blktap2/drivers/block-hlfs.c
+--- tools_ok/blktap2/drivers/block-hlfs.c	1970-01-01 08:00:00.000000000 +0800
++++ tools/blktap2/drivers/block-hlfs.c	2012-02-24 20:20:08.000000000 +0800
+@@ -0,0 +1,240 @@
++/* 
++ * Copyright (c) 2007, XenSource Inc.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are met:
++ *     * Redistributions of source code must retain the above copyright
++ *       notice, this list of conditions and the following disclaimer.
++ *     * Redistributions in binary form must reproduce the above copyright
++ *       notice, this list of conditions and the following disclaimer in the
++ *       documentation and/or other materials provided with the distribution.
++ *     * Neither the name of XenSource Inc. nor the names of its contributors
++ *       may be used to endorse or promote products derived from this software
++ *       without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
++ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
++ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
++ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
++ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
++ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
++ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include <errno.h>
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <sys/statvfs.h>
++#include <sys/stat.h>
++#include <sys/ioctl.h>
++#include <sys/mman.h>
++#include <string.h>
++
++#include "blk.h"
++#include "tapdisk.h"
++#include "tapdisk-driver.h"
++#include "tapdisk-interface.h"
++#include "api/hlfs.h"
++#include <glib.h>
++#include <glib/gstdio.h>
++
++#define MAX_HLFSDISK_SIZE 10240000000 /*500G*/
++#include "hlfs_log.h"
++
++char *img;
++long int   disksector_size;
++long int   disksize;
++long int   diskinfo;
++static int connections = 0;
++
++struct tdhlfs_state {
++       HLFS_CTRL *hlfs_ctrl;
++};
++
++
++static int get_hlfs_disk_info(const char *name,char **uri){
++    int ret = 0;
++    *uri = g_strdup(name);
++out:
++    return ret;
++}
++
++/*Get Image size, secsize*/
++static int set_image_info(long int size,td_disk_info_t *info)
++{
++	int ret;
++    info->size =(uint64_t) ((size * 1024 * 1024) >> SECTOR_SHIFT);
++    info->sector_size = DEFAULT_SECTOR_SIZE;
++
++	info->info = 0;
++    /*Store variables locally*/
++	disksector_size = info->sector_size;
++	disksize        = info->size;
++	diskinfo        = info->info;
++	DPRINTF("Image sector_size: \n\t[%"PRIu64"]\n",
++		info->sector_size);
++	return 0;
++}
++
++static char *build_ctrl_region(const char *testfs)
++{
++	int fd, offset;
++	CTRL_REGION_T ctrl_region;
++	char ctrl_region_file[128];
++	char *addr = NULL;
++
++	sprintf(ctrl_region_file, "%s%s%s", "/tmp/", testfs, "-ctrl");
++	g_remove(ctrl_region_file);
++	fd = open(ctrl_region_file, O_RDWR | O_CREAT, 0666);
++	if (fd == -1) {
++		return NULL;
++	}
++	offset = sysconf(_SC_PAGE_SIZE);
++	if (-1 == write(fd, &ctrl_region, sizeof(CTRL_REGION_T))) {
++		return NULL;
++	}
++	addr = mmap(NULL, sizeof(CTRL_REGION_T), PROT_WRITE, MAP_SHARED, fd, 0);
++	if (addr == NULL) {
++		return NULL;
++	}
++	return addr;
++}
++
++/*  name format:
++ *  uri/fsname:size(m)
++ *  eg: local:///tmp/testenv/testfs:1024
++ */
++
++/* Open the disk file and initialize ram state. */
++int tdhlfs_open (td_driver_t *driver, const char *name, td_flag_t flags)
++{
++	char *p;
++	uint64_t size;
++    int hlfs_disk_size; /*M*/
++	int i, ret = 0, count = 0;
++	struct tdhlfs_state *prv = (struct tdhlfs_state *)driver->data;
++    char *uri = NULL;
++	char *ctrl_region = NULL;
++    HLFS_CTRL *ctrl = NULL;
++	HLFS_STAT_T stat;
++
++	connections++;
++	if (connections > 1) {
++		driver->info.sector_size = disksector_size;
++		driver->info.size        = disksize;
++		driver->info.info        = diskinfo; 
++		DPRINTF("Image already open, returning parameters:\n");
++		DPRINTF("Image size: \n\tpre sector_shift  [%llu]\n\tpost "
++			"sector_shift [%llu]\n",
++			(long long unsigned)(driver->info.size << SECTOR_SHIFT),
++			(long long unsigned)driver->info.size);
++		DPRINTF("Image sector_size: \n\t[%"PRIu64"]\n",
++			driver->info.sector_size);
++		prv->hlfs_ctrl = NULL;
++		goto done;
++	}
++    if(0!=get_hlfs_disk_info(name,&uri)){
++       ret = -1;
++       goto done;
++    }
++    ctrl = init_hlfs(uri);
++    if(ctrl == NULL){
++		DPRINTF("Unable to open [%s]!\n",uri);
++        	ret = -1;
++        	goto done;
++    }
++    prv->hlfs_ctrl = ctrl;
++	if (0 != hlfs_stat(ctrl, &stat)) {
++		ret = -1;
++		goto done;
++	}
++	ctrl_region = build_ctrl_region(stat.fsname);
++	if (ctrl_region != NULL) {
++		hlfs_set_user_ctrl_region(ctrl, (CTRL_REGION_T *) ctrl_region);
++	}
++	if (0 != hlfs_open(ctrl, 1)) {
++		DPRINTF("Unable to connect storage!\n");
++		ret = -1;
++		goto done;
++	}
++	hlfs_disk_size = stat.max_fs_size;
++    ret = set_image_info(hlfs_disk_size,&driver->info);
++	if (driver->info.size > MAX_HLFSDISK_SIZE) {
++		DPRINTF("Disk exceeds limit, must be less than [%ld]MB",
++			(MAX_HLFSDISK_SIZE<<SECTOR_SHIFT)>>20);
++		return -ENOMEM;
++	}
++done:
++	return ret;
++}
++
++void tdhlfs_queue_read(td_driver_t *driver, td_request_t treq)
++{
++    int ret = 0;
++	struct tdhlfs_state *prv = (struct tdhlfs_state *)driver->data;
++	int      size    = treq.secs * driver->info.sector_size;
++	uint64_t offset  = treq.sec * (uint64_t)driver->info.sector_size;
++    HLFS_CTRL *ctrl = prv->hlfs_ctrl;
++    ret = hlfs_read(ctrl,treq.buf,size,offset);
++    if(ret == size){
++	   td_complete_request(treq, 0);
++    }else{
++       td_complete_request(treq,-1); 
++    }
++}
++
++void tdhlfs_queue_write(td_driver_t *driver, td_request_t treq)
++{
++    int ret = 0;
++	struct tdhlfs_state *prv = (struct tdhlfs_state *)driver->data;
++	int      size    = treq.secs * driver->info.sector_size;
++	uint64_t offset  = treq.sec * (uint64_t)driver->info.sector_size;
++    HLFS_CTRL *ctrl = prv->hlfs_ctrl;
++    ret = hlfs_write(ctrl,treq.buf,size,offset);
++    if(ret == size){
++	   td_complete_request(treq, 0);
++    }else{
++       td_complete_request(treq,-1); 
++    }
++}
++
++int tdhlfs_close(td_driver_t *driver)
++{
++	struct tdhlfs_state *prv = (struct tdhlfs_state *)driver->data;
++	HLFS_CTRL *ctrl = prv->hlfs_ctrl;
++	connections--;
++	hlfs_close(ctrl);
++	deinit_hlfs(ctrl);
++	return 0;
++}
++
++int tdhlfs_get_parent_id(td_driver_t *driver, td_disk_id_t *id)
++{
++	return TD_NO_PARENT;
++}
++
++int tdhlfs_validate_parent(td_driver_t *driver,
++			  td_driver_t *pdriver, td_flag_t flags)
++{
++	return -EINVAL;
++}
++
++struct tap_disk tapdisk_hlfs = {
++	.disk_type          = "tapdisk_hlfs",
++	.flags              = 0,
++	.private_data_size  = sizeof(struct tdhlfs_state),
++	.td_open            = tdhlfs_open,
++	.td_close           = tdhlfs_close,
++	.td_queue_read      = tdhlfs_queue_read,
++	.td_queue_write     = tdhlfs_queue_write,
++	.td_get_parent_id   = tdhlfs_get_parent_id,
++	.td_validate_parent = tdhlfs_validate_parent,
++	.td_debug           = NULL,
++};
+diff -urN tools_ok/blktap2/drivers/Makefile tools/blktap2/drivers/Makefile
+--- tools_ok/blktap2/drivers/Makefile	2011-06-15 00:03:43.000000000 +0800
++++ tools/blktap2/drivers/Makefile	2012-02-24 20:20:08.000000000 +0800
+@@ -2,6 +2,13 @@
+ BLKTAP_ROOT= ..
+ include $(XEN_ROOT)/tools/Rules.mk
+ 
++GLIB_DIR1=/usr/lib/glib-2.0/include
++GLIB_DIR2=/usr/include/glib-2.0
++HLFS_DIR=/home/kanghua/workshop/trunk/hlfs
++LOG4C_DIR=$(HLFS_DIR)/3part/log
++
++
++
+ LIBVHDDIR  = $(BLKTAP_ROOT)/vhd/lib
+ 
+ IBIN       = tapdisk2 td-util tapdisk-client tapdisk-stream tapdisk-diff
+@@ -16,14 +23,18 @@
+ CFLAGS    += $(CFLAGS_libxenctrl)
+ CFLAGS    += -I $(LIBAIO_DIR)
+ CFLAGS    += -I $(MEMSHR_DIR)
++CFLAGS    += -I $(GLIB_DIR1)
++CFLAGS    += -I $(GLIB_DIR2)
++CFLAGS    += -I $(HLFS_DIR)/src/include
++CFLAGS    += -I $(LOG4C_DIR)/include
+ CFLAGS    += -D_GNU_SOURCE
+ CFLAGS    += -DUSE_NFS_LOCKS
+ 
+ ifeq ($(CONFIG_X86_64),y)
+-CFLAGS            += -fPIC
++CFLAGS    += -fPIC
+ endif
+ 
+-LIBS      += -lrt -lz
++LIBS      += -lrt -lz 
+ 
+ LBLIBS_img := $(LDLIBS_libxenctrl) $(CRYPT_LIB) -lpthread -lz -lm
+ 
+@@ -32,6 +43,13 @@
+ ifeq ($(CONFIG_Linux),y)
+ LIBS += -luuid
+ endif
++ifeq ($(CONFIG_X86_64),y)
++LIBS += -L$(HLFS_DIR)/output/lib64 -lhlfs
++LIBS += -L$(LOG4C_DIR)/lib64 -llog4c
++else
++LIBS += -L$(HLFS_DIR)/output/lib32 -lhlfs
++LIBS += -L$(LOG4C_DIR)/lib32 -llog4c
++endif
+ 
+ REMUS-OBJS  := block-remus.o
+ REMUS-OBJS  += hashtable.o
+@@ -80,6 +98,7 @@
+ 
+ BLK-OBJS-y  := block-aio.o
+ BLK-OBJS-y  += block-ram.o
++BLK-OBJS-y  += block-hlfs.o
+ BLK-OBJS-y  += block-cache.o
+ BLK-OBJS-y  += block-vhd.o
+ BLK-OBJS-y  += block-log.o
+diff -urN tools_ok/blktap2/drivers/tapdisk2.c tools/blktap2/drivers/tapdisk2.c
+--- tools_ok/blktap2/drivers/tapdisk2.c	2011-06-15 00:03:43.000000000 +0800
++++ tools/blktap2/drivers/tapdisk2.c	2012-02-24 20:20:08.000000000 +0800
+@@ -38,7 +38,6 @@
+ #include "tapdisk-utils.h"
+ #include "tapdisk-server.h"
+ #include "tapdisk-control.h"
+-
+ static void
+ usage(const char *app, int err)
+ {
+@@ -81,7 +80,6 @@
+ 
+ 	chdir("/");
+ 	tapdisk_start_logging("tapdisk2");
+-
+ 	err = tapdisk_server_init();
+ 	if (err) {
+ 		DPRINTF("failed to initialize server: %d\n", err);
+diff -urN tools_ok/blktap2/drivers/tapdisk-disktype.c tools/blktap2/drivers/tapdisk-disktype.c
+--- tools_ok/blktap2/drivers/tapdisk-disktype.c	2011-06-15 00:03:43.000000000 +0800
++++ tools/blktap2/drivers/tapdisk-disktype.c	2012-02-24 20:20:08.000000000 +0800
+@@ -82,11 +82,13 @@
+        1,
+ };
+ 
++/*
+ static const disk_info_t vhd_index_disk = {
+        "vhdi",
+        "vhd index image (vhdi)",
+        1,
+ };
++*/
+ 
+ static const disk_info_t log_disk = {
+ 	"log",
+@@ -100,6 +102,13 @@
+        0,
+ };
+ 
++static const disk_info_t hlfs_disk = {
++       "hlfs",
++       "hlfs disk replicator (hlfs)",
++       0,
++};
++
++
+ const disk_info_t *tapdisk_disk_types[] = {
+ 	[DISK_TYPE_AIO]	= &aio_disk,
+ 	[DISK_TYPE_SYNC]	= &sync_disk,
+@@ -110,8 +119,9 @@
+ 	[DISK_TYPE_QCOW]	= &qcow_disk,
+ 	[DISK_TYPE_BLOCK_CACHE] = &block_cache_disk,
+ 	[DISK_TYPE_LOG]	= &log_disk,
+-	[DISK_TYPE_VINDEX]	= &vhd_index_disk,
++//	[DISK_TYPE_VINDEX]	= &vhd_index_disk,
+ 	[DISK_TYPE_REMUS]	= &remus_disk,
++	[DISK_TYPE_HLFS]	= &hlfs_disk,
+ 	0,
+ };
+ 
+@@ -123,9 +133,10 @@
+ extern struct tap_disk tapdisk_ram;
+ extern struct tap_disk tapdisk_qcow;
+ extern struct tap_disk tapdisk_block_cache;
+-extern struct tap_disk tapdisk_vhd_index;
++//extern struct tap_disk tapdisk_vhd_index;
+ extern struct tap_disk tapdisk_log;
+ extern struct tap_disk tapdisk_remus;
++extern struct tap_disk tapdisk_hlfs;
+ 
+ const struct tap_disk *tapdisk_disk_drivers[] = {
+ 	[DISK_TYPE_AIO]         = &tapdisk_aio,
+@@ -137,9 +148,10 @@
+ 	[DISK_TYPE_RAM]         = &tapdisk_ram,
+ 	[DISK_TYPE_QCOW]        = &tapdisk_qcow,
+ 	[DISK_TYPE_BLOCK_CACHE] = &tapdisk_block_cache,
+-	[DISK_TYPE_VINDEX]      = &tapdisk_vhd_index,
++//	[DISK_TYPE_VINDEX]      = &tapdisk_vhd_index,
+ 	[DISK_TYPE_LOG]         = &tapdisk_log,
+ 	[DISK_TYPE_REMUS]       = &tapdisk_remus,
++	[DISK_TYPE_HLFS]        = &tapdisk_hlfs,
+ 	0,
+ };
+ 
+diff -urN tools_ok/blktap2/drivers/tapdisk-disktype.h tools/blktap2/drivers/tapdisk-disktype.h
+--- tools_ok/blktap2/drivers/tapdisk-disktype.h	2011-06-15 00:03:43.000000000 +0800
++++ tools/blktap2/drivers/tapdisk-disktype.h	2012-02-24 20:20:08.000000000 +0800
+@@ -39,7 +39,8 @@
+ #define DISK_TYPE_BLOCK_CACHE 7
+ #define DISK_TYPE_LOG         8
+ #define DISK_TYPE_REMUS       9
+-#define DISK_TYPE_VINDEX      10
++//#define DISK_TYPE_VINDEX      10
++#define DISK_TYPE_HLFS        10
+ 
+ #define DISK_TYPE_NAME_MAX    32
+ 
+diff -urN tools_ok/hlfs_driver_for_blktap2.patch tools/hlfs_driver_for_blktap2.patch
+--- tools_ok/hlfs_driver_for_blktap2.patch	1970-01-01 08:00:00.000000000 +0800
++++ tools/hlfs_driver_for_blktap2.patch	2012-02-24 20:20:07.000000000 +0800
+@@ -0,0 +1,174 @@
++Index: python/xen/xend/server/BlktapController.py
++===================================================================
++--- python/xen/xend/server/BlktapController.py	(revision 327)
+++++ python/xen/xend/server/BlktapController.py	(working copy)
++@@ -24,6 +24,7 @@
++     'qcow',
++     'vhd',
++     'remus',
+++    'hlfs',
++     ]
++ 
++ blktap_disk_types = blktap1_disk_types + blktap2_disk_types
++Index: blktap2/drivers/tapdisk-disktype.h
++===================================================================
++--- blktap2/drivers/tapdisk-disktype.h	(revision 327)
+++++ blktap2/drivers/tapdisk-disktype.h	(working copy)
++@@ -39,7 +39,8 @@
++ #define DISK_TYPE_BLOCK_CACHE 7
++ #define DISK_TYPE_LOG         8
++ #define DISK_TYPE_REMUS       9
++-#define DISK_TYPE_VINDEX      10
+++//#define DISK_TYPE_VINDEX      10
+++#define DISK_TYPE_HLFS        10
++ 
++ #define DISK_TYPE_NAME_MAX    32
++ 
++Index: blktap2/drivers/Makefile
++===================================================================
++--- blktap2/drivers/Makefile	(revision 327)
+++++ blktap2/drivers/Makefile	(working copy)
++@@ -2,6 +2,13 @@
++ BLKTAP_ROOT= ..
++ include $(XEN_ROOT)/tools/Rules.mk
++ 
+++GLIB_DIR1=/usr/lib/glib-2.0/include
+++GLIB_DIR2=/usr/include/glib-2.0
+++HLFS_DIR=/home/kanghua/workshop/trunk/hlfs
+++LOG4C_DIR=$(HLFS_DIR)/3part/log
+++
+++
+++
++ LIBVHDDIR  = $(BLKTAP_ROOT)/vhd/lib
++ 
++ IBIN       = tapdisk2 td-util tapdisk-client tapdisk-stream tapdisk-diff
++@@ -16,14 +23,18 @@
++ CFLAGS    += $(CFLAGS_libxenctrl)
++ CFLAGS    += -I $(LIBAIO_DIR)
++ CFLAGS    += -I $(MEMSHR_DIR)
+++CFLAGS    += -I $(GLIB_DIR1)
+++CFLAGS    += -I $(GLIB_DIR2)
+++CFLAGS    += -I $(HLFS_DIR)/src/include
+++CFLAGS    += -I $(LOG4C_DIR)/include
++ CFLAGS    += -D_GNU_SOURCE
++ CFLAGS    += -DUSE_NFS_LOCKS
++ 
++ ifeq ($(CONFIG_X86_64),y)
++-CFLAGS            += -fPIC
+++CFLAGS    += -fPIC
++ endif
++ 
++-LIBS      += -lrt -lz
+++LIBS      += -lrt -lz 
++ 
++ LBLIBS_img := $(LDLIBS_libxenctrl) $(CRYPT_LIB) -lpthread -lz -lm
++ 
++@@ -32,6 +43,13 @@
++ ifeq ($(CONFIG_Linux),y)
++ LIBS += -luuid
++ endif
+++ifeq ($(CONFIG_X86_64),y)
+++LIBS += -L$(HLFS_DIR)/output/lib64 -lhlfs
+++LIBS += -L$(LOG4C_DIR)/lib64 -llog4c
+++else
+++LIBS += -L$(HLFS_DIR)/output/lib32 -lhlfs
+++LIBS += -L$(LOG4C_DIR)/lib32 -llog4c
+++endif
++ 
++ REMUS-OBJS  := block-remus.o
++ REMUS-OBJS  += hashtable.o
++@@ -80,6 +98,7 @@
++ 
++ BLK-OBJS-y  := block-aio.o
++ BLK-OBJS-y  += block-ram.o
+++BLK-OBJS-y  += block-hlfs.o
++ BLK-OBJS-y  += block-cache.o
++ BLK-OBJS-y  += block-vhd.o
++ BLK-OBJS-y  += block-log.o
++Index: blktap2/drivers/tapdisk2.c
++===================================================================
++--- blktap2/drivers/tapdisk2.c	(revision 327)
+++++ blktap2/drivers/tapdisk2.c	(working copy)
++@@ -38,7 +38,6 @@
++ #include "tapdisk-utils.h"
++ #include "tapdisk-server.h"
++ #include "tapdisk-control.h"
++-
++ static void
++ usage(const char *app, int err)
++ {
++@@ -81,7 +80,6 @@
++ 
++ 	chdir("/");
++ 	tapdisk_start_logging("tapdisk2");
++-
++ 	err = tapdisk_server_init();
++ 	if (err) {
++ 		DPRINTF("failed to initialize server: %d\n", err);
++Index: blktap2/drivers/tapdisk-disktype.c
++===================================================================
++--- blktap2/drivers/tapdisk-disktype.c	(revision 327)
+++++ blktap2/drivers/tapdisk-disktype.c	(working copy)
++@@ -82,11 +82,13 @@
++        1,
++ };
++ 
+++/*
++ static const disk_info_t vhd_index_disk = {
++        "vhdi",
++        "vhd index image (vhdi)",
++        1,
++ };
+++*/
++ 
++ static const disk_info_t log_disk = {
++ 	"log",
++@@ -100,6 +102,13 @@
++        0,
++ };
++ 
+++static const disk_info_t hlfs_disk = {
+++       "hlfs",
+++       "hlfs disk replicator (hlfs)",
+++       0,
+++};
+++
+++
++ const disk_info_t *tapdisk_disk_types[] = {
++ 	[DISK_TYPE_AIO]	= &aio_disk,
++ 	[DISK_TYPE_SYNC]	= &sync_disk,
++@@ -110,8 +119,9 @@
++ 	[DISK_TYPE_QCOW]	= &qcow_disk,
++ 	[DISK_TYPE_BLOCK_CACHE] = &block_cache_disk,
++ 	[DISK_TYPE_LOG]	= &log_disk,
++-	[DISK_TYPE_VINDEX]	= &vhd_index_disk,
+++//	[DISK_TYPE_VINDEX]	= &vhd_index_disk,
++ 	[DISK_TYPE_REMUS]	= &remus_disk,
+++	[DISK_TYPE_HLFS]	= &hlfs_disk,
++ 	0,
++ };
++ 
++@@ -123,9 +133,10 @@
++ extern struct tap_disk tapdisk_ram;
++ extern struct tap_disk tapdisk_qcow;
++ extern struct tap_disk tapdisk_block_cache;
++-extern struct tap_disk tapdisk_vhd_index;
+++//extern struct tap_disk tapdisk_vhd_index;
++ extern struct tap_disk tapdisk_log;
++ extern struct tap_disk tapdisk_remus;
+++extern struct tap_disk tapdisk_hlfs;
++ 
++ const struct tap_disk *tapdisk_disk_drivers[] = {
++ 	[DISK_TYPE_AIO]         = &tapdisk_aio,
++@@ -137,9 +148,10 @@
++ 	[DISK_TYPE_RAM]         = &tapdisk_ram,
++ 	[DISK_TYPE_QCOW]        = &tapdisk_qcow,
++ 	[DISK_TYPE_BLOCK_CACHE] = &tapdisk_block_cache,
++-	[DISK_TYPE_VINDEX]      = &tapdisk_vhd_index,
+++//	[DISK_TYPE_VINDEX]      = &tapdisk_vhd_index,
++ 	[DISK_TYPE_LOG]         = &tapdisk_log,
++ 	[DISK_TYPE_REMUS]       = &tapdisk_remus,
+++	[DISK_TYPE_HLFS]        = &tapdisk_hlfs,
++ 	0,
++ };
++ 
+diff -urN tools_ok/python/xen/xend/server/BlktapController.py tools/python/xen/xend/server/BlktapController.py
+--- tools_ok/python/xen/xend/server/BlktapController.py	2011-06-15 00:03:44.000000000 +0800
++++ tools/python/xen/xend/server/BlktapController.py	2012-02-24 20:20:12.000000000 +0800
+@@ -24,6 +24,7 @@
+     'qcow',
+     'vhd',
+     'remus',
++    'hlfs',
+     ]
+ 
+ blktap_disk_types = blktap1_disk_types + blktap2_disk_types

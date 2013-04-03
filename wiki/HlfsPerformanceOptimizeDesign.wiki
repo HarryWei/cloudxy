@@ -42,13 +42,9 @@ HLFS性能优化第一阶段先就以上问题进行优化。
 =HLFS性能测试矩阵示例=
 
 || Test Matrix 1 of HLFS ||
-|| *硬件参数* || 廉价pc，处理器：Pentium(R) Dual-Core CPU E2210 @ 2.2GHZ (2 Cpus); 内存：2038MB ||
-|| *软件参数* || Distributor ID:	Ubuntu
-Description:	Ubuntu 12.04.2 LTS
-Release:	12.04
-Codename:	precise ||
-|| *HDFS参数* ||  三台pc上搭建hdfs完全分布式环境(一个namenode, 两个datanode)；
-Hdfs文件配置参数待定； ||
+|| *硬件参数* || 廉价pc，处理器：Pentium(R) Dual-Core CPU E2210 @2.2GHZ (2 Cpus); 内存：2038MB ||
+|| *软件参数* || Distributor ID:	Ubuntu Description:	Ubuntu 12.04.2 LTS Release:	12.04 Codename:	precise ||
+|| *HDFS参数* ||  三台pc上搭建hdfs完全分布式环境(一个namenode, 两个datanode)；Hdfs文件配置参数待定； ||
 
 =HLFS性能优化可能需要用到的tools=
 {{{

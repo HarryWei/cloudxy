@@ -41,10 +41,17 @@ HLFS性能优化第一阶段先就以上问题进行优化。
 
 =HLFS性能测试矩阵示例=
 
-||                Test Matrix 1 of HLFS       ||
+=== Test Matrix 1 of HLFS ====
 || *硬件参数* || 廉价pc，处理器：Pentium(R) Dual-Core CPU E2210 @2.2GHZ (2 Cpus); 内存：2038MB ||
 || *软件参数* || Distributor ID:	Ubuntu Description:	Ubuntu 12.04.2 LTS Release:	12.04 Codename:	precise ||
 || *HDFS参数* ||  三台pc上搭建hdfs完全分布式环境(一个namenode, 两个datanode)；Hdfs文件配置参数待定； ||
+|| *HLFS段文件大小* || HLFS段文件大小为64MB ||
+|| *HLFS数据块大小* || HLFS数据块大小为8KB ||
+|| *HLFS cache 大小* || 待定 ||
+|| *测试结果* || 待定 ||
+|| *测试结论* || 待定 ||
+|| *测试人及时间* || 贾威威 2013，4, 3 ||
+|| *备注* || 这个HLFS性能测试矩阵只是例子，这个阶段测试需要先关闭HLFS段回收机制。 ||
 
 =HLFS性能优化可能需要用到的tools=
 {{{

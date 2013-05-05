@@ -63,7 +63,22 @@ sudo tgtadm --lld iscsi --mode target --op show
 {{{
 sudo tgtadm --lld iscsi --mode target --op bind --tid 1 -I ALL
 }}}
-
+ * Install open-iscsi:
+{{{
+sudo apt-get install open-iscsi
+}}}
+ * Discovery target:
+{{{
+sudo iscsiadm -m discovery -t st -p 202.117.132.221:3260
+}}}
+ * Login target:
+{{{
+sudo iscsiadm -m node --targetname iqn.2012-11.com.example:hlfs --portal 202.117.132.221 --login
+}}}
+ * Do something like using a local block device:
+{{{
+ls /dev/sdb
+}}}
 ---
 
 Wang Sen <kelvin.xupt@gmail.com>

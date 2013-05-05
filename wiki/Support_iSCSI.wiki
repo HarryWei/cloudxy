@@ -7,7 +7,7 @@ some steps need to quickly get the TGT working with HLFS.
 
 = Installation=
 
-Start by installing TGT.
+Start by installing TGT:[http://stgt.sourceforge.net/].
 
  * Download the source code of TGT.
 {{{
@@ -58,6 +58,10 @@ sudo tgtadm --lld iscsi --mode logicalunit --op new --tid 1 --lun 1 -b local:///
  * Show the result
 {{{
 sudo tgtadm --lld iscsi --mode target --op show
+}}}
+ * Add IP wildcard to allow all initiators
+{{{
+sudo tgtadm --lld iscsi --mode target --op bind --tid 1 -I ALL
 }}}
 
 ---

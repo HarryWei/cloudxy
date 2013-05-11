@@ -32,17 +32,17 @@ mirrors = http://e.pypi.python.org
 3.给openstack的源码部分打patch
 {{{
 cd /opt/stack/nova
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_openstack_nova.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/hlfs_driver_for_openstack_nova.patch
 git apply hlfs_driver_for_openstack_nova.patch
 cd /opt/stack/cinder
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_openstack_cinder.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/hlfs_driver_for_openstack_cinder.patch
 git apply hlfs_driver_for_openstack_cinder.patch
 }}}
 
 4.一键安安装所有hlfs相关的包（java,hlfs,hadoop,qemu,libvirt等）
 {{{
 sudo apt-get install subversion
-svn checkout http://cloudxy.googlecode.com/svn/branches/hlfs/person/zhangdianbo/scripts scripts;
+svn checkout http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/scripts scripts;
 cd scripts;./hlfs.sh
 }}}
 
@@ -172,8 +172,8 @@ cd devstack
 git reset --hard 25ebbcd1a7bc95e69ad32b19245ce0990a29eaa7
 
 2, 安装HLFS patches for Devstack
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_devstack_goback.patch
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_devstack.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/hlfs_driver_for_devstack_goback.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/hlfs_driver_for_devstack.patch
 git apply hlfs_driver_for_devstack_goback.patch
 git apply hlfs_driver_for_devstack.patch
 
@@ -216,11 +216,11 @@ sudo apt-get install gettext
 2， 下载libvirt并打上HLFS patches for Libvirt
 git clone git://libvirt.org/libvirt.git；
 cd libvirt;git reset --hard v1.0.1
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_network_disk.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/hlfs_driver_for_libvirt_network_disk.patch
 git apply hlfs_driver_for_libvirt_network_disk.patch
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_offline_storage.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/hlfs_driver_for_libvirt_offline_storage.patch
 git apply hlfs_driver_for_libvirt_offline_storage.patch
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_libvirt_add_classpath.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/hlfs_driver_for_libvirt_add_classpath.patch
 git apply hlfs_driver_for_libvirt_add_classpath.patch
 
 3, 编译安装Libvirt
@@ -231,10 +231,10 @@ git apply hlfs_driver_for_libvirt_add_classpath.patch
 
 4，安装HLFS patches for Openstack
 cd /opt/stack/nova
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_openstack_nova.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/hlfs_driver_for_openstack_nova.patch
 git apply hlfs_driver_for_openstack_nova.patch
 cd /opt/stack/cinder
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_openstack_cinder.patch
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/hlfs_driver_for_openstack_cinder.patch
 git apply hlfs_driver_for_openstack_cinder.patch
 
 5, 重新启动Openstack

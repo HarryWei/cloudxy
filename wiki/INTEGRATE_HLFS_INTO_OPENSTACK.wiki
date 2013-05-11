@@ -8,8 +8,8 @@
 sudo apt-get install git (如果你还没有安装git）
 git clone git://github.com/openstack-dev/devstack.git 
 cd devstack;git reset --hard 25ebbcd1a7bc95e69ad32b19245ce0990a29eaa7 
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_devstack_goback.patch 
-wget http://cloudxy.googlecode.com/svn/branches/hlfs/person/harry/hlfs/patches/hlfs_driver_for_devstack.patch 
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/hlfs_driver_for_devstack_goback.patch 
+wget http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/hlfs_driver_for_devstack.patch 
 git apply hlfs_driver_for_devstack_goback.patch 
 git apply hlfs_driver_for_devstack.patch 
 }}}

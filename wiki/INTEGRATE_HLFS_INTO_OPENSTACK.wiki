@@ -102,6 +102,7 @@ sudo apt-get install oracle-java7-installer
 如果想安装Sun-java-6,可按如下步骤进行
 sudo apt-get install python-software-properties
 sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ hardy multiverse"
+sudo apt-get update
 sudo apt-get install sun-java6-jdk sun-java6-jre
 
 3, 配置环境变量

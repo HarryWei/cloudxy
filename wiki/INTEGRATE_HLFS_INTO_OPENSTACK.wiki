@@ -39,7 +39,7 @@ wget http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches
 git apply hlfs_driver_for_openstack_cinder.patch
 }}}
 
-4.一键安安装所有hlfs相关的包（java,hlfs,hadoop,qemu,libvirt等）
+4.一键安装所有hlfs相关的包（java,hlfs,hadoop,qemu,libvirt等）
 {{{
 sudo apt-get install subversion
 svn checkout http://cloudxy.googlecode.com/svn/branches/hlfs/features/multi-file/patches/scripts scripts;

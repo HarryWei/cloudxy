@@ -80,20 +80,20 @@ export EC2_SECRET_KEY=$(echo "$CREDS" | awk '/ secret / { print $4 }')
 sudo apt-get update （执行软件列表更新前，最好先选择国内源，比如163网易的源\sohu的源 - 源设置参见http://blog.ubuntusoft.com/ubuntu-update-source.html）
 sudo apt-get install build-essential (基本编译环境）
 sudo apt-get install git subversion  (版本管理工具）
-sudo apt-get cmake (make管理工具）
+sudo apt-get install cmake (make管理工具）
 sudo apt-get install ubuntu-desktop (桌面环境，不是必要的，但很多朋友喜欢桌面环境）
 sudo apt-get install tightvnc-java  (vnc)
 
 注意：
 1， Devstack目前支持Ubuntu 12.04。
-2， Ubuntu 12.04支持CDH4比较完善(支持append和hflush)，同时HLFS本身不用再维护第三方库(可以本地安装libhdfs, liblog4c, libsnappy等)。
+2， Ubuntu 12.04(只支持64位)支持CDH4比较完善(支持append和hflush)，同时HLFS本身不用再维护第三方库(可以本地安装libhdfs, liblog4c, libsnappy等)。
 }}}
  ==== 安装HLFS ====
 {{{
 1，安装 HLFS 依赖的库
 sudo aptitude install libglib2.0-dev
 sudo apt-get install libsnappy-dev
-sudo apt-get liblog4c-dev
+sudo apt-get install liblog4c-dev
 
 2，安装Sun Java7 (也可安装sun-java-6)
 sudo add-apt-repository "deb http://ppa.launchpad.net/webupd8team/java/ubuntu precise main"

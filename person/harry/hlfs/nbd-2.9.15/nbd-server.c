@@ -204,7 +204,7 @@ typedef struct {
 	gchar* postrun;	     /**< command that will be ran after the client
 				  disconnects */
     /* add by kanghua */
-    //gchar *storage_address;
+    gchar *storage_address;
 } SERVER;
 
 /**
@@ -468,6 +468,8 @@ SERVER* cmdline(int argc, char *argv[]) {
                 break;
             case 1:
                 /* modify by kanghua */
+                printf("999 %s\n", optarg);
+                serve->storage_address = g_strdup(optarg);
 #if 0
                 serve->exportname = g_strdup(optarg);
                 if(serve->exportname[0] != '/') {
@@ -475,7 +477,6 @@ SERVER* cmdline(int argc, char *argv[]) {
                     exit(EXIT_FAILURE);
                 }
 #else
-                //serve->storage_address = g_strdup(optarg);
                 //HLOG_DEBUG("storage address:%s",serve->storage_address);
                 //gchar **v  = g_strsplit(serve->storage_address,"://",2);
                 //if (0 != g_strcmp0(v[0],"local") && 0 != g_strcmp0(v[0],"hdfs")){
@@ -590,7 +591,7 @@ SERVER* dup_serve(SERVER *s) {
 
 	if (s->exportname)
 		serve->exportname = g_strdup(s->exportname);
-#if 0
+#if 1
     if (s->storage_address){
         printf("%s storage address:%s\n",__func__,s->storage_address);
         serve->storage_address = g_strdup(s->storage_address);
@@ -1251,9 +1252,11 @@ int expwrite(off_t a, char *buf, size_t len, CLIENT *client) {
  **/
 void negotiate(CLIENT *client) {
 	char zeros[128];
+        char text[128];
 	u64 size_host;
 	u32 flags = NBD_FLAG_HAS_FLAGS;
     
+        memset(text, '\0', sizeof(text));
 	memset(zeros, '\0', sizeof(zeros));
 	if (write(client->net, INIT_PASSWD, 8) < 0)
 		err("Negotiation failed: %m");
@@ -1274,7 +1277,12 @@ void negotiate(CLIENT *client) {
     HLOG_INFO("Negotiation read uri");
     if (read(client->net,client->uri,128) <0)
         err("Failed/5:%m\n");
-    HLOG_DEBUG("uri:%s",client->uri);
+    printf("999 FS_NAME:%s\n",client->uri);
+    printf("999 uri:%s\n",client->server->storage_address);
+    sprintf(text, "%s/%s", client->server->storage_address, client->uri);
+    client->uri = g_strdup(text);
+    g_free(client->server->storage_address);
+    printf("999 [uri]:%s\n",client->uri);
     if(NULL ==(client->storage_ctrl 
                 = init_hlfs(client->uri))){     
         HLOG_ERROR("Failed to init storage control block");

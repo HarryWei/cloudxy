@@ -18,7 +18,7 @@ MESSAGE(STATUS "Path is " ${WORK_HOME})
 #SET(HADOOP_HOME ${WORK_HOME}/3part/hadoop)
 #SET(LOG_HOME ${WORK_HOME}/3part/log)
 #SET(HADOOP_HOME /root/jiawei/hadoop/hadoop-0.20.0)
-SET(JAVA_HOME   /usr/lib/jvm/java-7-oracle)
+SET(JAVA_HOME   /usr/lib/jvm/java-6-sun)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLIB_PKG glib-2.0)

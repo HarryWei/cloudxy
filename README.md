@@ -1,5 +1,5 @@
 # cloudxy
-Automatically exported from code.google.com/p/cloudxy
+Automatically exported from https://code.google.com/p/cloudxy/
 
 #Cloudxy
 

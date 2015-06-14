@@ -26,4 +26,4 @@ The subsystem ECMS is a virtual machine management system used in HLFS storage e
 The further goal for ECMS is to build Virtual IDC, which will include develop virtual resource define language and virtual resource visualization management. we wish user can define their own virtual resource (for example,a single instance mysql service,or a master-slave mysql service,or else anything,they are all belong to virtual resource),and can instantiate、reuse、deploy virtual resource.
 
 
-###Authors: Hua Kang <kanghua151@gmail.com> and Jia Weiwei <harryxiyou@gmail.com>
+Authors: Hua Kang <kanghua151@gmail.com> and Jia Weiwei <harryxiyou@gmail.com>

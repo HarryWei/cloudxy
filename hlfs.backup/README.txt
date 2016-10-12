@@ -20,10 +20,12 @@ If you are intrested in HLFS and willing to join us, you can subscribe HLFS's
 Mailing List, or talk with us on IRC channels or QQ. Here are some useful imfo-
 mation:
 
-Kang Hua <kanghua151@gmail.com>
-Weiwei Jia <harryxiyou@gmail.com>
-Chen Lijun <cljcore@gmail.com>
-
+Owner: Kang Hua <kanghua151@gmail.com>
+Owner: Chen Lijun <cljcore@gmail.com>
+Home Page: http://code.google.com/p/cloudxy
+Mailing List: cloudxy@googlegroups.com
+QQ: 92625284
+IRC: server-Freenode channel-#hlfs
 
 Install
 =======

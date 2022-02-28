@@ -1,8 +1,6 @@
 # Cloudxy
 Automatically exported from https://code.google.com/p/cloudxy/
 
-### Cloudxy
-
 Cloudxy is a generic and open source platform which can provide adjustable compute capacity in the cloud. It means you can scale capacity as your computing requirements change. Also, you can recover your virtual machine at any snapshot point when failure occurs.
 
 Cloudxy is constructed of HLFS(HDFS-based Log-structured file system) and ECMS(Elastic Cloud Management System).

@@ -1,13 +1,13 @@
 # cloudxy
 Automatically exported from https://code.google.com/p/cloudxy/
 
-#Cloudxy
+# Cloudxy
 
 Cloudxy is a generic and open source platform which can provide adjustable compute capacity in the cloud. It means you can scale capacity as your computing requirements change. Also, you can recover your virtual machine at any snapshot point when failure occurs.
 
 Cloudxy is constructed of HLFS(HDFS-based Log-structured file system) and ECMS(Elastic Cloud Management System).
 
-###HLFS
+### HLFS
 
 The subsystem HLFS(actually, Block level Storage System seems more proper than File System) is a distributed VM image storage system for ECMS,which provides highly available block level storage volumes that can be attached to XEN virtual machines by its tapdisk driver.Similar project related to KVM is sheepdog，but they are in different architectures.
 
@@ -19,7 +19,7 @@ The main idea of HLFS is:
     The ideology of LFS makes our storage system support random access to online images.
     The ideology of LFS also makes our storage system more efficient and easily take snapshot. 
 
-###ECMS
+### ECMS
 
 The subsystem ECMS is a virtual machine management system used in HLFS storage environment. The current work for ECMS is to smart schedule and life-cycle manage virtual machine
 
